@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model List {
+  id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  name  String
+  order Int
+
+  userId String @db.Uuid()
+
+  listItems ListItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ListItem {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  name      String
+  order     Int
+  completed Boolean @default(false)
+
+  listId     String @db.Uuid()
+  parentList List   @relation(fields: [listId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
