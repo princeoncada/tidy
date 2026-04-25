@@ -1,5 +1,4 @@
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import { Skeleton } from "@/components/ui/skeleton";
 import UserDetails from "@/components/UserDetails";
 
 export default function Page() {
