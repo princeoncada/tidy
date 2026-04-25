@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { Input } from "./ui/input";
+import { useEffect, useRef, useState } from "react";
+import { Input } from "../ui/input";
 
-interface InlineEditProps {
+interface ListInlineEditProps {
   id: string;
   value: string;
   onSave: (input: { id: string; name: string; }) => void;
@@ -11,7 +11,7 @@ interface InlineEditProps {
   displayClassName?: string;
 }
 
-export default function InlineEdit({
+export default function ListInlineEdit({
   id,
   value,
   onSave,
@@ -19,16 +19,11 @@ export default function InlineEdit({
   className = "",
   inputClassName = "",
   displayClassName = "",
-}: InlineEditProps) {
+}: ListInlineEditProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const [displayValue, setDisplayValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setEditValue(value);
-    setDisplayValue(value);
-  }, [id, value]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -36,6 +31,12 @@ export default function InlineEdit({
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  const startEditing = () => {
+    setEditValue(value);
+    setDisplayValue(value);
+    setIsEditing(true);
+  };
 
   const handleSave = () => {
     const trimmed = editValue.trim();
@@ -93,7 +94,7 @@ export default function InlineEdit({
 
   return (
     <span
-      onClick={() => setIsEditing(true)}
+      onClick={startEditing}
       className={`${className} ${displayClassName} cursor-pointer rounded transition-colors inline-block w-full`}
     >
       {displayValue}
