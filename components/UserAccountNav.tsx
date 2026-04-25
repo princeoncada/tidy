@@ -1,19 +1,20 @@
 
 
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+import { User } from "lucide-react";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Button, buttonVariants } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import Link from "next/link";
-import { CircleUser, Gem, User } from "lucide-react";
 
-interface UserAccountNavProps {
-  email: string | undefined;
-  name: string;
-  imageUrl?: string;
-  logout: () => void;
-}
 
-const UserAccountNav = ({ email, imageUrl, name, logout }: UserAccountNavProps) => {
+
+const UserAccountNav = ({ logout }: { logout: () => void; }) => {
+
+  const trpc = useTRPC();
+  const { data } = useQuery(trpc.getUser.queryOptions());
+  const user = data?.user;
+  const name = user ? "lol" : "angas";
 
   return (
     <DropdownMenu>
@@ -21,16 +22,11 @@ const UserAccountNav = ({ email, imageUrl, name, logout }: UserAccountNavProps) 
         asChild
         className="overflow-visible"
       >
-        <Button className="rounded-full h-12 w-12 aspect-square bg-slate-400">
-          <Avatar className='relative h-12 w-12'>
-            {imageUrl ? (
-              <div className="relative aspect-square h-full w-full">
-                <AvatarImage src={imageUrl} alt={name} referrerPolicy="no-referrer" />
-              </div>
-            ) :
-              <AvatarFallback>
-                <User className="scale-130!" />
-              </AvatarFallback>}
+        <Button className="rounded-full h-10 w-10 md:h-12 md:w-12 bg-slate-400">
+          <Avatar className='relative h-10 w-10 md:h-12 md:w-12'>
+            <AvatarFallback>
+              <User className="scale-115! md:scale-130!" />
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -39,28 +35,31 @@ const UserAccountNav = ({ email, imageUrl, name, logout }: UserAccountNavProps) 
           <div className="flex flex-col space-y-0.5 leading-none min-w-0">
             {name && <p className="font-medium text-sm text-black">{name}</p>}
             {
-              email && (
-                <p className="truncate text-xs text-zinc-700">{email}</p>
+              user && (
+                <p className="truncate text-xs text-zinc-700">{user.email}</p>
               )
             }
           </div>
         </div>
 
+        {/* <DropdownMenuSeparator />
+
+        <DropdownMenuItem asChild>
+          <div>
+            <Button
+              className="w-full"
+              variant="link"
+              disabled
+            >
+              Placeholder
+            </Button>
+          </div>
+        </DropdownMenuItem> */}
+
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link
-            href="/dashboard"
-            className={buttonVariants({
-              variant: "link"
-            })}
-          >Your Information</Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem asChild>
-          <div className="p-4 flex">
+          <div>
             <Button size="lg" onClick={logout}>Logout</Button>
           </div>
         </DropdownMenuItem>
