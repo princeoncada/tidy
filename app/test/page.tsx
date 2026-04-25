@@ -1,10 +1,11 @@
-import { ClientGreeting } from '@/trpc/client-greeting';
-import { HydrateClient } from '@/trpc/server';
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import { Skeleton } from "@/components/ui/skeleton";
+import UserDetails from "@/components/UserDetails";
 
 export default function Page() {
   return (
-    <HydrateClient>
-      <ClientGreeting />
-    </HydrateClient>
+    <MaxWidthWrapper singleItemPage={true}>
+        <UserDetails />
+    </MaxWidthWrapper>
   );
 }
