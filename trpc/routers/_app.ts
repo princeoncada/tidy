@@ -1,9 +1,7 @@
+import { db } from '@/lib/db';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
-import { db } from '@/lib/db';
-import { List } from '@/app/generated/prisma/client';
-import { TRPCError } from '@trpc/server';
-import { Dna } from 'lucide-react';
 
 export const appRouter = createTRPCRouter({
   hello: baseProcedure.input(
@@ -15,7 +13,7 @@ export const appRouter = createTRPCRouter({
       greeting: `hello ${opts.input.text}`
     }
   }),
-  getUser: baseProcedure.query(({
+  getUser: protectedProcedure.query(({
     ctx
   }) => {
     return {
