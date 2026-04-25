@@ -8,8 +8,8 @@ import { LayoutGroup } from "motion/react";
 import { useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
-import { Lists } from './types';
 import ListSkeleton from './ListSkeleton';
+import { Lists } from './types';
 
 const ListsContainer = () => {
 
