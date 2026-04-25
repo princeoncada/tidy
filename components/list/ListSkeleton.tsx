@@ -1,8 +1,6 @@
-import React from 'react';
-import { Card, CardContent, CardHeader } from '../ui/card';
-import { GripVertical } from 'lucide-react';
-import { Skeleton } from '../ui/skeleton';
+import { Card, CardContent } from '../ui/card';
 import { Separator } from '../ui/separator';
+import { Skeleton } from '../ui/skeleton';
 
 const ListSkeleton = () => {
   return (
