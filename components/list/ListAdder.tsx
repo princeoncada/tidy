@@ -6,32 +6,19 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { List } from "./types";
-import { createClient } from "@/lib/supabase/client";
-import { User } from "@supabase/auth-js";
+import { Plus } from "lucide-react";
 
-const supabase = createClient();
 
 const ListAdder = () => {
 
   const [createListName, setCreateListName] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    getUser();
-  }, []);
-
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-
-  async function getUser() {
-    const currUser = await supabase.auth.getUser();
-    setUser(currUser.data.user);
-  }
 
   const { mutate: createList } = useMutation(trpc.createList.mutationOptions({
     async onMutate(variables) {
@@ -45,7 +32,7 @@ const ListAdder = () => {
 
       const optimisticList: List = {
         id: variables.id,
-        userId: user ? user.id : "",
+        userId: "optimistic",
         name: variables.name,
         order: previousLists && previousLists.length > 0
           ? Math.max(...previousLists.map((list) => list.order)) + 1
@@ -92,16 +79,27 @@ const ListAdder = () => {
       onOpenChange={setDialogOpen}
     >
       <DialogTrigger className="h-full" asChild>
-        <Button
-          className="h-full px-5 font-semibold"
-          variant="outline"
-          size="lg"
-          onClick={() => {
-            setDialogOpen(true);
-          }}
-        >
-          New List +
-        </Button>
+        <div className="h-full flex items-end">
+          <Button
+            className="h-full px-5 font-semibold hidden md:flex"
+            variant="outline"
+            size="lg"
+            onClick={() => {
+              setDialogOpen(true);
+            }}
+          >
+            New List +
+          </Button>
+          <Button
+            className="font-semibold md:hidden p-4"
+            size="icon-lg"
+            onClick={() => {
+              setDialogOpen(true);
+            }}
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
+        </div>
       </DialogTrigger>
       <DialogContent
         onCloseAutoFocus={handleExit}
