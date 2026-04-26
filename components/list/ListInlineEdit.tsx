@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 interface ListInlineEditProps {
   id: string;
@@ -23,7 +24,7 @@ export default function ListInlineEdit({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const [displayValue, setDisplayValue] = useState(value);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -80,14 +81,21 @@ export default function ListInlineEdit({
 
   if (isEditing && !disabled) {
     return (
-      <Input
-        ref={inputRef}
+      <Textarea
+        ref={inputRef as React.Ref<HTMLTextAreaElement>}
         value={editValue}
         disabled={disabled}
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
-        className={`${className} ${inputClassName} focus-visible:ring-0 border-0 pl-0!`}
+        rows={1}
+        className={`
+        ${className}
+        ${inputClassName}
+        min-h-8 resize-none overflow-hidden
+        whitespace-normal break-all
+        focus-visible:ring-0 border-0 pl-0! rounded-none
+      `}
       />
     );
   }
@@ -95,7 +103,7 @@ export default function ListInlineEdit({
   return (
     <span
       onClick={startEditing}
-      className={`${className} ${displayClassName} cursor-pointer rounded transition-colors inline-block w-full`}
+      className={`${className} ${displayClassName} cursor-pointer rounded transition-colors block w-full min-w-0`}
     >
       {displayValue}
     </span>
