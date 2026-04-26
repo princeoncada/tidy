@@ -4,12 +4,11 @@ import { useMutationQueue } from '@/lib/helper';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { LayoutGroup } from "motion/react";
 import { useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
 import ListSkeleton from './ListSkeleton';
-import { Lists } from './types';
+import { Lists, OptimisticList, OptimisticListItem } from './types';
 
 const ListsContainer = () => {
 
@@ -106,6 +105,9 @@ const ListsContainer = () => {
     }, 300);
   };
 
+  const revealedItemIdsRef = useRef(new Set<string>());
+  const revealedListIdsRef = useRef(new Set<string>());
+
   if (isLoading) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 lg:md:grid-cols-3 gap-3">
       <ListSkeleton />
@@ -119,6 +121,12 @@ const ListsContainer = () => {
 
   if (isError) {
     return <>Something went wrong...</>;
+  }
+
+  if (lists.length === 0) {
+    return <div className='w-full h-full'>
+
+    </div>;
   }
 
   return (
@@ -296,36 +304,41 @@ const ListsContainer = () => {
         });
       }}
     >
-      <LayoutGroup>
-        <div className="grow grid grid-cols-1 md:grid-cols-2 lg:md:grid-cols-3 gap-3">
-          {
-            lists.map((list, index) =>
-              <ListComponent
-                key={list.id}
-                listValues={list}
-                index={index}
-                enqueue={enqueue}
-                activeDropTarget={activeDropTarget}
-              >
-                <LayoutGroup>
-                  {
-                    list.listItems?.map((item, index) =>
-                      <ListItemComponent
-                        key={item.id}
-                        listItem={item}
-                        index={index}
-                        enqueue={enqueue}
-                      />)
-                  }
-                </LayoutGroup>
-              </ListComponent>
-            )
-          }
-          {
-            lists.length === 0 && <div>hi</div>
-          }
-        </div>
-      </LayoutGroup>
+      <div className="grow grid grid-cols-1 md:grid-cols-2 lg:md:grid-cols-3 gap-3">
+        {
+          lists.map((list: OptimisticList, index) =>
+            <ListComponent
+              key={list.id}
+              listValues={list}
+              index={index}
+              enqueue={enqueue}
+              activeDropTarget={activeDropTarget}
+              shouldRevealOnMount={
+                Boolean(list.isOptimistic) && !revealedListIdsRef.current.has(list.id)
+              }
+              onRevealComplete={() => {
+                revealedListIdsRef.current.add(list.id);
+              }}
+            >
+              {
+                list.listItems?.map((item: OptimisticListItem, index) =>
+                  <ListItemComponent
+                    key={item.id}
+                    listItem={item}
+                    index={index}
+                    enqueue={enqueue}
+                    shouldRevealOnMount={
+                      Boolean(item.isOptimistic) && !revealedItemIdsRef.current.has(item.id)
+                    }
+                    onRevealComplete={() => {
+                      revealedItemIdsRef.current.add(item.id);
+                    }}
+                  />)
+              }
+            </ListComponent>
+          )
+        }
+      </div>
     </DragDropProvider>
   );
 };
