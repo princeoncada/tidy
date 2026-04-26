@@ -285,9 +285,9 @@ const ListComponent = ({
 
                 <div className="flex-1 min-w-0">
                   <ListInlineEdit
-                    className="block truncate w-full font-semibold"
-                    inputClassName="text-xl! h-6! mb-[5px]!"
-                    displayClassName="text-xl! leading-[23px] h-6!"
+                    className="block truncate w-full font-semibold leading-7! text-xl!"
+                    inputClassName=""
+                    displayClassName=""
                     id={list.id}
                     value={list.name}
                     onSave={renameList}
