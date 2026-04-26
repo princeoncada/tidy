@@ -28,7 +28,7 @@ export const appRouter = createTRPCRouter({
   createList: protectedProcedure.input(
     z.object({
       id: z.uuid(),
-      name: z.string().trim().min(1).max(20),
+      name: z.string().trim().max(255),
     })
   ).mutation(async ({ ctx: { userId }, input }) => {
     const topList = await db.list.findFirst({
@@ -80,7 +80,7 @@ export const appRouter = createTRPCRouter({
   renameList: protectedProcedure.input(
     z.object({
       id: z.uuid(),
-      name: z.string().min(1).max(20).trim()
+      name: z.string().trim().max(255)
     })
   ).mutation(async ({ ctx: { userId }, input: { id, name } }) => {
     const renamedList = await db.list.updateManyAndReturn({
@@ -134,7 +134,7 @@ export const appRouter = createTRPCRouter({
   }),
   createListItem: protectedProcedure.input(z.object({
     id: z.uuid(),
-    name: z.string().trim().min(1).max(20),
+    name: z.string().trim().max(255),
     listId: z.uuid(),
   })).mutation(async ({ ctx, input }) => {
     const parentList = await db.list.findFirst({
@@ -169,7 +169,7 @@ export const appRouter = createTRPCRouter({
     });
   }),
   renameListItem: protectedProcedure.input(z.object({
-    name: z.string().nonempty().trim().max(20),
+    name: z.string().trim().max(255),
     id: z.uuid()
   })).mutation(async ({ input: { id, name } }) => {
     const renamedListItem = await db.listItem.update({
