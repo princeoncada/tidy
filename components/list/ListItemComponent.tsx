@@ -4,25 +4,43 @@ import { useTRPC } from "@/trpc/client";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GripVertical, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ListInlineEdit from "./ListInlineEdit";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { ListItem, Lists } from "./types";
+import { cn } from "@/lib/utils";
+
 
 interface ListItemComponentProps {
   listItem: ListItem;
   index: number;
   enqueue: (task: () => Promise<void>, onQueueEmpty?: (() => void) | undefined) => Promise<void>;
+  shouldRevealOnMount?: boolean;
+  onRevealComplete?: () => void;
 }
 
 const ListItemComponent = ({
   listItem,
   index,
-  enqueue
+  enqueue,
+  shouldRevealOnMount,
+  onRevealComplete
 }: ListItemComponentProps) => {
 
   const [itemDeleted, setItemDeleted] = useState<boolean>(false);
+  const [itemRevealed, setItemRevealed] = useState(!shouldRevealOnMount);
+
+  useEffect(() => {
+    if (!shouldRevealOnMount) return;
+
+    const timeout = setTimeout(() => {
+      setItemRevealed(true);
+      onRevealComplete?.();
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [shouldRevealOnMount, onRevealComplete, listItem.id]);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -180,47 +198,52 @@ const ListItemComponent = ({
   return (
     <div
       ref={ref}
-      className={`
-    flex justify-between items-center gap-2 px-2 rounded-md border border-white hover:bg-gray-50 hover:border hover:border-gray-100
-    overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group
-    ${isDragging
-          ? "scale-[1.01] backdrop-blur-[5px] shadow-md bg-gray-50 border border-gray-100"
-          : ""}
-    ${itemDeleted
-          ? "max-h-0 opacity-0 py-0"
-          : "max-h-12 opacity-100 scale-100"
+      className={cn(
+        `flex items-start gap-2 px-2 rounded-md border border-white hover:bg-gray-50 hover:border-gray-100 overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group`,
+        {
+          "scale-[1.01] backdrop-blur-[5px] shadow-md bg-gray-50 border border-gray-100": isDragging,
+          "max-h-32 opacity-100 scale-100": !itemDeleted && itemRevealed,
+          "max-h-0 opacity-0 py-0": itemDeleted || !itemRevealed,
         }
-  `}
+      )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-start gap-2">
         <div
           ref={itemHandle}
-          className="cursor-grab active:cursor-grabbing touch-none select-none p-2 -m-2 -mr-1 shrink-0 text-gray-400"
+          className="cursor-grab active:cursor-grabbing touch-none select-none p-2 -m-2 -mr-1 shrink-0 text-gray-400 pt-[14px]"
         >
           <GripVertical className="w-4 h-4" />
         </div>
+
         <Checkbox
-          className="w-5 h-5 hover:cursor-pointer"
+          className="w-5 h-5 shrink-0 hover:cursor-pointer my-1"
           checked={listItem.completed}
           onClick={() => {
             setCompletion({
               id: listItem.id,
-              completed: !listItem.completed
+              completed: !listItem.completed,
             });
           }}
         />
-        <ListInlineEdit
-          className={`block text-lg truncate w-full leading-8 transition-colors duration-300 ${listItem.completed ? "line-through text-gray-500" : ""}`}
-          id={listItem.id}
-          value={listItem.name}
-          onSave={renameListItem}
-          disabled={renameListItemPending}
-          displayClassName="leading-[32px]!"
-          inputClassName="text-lg! mb-[0.6px]"
-        />
+
+        <div className="min-w-0 flex-1">
+          <ListInlineEdit
+            className={cn(
+              "block w-full min-w-0 text-lg whitespace-normal break-all transition-colors duration-300 leading-7!",
+              listItem.completed && "line-through text-gray-500"
+            )}
+            id={listItem.id}
+            value={listItem.name}
+            onSave={renameListItem}
+            disabled={renameListItemPending}
+            displayClassName="whitespace-normal break-all"
+            inputClassName="text-lg! p-0! leading-7!"
+          />
+        </div>
       </div>
+
       <Button
-        className="bg-transparent hover:bg-red-500/10 group-hover:opacity-100 md:opacity-0 transition-opacity duration-100"
+        className="shrink-0 self-start bg-transparent hover:bg-red-500/10 opacity-100 transition-opacity duration-100 my-0.5"
         variant="destructive"
         size="icon-xs"
         onClick={() => {
