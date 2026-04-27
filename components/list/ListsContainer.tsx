@@ -9,6 +9,7 @@ import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
 import ListSkeleton from './ListSkeleton';
 import { Lists, OptimisticList, OptimisticListItem } from './types';
+import ListEmpty from './ListEmpty';
 
 const ListsContainer = () => {
 
@@ -109,7 +110,7 @@ const ListsContainer = () => {
   const revealedListIdsRef = useRef(new Set<string>());
 
   if (isLoading) {
-    return <div className="grow grid grid-cols-1 md:grid-cols-2 lg:md:grid-cols-3 gap-3">
+    return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
       <ListSkeleton />
       <ListSkeleton />
       <ListSkeleton />
@@ -125,7 +126,7 @@ const ListsContainer = () => {
 
   if (lists.length === 0) {
     return <div className='w-full h-full'>
-
+      <ListEmpty />
     </div>;
   }
 
@@ -304,8 +305,8 @@ const ListsContainer = () => {
         });
       }}
     >
-      
-      <div className="grow grid grid-cols-1 md:grid-cols-2 lg:md:grid-cols-3 gap-3">
+
+      <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
         {
           lists.map((list: OptimisticList, index) =>
             <ListComponent
