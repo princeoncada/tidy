@@ -62,7 +62,7 @@ export function TRPCReactProvider(
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        <AuthSync />
+        {/* <AuthSync /> */}
         {props.children}
       </TRPCProvider>
     </QueryClientProvider>
