@@ -12,8 +12,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 const UserAccountNav = ({ logout }: { logout: () => void; }) => {
 
   const trpc = useTRPC();
-  const { data } = useQuery(trpc.getUser.queryOptions());
-  const user = data?.user;
+  const { data } = useQuery(trpc.user.getUser.queryOptions());
+  const user = data
   const name = user ? "lol" : "angas";
 
   return (

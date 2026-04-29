@@ -5,6 +5,27 @@ import { TRPCError } from "@trpc/server"
 
 
 export const listRouter = createTRPCRouter({
+  createList: protectedProcedure.input(
+    z.object({
+      id: z.uuid(),
+      name: z.string().trim().max(255),
+    })
+  ).mutation(async ({ ctx: { userId }, input }) => {
+    const topList = await db.list.findFirst({
+      where: { userId },
+      orderBy: { order: "asc" },
+      select: { order: true },
+    });
+
+    return await db.list.create({
+      data: {
+        id: input.id,
+        name: input.name,
+        userId,
+        order: topList ? topList.order - 1 : 0,
+      },
+    });
+  }),
   getLists: protectedProcedure.query(async ({ ctx: { userId } }) => {
     const lists = await db.list.findMany({
       where: {
@@ -26,6 +47,11 @@ export const listRouter = createTRPCRouter({
         order: 'asc'
       },
       include: {
+        listTags: {
+          include: {
+            tag: true,
+          },
+        },
         listItems: {
           orderBy: {
             order: 'asc'
@@ -35,27 +61,6 @@ export const listRouter = createTRPCRouter({
     })
 
     return lists
-  }),
-  createList: protectedProcedure.input(
-    z.object({
-      id: z.uuid(),
-      name: z.string().trim().max(255),
-    })
-  ).mutation(async ({ ctx: { userId }, input }) => {
-    const topList = await db.list.findFirst({
-      where: { userId },
-      orderBy: { order: "asc" },
-      select: { order: true },
-    });
-
-    return await db.list.create({
-      data: {
-        id: input.id,
-        name: input.name,
-        userId,
-        order: topList ? topList.order - 1 : 0,
-      },
-    });
   }),
   renameList: protectedProcedure.input(
     z.object({
@@ -83,19 +88,12 @@ export const listRouter = createTRPCRouter({
     z.object({
       listId: z.uuid()
     })
-  ).mutation(async ({ input }) => {
-    return await db.$transaction(async (tx) => {
-      await tx.listItem.deleteMany({
-        where: {
-          listId: input.listId,
-        },
-      });
-
-      await tx.list.delete({
-        where: {
-          id: input.listId,
-        },
-      });
+  ).mutation(async ({ ctx, input }) => {
+    return await db.list.delete({
+      where: {
+        id: input.listId,
+        userId: ctx.userId,
+      },
     });
   }),
   reorderLists: protectedProcedure.input(z.object({

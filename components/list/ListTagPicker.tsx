@@ -1,0 +1,484 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Plus, Tag, Trash2, X } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/lib/trpc";
+import type { Lists } from "./types";
+
+type TagValue = RouterOutputs["tag"]["getAll"][number];
+type ListTagValue = Lists[number]["listTags"][number];
+type TagColor = TagValue["color"];
+
+type ListTagPickerProps = {
+  listId: string;
+  selectedListTags: ListTagValue[];
+};
+
+const TAG_COLORS: TagColor[] = [
+  "gray",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+];
+
+const TAG_COLOR_CLASSES: Record<TagColor, string> = {
+  gray: "bg-zinc-100 text-zinc-700 border-zinc-200",
+  red: "bg-red-100 text-red-700 border-red-200",
+  orange: "bg-orange-100 text-orange-700 border-orange-200",
+  yellow: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  green: "bg-green-100 text-green-700 border-green-200",
+  blue: "bg-blue-100 text-blue-700 border-blue-200",
+  purple: "bg-purple-100 text-purple-700 border-purple-200",
+  pink: "bg-pink-100 text-pink-700 border-pink-200",
+};
+
+export default function ListTagPicker({
+  listId,
+  selectedListTags,
+}: ListTagPickerProps) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const tagsQueryKey = trpc.tag.getAll.queryKey();
+  const listsQueryKey = trpc.list.getListsWithItems.queryKey();
+
+  const { data: tags = [] } = useQuery(trpc.tag.getAll.queryOptions());
+
+  const selectedTagIds = useMemo(
+    () => selectedListTags.map((listTag) => listTag.tagId),
+    [selectedListTags]
+  );
+
+  const selectedTags = useMemo(
+    () => selectedListTags.map((listTag) => listTag.tag),
+    [selectedListTags]
+  );
+
+  const filteredTags = useMemo(() => {
+    return tags.filter((tag) =>
+      tag.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [tags, search]);
+
+  const exactTagExists = tags.some(
+    (tag) => tag.name.toLowerCase() === search.trim().toLowerCase()
+  );
+
+  const setTagInListsCache = (tag: TagValue) => {
+    queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) => {
+      if (!currentLists) return currentLists;
+
+      return currentLists.map((list) => ({
+        ...list,
+        listTags: list.listTags.map((listTag) =>
+          listTag.tagId === tag.id ? { ...listTag, tag } : listTag
+        ),
+      }));
+    });
+  };
+
+  const addTagToListCache = (tag: TagValue) => {
+    queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) => {
+      if (!currentLists) return currentLists;
+
+      return currentLists.map((list) => {
+        if (list.id !== listId) return list;
+        if (list.listTags.some((listTag) => listTag.tagId === tag.id)) {
+          return list;
+        }
+
+        return {
+          ...list,
+          listTags: [
+            ...list.listTags,
+            {
+              listId,
+              tagId: tag.id,
+              tag,
+            },
+          ],
+        };
+      });
+    });
+  };
+
+  const removeTagFromListCache = (tagId: string) => {
+    queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) => {
+      if (!currentLists) return currentLists;
+
+      return currentLists.map((list) =>
+        list.id === listId
+          ? {
+            ...list,
+            listTags: list.listTags.filter((listTag) => listTag.tagId !== tagId),
+          }
+          : list
+      );
+    });
+  };
+
+  const createTagMutation = useMutation(trpc.tag.create.mutationOptions({
+    async onMutate(newTag) {
+      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+
+      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+      const optimisticTag: TagValue = {
+        id: newTag.id,
+        name: newTag.name,
+        color: newTag.color ?? "gray",
+        userId: "optimistic",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        listTags: [],
+      };
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) => [
+        ...currentTags,
+        optimisticTag,
+      ].sort((a, b) => a.name.localeCompare(b.name)));
+      addTagToListCache(optimisticTag);
+
+      return { previousTags };
+    },
+    onError(_error, variables, context) {
+      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
+      removeTagFromListCache(variables.id);
+    },
+    onSuccess(createdTag) {
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.map((tag) => tag.id === createdTag.id ? {
+          ...createdTag,
+          listTags: tag.listTags,
+        } : tag)
+      );
+      setTagInListsCache({ ...createdTag, listTags: [] });
+    },
+  }));
+
+  const updateTagMutation = useMutation(trpc.tag.update.mutationOptions({
+    async onMutate(updatedTag) {
+      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+
+      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+      const previousLists = queryClient.getQueryData<Lists>(listsQueryKey);
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.map((tag) =>
+          tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag
+        )
+      );
+
+      const existingTag = previousTags?.find((tag) => tag.id === updatedTag.id);
+      if (existingTag) {
+        setTagInListsCache({ ...existingTag, ...updatedTag });
+      }
+
+      return { previousTags, previousLists };
+    },
+    onError(_error, _variables, context) {
+      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
+      queryClient.setQueryData(listsQueryKey, context?.previousLists);
+    },
+  }));
+
+  const deleteTagMutation = useMutation(trpc.tag.delete.mutationOptions({
+    async onMutate(deletedTag) {
+      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+
+      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+      const previousLists = queryClient.getQueryData<Lists>(listsQueryKey);
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.filter((tag) => tag.id !== deletedTag.id)
+      );
+      queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) =>
+        currentLists?.map((list) => ({
+          ...list,
+          listTags: list.listTags.filter((listTag) => listTag.tagId !== deletedTag.id),
+        }))
+      );
+
+      return { previousTags, previousLists };
+    },
+    onError(_error, _variables, context) {
+      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
+      queryClient.setQueryData(listsQueryKey, context?.previousLists);
+    },
+  }));
+
+  const addToListMutation = useMutation(trpc.tag.addToList.mutationOptions({
+    async onMutate({ tagId }) {
+      const tag = queryClient
+        .getQueryData<TagValue[]>(tagsQueryKey)
+        ?.find((currentTag) => currentTag.id === tagId);
+
+      if (tag) addTagToListCache(tag);
+    },
+    onError(_error, variables) {
+      removeTagFromListCache(variables.tagId);
+    },
+  }));
+
+  const removeFromListMutation = useMutation(trpc.tag.removeFromList.mutationOptions({
+    async onMutate({ tagId }) {
+      removeTagFromListCache(tagId);
+    },
+    onError(_error, variables) {
+      const tag = queryClient
+        .getQueryData<TagValue[]>(tagsQueryKey)
+        ?.find((currentTag) => currentTag.id === variables.tagId);
+
+      if (tag) addTagToListCache(tag);
+    },
+  }));
+
+  const toggleTag = (tag: TagValue) => {
+    const isSelected = selectedTagIds.includes(tag.id);
+
+    if (isSelected) {
+      removeFromListMutation.mutate({ listId, tagId: tag.id });
+      return;
+    }
+
+    addToListMutation.mutate({ listId, tagId: tag.id });
+  };
+
+  const updateTagColor = (tagId: string, color: TagColor) => {
+    updateTagMutation.mutate({ id: tagId, color });
+  };
+
+  const createTag = async () => {
+    const name = search.trim();
+    if (!name || exactTagExists) return;
+
+    const id = crypto.randomUUID();
+    setSearch("");
+    setOpen(false);
+
+    await createTagMutation.mutateAsync({
+      id,
+      name,
+      color: "gray",
+    });
+    await addToListMutation.mutateAsync({ listId, tagId: id });
+  };
+
+  const deleteTag = (tagId: string) => {
+    deleteTagMutation.mutate({ id: tagId });
+  };
+
+  const isCreatingNewTag = search.trim() && !exactTagExists;
+
+  return (
+    <div className="flex w-full flex-wrap items-center gap-1">
+      {selectedTags.map((tag) => (
+        <Badge
+          key={tag.id}
+          variant="outline"
+          className={cn(
+            "h-5 gap-1 rounded-full border px-1.5 text-[11px] hover:cursor-default",
+            TAG_COLOR_CLASSES[tag.color]
+          )}
+        >
+          {tag.name}
+
+          <button
+            type="button"
+            onClick={() => removeFromListMutation.mutate({ listId, tagId: tag.id })}
+            className="rounded-full opacity-70 transition hover:cursor-pointer hover:opacity-100"
+          >
+            <X className="size-2.5" />
+          </button>
+        </Badge>
+      ))}
+
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Badge
+            variant="outline"
+            className="h-5 gap-1 rounded-full border px-1.5 text-[11px]"
+          >
+            <Tag className="size-2.5" />
+            Tags
+          </Badge>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="center"
+          className="w-64 p-0"
+          onCloseAutoFocus={(event) => event.preventDefault()}
+        >
+          <Command>
+            <CommandInput
+              placeholder="Search or create tag..."
+              value={search}
+              onValueChange={setSearch}
+              className="h-8 text-xs"
+            />
+            <CommandList className="overflow-y-hidden">
+              <CommandEmpty className="px-2 py-2.5 text-xs text-muted-foreground">
+                No tags found.
+              </CommandEmpty>
+
+              <CommandGroup heading="Existing tags">
+                <ScrollArea
+                  className={cn(
+                    "max-h-36",
+                    !isCreatingNewTag && "h-36"
+                  )}
+                >
+                  {filteredTags.map((tag) => {
+                    const isSelected = selectedTagIds.includes(tag.id);
+
+                    return (
+                      <div
+                        key={tag.id}
+                        className="group/tag-row flex items-center gap-1 px-1 py-0.5"
+                      >
+                        <CommandItem
+                          value={tag.name}
+                          onSelect={() => toggleTag(tag)}
+                          className="flex h-7 flex-1 cursor-pointer items-center justify-between rounded-sm px-1 text-xs [&>svg:last-child]:hidden"
+                        >
+                          <div className="flex flex-1 items-center gap-1.5">
+                            <div className="flex min-w-0 items-center gap-1.5">
+                              <span className="truncate">{tag.name}</span>
+                            </div>
+
+                            <Check
+                              className={cn(
+                                "size-3.5 shrink-0",
+                                isSelected ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              deleteTag(tag.id);
+                            }}
+                            className={cn(
+                              "h-5 w-5 text-muted-foreground transition",
+                              "hover:bg-destructive/10 hover:text-destructive",
+                              "md:flex md:opacity-0 md:group-hover/tag-row:opacity-100"
+                            )}
+                            aria-label={`Delete ${tag.name} tag`}
+                          >
+                            <Trash2 className="size-3" />
+                          </Button>
+                        </CommandItem>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-xs"
+                              className="size-5 shrink-0"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <span
+                                className={cn(
+                                  "flex size-3 items-center justify-center rounded-full border",
+                                  TAG_COLOR_CLASSES[tag.color],
+                                  "ring-1 ring-muted ring-offset-1"
+                                )}
+                              />
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-32 p-1.5"
+                            onCloseAutoFocus={(event) =>
+                              event.preventDefault()
+                            }
+                          >
+                            <p className="mb-1 text-[10px] font-medium text-muted-foreground">
+                              Choose color
+                            </p>
+
+                            <div className="grid grid-cols-4 gap-1">
+                              {TAG_COLORS.map((color) => {
+                                const isCurrentColor = tag.color === color;
+
+                                return (
+                                  <button
+                                    key={color}
+                                    type="button"
+                                    title={color}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      updateTagColor(tag.id, color);
+                                    }}
+                                    className={cn(
+                                      "flex size-5 items-center justify-center rounded-full border transition hover:scale-105",
+                                      TAG_COLOR_CLASSES[color],
+                                      isCurrentColor &&
+                                      "ring-2 ring-ring ring-offset-1"
+                                    )}
+                                  >
+                                    {isCurrentColor && (
+                                      <Check className="size-2.5" />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    );
+                  })}
+                </ScrollArea>
+              </CommandGroup>
+
+              {search.trim() && !exactTagExists && (
+                <CommandGroup heading="Create new">
+                  <CommandItem
+                    value={search}
+                    onSelect={createTag}
+                    className="h-7 cursor-pointer gap-1 px-1.5 text-xs"
+                  >
+                    <Plus className="size-3" />
+                    Create &quot;{search.trim()}&quot;
+                  </CommandItem>
+                </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
