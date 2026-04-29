@@ -228,7 +228,7 @@ const ListItemComponent = ({
       <div className="min-w-0 flex-1">
         <ListInlineEdit
           className={cn(
-            "block w-full min-w-0 text-sm whitespace-normal break-all break-normal transition-colors duration-300 leading-5.5!",
+            "block w-full min-w-0 text-sm whitespace-normal break-all break-normal transition-colors duration-300 leading-6!",
             listItem.completed && "line-through text-gray-500"
           )}
           id={listItem.id}
@@ -236,7 +236,7 @@ const ListItemComponent = ({
           onSave={renameListItem}
           disabled={renameListItemPending}
           displayClassName="whitespace-normal"
-          inputClassName="text-sm! p-0! leading-5.5! break-normal!"
+          inputClassName="text-sm! p-0! leading-6! break-normal!"
         />
       </div>
 
