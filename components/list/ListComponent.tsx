@@ -255,23 +255,17 @@ const ListComponent = ({
 
           // creation
           !listDeleted && listRevealed && (
-            isMobile
-              ? "max-h-200 opacity-100 translate-y-0"
-              : "w-full opacity-100 translate-x-0"
+              "max-h-200 opacity-100 translate-y-0"
           ),
 
           // before reveal
           !listDeleted && !listRevealed && (
-            isMobile
-              ? "max-h-0 opacity-0"
-              : "w-0 opacity-0 translate-x-8"
+              "max-h-0 opacity-0"
           ),
 
           // deletion
           listDeleted && (
-            isMobile
-              ? "max-h-0 opacity-0 -translate-y-4"
-              : "opacity-0 -translate-y-4"
+              "opacity-0 -translate-y-4"
           )
         )}
       >
