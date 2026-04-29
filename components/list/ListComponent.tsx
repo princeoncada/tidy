@@ -285,9 +285,9 @@ const ListComponent = ({
                   <GripVertical />
                 </div>
 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 space-y-1">
                   <ListInlineEdit
-                    className="block wrap-break-word font-semibold leading-7! text-xl!"
+                    className="block font-semibold leading-7! text-xl!"
                     inputClassName=""
                     displayClassName=""
                     id={list.id}
@@ -341,7 +341,7 @@ const ListComponent = ({
                         ref={inputRef}
                         value={createListItemName}
                         placeholder="Add new item here..."
-                        className="rounded-md flex-1 min-h-5  resize-none overflow-hidden border-0 bg-transparent p-0 text-sm leading-5.5 shadow-none focus-visible:ring-0 break-normal!"
+                        className="rounded-md flex-1 min-h-5 resize-none overflow-hidden border-0 bg-transparent p-0 text-sm leading-6 shadow-none focus-visible:ring-0 break-normal!"
                         onChange={(e) => {
                           setCreateListItemName(e.target.value);
                         }}
