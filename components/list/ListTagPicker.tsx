@@ -302,16 +302,16 @@ export default function ListTagPicker({
           key={tag.id}
           variant="outline"
           className={cn(
-            "h-5 gap-1 rounded-full border px-1.5 text-[11px] hover:cursor-default",
+            "h-5 max-w-full min-w-0 justify-start gap-1 rounded-full border px-1.5 text-[11px] hover:cursor-default",
             TAG_COLOR_CLASSES[tag.color]
           )}
         >
-          {tag.name}
+          <span className="min-w-0 truncate">{tag.name}</span>
 
           <button
             type="button"
             onClick={() => removeFromListMutation.mutate({ listId, tagId: tag.id })}
-            className="rounded-full opacity-70 transition hover:cursor-pointer hover:opacity-100"
+            className="shrink-0 rounded-full opacity-70 transition hover:cursor-pointer hover:opacity-100"
           >
             <X className="size-2.5" />
           </button>
@@ -331,7 +331,7 @@ export default function ListTagPicker({
 
         <DropdownMenuContent
           align="center"
-          className="w-64 p-0"
+          className="w-64 overflow-hidden p-0"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
           <Command>
@@ -359,17 +359,17 @@ export default function ListTagPicker({
                     return (
                       <div
                         key={tag.id}
-                        className="group/tag-row flex items-center gap-1 px-1 py-0.5"
+                        className="grid min-w-0 grid-cols-[minmax(0,1fr)_1.25rem_1.25rem] items-center gap-1 px-1 py-0.5"
                       >
                         <CommandItem
                           value={tag.name}
                           onSelect={() => toggleTag(tag)}
-                          className="flex h-7 flex-1 cursor-pointer items-center justify-between rounded-sm px-1 text-xs [&>svg:last-child]:hidden"
+                          className="h-7 min-w-0 cursor-pointer overflow-hidden rounded-sm px-1 text-xs [&>svg:last-child]:hidden"
                         >
-                          <div className="flex flex-1 items-center gap-1.5">
-                            <div className="flex min-w-0 items-center gap-1.5">
-                              <span className="truncate">{tag.name}</span>
-                            </div>
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <span className="block min-w-0 flex-1 truncate">
+                              {tag.name}
+                            </span>
 
                             <Check
                               className={cn(
@@ -378,25 +378,25 @@ export default function ListTagPicker({
                               )}
                             />
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-xs"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              deleteTag(tag.id);
-                            }}
-                            className={cn(
-                              "h-5 w-5 text-muted-foreground transition",
-                              "hover:bg-destructive/10 hover:text-destructive",
-                              "md:flex md:opacity-0 md:group-hover/tag-row:opacity-100"
-                            )}
-                            aria-label={`Delete ${tag.name} tag`}
-                          >
-                            <Trash2 className="size-3" />
-                          </Button>
                         </CommandItem>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            deleteTag(tag.id);
+                          }}
+                          className={cn(
+                            "size-5 text-muted-foreground transition",
+                            "hover:bg-destructive/10 hover:text-destructive"
+                          )}
+                          aria-label={`Delete ${tag.name} tag`}
+                        >
+                          <Trash2 className="size-3" />
+                        </Button>
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -404,7 +404,7 @@ export default function ListTagPicker({
                               type="button"
                               variant="ghost"
                               size="icon-xs"
-                              className="size-5 shrink-0"
+                              className="size-5"
                               onClick={(event) => event.stopPropagation()}
                             >
                               <span
@@ -468,10 +468,12 @@ export default function ListTagPicker({
                   <CommandItem
                     value={search}
                     onSelect={createTag}
-                    className="h-7 cursor-pointer gap-1 px-1.5 text-xs"
+                    className="h-7 min-w-0 cursor-pointer gap-1 px-1.5 text-xs"
                   >
-                    <Plus className="size-3" />
-                    Create &quot;{search.trim()}&quot;
+                    <Plus className="size-3 shrink-0" />
+                    <span className="min-w-0 truncate">
+                      Create &quot;{search.trim()}&quot;
+                    </span>
                   </CommandItem>
                 </CommandGroup>
               )}
