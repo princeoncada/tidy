@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus, Tag, Trash2, X } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,21 +20,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/lib/trpc";
+import type { Lists } from "./types";
 
-type TagColor =
-  | "gray"
-  | "red"
-  | "orange"
-  | "yellow"
-  | "green"
-  | "blue"
-  | "purple"
-  | "pink";
+type TagValue = RouterOutputs["tag"]["getAll"][number];
+type ListTagValue = Lists[number]["listTags"][number];
+type TagColor = TagValue["color"];
 
-type TagValue = {
-  id: string;
-  name: string;
-  color: TagColor;
+type ListTagPickerProps = {
+  listId: string;
+  selectedListTags: ListTagValue[];
 };
 
 const TAG_COLORS: TagColor[] = [
@@ -59,27 +56,29 @@ const TAG_COLOR_CLASSES: Record<TagColor, string> = {
   pink: "bg-pink-100 text-pink-700 border-pink-200",
 };
 
-const DEFAULT_TAGS: TagValue[] = [
-  { id: "tag-1", name: "Urgent", color: "red" },
-  { id: "tag-2", name: "Work", color: "blue" },
-  { id: "tag-3", name: "Personal", color: "green" },
-  { id: "tag-4", name: "School", color: "purple" },
-  { id: "tag-5", name: "Shopping", color: "orange" },
-  { id: "tag-6", name: "Ideas", color: "yellow" },
-];
-
-export default function ListTagPicker() {
+export default function ListTagPicker({
+  listId,
+  selectedListTags,
+}: ListTagPickerProps) {
   const [open, setOpen] = useState(false);
-  const [tags, setTags] = useState<TagValue[]>(DEFAULT_TAGS);
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([
-    "tag-1",
-    "tag-2",
-  ]);
   const [search, setSearch] = useState("");
 
-  const selectedTags = useMemo(() => {
-    return tags.filter((tag) => selectedTagIds.includes(tag.id));
-  }, [tags, selectedTagIds]);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const tagsQueryKey = trpc.tag.getAll.queryKey();
+  const listsQueryKey = trpc.list.getListsWithItems.queryKey();
+
+  const { data: tags = [] } = useQuery(trpc.tag.getAll.queryOptions());
+
+  const selectedTagIds = useMemo(
+    () => selectedListTags.map((listTag) => listTag.tagId),
+    [selectedListTags]
+  );
+
+  const selectedTags = useMemo(
+    () => selectedListTags.map((listTag) => listTag.tag),
+    [selectedListTags]
+  );
 
   const filteredTags = useMemo(() => {
     return tags.filter((tag) =>
@@ -91,53 +90,207 @@ export default function ListTagPicker() {
     (tag) => tag.name.toLowerCase() === search.trim().toLowerCase()
   );
 
-  const toggleTag = (tagId: string) => {
-    const isSelected = selectedTagIds.includes(tagId);
+  const setTagInListsCache = (tag: TagValue) => {
+    queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) => {
+      if (!currentLists) return currentLists;
+
+      return currentLists.map((list) => ({
+        ...list,
+        listTags: list.listTags.map((listTag) =>
+          listTag.tagId === tag.id ? { ...listTag, tag } : listTag
+        ),
+      }));
+    });
+  };
+
+  const addTagToListCache = (tag: TagValue) => {
+    queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) => {
+      if (!currentLists) return currentLists;
+
+      return currentLists.map((list) => {
+        if (list.id !== listId) return list;
+        if (list.listTags.some((listTag) => listTag.tagId === tag.id)) {
+          return list;
+        }
+
+        return {
+          ...list,
+          listTags: [
+            ...list.listTags,
+            {
+              listId,
+              tagId: tag.id,
+              tag,
+            },
+          ],
+        };
+      });
+    });
+  };
+
+  const removeTagFromListCache = (tagId: string) => {
+    queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) => {
+      if (!currentLists) return currentLists;
+
+      return currentLists.map((list) =>
+        list.id === listId
+          ? {
+            ...list,
+            listTags: list.listTags.filter((listTag) => listTag.tagId !== tagId),
+          }
+          : list
+      );
+    });
+  };
+
+  const createTagMutation = useMutation(trpc.tag.create.mutationOptions({
+    async onMutate(newTag) {
+      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+
+      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+      const optimisticTag: TagValue = {
+        id: newTag.id,
+        name: newTag.name,
+        color: newTag.color ?? "gray",
+        userId: "optimistic",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        listTags: [],
+      };
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) => [
+        ...currentTags,
+        optimisticTag,
+      ].sort((a, b) => a.name.localeCompare(b.name)));
+      addTagToListCache(optimisticTag);
+
+      return { previousTags };
+    },
+    onError(_error, variables, context) {
+      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
+      removeTagFromListCache(variables.id);
+    },
+    onSuccess(createdTag) {
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.map((tag) => tag.id === createdTag.id ? {
+          ...createdTag,
+          listTags: tag.listTags,
+        } : tag)
+      );
+      setTagInListsCache({ ...createdTag, listTags: [] });
+    },
+  }));
+
+  const updateTagMutation = useMutation(trpc.tag.update.mutationOptions({
+    async onMutate(updatedTag) {
+      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+
+      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+      const previousLists = queryClient.getQueryData<Lists>(listsQueryKey);
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.map((tag) =>
+          tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag
+        )
+      );
+
+      const existingTag = previousTags?.find((tag) => tag.id === updatedTag.id);
+      if (existingTag) {
+        setTagInListsCache({ ...existingTag, ...updatedTag });
+      }
+
+      return { previousTags, previousLists };
+    },
+    onError(_error, _variables, context) {
+      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
+      queryClient.setQueryData(listsQueryKey, context?.previousLists);
+    },
+  }));
+
+  const deleteTagMutation = useMutation(trpc.tag.delete.mutationOptions({
+    async onMutate(deletedTag) {
+      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+
+      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+      const previousLists = queryClient.getQueryData<Lists>(listsQueryKey);
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.filter((tag) => tag.id !== deletedTag.id)
+      );
+      queryClient.setQueryData<Lists>(listsQueryKey, (currentLists) =>
+        currentLists?.map((list) => ({
+          ...list,
+          listTags: list.listTags.filter((listTag) => listTag.tagId !== deletedTag.id),
+        }))
+      );
+
+      return { previousTags, previousLists };
+    },
+    onError(_error, _variables, context) {
+      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
+      queryClient.setQueryData(listsQueryKey, context?.previousLists);
+    },
+  }));
+
+  const addToListMutation = useMutation(trpc.tag.addToList.mutationOptions({
+    async onMutate({ tagId }) {
+      const tag = queryClient
+        .getQueryData<TagValue[]>(tagsQueryKey)
+        ?.find((currentTag) => currentTag.id === tagId);
+
+      if (tag) addTagToListCache(tag);
+    },
+    onError(_error, variables) {
+      removeTagFromListCache(variables.tagId);
+    },
+  }));
+
+  const removeFromListMutation = useMutation(trpc.tag.removeFromList.mutationOptions({
+    async onMutate({ tagId }) {
+      removeTagFromListCache(tagId);
+    },
+    onError(_error, variables) {
+      const tag = queryClient
+        .getQueryData<TagValue[]>(tagsQueryKey)
+        ?.find((currentTag) => currentTag.id === variables.tagId);
+
+      if (tag) addTagToListCache(tag);
+    },
+  }));
+
+  const toggleTag = (tag: TagValue) => {
+    const isSelected = selectedTagIds.includes(tag.id);
 
     if (isSelected) {
-      setSelectedTagIds(selectedTagIds.filter((id) => id !== tagId));
+      removeFromListMutation.mutate({ listId, tagId: tag.id });
       return;
     }
 
-    setSelectedTagIds([...selectedTagIds, tagId]);
-  };
-
-  const removeTag = (tagId: string) => {
-    setSelectedTagIds(selectedTagIds.filter((id) => id !== tagId));
+    addToListMutation.mutate({ listId, tagId: tag.id });
   };
 
   const updateTagColor = (tagId: string, color: TagColor) => {
-    setTags((currentTags) =>
-      currentTags.map((tag) => {
-        if (tag.id !== tagId) return tag;
-
-        return {
-          ...tag,
-          color,
-        };
-      })
-    );
+    updateTagMutation.mutate({ id: tagId, color });
   };
 
-  const createTag = () => {
+  const createTag = async () => {
     const name = search.trim();
     if (!name || exactTagExists) return;
 
-    const newTag: TagValue = {
-      id: crypto.randomUUID(),
-      name,
-      color: "gray",
-    };
-
-    setTags((currentTags) => [...currentTags, newTag]);
-    setSelectedTagIds((currentIds) => [...currentIds, newTag.id]);
+    const id = crypto.randomUUID();
     setSearch("");
     setOpen(false);
+
+    await createTagMutation.mutateAsync({
+      id,
+      name,
+      color: "gray",
+    });
+    await addToListMutation.mutateAsync({ listId, tagId: id });
   };
 
   const deleteTag = (tagId: string) => {
-    setTags((currentTags) => currentTags.filter((tag) => tag.id !== tagId));
-    setSelectedTagIds((currentIds) => currentIds.filter((id) => id !== tagId));
+    deleteTagMutation.mutate({ id: tagId });
   };
 
   const isCreatingNewTag = search.trim() && !exactTagExists;
@@ -157,8 +310,8 @@ export default function ListTagPicker() {
 
           <button
             type="button"
-            onClick={() => removeTag(tag.id)}
-            className="rounded-full opacity-70 transition hover:opacity-100 hover:cursor-pointer"
+            onClick={() => removeFromListMutation.mutate({ listId, tagId: tag.id })}
+            className="rounded-full opacity-70 transition hover:cursor-pointer hover:opacity-100"
           >
             <X className="size-2.5" />
           </button>
@@ -210,7 +363,7 @@ export default function ListTagPicker() {
                       >
                         <CommandItem
                           value={tag.name}
-                          onSelect={() => toggleTag(tag.id)}
+                          onSelect={() => toggleTag(tag)}
                           className="flex h-7 flex-1 cursor-pointer items-center justify-between rounded-sm px-1 text-xs [&>svg:last-child]:hidden"
                         >
                           <div className="flex flex-1 items-center gap-1.5">
@@ -318,7 +471,7 @@ export default function ListTagPicker() {
                     className="h-7 cursor-pointer gap-1 px-1.5 text-xs"
                   >
                     <Plus className="size-3" />
-                    Create “{search.trim()}”
+                    Create &quot;{search.trim()}&quot;
                   </CommandItem>
                 </CommandGroup>
               )}
