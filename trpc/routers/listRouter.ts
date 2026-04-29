@@ -83,19 +83,12 @@ export const listRouter = createTRPCRouter({
     z.object({
       listId: z.uuid()
     })
-  ).mutation(async ({ input }) => {
-    return await db.$transaction(async (tx) => {
-      await tx.listItem.deleteMany({
-        where: {
-          listId: input.listId,
-        },
-      });
-
-      await tx.list.delete({
-        where: {
-          id: input.listId,
-        },
-      });
+  ).mutation(async ({ ctx, input }) => {
+    return await db.list.delete({
+      where: {
+        id: input.listId,
+        userId: ctx.userId,
+      },
     });
   }),
   reorderLists: protectedProcedure.input(z.object({
