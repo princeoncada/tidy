@@ -106,8 +106,8 @@ const ListsContainer = () => {
     }, 300);
   };
 
-  const revealedItemIdsRef = useRef(new Set<string>());
-  const revealedListIdsRef = useRef(new Set<string>());
+  const [revealedItemIds, setRevealedItemIds] = useState(() => new Set<string>());
+  const [revealedListIds, setRevealedListIds] = useState(() => new Set<string>());
 
   if (isLoading) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
@@ -316,10 +316,10 @@ const ListsContainer = () => {
               enqueue={enqueue}
               activeDropTarget={activeDropTarget}
               shouldRevealOnMount={
-                Boolean(list.isOptimistic) && !revealedListIdsRef.current.has(list.id)
+                Boolean(list.isOptimistic) && !revealedListIds.has(list.id)
               }
               onRevealComplete={() => {
-                revealedListIdsRef.current.add(list.id);
+                setRevealedListIds((currentIds) => new Set(currentIds).add(list.id));
               }}
             >
               {
@@ -330,10 +330,10 @@ const ListsContainer = () => {
                     index={index}
                     enqueue={enqueue}
                     shouldRevealOnMount={
-                      Boolean(item.isOptimistic) && !revealedItemIdsRef.current.has(item.id)
+                      Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
                     }
                     onRevealComplete={() => {
-                      revealedItemIdsRef.current.add(item.id);
+                      setRevealedItemIds((currentIds) => new Set(currentIds).add(item.id));
                     }}
                   />)
               }
