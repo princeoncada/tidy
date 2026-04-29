@@ -5,21 +5,20 @@ import { useTRPC } from "@/trpc/client";
 import { useDroppable } from "@dnd-kit/react";
 import { useSortable } from '@dnd-kit/react/sortable';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar1, GripVertical, ListPlus, ListX, Plus, StickyNote, Trash2 } from "lucide-react";
+import { Calendar1, GripVertical, Plus, StickyNote } from "lucide-react";
 import { motion } from "motion/react";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import ListInlineEdit from "./ListInlineEdit";
+import { useMediaQuery } from "usehooks-ts";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "../ui/input-group";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-import { List, ListItem, Lists, OptimisticListItem } from "./types";
-import ListMenu from "./ListMenu";
-import { useMediaQuery } from "usehooks-ts";
 import { Textarea } from "../ui/textarea";
+import ListInlineEdit from "./ListInlineEdit";
+import ListMenu from "./ListMenu";
 import ListTagPicker from "./ListTagPicker";
+import { List, ListItem, Lists, OptimisticListItem } from "./types";
 
 interface ListComponentProps {
   children: ReactNode;
@@ -57,8 +56,6 @@ const ListComponent = ({
 
     return () => clearTimeout(timeout);
   }, [shouldRevealOnMount, onRevealComplete, list.id]);
-
-  const isMobile = useMediaQuery("(max-width: 767px)");
 
   const [createListItemName, setCreateListItemName] = useState<string>('');
   const [viewListItemAdder, setViewListItemAdder] = useState<boolean>(false);
@@ -248,24 +245,21 @@ const ListComponent = ({
     >
       <div
         className={cn(
-          "transition-all duration-300 ease-in-out",
-          isMobile
-            ? "w-full"
-            : "h-full shrink-0",
+          "transition-all duration-300 ease-in-out h-full shrink-0",
 
           // creation
           !listDeleted && listRevealed && (
-              "max-h-200 opacity-100 translate-y-0"
+            "max-h-200 opacity-100 translate-y-0"
           ),
 
           // before reveal
           !listDeleted && !listRevealed && (
-              "max-h-0 opacity-0"
+            "max-h-0 opacity-0"
           ),
 
           // deletion
           listDeleted && (
-              "opacity-0 -translate-y-4"
+            "opacity-0 -translate-y-4"
           )
         )}
       >
