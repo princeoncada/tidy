@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import ListInlineEdit from "./ListInlineEdit";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { ListItem, Lists } from "./types";
+import { List, ListItem, Lists } from "./types";
 import { cn } from "@/lib/utils";
 
 
@@ -44,20 +44,20 @@ const ListItemComponent = ({
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const queryKey = trpc.getListsWithItems.queryKey();
+  const queryKey = trpc.list.getListsWithItems.queryKey();
 
-  const { mutate: renameListItem, isPending: renameListItemPending } = useMutation(trpc.renameListItem.mutationOptions({
+  const { mutate: renameListItem, isPending: renameListItemPending } = useMutation(trpc.listItem.renameListItem.mutationOptions({
     async onMutate(variables) {
-      const queryKey = trpc.getListsWithItems.queryKey();
+      const queryKey = trpc.list.getListsWithItems.queryKey();
       await queryClient.cancelQueries({ queryKey });
       const previousListsWithItems = queryClient.getQueryData<Lists>(queryKey);
 
       queryClient.setQueryData<Lists>(queryKey, (old) => {
         if (!old) return old;
 
-        return old.map((list) => ({
+        return old.map((list: List) => ({
           ...list,
-          listItems: list.listItems.map((item) =>
+          listItems: list.listItems.map((item: ListItem) =>
             item.id === variables.id
               ? { ...item, name: variables.name }
               : item
@@ -68,7 +68,7 @@ const ListItemComponent = ({
       return { previousListsWithItems };
     },
     onError(_error, _variables, context) {
-      const queryKey = trpc.getListsWithItems.queryKey();
+      const queryKey = trpc.list.getListsWithItems.queryKey();
 
       if (context?.previousListsWithItems) {
         queryClient.setQueryData(queryKey, context.previousListsWithItems);
@@ -76,23 +76,23 @@ const ListItemComponent = ({
     }
   }));
 
-  const deleteItemMutation = useMutation(trpc.deleteListItem.mutationOptions());
+  const deleteItemMutation = useMutation(trpc.listItem.deleteListItem.mutationOptions());
 
   const deleteItem = (itemId: string) => {
     // Find the parent list before deleting
     const parentList = queryClient.getQueryData<Lists>(queryKey)?.find(
-      (list) => list.listItems.some(
-        (item) => item.id === itemId)
+      (list: List) => list.listItems.some(
+        (item: ListItem) => item.id === itemId)
     );
 
     // Snapshot of item before optimistic update
     const deletedItem = parentList?.listItems.find(
-      (item) => item.id === itemId
+      (item: ListItem) => item.id === itemId
     );
 
     // Save original position for rollback
     const deletedItemIndex = parentList?.listItems.findIndex(
-      (item) => item.id === itemId
+      (item: ListItem) => item.id === itemId
     );
 
     // Stop if item does not exist in cache
@@ -103,13 +103,13 @@ const ListItemComponent = ({
       queryClient.setQueryData<Lists>(queryKey,
         (old) => {
           if (!old) return old;
-          return old.map((list) => {
+          return old.map((list: List) => {
             // Only updated the parent list
             if (list.id !== parentList.id) return list;
 
             return {
               ...list,
-              listItems: list.listItems.filter((item) => item.id !== itemId)
+              listItems: list.listItems.filter((item: ListItem) => item.id !== itemId)
             };
           });
         }
@@ -129,12 +129,12 @@ const ListItemComponent = ({
             (old) => {
               if (!old || !deletedItem) return old;
 
-              return old.map((list) => {
+              return old.map((list: List) => {
                 // Only restore into original parent list
                 if (list.id !== parentList.id) return list;
 
                 const alreadyRestored = list.listItems.some(
-                  (item) => item.id === itemId
+                  (item: ListItem) => item.id === itemId
                 );
 
                 if (alreadyRestored) return list;
@@ -157,18 +157,18 @@ const ListItemComponent = ({
     );
   };
 
-  const { mutate: setCompletion } = useMutation(trpc.setCompletionListItem.mutationOptions({
+  const { mutate: setCompletion } = useMutation(trpc.listItem.setCompletionListItem.mutationOptions({
     async onMutate(variables) {
-      const queryKey = trpc.getListsWithItems.queryKey();
+      const queryKey = trpc.list.getListsWithItems.queryKey();
       await queryClient.cancelQueries({ queryKey });
       const previousListsWithItems = queryClient.getQueryData<Lists>(queryKey);
 
       queryClient.setQueryData<Lists>(queryKey, (old) => {
         if (!old) return old;
 
-        return old.map((list) => ({
+        return old.map((list: List) => ({
           ...list,
-          listItems: list.listItems.map((item) =>
+          listItems: list.listItems.map((item: ListItem) =>
             item.id === variables.id
               ? { ...item, completed: variables.completed }
               : item
@@ -179,7 +179,7 @@ const ListItemComponent = ({
       return { previousListsWithItems };
     },
     onError(_error, _variables, context) {
-      const queryKey = trpc.getListsWithItems.queryKey();
+      const queryKey = trpc.list.getListsWithItems.queryKey();
 
       if (context?.previousListsWithItems) {
         queryClient.setQueryData(queryKey, context.previousListsWithItems);
