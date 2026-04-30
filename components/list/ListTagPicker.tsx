@@ -342,126 +342,126 @@ export default function ListTagPicker({
               className="h-8 text-xs"
             />
             <CommandList className="overflow-y-hidden">
-              <CommandEmpty className="px-2 py-2.5 text-xs text-muted-foreground">
+              <CommandEmpty className="px-2 py-2.5 text-xs text-muted-foreground text-start">
                 No tags found.
               </CommandEmpty>
 
-              <CommandGroup heading="Existing tags">
-                <ScrollArea
-                  className={cn(
-                    "max-h-36",
-                    !isCreatingNewTag && "h-36"
-                  )}
-                >
-                  {filteredTags.map((tag) => {
-                    const isSelected = selectedTagIds.includes(tag.id);
+              {filteredTags.length > 0 && (
+                <CommandGroup heading="Existing tags">
+                  <ScrollArea
+                    className={cn(
+                      "max-h-36",
+                      !isCreatingNewTag && "h-36"
+                    )}
+                  >
+                    {filteredTags.map((tag) => {
+                      const isSelected = selectedTagIds.includes(tag.id);
 
-                    return (
-                      <div
-                        key={tag.id}
-                        className="grid min-w-0 grid-cols-[minmax(0,1fr)_1.25rem_1.25rem] items-center gap-1 px-1 py-0.5"
-                      >
-                        <CommandItem
-                          value={tag.name}
-                          onSelect={() => toggleTag(tag)}
-                          className="h-7 min-w-0 cursor-pointer overflow-hidden rounded-sm px-1 text-xs [&>svg:last-child]:hidden"
+                      return (
+                        <div
+                          key={tag.id}
+                          className="grid min-w-0 grid-cols-[minmax(0,1fr)_1.25rem_1.25rem] items-center gap-1 px-1 py-0.5"
                         >
-                          <div className="flex min-w-0 items-center gap-1.5">
-                            <span className="block min-w-0 flex-1 truncate">
-                              {tag.name}
-                            </span>
+                          <CommandItem
+                            value={tag.name}
+                            onSelect={() => toggleTag(tag)}
+                            className="h-7 min-w-0 cursor-pointer overflow-hidden rounded-sm px-1 text-xs [&>svg:last-child]:hidden"
+                          >
+                            <div className="flex min-w-0 items-center gap-1.5">
+                              <span className="block min-w-0 flex-1 truncate pl-1.5">
+                                {tag.name}
+                              </span>
 
-                            <Check
-                              className={cn(
-                                "size-3.5 shrink-0",
-                                isSelected ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                          </div>
-                        </CommandItem>
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            deleteTag(tag.id);
-                          }}
-                          className={cn(
-                            "size-5 text-muted-foreground transition",
-                            "hover:bg-destructive/10 hover:text-destructive"
-                          )}
-                          aria-label={`Delete ${tag.name} tag`}
-                        >
-                          <Trash2 className="size-3" />
-                        </Button>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-xs"
-                              className="size-5"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <span
+                              <Check
                                 className={cn(
-                                  "flex size-3 items-center justify-center rounded-full border",
-                                  TAG_COLOR_CLASSES[tag.color],
-                                  "ring-1 ring-muted ring-offset-1"
+                                  "size-3.5 shrink-0",
+                                  isSelected ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                            </Button>
-                          </DropdownMenuTrigger>
-
-                          <DropdownMenuContent
-                            align="end"
-                            className="w-32 p-1.5"
-                            onCloseAutoFocus={(event) =>
-                              event.preventDefault()
-                            }
-                          >
-                            <p className="mb-1 text-[10px] font-medium text-muted-foreground">
-                              Choose color
-                            </p>
-
-                            <div className="grid grid-cols-4 gap-1">
-                              {TAG_COLORS.map((color) => {
-                                const isCurrentColor = tag.color === color;
-
-                                return (
-                                  <button
-                                    key={color}
-                                    type="button"
-                                    title={color}
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      updateTagColor(tag.id, color);
-                                    }}
-                                    className={cn(
-                                      "flex size-5 items-center justify-center rounded-full border transition hover:scale-105",
-                                      TAG_COLOR_CLASSES[color],
-                                      isCurrentColor &&
-                                      "ring-2 ring-ring ring-offset-1"
-                                    )}
-                                  >
-                                    {isCurrentColor && (
-                                      <Check className="size-2.5" />
-                                    )}
-                                  </button>
-                                );
-                              })}
                             </div>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    );
-                  })}
-                </ScrollArea>
-              </CommandGroup>
+                          </CommandItem>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              deleteTag(tag.id);
+                            }}
+                            className={cn(
+                              "text-muted-foreground transition",
+                              "hover:bg-destructive/10 hover:text-destructive"
+                            )}
+                            aria-label={`Delete ${tag.name} tag`}
+                          >
+                            <Trash2 className="size-3" />
+                          </Button>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-xs"
+                                onClick={(event) => event.stopPropagation()}
+                              >
+                                <span
+                                  className={cn(
+                                    "flex size-3 items-center justify-center rounded-full border",
+                                    TAG_COLOR_CLASSES[tag.color],
+                                    "ring-1 ring-muted ring-offset-1"
+                                  )}
+                                />
+                              </Button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-32 p-2 flex flex-col gap-0.5"
+                              onCloseAutoFocus={(event) =>
+                                event.preventDefault()
+                              }
+                            >
+                              <p className="mb-1 text-[10px] font-medium text-muted-foreground">
+                                Choose color
+                              </p>
+
+                              <div className="grid grid-cols-4 gap-1">
+                                {TAG_COLORS.map((color) => {
+                                  const isCurrentColor = tag.color === color;
+
+                                  return (
+                                    <button
+                                      key={color}
+                                      type="button"
+                                      title={color}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        updateTagColor(tag.id, color);
+                                      }}
+                                      className={cn(
+                                        "flex size-5 items-center justify-center rounded-full border transition hover:scale-105",
+                                        TAG_COLOR_CLASSES[color],
+                                        isCurrentColor
+                                      )}
+                                    >
+                                      {isCurrentColor && (
+                                        <Check className="size-2.5" />
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      );
+                    })}
+                  </ScrollArea>
+                </CommandGroup>
+              )}
 
               {search.trim() && !exactTagExists && (
                 <CommandGroup heading="Create new">
