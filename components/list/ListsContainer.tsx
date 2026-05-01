@@ -1,37 +1,204 @@
 "use client";
 
-import { useMutationQueue } from '@/lib/helper';
+import {
+  projectView,
+  selectedViewFromCache,
+  syncProjectedCurrentView,
+  ViewsCache,
+} from '@/lib/dashboard-cache';
+import {
+  measureCacheWrite,
+  measureOptimisticEvent,
+  measureRequest,
+  OptimisticProfiler,
+  useRenderMeasure,
+} from '@/lib/optimistic-debug';
+import { useOptimisticSync } from '@/hooks/useOptimisticSync';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
 import ListSkeleton from './ListSkeleton';
-import { List, ListItem, Lists, OptimisticList, OptimisticListItem } from './types';
+import { CurrentView, List, ListItem, Lists, OptimisticList, OptimisticListItem } from './types';
 import ListEmpty from './ListEmpty';
+
+type DragPreviewLists = Lists;
+
+function isStillOptimistic(value: unknown) {
+  return Boolean(
+    value &&
+    typeof value === "object" &&
+    "isOptimistic" in value &&
+    value.isOptimistic
+  );
+}
+
+function reorderListsForDrag(
+  baseLists: Lists,
+  sourceListId: string,
+  targetListId: string
+): DragPreviewLists | null {
+  const sourceIndex = baseLists.findIndex((list) => list.id === sourceListId);
+  const targetIndex = baseLists.findIndex((list) => list.id === targetListId);
+
+  if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) {
+    return null;
+  }
+
+  const nextLists = [...baseLists];
+  const [movedList] = nextLists.splice(sourceIndex, 1);
+  nextLists.splice(targetIndex, 0, movedList);
+
+  return nextLists.map((list, index) => ({
+    ...list,
+    order: index,
+  }));
+}
+
+function reorderItemsForDrag(
+  baseLists: Lists,
+  draggedItemId: string,
+  targetType: string,
+  targetId: string
+): DragPreviewLists | null {
+  const sourceListIndex = baseLists.findIndex((list) =>
+    list.listItems.some((item) => item.id === draggedItemId)
+  );
+
+  if (sourceListIndex === -1) return null;
+
+  const sourceItemIndex = baseLists[sourceListIndex].listItems.findIndex(
+    (item) => item.id === draggedItemId
+  );
+
+  if (sourceItemIndex === -1) return null;
+
+  let targetListIndex = -1;
+  let targetItemIndex = 0;
+
+  if (targetType === "list-item") {
+    const targetItemId = targetId.replace("list-item-", "");
+
+    targetListIndex = baseLists.findIndex((list) =>
+      list.listItems.some((item) => item.id === targetItemId)
+    );
+
+    if (targetListIndex === -1) return null;
+
+    targetItemIndex = baseLists[targetListIndex].listItems.findIndex(
+      (item) => item.id === targetItemId
+    );
+  }
+
+  if (targetType === "list-drop") {
+    const targetListId = targetId.replace("list-drop-", "");
+
+    targetListIndex = baseLists.findIndex((list) => list.id === targetListId);
+
+    if (targetListIndex === -1) return null;
+
+    targetItemIndex = baseLists[targetListIndex].listItems.length;
+  }
+
+  if (targetListIndex === -1) return null;
+
+  if (
+    sourceListIndex === targetListIndex &&
+    sourceItemIndex === targetItemIndex
+  ) {
+    return null;
+  }
+
+  const nextLists = [...baseLists];
+  const nextSourceList: List = {
+    ...nextLists[sourceListIndex],
+    listItems: [...nextLists[sourceListIndex].listItems],
+  };
+  nextLists[sourceListIndex] = nextSourceList;
+
+  if (sourceListIndex !== targetListIndex) {
+    nextLists[targetListIndex] = {
+      ...nextLists[targetListIndex],
+      listItems: [...nextLists[targetListIndex].listItems],
+    };
+  }
+
+  const [movedItem] = nextLists[sourceListIndex].listItems.splice(
+    sourceItemIndex,
+    1
+  );
+
+  let insertIndex = targetItemIndex;
+
+  if (sourceListIndex === targetListIndex && sourceItemIndex < targetItemIndex) {
+    insertIndex -= 1;
+  }
+
+  nextLists[targetListIndex].listItems.splice(insertIndex, 0, {
+    ...movedItem,
+    listId: nextLists[targetListIndex].id,
+  });
+
+  nextLists[sourceListIndex] = {
+    ...nextLists[sourceListIndex],
+    listItems: nextLists[sourceListIndex].listItems.map((item, index) => ({
+      ...item,
+      order: index,
+    })),
+  };
+
+  if (sourceListIndex !== targetListIndex) {
+    nextLists[targetListIndex] = {
+      ...nextLists[targetListIndex],
+      listItems: nextLists[targetListIndex].listItems.map((item, index) => ({
+        ...item,
+        order: index,
+      })),
+    };
+  }
+
+  return nextLists;
+}
 
 const ListsContainer = () => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const queryKey = trpc.list.getListsWithItems.queryKey();
-  const { enqueue } = useMutationQueue();
+  const viewsQueryKey = trpc.view.getAll.queryKey();
+  const allListsQueryKey = trpc.view.getAllListsWithItems.queryKey();
+  const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
+  const optimisticSync = useOptimisticSync();
+  const dashboardKeys = useMemo(() => ({
+    views: viewsQueryKey,
+    allLists: allListsQueryKey,
+    currentView: currentViewQueryKey,
+  }), [allListsQueryKey, currentViewQueryKey, viewsQueryKey]);
+
+  useRenderMeasure("ListsContainer");
 
   const [activeDropTarget, setActiveDropTarget] = useState<{
     type: string;
     id: string;
   } | null>(null);
+  const [dragPreviewLists, setDragPreviewLists] = useState<DragPreviewLists | null>(null);
+  const dragPreviewListsRef = useRef<DragPreviewLists | null>(null);
 
-  const { data: retrievedLists, isLoading, isError } = useQuery(trpc.list.getListsWithItems.queryOptions(undefined, {
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  }));
+  const { data: views, isLoading: viewsLoading, isError: viewsError } = useQuery(
+    trpc.view.getAll.queryOptions()
+  );
+  const { data: allListsSnapshot, isLoading: listsLoading, isError: listsError } = useQuery(
+    trpc.view.getAllListsWithItems.queryOptions()
+  );
 
-  const lists = retrievedLists ?? [];
+  const selectedView = selectedViewFromCache(views);
+  const currentView = projectView(selectedView, allListsSnapshot);
+  const lists = currentView?.lists ?? [];
+  const visibleLists = dragPreviewLists ?? lists;
 
-  const reorderListsMutation = useMutation(
-    trpc.list.reorderLists.mutationOptions()
+  const reorderViewListsMutation = useMutation(
+    trpc.view.reorderViewLists.mutationOptions()
   );
 
   const reorderListItemsMutation = useMutation(
@@ -40,76 +207,140 @@ const ListsContainer = () => {
 
   const reorderListsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reorderListItemsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const latestListsPayloadRef = useRef<Lists | null>(null);
-  const latestListItemsPayloadRef = useRef<Lists | null>(null);
 
-  const scheduleReorderListsSave = (nextLists: Lists) => {
-    // Keep the newest list order
-    latestListsPayloadRef.current = nextLists;
+  const scheduleReorderListsSave = useCallback((nextLists: Lists) => {
+    if (currentView?.view.type === "ALL_LISTS") {
+      measureCacheWrite("lists.drop.all-lists", nextLists);
+      queryClient.setQueryData<CurrentView>(allListsQueryKey, (current) =>
+        current ? { ...current, lists: nextLists } : current
+      );
+    } else {
+      measureCacheWrite("lists.drop.view-order", nextLists.map((list, index) => ({
+        listId: list.id,
+        order: index,
+      })));
+      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
+        currentViews?.map((view) =>
+          view.id === currentView?.view.id
+            ? {
+              ...view,
+              viewLists: nextLists.map((list, index) => ({
+                listId: list.id,
+                order: index,
+              })),
+            }
+            : view
+        )
+      );
+    }
 
-    // Update UI instantly through cache
-    queryClient.setQueryData<Lists>(queryKey, nextLists);
+    // This cache is derived from all-lists data, so do not treat it as a second source of truth.
+    syncProjectedCurrentView(queryClient, dashboardKeys);
 
-    // Cancel old timer
     if (reorderListsTimeoutRef.current) {
       clearTimeout(reorderListsTimeoutRef.current);
     }
 
     reorderListsTimeoutRef.current = setTimeout(() => {
-      // Get latest payload at save time
-      const latestLists = latestListsPayloadRef.current;
+      optimisticSync.replacePending("list-order", async () => {
+        if (!currentView) return;
+        const savedLists = nextLists.filter((list) => !isStillOptimistic(list));
+        if (savedLists.length === 0) return;
 
-      if (!latestLists) return;
-
-      enqueue(async () => {
-        // Server save runs through queue
-        await reorderListsMutation.mutateAsync({
-          lists: latestLists.map((list: List, index: number) => ({
+        measureRequest("view.reorderViewLists", { count: nextLists.length });
+        await reorderViewListsMutation.mutateAsync({
+          viewId: currentView.view.id,
+          lists: savedLists.map((list: List, index: number) => ({
             id: list.id,
             order: index
           }))
         });
-      });
+      }, { label: "view.reorderViewLists" });
     }, 300);
-  };
+  }, [
+    allListsQueryKey,
+    currentView,
+    dashboardKeys,
+    optimisticSync,
+    queryClient,
+    reorderViewListsMutation,
+    viewsQueryKey,
+  ]);
 
-  const scheduleReorderListItemsSave = (nextLists: Lists) => {
-    // Keep the newest list order
-    latestListItemsPayloadRef.current = nextLists;
+  const scheduleReorderListItemsSave = useCallback((nextLists: Lists) => {
+    measureCacheWrite("items.drop.all-lists", nextLists);
+    queryClient.setQueryData<CurrentView>(allListsQueryKey, (current) =>
+      current
+        ? {
+          ...current,
+          lists: current.lists.map((list) =>
+            nextLists.find((nextList) => nextList.id === list.id) ?? list
+          ),
+        }
+        : current
+    );
 
-    // Update UI instantly through cache
-    queryClient.setQueryData<Lists>(queryKey, nextLists);
+    // This cache is derived from all-lists data, so update it after the main cache changes.
+    syncProjectedCurrentView(queryClient, dashboardKeys);
 
-    // Cancel old timer
     if (reorderListItemsTimeoutRef.current) {
       clearTimeout(reorderListItemsTimeoutRef.current);
     }
 
     reorderListItemsTimeoutRef.current = setTimeout(() => {
-      // Get latest payload at save time
-      const latestLists = latestListItemsPayloadRef.current;
+      optimisticSync.replacePending("item-order", async () => {
+        const savedItems = nextLists.flatMap((list: List) =>
+          isStillOptimistic(list)
+            ? []
+            : list.listItems
+              .filter((item) => !isStillOptimistic(item))
+              .map((item: ListItem, index: number) => ({
+                id: item.id,
+                listId: list.id,
+                order: index
+              }))
+        );
 
-      if (!latestLists) return;
+        if (savedItems.length === 0) return;
 
-      enqueue(async () => {
-        // Server save runs through queue
-        await reorderListItemsMutation.mutateAsync({
-          items: latestLists.flatMap((list: List) =>
-            list.listItems.map((item: ListItem, index: number) => ({
-              id: item.id,
-              listId: list.id,
-              order: index
-            }))
-          )
+        measureRequest("listItem.reorderListItems", {
+          count: savedItems.length,
         });
-      });
+        await reorderListItemsMutation.mutateAsync({
+          items: savedItems
+        });
+      }, { label: "listItem.reorderListItems" });
     }, 300);
-  };
+  }, [
+    allListsQueryKey,
+    dashboardKeys,
+    optimisticSync,
+    queryClient,
+    reorderListItemsMutation,
+  ]);
+
+  const setLocalDragPreview = useCallback((nextLists: DragPreviewLists | null) => {
+    dragPreviewListsRef.current = nextLists;
+    setDragPreviewLists(nextLists);
+  }, [setDragPreviewLists]);
+
+  const applyLocalDragPreview = useCallback((nextLists: DragPreviewLists) => {
+    dragPreviewListsRef.current = nextLists;
+    setDragPreviewLists(nextLists);
+  }, [setDragPreviewLists]);
 
   const [revealedItemIds, setRevealedItemIds] = useState(() => new Set<string>());
   const [revealedListIds, setRevealedListIds] = useState(() => new Set<string>());
 
-  if (isLoading) {
+  const revealList = useCallback((listId: string) => {
+    setRevealedListIds((currentIds) => new Set(currentIds).add(listId));
+  }, []);
+
+  const revealItem = useCallback((itemId: string) => {
+    setRevealedItemIds((currentIds) => new Set(currentIds).add(itemId));
+  }, []);
+
+  if (viewsLoading || listsLoading) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
       <ListSkeleton />
       <ListSkeleton />
@@ -120,11 +351,11 @@ const ListsContainer = () => {
     </div>;
   }
 
-  if (isError) {
+  if (viewsError || listsError) {
     return <>Something went wrong...</>;
   }
 
-  if (lists.length === 0) {
+  if (visibleLists.length === 0) {
     return <div className='w-full h-full'>
       <ListEmpty />
     </div>;
@@ -133,30 +364,40 @@ const ListsContainer = () => {
   return (
     <DragDropProvider
       onDragStart={() => {
-        console.log(lists.map((list) => ({ id: list.id, order: list.order })));
+        // Keep drag order local so hovering does not rewrite the whole cache.
+        measureOptimisticEvent("drag.start", { lists: lists.length });
+        setLocalDragPreview(lists);
       }}
 
       onDragEnd={(e) => {
         setActiveDropTarget(null);
 
         const { source } = e.operation;
+        const finalPreview = dragPreviewListsRef.current;
 
-        if (!source) return;
+        setLocalDragPreview(null);
 
-        // Get the latest optimistic cache after dragging
-        const currentLists = queryClient.getQueryData<Lists>(queryKey);
+        if (e.canceled) {
+          // Cancelled drags should leave cache and server data untouched.
+          measureOptimisticEvent("drag.cancel");
+          return;
+        }
 
-        if (!currentLists) return;
+        if (!source || !finalPreview) return;
 
+        measureOptimisticEvent("drag.end", {
+          sourceType: source.type,
+          lists: finalPreview.length,
+        });
+
+        // Only save the final dropped order. Older drag positions do not matter.
         switch (source.type) {
           case "list":
-            // Schedule debounced save for latest list order
-            scheduleReorderListsSave(currentLists);
+            scheduleReorderListsSave(finalPreview);
             break;
 
           case "list-item":
-            // Schedule debounced save for latest item order
-            scheduleReorderListItemsSave(currentLists);
+            scheduleReorderListItemsSave(finalPreview);
             break;
 
           default:
@@ -177,150 +418,52 @@ const ListsContainer = () => {
           id: String(target.id),
         });
 
+        measureOptimisticEvent("drag.over", {
+          sourceType: source.type,
+          targetType: target.type,
+        });
 
         if (source.type === "list" && target.type === "list") {
           const sourceListId = String(source.id).replace("list-", "");
           const targetListId = String(target.id).replace("list-", "");
+          const nextLists = reorderListsForDrag(
+            dragPreviewListsRef.current ?? lists,
+            sourceListId,
+            targetListId
+          );
 
-          queryClient.setQueryData<Lists>(queryKey, (currentLists) => {
-            if (!currentLists) return currentLists;
-            const sourceIndex = currentLists.findIndex(
-              (list: List) => list.id === sourceListId
-            );
-
-            const targetIndex = currentLists.findIndex(
-              (list: List) => list.id === targetListId
-            );
-
-            if (sourceIndex === -1 || targetIndex === -1) return currentLists;
-            if (sourceIndex === targetIndex) return currentLists;
-
-            const nextLists = [...currentLists];
-            const [movedList] = nextLists.splice(sourceIndex, 1);
-            nextLists.splice(targetIndex, 0, movedList);
-
-            return nextLists.map((list, index) => ({
-              ...list,
-              order: index,
-            }));
-          });
-
+          if (nextLists) applyLocalDragPreview(nextLists);
           return;
         }
 
         if (source.type !== "list-item") return;
 
         const draggedItemId = String(source.id).replace("list-item-", "");
+        const nextLists = reorderItemsForDrag(
+          dragPreviewListsRef.current ?? lists,
+          draggedItemId,
+          String(target.type),
+          String(target.id)
+        );
 
-        queryClient.setQueryData<Lists>(queryKey, (currentLists) => {
-          if (!currentLists) return currentLists;
-          const sourceListIndex = currentLists.findIndex((list: List) =>
-            list.listItems.some((item: ListItem) => item.id === draggedItemId)
-          );
-
-          if (sourceListIndex === -1) return currentLists;
-
-          const sourceList = currentLists[sourceListIndex];
-          const sourceItemIndex = sourceList.listItems.findIndex(
-            (item: ListItem) => item.id === draggedItemId
-          );
-
-          if (sourceItemIndex === -1) return currentLists;
-
-          let targetListIndex = -1;
-          let targetItemIndex = 0;
-
-          if (target.type === "list-item") {
-            const targetItemId = String(target.id).replace("list-item-", "");
-
-            targetListIndex = currentLists.findIndex((list: List) =>
-              list.listItems.some((item: ListItem) => item.id === targetItemId)
-            );
-
-            if (targetListIndex === -1) return currentLists;
-
-            targetItemIndex = currentLists[targetListIndex].listItems.findIndex(
-              (item: ListItem) => item.id === targetItemId
-            );
-          }
-
-          if (target.type === "list-drop") {
-            const targetListId = String(target.id).replace("list-drop-", "");
-
-            targetListIndex = currentLists.findIndex(
-              (list) => list.id === targetListId
-            );
-
-            if (targetListIndex === -1) return currentLists;
-
-            targetItemIndex = currentLists[targetListIndex].listItems.length;
-          }
-
-          if (targetListIndex === -1) return currentLists;
-
-          if (
-            sourceListIndex === targetListIndex &&
-            sourceItemIndex === targetItemIndex
-          ) {
-            return currentLists;
-          }
-
-          const nextLists = currentLists.map((list: List) => ({
-            ...list,
-            listItems: [...list.listItems],
-          }));
-
-          const [movedItem] = nextLists[sourceListIndex].listItems.splice(
-            sourceItemIndex,
-            1
-          );
-
-          let insertIndex = targetItemIndex;
-
-          if (
-            sourceListIndex === targetListIndex &&
-            sourceItemIndex < targetItemIndex
-          ) {
-            insertIndex -= 1;
-          }
-
-          nextLists[targetListIndex].listItems.splice(insertIndex, 0, {
-            ...movedItem,
-            listId: nextLists[targetListIndex].id,
-          });
-
-          nextLists[sourceListIndex].listItems =
-            nextLists[sourceListIndex].listItems.map((item: ListItem, index: number) => ({
-              ...item,
-              order: index,
-            }));
-
-          nextLists[targetListIndex].listItems =
-            nextLists[targetListIndex].listItems.map((item: ListItem, index: number) => ({
-              ...item,
-              order: index,
-            }));
-
-          return nextLists;
-        });
+        if (nextLists) applyLocalDragPreview(nextLists);
       }}
     >
 
-      <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
-        {
-          lists.map((list: OptimisticList, index) =>
+      <OptimisticProfiler id="dashboard-list-grid">
+        <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
+          {
+            visibleLists.map((list: OptimisticList, index) =>
             <ListComponent
               key={list.id}
               listValues={list}
               index={index}
-              enqueue={enqueue}
+              enqueue={optimisticSync.enqueue}
               activeDropTarget={activeDropTarget}
               shouldRevealOnMount={
                 Boolean(list.isOptimistic) && !revealedListIds.has(list.id)
               }
-              onRevealComplete={() => {
-                setRevealedListIds((currentIds) => new Set(currentIds).add(list.id));
-              }}
+              onRevealComplete={() => revealList(list.id)}
             >
               {
                 list.listItems?.map((item: OptimisticListItem, index: number) =>
@@ -328,19 +471,18 @@ const ListsContainer = () => {
                     key={item.id}
                     listItem={item}
                     index={index}
-                    enqueue={enqueue}
+                    enqueue={optimisticSync.enqueue}
                     shouldRevealOnMount={
                       Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
                     }
-                    onRevealComplete={() => {
-                      setRevealedItemIds((currentIds) => new Set(currentIds).add(item.id));
-                    }}
+                    onRevealComplete={() => revealItem(item.id)}
                   />)
               }
             </ListComponent>
-          )
-        }
-      </div>
+            )
+          }
+        </div>
+      </OptimisticProfiler>
     </DragDropProvider>
   );
 };
