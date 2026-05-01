@@ -1,7 +1,6 @@
 import React from 'react';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../ui/empty';
-import { Button } from '../ui/button';
-import { FolderOpen, Plus } from 'lucide-react';
+import { FolderOpen } from 'lucide-react';
 import ListAdder from './ListAdder';
 
 const ListEmpty = () => {

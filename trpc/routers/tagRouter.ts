@@ -2,6 +2,7 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/lib/db";
 import { createTRPCRouter, protectedProcedure } from "../init";
+import { recomputeCustomViewsForTags, recomputeCustomViewsForUser } from "./viewHelpers";
 
 export const tagColorSchema = z.enum([
   "gray",
@@ -13,6 +14,11 @@ export const tagColorSchema = z.enum([
   "purple",
   "pink",
 ]);
+
+const listTagChangeSchema = z.object({
+  tagId: z.uuid(),
+  action: z.enum(["add", "remove"]),
+});
 
 export const tagRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx: { userId } }) => {
@@ -63,16 +69,22 @@ export const tagRouter = createTRPCRouter({
   delete: protectedProcedure.input(z.object({
     id: z.uuid(),
   })).mutation(async ({ ctx: { userId }, input: { id } }) => {
-    const result = await db.tag.deleteMany({
-      where: {
-        id,
-        userId,
-      },
+    const result = await db.$transaction(async (tx) => {
+      const result = await tx.tag.deleteMany({
+        where: {
+          id,
+          userId,
+        },
+      });
+
+      return {
+        deleted: result.count > 0,
+      };
     });
 
-    return {
-      deleted: result.count > 0,
-    };
+    await recomputeCustomViewsForUser(userId);
+
+    return result;
   }),
   addToList: protectedProcedure.input(z.object({
     listId: z.uuid(),
@@ -93,39 +105,124 @@ export const tagRouter = createTRPCRouter({
       throw new TRPCError({ code: "NOT_FOUND" });
     }
 
-    return await db.listTag.upsert({
-      where: {
-        listId_tagId: {
+    const listTag = await db.$transaction(async (tx) => {
+      const listTag = await tx.listTag.upsert({
+        where: {
+          listId_tagId: {
+            listId,
+            tagId,
+          },
+        },
+        update: {},
+        create: {
           listId,
           tagId,
         },
-      },
-      update: {},
-      create: {
-        listId,
-        tagId,
-      },
+      });
+
+      return listTag;
     });
+
+    await recomputeCustomViewsForTags(userId, [tagId]);
+
+    return listTag;
   }),
   removeFromList: protectedProcedure.input(z.object({
     listId: z.uuid(),
     tagId: z.uuid(),
   })).mutation(async ({ ctx: { userId }, input: { listId, tagId } }) => {
-    const result = await db.listTag.deleteMany({
-      where: {
-        listId,
-        tagId,
-        list: {
-          userId,
+    const result = await db.$transaction(async (tx) => {
+      const result = await tx.listTag.deleteMany({
+        where: {
+          listId,
+          tagId,
+          list: {
+            userId,
+          },
+          tag: {
+            userId,
+          },
         },
-        tag: {
-          userId,
-        },
-      },
+      });
+
+      await recomputeCustomViewsForUser(userId, tx);
+
+      return {
+        detached: result.count > 0,
+      };
     });
 
-    return {
-      detached: result.count > 0,
-    };
+    await recomputeCustomViewsForTags(userId, [tagId]);
+
+    return result;
+  }),
+
+  applyListTagChanges: protectedProcedure.input(z.object({
+    listId: z.uuid(),
+    operations: z.array(listTagChangeSchema),
+  })).mutation(async ({ ctx: { userId }, input: { listId, operations } }) => {
+    const compactedOperations = Array.from(
+      operations
+        .reduce((map, operation) => {
+          map.set(operation.tagId, operation.action);
+          return map;
+        }, new Map<string, "add" | "remove">())
+        .entries()
+    ).map(([tagId, action]) => ({ tagId, action }));
+
+    if (compactedOperations.length === 0) {
+      return { success: true };
+    }
+
+    const tagIds = compactedOperations.map((operation) => operation.tagId);
+    const [list, tags] = await Promise.all([
+      db.list.findFirst({
+        where: { id: listId, userId },
+        select: { id: true },
+      }),
+      db.tag.findMany({
+        where: { id: { in: tagIds }, userId },
+        select: { id: true },
+      }),
+    ]);
+
+    if (!list || tags.length !== tagIds.length) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    await db.$transaction(async (tx) => {
+      const adds = compactedOperations
+        .filter((operation) => operation.action === "add")
+        .map((operation) => ({
+          listId,
+          tagId: operation.tagId,
+        }));
+      const removes = compactedOperations
+        .filter((operation) => operation.action === "remove")
+        .map((operation) => operation.tagId);
+
+      if (adds.length > 0) {
+        await tx.listTag.createMany({
+          data: adds,
+          skipDuplicates: true,
+        });
+      }
+
+      if (removes.length > 0) {
+        await tx.listTag.deleteMany({
+          where: {
+            listId,
+            tagId: { in: removes },
+            list: { userId },
+            tag: { userId },
+          },
+        });
+      }
+    });
+
+    // Recompute after the short write transaction. Keeping this outside avoids Prisma's 5s transaction timeout.
+    await recomputeCustomViewsForTags(userId, tagIds);
+
+    return { success: true };
   }),
 })
