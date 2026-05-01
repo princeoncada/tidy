@@ -113,9 +113,17 @@ const Page = () => {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="password">
-                      Password
-                    </FieldLabel>
+                    <div className="flex items-center justify-between gap-3">
+                      <FieldLabel htmlFor="password">
+                        Password
+                      </FieldLabel>
+                      <Link
+                        href="/forgot-password"
+                        className="text-xs font-medium text-zinc-600 underline-offset-4 hover:text-zinc-900 hover:underline"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
                     <Input
                       {...field}
                       id="password"
