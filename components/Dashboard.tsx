@@ -3,7 +3,7 @@
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ListAdder from "./list/ListAdder";
 import ListsContainer from "./list/ListsContainer";
@@ -19,7 +19,7 @@ const Dashboard = () => {
   const [loggingOut, setLoggingOut] = useState(false);
 
   const queryClient = useQueryClient();
-  const router = useRouter();;
+  const router = useRouter();
 
   function handleLogout() {
     setLoggingOut(true);
@@ -30,7 +30,7 @@ const Dashboard = () => {
 
   if (loggingOut) {
     return <MaxWidthWrapper singleItemPage={true}>
-      <Loader2 className="w-5 h-5 animate-spin" />;
+      <Loader2 className="w-5 h-5 animate-spin" />
     </MaxWidthWrapper>;
   }
 
@@ -51,17 +51,21 @@ const Dashboard = () => {
               </div>
             </div>
 
+            <div className="w-full lg:hidden">
+              <ViewsSidebarPreview />
+            </div>
+
             <Separator className="bg-zinc-200 md:bg-zinc-200/30" />
           </div>
 
           <ListsContainer />
         </main>
 
-        {/* <aside className="hidden lg:block w-64 shrink-0 py-11">
+        <aside className="hidden lg:block w-64 shrink-0 py-11">
           <div className="sticky top-4">
             <ViewsSidebarPreview />
           </div>
-        </aside> */}
+        </aside>
       </div>
     </MaxWidthWrapper>
   );
