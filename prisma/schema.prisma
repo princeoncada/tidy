@@ -23,10 +23,43 @@ enum ViewMatchMode {
   ANY
 }
 
+model View {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  order     Int
+  userId    String        @db.Uuid
+  type      ViewType      @default(CUSTOM)
+  isDefault Boolean       @default(false)
+  matchMode ViewMatchMode @default(ALL)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  viewLists ViewList[]
+  viewTags  ViewTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([userId, order])
+  @@index([userId, type])
+}
+
+model ViewList {
+  viewId String @db.Uuid
+  listId String @db.Uuid
+  order  Int
+
+  view View @relation(fields: [viewId], references: [id], onDelete: Cascade)
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@id([viewId, listId])
+  @@unique([viewId, order])
+  @@index([viewId, order])
+  @@index([listId])
+}
+
 model List {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
-  order     Int
   userId    String   @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,7 +69,6 @@ model List {
   viewLists ViewList[]
 
   @@index([userId])
-  @@index([userId, order])
 }
 
 model ListItem {
@@ -80,39 +112,6 @@ model ListTag {
 
   @@id([listId, tagId])
   @@index([tagId])
-}
-
-model View {
-  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  order     Int
-  userId    String        @db.Uuid
-  type      ViewType      @default(CUSTOM)
-  isDefault Boolean       @default(false)
-  matchMode ViewMatchMode @default(ALL)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-
-  viewLists ViewList[]
-  viewTags  ViewTag[]
-
-  @@unique([userId, name])
-  @@index([userId])
-  @@index([userId, order])
-  @@index([userId, type])
-}
-
-model ViewList {
-  viewId String @db.Uuid
-  listId String @db.Uuid
-  order  Int
-
-  view View @relation(fields: [viewId], references: [id], onDelete: Cascade)
-  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
-
-  @@id([viewId, listId])
-  @@index([viewId, order])
-  @@index([listId])
 }
 
 model ViewTag {
