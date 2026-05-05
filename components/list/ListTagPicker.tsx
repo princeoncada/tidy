@@ -87,12 +87,12 @@ export default function ListTagPicker({
   const queryClient = useQueryClient();
   const optimisticSync = useOptimisticSync();
   const tagsQueryKey = trpc.tag.getAll.queryKey();
-  const listsQueryKey = trpc.view.getAllListsWithItems.queryKey();
   const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
+  const queryKey = currentViewQueryKey;
   const viewsQueryKey = trpc.view.getAll.queryKey();
   const dashboardKeys = {
     views: viewsQueryKey,
-    allLists: listsQueryKey,
+    allLists: queryKey,
     currentView: currentViewQueryKey,
   };
   const pendingTagOperationsRef = useRef(new Map<string, "add" | "remove">());
@@ -126,7 +126,7 @@ export default function ListTagPicker({
   );
 
   const setTagInListsCache = (tag: TagValue) => {
-    queryClient.setQueryData<CurrentView>(listsQueryKey, (currentView) => {
+    queryClient.setQueryData<CurrentView>(queryKey, (currentView) => {
       if (!currentView) return currentView;
 
       return {
@@ -167,7 +167,7 @@ export default function ListTagPicker({
 
     if (!tagRollbackSnapshotRef.current) {
       tagRollbackSnapshotRef.current = {
-        allLists: queryClient.getQueryData<DashboardSnapshot>(listsQueryKey),
+        allLists: queryClient.getQueryData<DashboardSnapshot>(queryKey),
         currentView: queryClient.getQueryData<CurrentView>(currentViewQueryKey),
         views: queryClient.getQueryData<ViewsCache>(viewsQueryKey),
       };
@@ -183,7 +183,7 @@ export default function ListTagPicker({
     }
 
     tagFlushTimeoutRef.current = setTimeout(() => {
-      const currentLists = queryClient.getQueryData<CurrentView>(listsQueryKey);
+      const currentLists = queryClient.getQueryData<CurrentView>(queryKey);
 
       if (listIsStillOptimistic(currentLists, listId)) {
         // Newly created lists may not exist on the server yet. Wait instead of sending a temporary id.
@@ -213,9 +213,9 @@ export default function ListTagPicker({
         {
           label: "tag.applyListTagChanges",
           rollback: () => {
-          queryClient.setQueryData(listsQueryKey, rollbackSnapshot?.allLists);
-          queryClient.setQueryData(currentViewQueryKey, rollbackSnapshot?.currentView);
-          queryClient.setQueryData(viewsQueryKey, rollbackSnapshot?.views);
+            queryClient.setQueryData(queryKey, rollbackSnapshot?.allLists);
+            queryClient.setQueryData(currentViewQueryKey, rollbackSnapshot?.currentView);
+            queryClient.setQueryData(viewsQueryKey, rollbackSnapshot?.views);
           },
         }
       );
@@ -265,7 +265,7 @@ export default function ListTagPicker({
       await queryClient.cancelQueries({ queryKey: tagsQueryKey });
 
       const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
-      const previousLists = queryClient.getQueryData<CurrentView>(listsQueryKey);
+      const previousLists = queryClient.getQueryData<CurrentView>(queryKey);
 
       queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
         currentTags.map((tag) =>
@@ -282,7 +282,7 @@ export default function ListTagPicker({
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(tagsQueryKey, context?.previousTags);
-      queryClient.setQueryData(listsQueryKey, context?.previousLists);
+      queryClient.setQueryData(queryKey, context?.previousLists);
     },
   }));
 
@@ -291,12 +291,12 @@ export default function ListTagPicker({
       await queryClient.cancelQueries({ queryKey: tagsQueryKey });
 
       const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
-      const previousLists = queryClient.getQueryData<CurrentView>(listsQueryKey);
+      const previousLists = queryClient.getQueryData<CurrentView>(queryKey);
 
       queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
         currentTags.filter((tag) => tag.id !== deletedTag.id)
       );
-      queryClient.setQueryData<CurrentView>(listsQueryKey, (currentView) =>
+      queryClient.setQueryData<CurrentView>(queryKey, (currentView) =>
         currentView
           ? {
             ...currentView,
@@ -313,7 +313,7 @@ export default function ListTagPicker({
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(tagsQueryKey, context?.previousTags);
-      queryClient.setQueryData(listsQueryKey, context?.previousLists);
+      queryClient.setQueryData(queryKey, context?.previousLists);
     },
   }));
 
