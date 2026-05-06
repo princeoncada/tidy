@@ -171,7 +171,19 @@ export const tagRouter = createTRPCRouter({
     ).map(([tagId, action]) => ({ tagId, action }));
 
     if (compactedOperations.length === 0) {
-      return { success: true };
+      const listTags = await db.listTag.findMany({
+        where: {
+          listId,
+          list: { userId },
+        },
+        include: { tag: true },
+      });
+
+      return {
+        listId,
+        listTags,
+        affectedViews: [],
+      };
     }
 
     const tagIds = compactedOperations.map((operation) => operation.tagId);
@@ -223,6 +235,45 @@ export const tagRouter = createTRPCRouter({
     // Recompute after the short write transaction. Keeping this outside avoids Prisma's 5s transaction timeout.
     await recomputeCustomViewsForTags(userId, tagIds);
 
-    return { success: true };
+    const [listTags, affectedViews] = await Promise.all([
+      db.listTag.findMany({
+        where: {
+          listId,
+          list: { userId },
+        },
+        include: { tag: true },
+      }),
+      db.view.findMany({
+        where: {
+          userId,
+          type: "CUSTOM",
+          viewTags: {
+            some: {
+              tagId: { in: tagIds },
+            },
+          },
+        },
+        include: {
+          viewTags: {
+            include: { tag: true },
+          },
+          viewLists: {
+            select: {
+              listId: true,
+              order: true,
+            },
+            orderBy: {
+              order: "asc",
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      listId,
+      listTags,
+      affectedViews,
+    };
   }),
 })
