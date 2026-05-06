@@ -1,6 +1,5 @@
 "use client";
 
-import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +13,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useOptimisticSync } from "@/hooks/useOptimisticSync";
 import {
   applyViewSelection,
   DashboardSnapshot,
@@ -53,9 +54,9 @@ import {
   OptimisticProfiler,
   useRenderMeasure,
 } from "@/lib/optimistic-debug";
-import { useOptimisticSync } from "@/hooks/useOptimisticSync";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
 
 type ViewItem = RouterOutputs["view"]["getAll"][number];
 type TagItem = RouterOutputs["tag"]["getAll"][number];
@@ -230,6 +231,50 @@ function SortableViewRowComponent({
 
 const SortableViewRow = memo(SortableViewRowComponent);
 
+function ViewsSidebarSkeleton() {
+  return (
+    <Card className="w-full border-zinc-200/80 bg-white/90 shadow-none py-0 mt-3">
+      <CardHeader className="px-3 py-3">
+        <CardTitle className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5">
+            <Skeleton className="size-3.5" />
+            <Skeleton className="h-4 w-12" />
+          </span>
+          <Skeleton className="h-6 w-20" />
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-2 px-3 pb-3 pt-0">
+        <div className="flex w-full items-center justify-between rounded-md border border-zinc-200 px-2 py-1.5">
+          <span className="inline-flex items-center gap-1.5">
+            <Skeleton className="size-3.5" />
+            <Skeleton className="h-3.5 w-16" />
+          </span>
+          <Skeleton className="size-3.5" />
+        </div>
+
+        <Separator />
+
+        <div className="space-y-0.5">
+          {[72, 92, 64].map((width) => (
+            <div
+              key={width}
+              className="flex items-center gap-1 rounded-md border border-transparent pr-0.5"
+            >
+              <Skeleton className="size-5" />
+              <div className="flex min-w-0 flex-1 items-center justify-between px-1.5 py-1">
+                <Skeleton className="h-3.5" style={{ width }} />
+                <Skeleton className="size-3.5" />
+              </div>
+              <Skeleton className="size-5" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 type ViewDialogProps = {
   state: ViewDialogState;
   tags: TagItem[];
@@ -261,7 +306,7 @@ function ViewDialog({
 
   const submit = () => {
     const trimmedName = name.trim();
-    if (!trimmedName) return;
+    if (!trimmedName || selectedTagIds.length === 0) return;
 
     if (state.mode === "edit" && view) {
       onUpdate(view, trimmedName, selectedTagIds);
@@ -342,7 +387,7 @@ function ViewDialog({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="button" disabled={!name.trim()} onClick={submit}>
+          <Button type="button" disabled={!name.trim() || selectedTagIds.length === 0} onClick={submit}>
             {state?.mode === "edit" ? "Save View" : "Create View"}
           </Button>
         </DialogFooter>
@@ -356,27 +401,32 @@ export default function ViewsSidebarPreview() {
   const queryClient = useQueryClient();
   const optimisticSync = useOptimisticSync();
   const viewsQueryKey = trpc.view.getAll.queryKey();
-  const allListsQueryKey = trpc.view.getAllListsWithItems.queryKey();
   const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
-  const dashboardKeys = useMemo(() => ({
-    views: viewsQueryKey,
-    allLists: allListsQueryKey,
-    currentView: currentViewQueryKey,
-  }), [allListsQueryKey, currentViewQueryKey, viewsQueryKey]);
   const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dragPreviewViewsRef = useRef<ViewItem[] | null>(null);
+  const latestSelectedViewIdRef = useRef<string | null>(null);
 
   const [dialogState, setDialogState] = useState<ViewDialogState | null>(null);
   const [dragPreviewViews, setDragPreviewViews] = useState<ViewItem[] | null>(null);
 
   useRenderMeasure("ViewsSidebarPreview");
 
-  const { data: views = [] } = useQuery(trpc.view.getAll.queryOptions());
-  const { data: tags = [] } = useQuery(trpc.tag.getAll.queryOptions());
+  const { data: views = [], isLoading: viewsLoading } = useQuery(trpc.view.getAll.queryOptions());
+  const { data: tags = [], isLoading: tagsLoading } = useQuery(trpc.tag.getAll.queryOptions());
 
   const allListsView = useMemo(
     () => views.find((view) => view.type === "ALL_LISTS"),
     [views]
+  );
+  const allListsQueryKey = allListsView
+    ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
+    : currentViewQueryKey;
+  const queryKey = allListsQueryKey;
+  const { isLoading: allListsLoading } = useQuery(
+    trpc.view.getViewListsWithItems.queryOptions(
+      { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
+      { enabled: Boolean(allListsView?.id) }
+    )
   );
   const savedCustomViews = useMemo(
     () => views.filter((view) => view.type === "CUSTOM"),
@@ -387,6 +437,15 @@ export default function ViewsSidebarPreview() {
     () => views.find((view) => view.isDefault)?.id ?? allListsView?.id,
     [allListsView?.id, views]
   );
+  const selectedViewQueryKey = selectedViewId
+    ? trpc.view.getViewListsWithItems.queryKey({ viewId: selectedViewId })
+    : currentViewQueryKey;
+  const dashboardKeys = {
+    views: viewsQueryKey,
+    allLists: allListsQueryKey,
+    currentView: currentViewQueryKey,
+    selectedView: selectedViewQueryKey,
+  };
 
   const selectViewMutation = useMutation(
     trpc.view.saveSelectedView.mutationOptions()
@@ -396,7 +455,7 @@ export default function ViewsSidebarPreview() {
     async onMutate(variables) {
       const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
       const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(allListsQueryKey);
+      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
       const optimisticView = buildOptimisticView({
         id: variables.id,
         name: variables.name,
@@ -417,13 +476,17 @@ export default function ViewsSidebarPreview() {
 
       return { previousViews, previousCurrentView };
     },
-    onSuccess(createdView) {
+    async onSuccess(createdView) {
       queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews = []) =>
         currentViews.map((view) => view.id === createdView.id ? {
           ...view,
           ...createdView,
         } : view)
       );
+      const createdViewPayload = await queryClient.fetchQuery(
+        trpc.view.getViewListsWithItems.queryOptions({ viewId: createdView.id })
+      );
+      queryClient.setQueryData(currentViewQueryKey, createdViewPayload);
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(viewsQueryKey, context?.previousViews);
@@ -449,7 +512,7 @@ export default function ViewsSidebarPreview() {
     async onMutate(variables) {
       const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
       const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(allListsQueryKey);
+      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
       const selectedTagIds = variables.tagIds ?? [];
       const selectedTags = tags.filter((tag) => selectedTagIds.includes(tag.id));
       let editedView: ViewItem | undefined;
@@ -466,6 +529,7 @@ export default function ViewsSidebarPreview() {
               tag,
             })),
           };
+
           editedView.viewLists = (allListsSnapshot?.lists ?? [])
             .filter((list) => editedView ? listMatchesView(list, editedView) : false)
             .map((list) => ({ listId: list.id, order: list.order }));
@@ -483,12 +547,18 @@ export default function ViewsSidebarPreview() {
 
       return { previousViews, previousCurrentView };
     },
-    onSuccess(updatedView) {
+    async onSuccess(updatedView) {
       queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
         currentViews?.map((view) =>
           view.id === updatedView.id ? { ...view, ...updatedView } : view
         )
       );
+      if (updatedView.isDefault) {
+        const updatedViewPayload = await queryClient.fetchQuery(
+          trpc.view.getViewListsWithItems.queryOptions({ viewId: updatedView.id })
+        );
+        queryClient.setQueryData(currentViewQueryKey, updatedViewPayload);
+      }
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(viewsQueryKey, context?.previousViews);
@@ -500,7 +570,7 @@ export default function ViewsSidebarPreview() {
     async onMutate({ id }) {
       const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
       const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(allListsQueryKey);
+      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
       const deletedView = previousViews?.find((view) => view.id === id);
       const fallbackView = previousViews?.find((view) => view.type === "ALL_LISTS");
 
@@ -574,8 +644,14 @@ export default function ViewsSidebarPreview() {
     if (nextViews) setLocalViewPreview(nextViews);
   }, [customViews, setLocalViewPreview]);
 
-  const selectView = useCallback((id: string | undefined) => {
+  function selectView(id: string | undefined) {
     if (!id || selectedViewId === id) return;
+
+    /**
+     * View save requests can finish out of order during fast switching.
+     * Only the latest requested view may write the dashboard cache.
+     */
+    latestSelectedViewIdRef.current = id;
 
     const previousViews = queryClient.getQueryData<ViewItem[]>(viewsQueryKey);
     const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
@@ -586,7 +662,29 @@ export default function ViewsSidebarPreview() {
       "view-selection",
       async () => {
         measureRequest("view.saveSelectedView", { viewId: id });
+        const nextViewQueryKey = trpc.view.getViewListsWithItems.queryKey({
+          viewId: id,
+        });
+
+        const cachedNextView = queryClient.getQueryData(nextViewQueryKey);
+
+        if (cachedNextView && latestSelectedViewIdRef.current === id) {
+          queryClient.setQueryData(currentViewQueryKey, cachedNextView);
+        }
+
         await selectViewMutation.mutateAsync({ viewId: id });
+
+        if (latestSelectedViewIdRef.current !== id) return;
+
+        await queryClient.fetchQuery(
+          trpc.view.getViewListsWithItems.queryOptions({ viewId: id })
+        );
+
+        const freshNextView = queryClient.getQueryData(nextViewQueryKey);
+
+        if (freshNextView && latestSelectedViewIdRef.current === id) {
+          queryClient.setQueryData(currentViewQueryKey, freshNextView);
+        }
       },
       {
         label: "view.saveSelectedView",
@@ -596,26 +694,22 @@ export default function ViewsSidebarPreview() {
         },
       }
     );
-  }, [
-    currentViewQueryKey,
-    dashboardKeys,
-    optimisticSync,
-    queryClient,
-    selectViewMutation,
-    selectedViewId,
-    viewsQueryKey,
-  ]);
+  }
 
-  const createView = useCallback((name: string, tagIds: string[]) => {
+  function createView(name: string, tagIds: string[]) {
+    if (tagIds.length === 0) return;
+
     createMutation.mutate({
       id: crypto.randomUUID(),
       name,
       tagIds,
     });
     setDialogState(null);
-  }, [createMutation]);
+  }
 
-  const updateView = useCallback((view: ViewItem, name: string, tagIds: string[]) => {
+  function updateView(view: ViewItem, name: string, tagIds: string[]) {
+    if (tagIds.length === 0) return;
+
     const currentTagIds = view.viewTags.map((viewTag) => viewTag.tagId).sort();
     const nextTagIds = [...tagIds].sort();
     const nameChanged = view.name !== name;
@@ -630,23 +724,27 @@ export default function ViewsSidebarPreview() {
     }
 
     setDialogState(null);
-  }, [renameMutation, updateFilterMutation]);
+  }
 
-  const deleteView = useCallback((id: string) => {
+  function deleteView(id: string) {
     deleteMutation.mutate({ id });
-  }, [deleteMutation]);
+  }
 
-  const openCreateView = useCallback(() => {
+  function openCreateView() {
     setDialogState({ mode: "create" });
-  }, []);
+  }
 
-  const openEditView = useCallback((view: ViewItem) => {
+  function openEditView(view: ViewItem) {
     setDialogState({ mode: "edit", view });
-  }, []);
+  }
 
-  const closeDialog = useCallback((open: boolean) => {
+  function closeDialog(open: boolean) {
     if (!open) setDialogState(null);
-  }, []);
+  }
+
+  if (viewsLoading || tagsLoading || !allListsView || allListsLoading) {
+    return <ViewsSidebarSkeleton />;
+  }
 
   return (
     <>

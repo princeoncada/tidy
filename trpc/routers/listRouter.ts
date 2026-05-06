@@ -2,7 +2,7 @@ import { db } from "@/lib/db"
 import { createTRPCRouter, protectedProcedure } from "../init"
 import z from "zod"
 import { TRPCError } from "@trpc/server"
-import { Prisma } from "@/app/generated/prisma/client"
+import { ViewType } from "@/app/generated/prisma/client"
 import {
   ensureAllListsView,
   ensureDefaultView,
@@ -28,12 +28,7 @@ export const listRouter = createTRPCRouter({
             include: {
               tag: true,
             },
-          },
-          listItems: {
-            orderBy: {
-              order: "asc",
-            },
-          },
+          }
         },
       });
 
@@ -60,16 +55,12 @@ export const listRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const topList = await tx.list.findFirst({
-        where: { userId },
-        orderBy: { order: "asc" },
-        select: { order: true },
-      });
       const topAllViewList = await tx.viewList.findFirst({
         where: { viewId: allListsView.id },
         orderBy: { order: "asc" },
         select: { order: true },
       });
+      
       const viewTagIds =
         selectedView.type === "CUSTOM"
           ? selectedView.viewTags.map((viewTag) => viewTag.tagId)
@@ -78,15 +69,15 @@ export const listRouter = createTRPCRouter({
         ? await tx.view.findMany({
           where: {
             userId,
-            type: "CUSTOM",
-            viewTags: {
-              every: {
-                tagId: { in: viewTagIds },
-              },
-            },
+            type: ViewType.CUSTOM,
           },
           select: {
             id: true,
+            viewTags: {
+              select: {
+                tagId: true,
+              },
+            },
           },
         })
         : [];
@@ -96,7 +87,6 @@ export const listRouter = createTRPCRouter({
           id: input.id,
           name: input.name,
           userId,
-          order: topList ? topList.order - 1 : 0,
           listTags: viewTagIds.length > 0
             ? {
               createMany: {
@@ -121,6 +111,10 @@ export const listRouter = createTRPCRouter({
       });
 
       const customViewIds = matchingCustomViews
+        .filter((view) =>
+          view.viewTags.length > 0 &&
+          view.viewTags.every((viewTag) => viewTagIds.includes(viewTag.tagId))
+        )
         .map((view) => view.id)
         .filter((viewId) => viewId !== allListsView.id);
 
@@ -146,9 +140,6 @@ export const listRouter = createTRPCRouter({
       where: {
         userId
       },
-      orderBy: {
-        order: 'asc'
-      }
     })
 
     return lists
@@ -157,9 +148,6 @@ export const listRouter = createTRPCRouter({
     const lists = await db.list.findMany({
       where: {
         userId
-      },
-      orderBy: {
-        order: 'asc'
       },
       include: {
         listTags: {
@@ -204,53 +192,13 @@ export const listRouter = createTRPCRouter({
       listId: z.uuid()
     })
   ).mutation(async ({ ctx, input }) => {
-    return await db.list.delete({
+    await db.list.deleteMany({
       where: {
         id: input.listId,
         userId: ctx.userId,
       },
     });
-  }),
-  reorderLists: protectedProcedure.input(z.object({
-    lists: z.array(
-      z.object({
-        id: z.uuid(),
-        order: z.number().int().min(0)
-      })
-    )
-  })).mutation(async ({ ctx: { userId }, input }) => {
-    if (input.lists.length === 0) {
-      return { success: true };
-    }
 
-    const ids = input.lists.map((list) => list.id)
-
-    const ownedLists = await db.list.findMany({
-      where: {
-        id: { in: ids },
-        userId
-      },
-      select: { id: true }
-    })
-
-    if (ownedLists.length !== ids.length) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Some lists do not belong to this user."
-      })
-    }
-
-    // Save the whole order in one statement. Many small updates can expire the transaction.
-    await db.$executeRaw`
-      UPDATE "List" AS list
-      SET "order" = data."order"
-      FROM (VALUES ${Prisma.join(
-        input.lists.map((list) => Prisma.sql`(${list.id}::uuid, ${list.order}::int)`)
-      )}) AS data("id", "order")
-      WHERE list."id" = data."id"
-        AND list."userId" = ${userId}::uuid
-    `
-
-    return { success: true }
+    return { id: input.listId };
   }),
 })

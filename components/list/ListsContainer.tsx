@@ -1,9 +1,8 @@
 "use client";
 
 import {
-  projectView,
+  DashboardSnapshot,
   selectedViewFromCache,
-  syncProjectedCurrentView,
   ViewsCache,
 } from '@/lib/dashboard-cache';
 import {
@@ -17,7 +16,7 @@ import { useOptimisticSync } from '@/hooks/useOptimisticSync';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
 import ListSkeleton from './ListSkeleton';
@@ -167,14 +166,34 @@ const ListsContainer = () => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const viewsQueryKey = trpc.view.getAll.queryKey();
-  const allListsQueryKey = trpc.view.getAllListsWithItems.queryKey();
   const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
-  const optimisticSync = useOptimisticSync();
-  const dashboardKeys = useMemo(() => ({
+
+  const { data: views, isLoading: viewsLoading, isError: viewsError } = useQuery(
+    trpc.view.getAll.queryOptions()
+  );
+
+  const allListsView = views?.find((view) => view.type === "ALL_LISTS");
+  const selectedView = selectedViewFromCache(views);
+  const selectedViewId = selectedView?.id;
+
+  const allListsQueryKey = allListsView
+    ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
+    : currentViewQueryKey;
+  const selectedViewQueryKey = selectedViewId
+    ? trpc.view.getViewListsWithItems.queryKey({ viewId: selectedViewId })
+    : currentViewQueryKey;
+
+  const dashboardKeys = {
     views: viewsQueryKey,
     allLists: allListsQueryKey,
     currentView: currentViewQueryKey,
-  }), [allListsQueryKey, currentViewQueryKey, viewsQueryKey]);
+    selectedView: selectedViewQueryKey,
+  };
+
+  const queryKey = selectedViewQueryKey;
+
+
+  const optimisticSync = useOptimisticSync();
 
   useRenderMeasure("ListsContainer");
 
@@ -184,16 +203,35 @@ const ListsContainer = () => {
   } | null>(null);
   const [dragPreviewLists, setDragPreviewLists] = useState<DragPreviewLists | null>(null);
   const dragPreviewListsRef = useRef<DragPreviewLists | null>(null);
-
-  const { data: views, isLoading: viewsLoading, isError: viewsError } = useQuery(
-    trpc.view.getAll.queryOptions()
-  );
-  const { data: allListsSnapshot, isLoading: listsLoading, isError: listsError } = useQuery(
-    trpc.view.getAllListsWithItems.queryOptions()
+  const { data: bootCurrentView, isLoading: bootListsLoading, isError: bootListsError } = useQuery(
+    trpc.view.getCurrentViewListsWithItems.queryOptions()
   );
 
-  const selectedView = selectedViewFromCache(views);
-  const currentView = projectView(selectedView, allListsSnapshot);
+  const { isLoading: allListsLoading, isError: allListsError } = useQuery(
+    trpc.view.getViewListsWithItems.queryOptions(
+      { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
+      { enabled: Boolean(allListsView?.id) }
+    )
+  );
+
+  const { data: selectedViewSnapshot, isLoading: selectedViewLoading, isError: selectedViewError } = useQuery(
+    trpc.view.getViewListsWithItems.queryOptions(
+      { viewId: selectedViewId ?? "00000000-0000-0000-0000-000000000000" },
+      { enabled: Boolean(selectedViewId) }
+    )
+  );
+
+  useEffect(() => {
+    if (!bootCurrentView) return;
+    queryClient.setQueryData(currentViewQueryKey, bootCurrentView);
+  }, [bootCurrentView, currentViewQueryKey, queryClient]);
+
+  useEffect(() => {
+    if (!selectedViewSnapshot) return;
+    queryClient.setQueryData(currentViewQueryKey, selectedViewSnapshot);
+  }, [currentViewQueryKey, queryClient, selectedViewSnapshot]);
+
+  const currentView = selectedViewSnapshot ?? bootCurrentView;
   const lists = currentView?.lists ?? [];
   const visibleLists = dragPreviewLists ?? lists;
 
@@ -211,7 +249,10 @@ const ListsContainer = () => {
   const scheduleReorderListsSave = useCallback((nextLists: Lists) => {
     if (currentView?.view.type === "ALL_LISTS") {
       measureCacheWrite("lists.drop.all-lists", nextLists);
-      queryClient.setQueryData<CurrentView>(allListsQueryKey, (current) =>
+      queryClient.setQueryData<CurrentView>(queryKey, (current) =>
+        current ? { ...current, lists: nextLists } : current
+      );
+      queryClient.setQueryData<CurrentView>(currentViewQueryKey, (current) =>
         current ? { ...current, lists: nextLists } : current
       );
     } else {
@@ -232,10 +273,13 @@ const ListsContainer = () => {
             : view
         )
       );
+      queryClient.setQueryData<CurrentView>(queryKey, (current) =>
+        current ? { ...current, lists: nextLists } : current
+      );
+      queryClient.setQueryData<CurrentView>(currentViewQueryKey, (current) =>
+        current ? { ...current, lists: nextLists } : current
+      );
     }
-
-    // This cache is derived from all-lists data, so do not treat it as a second source of truth.
-    syncProjectedCurrentView(queryClient, dashboardKeys);
 
     if (reorderListsTimeoutRef.current) {
       clearTimeout(reorderListsTimeoutRef.current);
@@ -258,9 +302,9 @@ const ListsContainer = () => {
       }, { label: "view.reorderViewLists" });
     }, 300);
   }, [
-    allListsQueryKey,
+    queryKey,
+    currentViewQueryKey,
     currentView,
-    dashboardKeys,
     optimisticSync,
     queryClient,
     reorderViewListsMutation,
@@ -269,7 +313,7 @@ const ListsContainer = () => {
 
   const scheduleReorderListItemsSave = useCallback((nextLists: Lists) => {
     measureCacheWrite("items.drop.all-lists", nextLists);
-    queryClient.setQueryData<CurrentView>(allListsQueryKey, (current) =>
+    const mergeChangedLists = (current: DashboardSnapshot | undefined) =>
       current
         ? {
           ...current,
@@ -277,11 +321,11 @@ const ListsContainer = () => {
             nextLists.find((nextList) => nextList.id === list.id) ?? list
           ),
         }
-        : current
-    );
+        : current;
 
-    // This cache is derived from all-lists data, so update it after the main cache changes.
-    syncProjectedCurrentView(queryClient, dashboardKeys);
+    queryClient.setQueryData<CurrentView>(allListsQueryKey, mergeChangedLists);
+    queryClient.setQueryData<CurrentView>(queryKey, mergeChangedLists);
+    queryClient.setQueryData<CurrentView>(currentViewQueryKey, mergeChangedLists);
 
     if (reorderListItemsTimeoutRef.current) {
       clearTimeout(reorderListItemsTimeoutRef.current);
@@ -312,8 +356,9 @@ const ListsContainer = () => {
       }, { label: "listItem.reorderListItems" });
     }, 300);
   }, [
+    queryKey,
     allListsQueryKey,
-    dashboardKeys,
+    currentViewQueryKey,
     optimisticSync,
     queryClient,
     reorderListItemsMutation,
@@ -340,7 +385,7 @@ const ListsContainer = () => {
     setRevealedItemIds((currentIds) => new Set(currentIds).add(itemId));
   }, []);
 
-  if (viewsLoading || listsLoading) {
+  if (viewsLoading || !allListsView || bootListsLoading || allListsLoading || selectedViewLoading) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
       <ListSkeleton />
       <ListSkeleton />
@@ -351,7 +396,8 @@ const ListsContainer = () => {
     </div>;
   }
 
-  if (viewsError || listsError) {
+
+  if (viewsError || bootListsError || allListsError || selectedViewError) {
     return <>Something went wrong...</>;
   }
 
@@ -454,31 +500,33 @@ const ListsContainer = () => {
         <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
           {
             visibleLists.map((list: OptimisticList, index) =>
-            <ListComponent
-              key={list.id}
-              listValues={list}
-              index={index}
-              enqueue={optimisticSync.enqueue}
-              activeDropTarget={activeDropTarget}
-              shouldRevealOnMount={
-                Boolean(list.isOptimistic) && !revealedListIds.has(list.id)
-              }
-              onRevealComplete={() => revealList(list.id)}
-            >
-              {
-                list.listItems?.map((item: OptimisticListItem, index: number) =>
-                  <ListItemComponent
-                    key={item.id}
-                    listItem={item}
-                    index={index}
-                    enqueue={optimisticSync.enqueue}
-                    shouldRevealOnMount={
-                      Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
-                    }
-                    onRevealComplete={() => revealItem(item.id)}
-                  />)
-              }
-            </ListComponent>
+              <ListComponent
+                key={list.id}
+                listValues={list}
+                index={index}
+                enqueue={optimisticSync.enqueue}
+                activeDropTarget={activeDropTarget}
+                dashboardKeys={dashboardKeys}
+                shouldRevealOnMount={
+                  Boolean(list.isOptimistic) && !revealedListIds.has(list.id)
+                }
+                onRevealComplete={() => revealList(list.id)}
+              >
+                {
+                  list.listItems?.map((item: OptimisticListItem, index: number) =>
+                    <ListItemComponent
+                      key={item.id}
+                      listItem={item}
+                      index={index}
+                      enqueue={optimisticSync.enqueue}
+                      dashboardKeys={dashboardKeys}
+                      shouldRevealOnMount={
+                        Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
+                      }
+                      onRevealComplete={() => revealItem(item.id)}
+                    />)
+                }
+              </ListComponent>
             )
           }
         </div>
