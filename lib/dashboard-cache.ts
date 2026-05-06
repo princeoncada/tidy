@@ -239,9 +239,22 @@ export function reconcileSavedListTags(
   listId: string,
   listTags: SavedListTags
 ) {
+  const savedTagById = new Map(
+    listTags.map((listTag) => [listTag.tagId, listTag])
+  );
+
   updateListInDashboardCaches(queryClient, keys, listId, (list) => ({
     ...list,
-    listTags,
+    listTags: [
+      ...list.listTags
+        .filter((listTag) => savedTagById.has(listTag.tagId))
+        .map((listTag) => savedTagById.get(listTag.tagId)!),
+      ...listTags.filter((listTag) =>
+        !list.listTags.some((currentListTag) =>
+          currentListTag.tagId === listTag.tagId
+        )
+      ),
+    ],
   }));
 }
 
