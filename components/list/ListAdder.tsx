@@ -28,15 +28,17 @@ const ListAdder = () => {
   const allListsQueryKey = allListsView
     ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
     : currentViewQueryKey;
-  const queryKey = allListsQueryKey;
+  const selectedView = selectedViewFromCache(views);
+  const selectedViewId = selectedView?.id;
+  const selectedViewQueryKey = selectedViewId
+    ? trpc.view.getViewListsWithItems.queryKey({ viewId: selectedViewId })
+    : currentViewQueryKey;
   const dashboardKeys = {
     views: viewsQueryKey,
     allLists: allListsQueryKey,
     currentView: currentViewQueryKey,
+    selectedView: selectedViewQueryKey,
   };
-
-  const selectedView = selectedViewFromCache(views);
-  const selectedViewId = selectedView?.id;
 
   const { isLoading: bootListsLoading } = useQuery(
     trpc.view.getCurrentViewListsWithItems.queryOptions()
@@ -58,13 +60,18 @@ const ListAdder = () => {
 
   const { mutate: createList, isPending: createListPending } = useMutation(trpc.list.createList.mutationOptions({
     async onMutate(variables) {
-      await queryClient.cancelQueries({ queryKey });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
+      ]);
 
       const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
       const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
 
       if (!previousAllLists && !previousCurrentView) {
-        return { previousAllLists, previousCurrentView };
+        return { previousAllLists, previousCurrentView, previousSelectedView };
       }
 
       const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
@@ -113,8 +120,19 @@ const ListAdder = () => {
           }
           : current
       );
+      queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, (current) =>
+        current && (activeView?.type !== "CUSTOM" || activeView.id === current.view.id)
+          ? {
+            ...current,
+            lists: [
+              optimisticList,
+              ...current.lists,
+            ],
+          }
+          : current
+      );
 
-      return { previousAllLists, previousCurrentView };
+      return { previousAllLists, previousCurrentView, previousSelectedView };
     },
     async onSuccess(createdList, variables) {
       const replaceOptimisticList = (current: CurrentView | undefined) =>
@@ -137,12 +155,14 @@ const ListAdder = () => {
 
       queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, replaceOptimisticList);
       queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, replaceOptimisticList);
+      queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, replaceOptimisticList);
       await queryClient.invalidateQueries({ queryKey: dashboardKeys.views });
       await invalidateViewPayloadQueries(queryClient);
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(dashboardKeys.allLists, context?.previousAllLists);
       queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
+      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
     },
   }));
 

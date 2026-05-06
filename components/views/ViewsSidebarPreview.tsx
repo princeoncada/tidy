@@ -422,11 +422,6 @@ export default function ViewsSidebarPreview() {
     ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
     : currentViewQueryKey;
   const queryKey = allListsQueryKey;
-  const dashboardKeys = {
-    views: viewsQueryKey,
-    allLists: allListsQueryKey,
-    currentView: currentViewQueryKey,
-  };
   const { isLoading: allListsLoading } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
@@ -442,6 +437,15 @@ export default function ViewsSidebarPreview() {
     () => views.find((view) => view.isDefault)?.id ?? allListsView?.id,
     [allListsView?.id, views]
   );
+  const selectedViewQueryKey = selectedViewId
+    ? trpc.view.getViewListsWithItems.queryKey({ viewId: selectedViewId })
+    : currentViewQueryKey;
+  const dashboardKeys = {
+    views: viewsQueryKey,
+    allLists: allListsQueryKey,
+    currentView: currentViewQueryKey,
+    selectedView: selectedViewQueryKey,
+  };
 
   const selectViewMutation = useMutation(
     trpc.view.saveSelectedView.mutationOptions()

@@ -12,6 +12,7 @@ export type DashboardKeys = {
   views: QueryKey;
   allLists: QueryKey;
   currentView: QueryKey;
+  selectedView: QueryKey;
 };
 
 export function getAllListsSnapshot(
@@ -128,6 +129,27 @@ export function updateListInDashboardCaches(
       lists: updatedLists.filter((list) => listMatchesView(list, selectedView)),
     };
   });
+
+  queryClient.setQueryData<DashboardSnapshot>(keys.selectedView, (snapshot) => {
+    if (!snapshot) return snapshot;
+
+    const selectedView = snapshot.view;
+    const updatedLists = snapshot.lists.map((list) =>
+      list.id === listId ? updater(list) : list
+    );
+
+    if (selectedView.type !== "CUSTOM") {
+      return {
+        ...snapshot,
+        lists: updatedLists,
+      };
+    }
+
+    return {
+      ...snapshot,
+      lists: updatedLists.filter((list) => listMatchesView(list, selectedView)),
+    };
+  });
 }
 
 export function removeListFromDashboardCaches(
@@ -145,6 +167,7 @@ export function removeListFromDashboardCaches(
 
   queryClient.setQueryData<DashboardSnapshot>(keys.allLists, removeList);
   queryClient.setQueryData<DashboardSnapshot>(keys.currentView, removeList);
+  queryClient.setQueryData<DashboardSnapshot>(keys.selectedView, removeList);
 }
 
 export function invalidateViewPayloadQueries(queryClient: QueryClient) {

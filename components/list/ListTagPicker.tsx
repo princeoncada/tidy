@@ -96,6 +96,7 @@ export default function ListTagPicker({
   const tagRollbackSnapshotRef = useRef<{
     allLists: DashboardSnapshot | undefined;
     currentView: CurrentView | undefined;
+    selectedView: CurrentView | undefined;
     views: ViewsCache | undefined;
   } | null>(null);
 
@@ -137,6 +138,7 @@ export default function ListTagPicker({
 
     queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, updateTag);
     queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, updateTag);
+    queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, updateTag);
   };
 
   const addTagToListCache = (tag: TagValue) => {
@@ -166,6 +168,7 @@ export default function ListTagPicker({
       tagRollbackSnapshotRef.current = {
         allLists: queryClient.getQueryData<DashboardSnapshot>(queryKey),
         currentView: queryClient.getQueryData<CurrentView>(dashboardKeys.currentView),
+        selectedView: queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView),
         views: queryClient.getQueryData<ViewsCache>(dashboardKeys.views),
       };
     }
@@ -214,6 +217,7 @@ export default function ListTagPicker({
           rollback: () => {
             queryClient.setQueryData(queryKey, rollbackSnapshot?.allLists);
             queryClient.setQueryData(dashboardKeys.currentView, rollbackSnapshot?.currentView);
+            queryClient.setQueryData(dashboardKeys.selectedView, rollbackSnapshot?.selectedView);
             queryClient.setQueryData(dashboardKeys.views, rollbackSnapshot?.views);
           },
         }
@@ -261,10 +265,17 @@ export default function ListTagPicker({
 
   const updateTagMutation = useMutation(trpc.tag.update.mutationOptions({
     async onMutate(updatedTag) {
-      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: tagsQueryKey }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
+      ]);
 
       const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
       const previousLists = queryClient.getQueryData<CurrentView>(queryKey);
+      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
 
       queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
         currentTags.map((tag) =>
@@ -277,20 +288,29 @@ export default function ListTagPicker({
         setTagInListsCache({ ...existingTag, ...updatedTag });
       }
 
-      return { previousTags, previousLists };
+      return { previousTags, previousLists, previousCurrentView, previousSelectedView };
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(tagsQueryKey, context?.previousTags);
       queryClient.setQueryData(queryKey, context?.previousLists);
+      queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
+      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
     },
   }));
 
   const deleteTagMutation = useMutation(trpc.tag.delete.mutationOptions({
     async onMutate(deletedTag) {
-      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: tagsQueryKey }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
+      ]);
 
       const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
       const previousLists = queryClient.getQueryData<CurrentView>(queryKey);
+      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
 
       queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
         currentTags.filter((tag) => tag.id !== deletedTag.id)
@@ -322,12 +342,30 @@ export default function ListTagPicker({
           }
           : currentView
       );
+      queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, (currentView) =>
+        currentView
+          ? {
+            ...currentView,
+            lists: currentView.lists
+              .map((list) => ({
+                ...list,
+                listTags: list.listTags.filter((listTag) => listTag.tagId !== deletedTag.id),
+              }))
+              .filter((list) => currentView.view.type !== "CUSTOM" ||
+                currentView.view.viewTags.every((viewTag) =>
+                  list.listTags.some((listTag) => listTag.tagId === viewTag.tagId)
+                )),
+          }
+          : currentView
+      );
 
-      return { previousTags, previousLists };
+      return { previousTags, previousLists, previousCurrentView, previousSelectedView };
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(tagsQueryKey, context?.previousTags);
       queryClient.setQueryData(queryKey, context?.previousLists);
+      queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
+      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
     },
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: dashboardKeys.views });

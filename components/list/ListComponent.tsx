@@ -123,9 +123,14 @@ const ListComponent = ({
 
   const { mutate: renameList, isPending: renameListPending } = useMutation(trpc.list.renameList.mutationOptions({
     async onMutate(variables) {
-      await queryClient.cancelQueries({ queryKey });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
+      ]);
       const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
       const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
 
       updateListInDashboardCaches(queryClient, dashboardKeys, variables.id, (currentList) => ({
         ...currentList,
@@ -133,11 +138,12 @@ const ListComponent = ({
       }));
       measureCacheWrite("list.rename", { id: variables.id, name: variables.name });
 
-      return { previousAllLists, previousCurrentView };
+      return { previousAllLists, previousCurrentView, previousSelectedView };
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(dashboardKeys.allLists, context?.previousAllLists);
       queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
+      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
     },
   }));
 
@@ -192,6 +198,20 @@ const ListComponent = ({
               };
             }
           );
+          queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView,
+            (old) => {
+              if (!old || !deletedList) return old;
+
+              const alreadyRestored = old.lists.some((list: List) => list.id === listId);
+
+              if (alreadyRestored) return old;
+
+              return {
+                ...old,
+                lists: [...old.lists, deletedList].sort((a, b) => a.order - b.order),
+              };
+            }
+          );
 
           throw error;
         }
@@ -202,16 +222,22 @@ const ListComponent = ({
 
   const { mutateAsync: createListItem } = useMutation(trpc.listItem.createListItem.mutationOptions({
     async onMutate(variables) {
-      await queryClient.cancelQueries({ queryKey });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
+        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
+      ]);
 
       const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
       const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
       const alreadyInCache = itemIsAlreadyInCache(previousAllLists, variables.id) ||
-        itemIsAlreadyInCache(previousCurrentView, variables.id);
+        itemIsAlreadyInCache(previousCurrentView, variables.id) ||
+        itemIsAlreadyInCache(previousSelectedView, variables.id);
 
       if (alreadyInCache) {
         // The UI already showed this item while its parent list was saving.
-        return { previousAllLists, previousCurrentView, addedToCache: false };
+        return { previousAllLists, previousCurrentView, previousSelectedView, addedToCache: false };
       }
 
       const optimisticListItem: OptimisticListItem = {
@@ -236,7 +262,7 @@ const ListComponent = ({
 
       setCreateListItemName('');
 
-      return { previousAllLists, previousCurrentView, addedToCache: true };
+      return { previousAllLists, previousCurrentView, previousSelectedView, addedToCache: true };
     },
     onSuccess(createdItem) {
       updateListInDashboardCaches(queryClient, dashboardKeys, createdItem.listId, (currentList) => ({
@@ -250,6 +276,7 @@ const ListComponent = ({
       if (context?.addedToCache) {
         queryClient.setQueryData(dashboardKeys.allLists, context.previousAllLists);
         queryClient.setQueryData(dashboardKeys.currentView, context.previousCurrentView);
+        queryClient.setQueryData(dashboardKeys.selectedView, context.previousSelectedView);
         return;
       }
 
@@ -257,6 +284,9 @@ const ListComponent = ({
         removeItemFromCache(current, variables.id)
       );
       queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, (current) =>
+        removeItemFromCache(current, variables.id)
+      );
+      queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, (current) =>
         removeItemFromCache(current, variables.id)
       );
     }

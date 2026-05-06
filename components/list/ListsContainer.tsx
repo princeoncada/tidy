@@ -187,6 +187,7 @@ const ListsContainer = () => {
     views: viewsQueryKey,
     allLists: allListsQueryKey,
     currentView: currentViewQueryKey,
+    selectedView: selectedViewQueryKey,
   };
 
   const queryKey = selectedViewQueryKey;
