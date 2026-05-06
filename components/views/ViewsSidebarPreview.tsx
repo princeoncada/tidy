@@ -674,6 +674,8 @@ export default function ViewsSidebarPreview() {
 
         await selectViewMutation.mutateAsync({ viewId: id });
 
+        if (latestSelectedViewIdRef.current !== id) return;
+
         await queryClient.fetchQuery(
           trpc.view.getViewListsWithItems.queryOptions({ viewId: id })
         );

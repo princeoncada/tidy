@@ -66,6 +66,15 @@ function describeError(error: unknown) {
   return error;
 }
 
+function isCancelledError(error: unknown) {
+  return Boolean(
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    error.message === "CancelledError"
+  );
+}
+
 export function useOptimisticSync(): OptimisticSyncApi {
   const cancelScope = useCallback((scope: OptimisticScope) => {
     entries[scope].forEach((entry) => {
@@ -90,6 +99,8 @@ export function useOptimisticSync(): OptimisticSyncApi {
         await task();
       })
       .catch((error) => {
+        if (isCancelledError(error)) return;
+
         options.rollback?.();
         cancelScope(scope);
         console.error("Optimistic sync failed:", {
