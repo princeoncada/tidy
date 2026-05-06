@@ -7,6 +7,8 @@ export type CurrentViewSnapshot = RouterOutputs["view"]["getCurrentViewListsWith
 export type DashboardSnapshot = CurrentViewSnapshot
 export type DashboardList = DashboardSnapshot["lists"][number];
 export type DashboardTag = RouterOutputs["tag"]["getAll"][number];
+export type SavedListTags = DashboardList["listTags"];
+export type AffectedTagView = RouterOutputs["tag"]["applyListTagChanges"]["affectedViews"][number];
 
 export type DashboardKeys = {
   views: QueryKey;
@@ -229,6 +231,66 @@ export function applyTagChangeToCaches(
         : list.listTags.filter((listTag) => listTag.tagId !== tag.id),
     };
   });
+}
+
+export function reconcileSavedListTags(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  listId: string,
+  listTags: SavedListTags
+) {
+  updateListInDashboardCaches(queryClient, keys, listId, (list) => ({
+    ...list,
+    listTags,
+  }));
+}
+
+export function reconcileAffectedViewLists(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  affectedViews: AffectedTagView[]
+) {
+  if (affectedViews.length === 0) return;
+
+  const affectedViewById = new Map(
+    affectedViews.map((view) => [view.id, view])
+  );
+
+  queryClient.setQueryData<ViewsCache>(keys.views, (views) =>
+    views?.map((view) => {
+      const affectedView = affectedViewById.get(view.id);
+
+      return affectedView ? { ...view, ...affectedView } : view;
+    })
+  );
+
+  const allListsSnapshot = getAllListsSnapshot(queryClient, keys.allLists);
+  if (!allListsSnapshot) return;
+
+  const views = queryClient.getQueryData<ViewsCache>(keys.views);
+  const reprojectAffectedView = (snapshot: DashboardSnapshot | undefined) => {
+    if (!snapshot) return snapshot;
+
+    const updatedView = affectedViewById.get(snapshot.view.id) ??
+      views?.find((view) => view.id === snapshot.view.id) ??
+      snapshot.view;
+
+    return projectView(updatedView, allListsSnapshot);
+  };
+
+  const updatedKeys = new Set<string>();
+  setDashboardQueryDataOnce<DashboardSnapshot>(
+    queryClient,
+    updatedKeys,
+    keys.currentView,
+    reprojectAffectedView
+  );
+  setDashboardQueryDataOnce<DashboardSnapshot>(
+    queryClient,
+    updatedKeys,
+    keys.selectedView,
+    reprojectAffectedView
+  );
 }
 
 export function rollbackScope<T>(
