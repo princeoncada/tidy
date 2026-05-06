@@ -10,7 +10,8 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrentView, OptimisticList } from "./types";
 import { Plus } from "lucide-react";
-import { selectedViewFromCache, syncProjectedCurrentView } from "@/lib/dashboard-cache";
+import { invalidateViewPayloadQueries, selectedViewFromCache } from "@/lib/dashboard-cache";
+import { Skeleton } from "../ui/skeleton";
 
 
 const ListAdder = () => {
@@ -22,23 +23,49 @@ const ListAdder = () => {
   const queryClient = useQueryClient();
   const viewsQueryKey = trpc.view.getAll.queryKey();
   const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
-  const queryKey = currentViewQueryKey;
+  const { data: views, isLoading: viewsLoading } = useQuery(trpc.view.getAll.queryOptions());
+  const allListsView = views?.find((view) => view.type === "ALL_LISTS");
+  const allListsQueryKey = allListsView
+    ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
+    : currentViewQueryKey;
+  const queryKey = allListsQueryKey;
   const dashboardKeys = {
     views: viewsQueryKey,
-    allLists: queryKey,
+    allLists: allListsQueryKey,
     currentView: currentViewQueryKey,
   };
 
-  const { data: views } = useQuery(trpc.view.getAll.queryOptions());
   const selectedView = selectedViewFromCache(views);
+  const selectedViewId = selectedView?.id;
+
+  const { isLoading: bootListsLoading } = useQuery(
+    trpc.view.getCurrentViewListsWithItems.queryOptions()
+  );
+
+  const { isLoading: allListsLoading } = useQuery(
+    trpc.view.getViewListsWithItems.queryOptions(
+      { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
+      { enabled: Boolean(allListsView?.id) }
+    )
+  );
+
+  const { isLoading: selectedViewLoading } = useQuery(
+    trpc.view.getViewListsWithItems.queryOptions(
+      { viewId: selectedViewId ?? "00000000-0000-0000-0000-000000000000" },
+      { enabled: Boolean(selectedViewId) }
+    )
+  );
 
   const { mutate: createList, isPending: createListPending } = useMutation(trpc.list.createList.mutationOptions({
     async onMutate(variables) {
       await queryClient.cancelQueries({ queryKey });
 
-      const previousCurrentView = queryClient.getQueryData<CurrentView>(queryKey);
+      const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
+      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
 
-      if (!previousCurrentView) return { previousCurrentView };
+      if (!previousAllLists && !previousCurrentView) {
+        return { previousAllLists, previousCurrentView };
+      }
 
       const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
       const selectedViewTags = activeView?.viewTags ?? [];
@@ -52,8 +79,8 @@ const ListAdder = () => {
         id: variables.id,
         userId: "optimistic",
         name: variables.name,
-        order: previousCurrentView.lists.length > 0
-          ? Math.min(...previousCurrentView.lists.map((list) => list.order)) - 1
+        order: (previousCurrentView?.lists.length ?? previousAllLists?.lists.length ?? 0) > 0
+          ? Math.min(...(previousCurrentView?.lists ?? previousAllLists?.lists ?? []).map((list) => list.order)) - 1
           : 0,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -64,7 +91,7 @@ const ListAdder = () => {
         isOptimistic: true
       };
 
-      queryClient.setQueryData<CurrentView>(queryKey, (current) =>
+      queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, (current) =>
         current
           ? {
             ...current,
@@ -75,12 +102,22 @@ const ListAdder = () => {
           }
           : current
       );
-      syncProjectedCurrentView(queryClient, dashboardKeys);
+      queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, (current) =>
+        current && (activeView?.type !== "CUSTOM" || activeView.id === current.view.id)
+          ? {
+            ...current,
+            lists: [
+              optimisticList,
+              ...current.lists,
+            ],
+          }
+          : current
+      );
 
-      return { previousCurrentView };
+      return { previousAllLists, previousCurrentView };
     },
-    onSuccess(createdList, variables) {
-      queryClient.setQueryData<CurrentView>(queryKey, (current) =>
+    async onSuccess(createdList, variables) {
+      const replaceOptimisticList = (current: CurrentView | undefined) =>
         current
           ? {
             ...current,
@@ -96,15 +133,16 @@ const ListAdder = () => {
                 : list
             ),
           }
-          : current
-      );
-      syncProjectedCurrentView(queryClient, dashboardKeys);
+          : current;
+
+      queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, replaceOptimisticList);
+      queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, replaceOptimisticList);
+      await queryClient.invalidateQueries({ queryKey: dashboardKeys.views });
+      await invalidateViewPayloadQueries(queryClient);
     },
     onError(_error, _variables, context) {
-      if (context?.previousCurrentView) {
-        queryClient.setQueryData(queryKey, context.previousCurrentView);
-      }
-      syncProjectedCurrentView(queryClient, dashboardKeys);
+      queryClient.setQueryData(dashboardKeys.allLists, context?.previousAllLists);
+      queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
     },
   }));
 
@@ -126,6 +164,21 @@ const ListAdder = () => {
       setCreateListName('');
     }, 200);
   };
+
+  if (
+    viewsLoading ||
+    !allListsView ||
+    bootListsLoading ||
+    allListsLoading ||
+    selectedViewLoading
+  ) {
+    return (
+      <div className="h-full flex items-end">
+        <Skeleton className="hidden h-8 w-24 md:block" />
+        <Skeleton className="size-9 md:hidden" />
+      </div>
+    );
+  }
 
   return (
     <Dialog
