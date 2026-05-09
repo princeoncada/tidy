@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tidy
 
-## Getting Started
+Tidy is an optimistic-updates-first productivity app focused on speed, fluid interactions, and modern task management workflows.
 
-First, run the development server:
+Built with a performance-first mindset, the app delivers near-instant UI feedback through aggressive optimistic updates, smooth drag-and-drop interactions, and scalable state management designed for growing interconnected data structures.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- ⚡ Optimistic updates for instant user feedback
+- 🧠 Smart task organization with lists and views
+- 🏷️ Tag-based filtering and categorization
+- 🎯 Drag-and-drop task and list management
+- 🔄 Debounced reordering and sync handling
+- 📱 Responsive modern UI
+- 🛠️ Built with type-safe full-stack architecture
+- 💾 Persistent database-backed state management
+- 🎨 Clean and minimal productivity-focused design
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js
+- TypeScript
+- React
+- TailwindCSS
+- tRPC
+- Prisma
+- PostgreSQL
+- TanStack Query
+- DND Kit
+- Framer Motion
+- shadcn/ui
 
-## Learn More
+## Philosophy
 
-To learn more about Next.js, take a look at the following resources:
+Tidy is designed around one core principle:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> User feedback should feel instant.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The project explores advanced optimistic UI patterns, scalable frontend architecture, and seamless interaction design while maintaining strong developer experience and type safety.
 
-## Deploy on Vercel
+## Current Status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+🚧 In active development.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The project is continuously evolving with improvements to:
+- Real-time interaction handling
+- Optimistic mutation queues
+- Drag-and-drop UX
+- View systems
+- Tag filtering
+- Performance optimization
+- Offline/PWA support
+
+## Goals
+
+- Create a productivity app that feels instantaneous
+- Push optimistic UI patterns to production-ready quality
+- Build scalable interaction systems for complex task management
+- Explore modern full-stack architecture patterns
+
+---
+
+Made by Prince Oncada.
