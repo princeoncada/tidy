@@ -7,11 +7,12 @@ Document available validation commands and high-value manual regression checks.
 There is no dedicated automated test suite in `package.json`. Available scripts:
 
 - `npm run lint`: ESLint with Next core web vitals and TypeScript config.
+- `npm run typecheck`: `tsc --noEmit`.
 - `npm run build`: `prisma generate && next build`.
 - `npm run dev`: local Next dev server.
 - `npm start`: production server after build.
 
-Approved local commands in this Codex environment include `npm run lint` and `npx tsc`.
+Approved local commands in this Codex environment include `npm run typecheck` and `npm run lint`.
 
 ## Important Files
 - `package.json`: scripts and dependency versions.
@@ -25,7 +26,7 @@ Approved local commands in this Codex environment include `npm run lint` and `np
 Suggested validation by change type:
 
 - Docs-only: no build required unless links/reference names are uncertain.
-- Type-only or router/component change: `npx tsc --noEmit` and `npm run lint`.
+- Type-only or router/component change: `npm run typecheck` and `npm run lint`.
 - Prisma/schema change: `prisma generate`, typecheck, migration review, build.
 - Next route/layout/config change: read local Next docs if available, then typecheck/build.
 - Dashboard interaction change: run app and manually exercise cache/sync flows.
