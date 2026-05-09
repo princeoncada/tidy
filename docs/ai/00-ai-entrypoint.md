@@ -5,6 +5,8 @@ This is the first file future Codex sessions should read for Tidy. Its job is to
 
 Every implementation PR must update the relevant `docs/ai/*.md` file and `docs/ai/backlog.md` in the same PR.
 
+Use `docs/ai/task-routing-guide.md` before opening many files. The routing guide is intended to keep future AI sessions focused on the smallest relevant docs and source files. `docs/ai/codex-prompt-template.md` provides a reusable prompt format for handing focused implementation tasks from ChatGPT to Codex.
+
 ## Current Implementation
 Tidy is a Next.js 16, React 19, TypeScript strict productivity app with Supabase auth, tRPC 11, TanStack Query 5, Prisma 7, PostgreSQL, dnd-kit, shadcn/radix, and Tailwind v4.
 
@@ -22,6 +24,8 @@ The main product surface is the authenticated dashboard:
 
 ## Important Files
 - `AGENTS.md`: mandatory repo instruction. This project uses a newer Next.js with breaking changes. If `node_modules/next/dist/docs/` exists, read the relevant Next guide before editing app code.
+- `docs/ai/codex-prompt-template.md`: copy-paste handoff template for ChatGPT-planned, Codex-executed tasks.
+- `docs/ai/task-routing-guide.md`: task-to-doc routing map to avoid broad repo scanning.
 - `docs/ai/01-product-current-state.md`: what the app currently does.
 - `docs/ai/02-repo-map.md`: where code lives and what owns what.
 - `docs/ai/03-data-model.md`: Prisma models, ownership, ordering, and view membership.
@@ -66,7 +70,8 @@ The main product surface is the authenticated dashboard:
 - `node_modules` may not exist in fresh Codex workspaces. If so, do not claim Next.js 16 docs were checked locally.
 
 ## What Codex Should Read Before Editing
-- Any code task: this file, `12-implementation-rules.md`, and `13-testing-and-validation.md`.
+- Any code task: this file, `task-routing-guide.md`, `12-implementation-rules.md`, and `13-testing-and-validation.md`.
+- Use `task-routing-guide.md` first, then read only the smallest matching feature docs.
 - Dashboard/list/item task: `05-dashboard-state-cache.md`, `06-optimistic-sync.md`, `07-drag-and-drop.md`, `09-ui-components.md`.
 - Tags/views task: `05-dashboard-state-cache.md`, `08-views-tags-system.md`, `03-data-model.md`.
 - Auth/API task: `04-auth-and-api.md`, `03-data-model.md`.
