@@ -2,7 +2,6 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/lib/db";
 import { createTRPCRouter, protectedProcedure } from "../init";
-import { recomputeCustomViewsForTags, recomputeCustomViewsForUser } from "./viewHelpers";
 
 export const tagColorSchema = z.enum([
   "gray",
@@ -82,8 +81,6 @@ export const tagRouter = createTRPCRouter({
       };
     });
 
-    await recomputeCustomViewsForUser(userId);
-
     const affectedViews = await db.view.findMany({
       where: {
         userId,
@@ -107,7 +104,10 @@ export const tagRouter = createTRPCRouter({
 
     return {
       ...result,
-      affectedViews,
+      affectedViews: affectedViews.map((view) => ({
+        ...view,
+        viewLists: [],
+      })),
     };
   }),
   addToList: protectedProcedure.input(z.object({
@@ -147,8 +147,6 @@ export const tagRouter = createTRPCRouter({
       return listTag;
     });
 
-    await recomputeCustomViewsForTags(userId, [tagId]);
-
     return listTag;
   }),
   removeFromList: protectedProcedure.input(z.object({
@@ -169,14 +167,10 @@ export const tagRouter = createTRPCRouter({
         },
       });
 
-      await recomputeCustomViewsForUser(userId, tx);
-
       return {
         detached: result.count > 0,
       };
     });
-
-    await recomputeCustomViewsForTags(userId, [tagId]);
 
     return result;
   }),
@@ -210,7 +204,6 @@ export const tagRouter = createTRPCRouter({
       };
     }
 
-    const tagIds = compactedOperations.map((operation) => operation.tagId);
     const addTagIds = compactedOperations
       .filter((operation) => operation.action === "add")
       .map((operation) => operation.tagId);
@@ -259,48 +252,18 @@ export const tagRouter = createTRPCRouter({
       }
     });
 
-    // Recompute after the short write transaction. Keeping this outside avoids Prisma's 5s transaction timeout.
-    await recomputeCustomViewsForTags(userId, tagIds);
-
-    const [listTags, affectedViews] = await Promise.all([
-      db.listTag.findMany({
-        where: {
-          listId,
-          list: { userId },
-        },
-        include: { tag: true },
-      }),
-      db.view.findMany({
-        where: {
-          userId,
-          type: "CUSTOM",
-          viewTags: {
-            some: {
-              tagId: { in: tagIds },
-            },
-          },
-        },
-        include: {
-          viewTags: {
-            include: { tag: true },
-          },
-          viewLists: {
-            select: {
-              listId: true,
-              order: true,
-            },
-            orderBy: {
-              order: "asc",
-            },
-          },
-        },
-      }),
-    ]);
+    const listTags = await db.listTag.findMany({
+      where: {
+        listId,
+        list: { userId },
+      },
+      include: { tag: true },
+    });
 
     return {
       listId,
       listTags,
-      affectedViews,
+      affectedViews: [],
     };
   }),
 })
