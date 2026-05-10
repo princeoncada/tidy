@@ -4,19 +4,21 @@
 Document available validation commands and high-value manual regression checks.
 
 ## Current Implementation
-There is no dedicated automated test suite in `package.json`. Available scripts:
+The repo has Vitest unit tests and Playwright E2E tests. Available scripts:
 
 - `npm run lint`: ESLint with Next core web vitals and TypeScript config.
 - `npm run typecheck`: `tsc --noEmit`.
 - `npm run test`: Vitest unit tests.
-- `npm run test:e2e`: Playwright public smoke E2E tests.
-- `npm run test:e2e:auth`: Playwright authenticated dashboard E2E tests.
+- `npm run test:e2e`: non-authenticated Playwright E2E.
+- `npm run test:e2e:auth:setup`: log in through `/login` and write ignored storage state to `tests/.auth/user.json`.
+- `npm run test:e2e:auth`: authenticated dashboard Playwright E2E using existing storage state.
+- `npm run test:ci`: typecheck, lint, unit tests, and default E2E.
 - `npm run test:all`: Vitest followed by Playwright.
 - `npm run build`: `prisma generate && next build`.
 - `npm run dev`: local Next dev server.
 - `npm start`: production server after build.
 
-Dashboard E2E tests require `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, real Supabase public env vars, and `DATABASE_URL`. The auth setup logs in through `/login` and writes ignored storage state to `tests/.auth/user.json`.
+Dashboard E2E tests require `tests/.auth/user.json`, real Supabase public env vars, and `DATABASE_URL`. Generate storage state locally with `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` by running `npm run test:e2e:auth:setup`.
 
 See `docs/testing.md` and `ai-docs/testing-workflow.md` before changing test infrastructure.
 
@@ -67,7 +69,7 @@ Manual dashboard checks:
 - Any mobile layout change should check at least one narrow viewport.
 
 ## Known Risks
-- No Playwright, Vitest, or integration tests are configured.
+- Authenticated dashboard E2E requires a real Supabase test user and database.
 - Database-backed validation requires valid `DATABASE_URL` and Supabase env vars.
 - Build runs Prisma generate, so missing env/setup can block validation in fresh environments.
 - Manual testing is currently the only way to validate most optimistic race cases.
