@@ -76,6 +76,30 @@ When implementation work completes:
   - Use `docs/testing-validation.md`, `docs/testing.md`, `ai-docs/testing-workflow.md`, and `docs/ai/13-testing-and-validation.md` as validation source of truth.
   - Docs-only checkpoints do not require new tests unless test infrastructure changes.
 
+## Phase 2: Outbox Sync Queue
+- **Priority:** High / durable sync foundation.
+- **Status:** In progress.
+- **Phase log:** `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
+- **Umbrella branch:** `phase/outbox-sync-queue`.
+- **Checkpoint branches:**
+  - `checkpoint/phase-two-roadmap`
+  - `checkpoint/outbox-model-finalization`
+  - `checkpoint/outbox-repository-helpers`
+  - `checkpoint/outbox-coalescing-rules`
+  - `checkpoint/sync-replay-client`
+  - `checkpoint/sync-endpoint-contract`
+  - `checkpoint/basic-sync-status-surface`
+  - `checkpoint/phase-two-regression-docs`
+- **Acceptance criteria:**
+  - Each checkpoint stays scoped to one concern.
+  - Runtime checkpoints add/update matching unit or E2E tests.
+  - Outbox replay and sync status work is introduced gradually and remains isolated until validated.
+  - `phase/outbox-sync-queue` does not merge to `master` with unstable auto-running sync behavior or a hidden full dashboard local-first rewrite.
+- **Validation notes:**
+  - Use `docs/testing-validation.md`, `docs/testing.md`, `ai-docs/testing-workflow.md`, and `docs/ai/13-testing-and-validation.md` as validation source of truth.
+  - Authenticated E2E is required when dashboard behavior changes and credentials/storage state are available.
+  - Docs-only checkpoints do not require new tests unless test infrastructure changes.
+
 ## NOW
 
 ### NOW-1: Close list item ownership gaps
