@@ -12,23 +12,23 @@ Keep tests focused on current behavior. Do not rewrite product behavior only to 
 - `npm run test`: run Vitest unit tests once.
 - `npm run test:watch`: run Vitest in watch mode.
 - `npm run test:ui`: run the Vitest UI.
-- `npm run test:e2e`: run public smoke E2E only.
-- `npm run test:e2e:smoke`: same as `test:e2e`.
-- `npm run test:e2e:auth`: log in through the real app and run dashboard E2E.
+- `npm run test:e2e`: run non-authenticated Playwright tests only.
+- `npm run test:e2e:smoke`: run public smoke E2E only.
+- `npm run test:e2e:auth`: run authenticated dashboard E2E with an existing `tests/.auth/user.json`.
+- `npm run test:e2e:dashboard`: alias for authenticated dashboard E2E.
 - `npm run test:e2e:auth:setup`: generate `tests/.auth/user.json`.
-- `npm run test:e2e:headed`: run smoke E2E with a visible browser.
-- `npm run test:e2e:debug`: run smoke E2E in debug mode.
+- `npm run test:e2e:headed`: run non-authenticated E2E with a visible browser.
+- `npm run test:e2e:debug`: run non-authenticated E2E in debug mode.
 - `npm run test:e2e:report`: open the last Playwright HTML report.
-- `npm run test:all`: run unit tests, then public smoke E2E.
+- `npm run test:ci`: run typecheck, lint, unit tests, and default E2E.
+- `npm run test:all`: run unit tests, then default E2E.
 
 ## Smoke E2E
 Smoke tests cover public routes that do not require Supabase auth.
 
-```text
-npm run test:e2e
-```
+Run smoke and non-auth dashboard checks with `npm run test:e2e`.
 
-This runs only the Playwright `smoke` project.
+The default E2E command does not require credentials. It covers public routes and the unauthenticated dashboard redirect only.
 
 ## Authenticated Dashboard E2E
 Dashboard tests require a real Supabase test user and a reachable database.
@@ -41,10 +41,16 @@ Set:
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `DATABASE_URL`
 
-Then run:
+First create `.env.local` from the example and set local test credentials:
 
 ```text
-npm run test:e2e:auth
+copy .env.example .env.local
+```
+
+Then generate storage state:
+
+```text
+npm run test:e2e:auth:setup
 ```
 
 The `auth-setup` project logs in through `/login` and writes storage state to:
@@ -55,13 +61,13 @@ tests/.auth/user.json
 
 That file is ignored by git. Do not commit storage state or credentials.
 
-To generate or refresh only the auth state:
+If credentials are missing, authenticated E2E fails loudly with setup instructions. It does not silently skip dashboard coverage.
+
+After `tests/.auth/user.json` exists, run dashboard tests:
 
 ```text
-npm run test:e2e:auth:setup
+npm run test:e2e:auth
 ```
-
-If credentials are missing, authenticated E2E fails loudly with setup instructions. It does not silently skip dashboard coverage.
 
 ## Playwright Traces
 Playwright records traces on first retry and screenshots/videos on failure.
@@ -75,7 +81,7 @@ npm run test:e2e:report
 Use the trace to inspect the exact selector, action, network state, and DOM snapshot before changing tests or app code.
 
 ## Data Naming
-Generated E2E data must use a visible `e2e-` prefix plus a timestamp/random suffix. Helpers in `tests/e2e/utils/seed.ts` provide `uniqueTestName`.
+Generated E2E data must use a visible `e2e-` prefix plus a deterministic run id and per-process sequence. Helpers in `tests/e2e/utils/seed.ts` provide `uniqueTestName`.
 
 Clean up test-created lists through the UI when possible. If cleanup fails, the visible prefix makes leftover data easy to identify.
 
@@ -121,7 +127,8 @@ When adding a feature:
 4. Update this document if a new command, fixture, or selector convention is introduced.
 
 ## Current Gaps
-- No Playwright tests are intentionally skipped in the current suite. Public smoke runs with `npm run test:e2e`; authenticated dashboard tests run with `npm run test:e2e:auth` and fail in setup if credentials are missing.
+- No Playwright tests are intentionally skipped in the current suite.
+- `npm run test:e2e` intentionally excludes authenticated dashboard coverage.
 - Authenticated dashboard E2E requires CI secrets before it can run in GitHub Actions.
 - Drag/drop tests use a lower-level mouse movement helper because dnd-kit does not always work with `locator.dragTo`.
 - API ownership tests are still needed for protected tRPC procedures.
