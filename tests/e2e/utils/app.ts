@@ -1,6 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
 import { testIds } from "./test-ids";
+import { expectItemNotVisible, expectListNotVisible } from "./assertions";
 
 export async function createList(page: Page, name: string) {
   await page.getByTestId(testIds.createListButton).first().click();
@@ -15,6 +16,7 @@ export async function renameList(page: Page, oldName: string, newName: string) {
   await card.getByTestId(testIds.listTitleInput).fill(newName);
   await card.getByTestId(testIds.listTitleInput).press("Enter");
   await expect(page.getByTestId(testIds.listCard).filter({ hasText: newName })).toBeVisible();
+  await expectListNotVisible(page, oldName);
 }
 
 export async function deleteList(page: Page, name: string) {
@@ -22,7 +24,7 @@ export async function deleteList(page: Page, name: string) {
   await expect(card).toBeVisible();
   await card.getByRole("button", { name: /list options/i }).click();
   await page.getByTestId(testIds.deleteListButton).click();
-  await expect(card).toBeHidden({ timeout: 10_000 });
+  await expectListNotVisible(page, name);
 }
 
 export async function createItem(page: Page, listName: string, itemName: string) {
@@ -40,13 +42,14 @@ export async function renameItem(page: Page, oldName: string, newName: string) {
   await item.getByTestId(testIds.listTitleInput).fill(newName);
   await item.getByTestId(testIds.listTitleInput).press("Enter");
   await expect(page.getByTestId(testIds.listItem).filter({ hasText: newName })).toBeVisible();
+  await expectItemNotVisible(page, oldName);
 }
 
 export async function deleteItem(page: Page, itemName: string) {
   const item = page.getByTestId(testIds.listItem).filter({ hasText: itemName }).first();
   await expect(item).toBeVisible();
   await item.getByRole("button").last().click();
-  await expect(item).toBeHidden({ timeout: 10_000 });
+  await expectItemNotVisible(page, itemName);
 }
 
 export async function createTag(page: Page, listName: string, tagName: string) {
