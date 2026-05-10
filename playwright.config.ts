@@ -28,6 +28,7 @@ export default defineConfig({
     {
       name: "auth-setup",
       testMatch: /auth\.setup\.ts/,
+      use: { ...devices["Desktop Chrome"] },
     },
     {
       name: "smoke",
@@ -36,8 +37,12 @@ export default defineConfig({
     },
     {
       name: "dashboard",
-      dependencies: ["auth-setup"],
-      testIgnore: [/smoke\.spec\.ts/, /auth\.setup\.ts/],
+      testMatch: /dashboard-public\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "authenticated-dashboard",
+      testIgnore: [/smoke\.spec\.ts/, /dashboard-public\.spec\.ts/, /auth\.setup\.ts/],
       use: {
         ...devices["Desktop Chrome"],
         storageState: authFile,
