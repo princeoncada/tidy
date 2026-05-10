@@ -237,6 +237,43 @@ A checkpoint can merge into `phase/outbox-sync-queue` only when:
 - No unstable sync worker behavior is auto-running unexpectedly.
 - No full dashboard local-first rewrite snuck into this phase.
 
+## Phase 2 Final Review
+Phase 2 added the outbox sync queue foundation, not full local-first dashboard behavior.
+
+Completed foundation pieces:
+
+- Outbox operation model validation.
+- Isolated outbox repository helpers.
+- Pure operation coalescing rules.
+- Client replay service with injected transport.
+- Server sync endpoint contract validation helpers.
+- Hidden/debug sync status display model.
+- Unit coverage for each runtime helper layer.
+
+Runtime behavior intentionally not changed:
+
+- Dashboard data still comes from the existing server, TanStack Query, and tRPC flow.
+- Existing list, item, view, tag, drag/drop, and optimistic update behavior was not replaced.
+- No automatic background sync worker was mounted.
+- No live sync endpoint was registered.
+- No visible sync status UI was mounted.
+- No Redis, Sentry, QStash, Inngest, CRDT, or full local-first rewrite was introduced.
+
+Phase 2 remaining gaps:
+
+- Live server endpoint implementation still needs database ownership, entity existence, permission, payload semantic, order value, and idempotency persistence checks.
+- Replay ordering still needs entity dependency review before connecting to real mutations.
+- Dexie discard/sync transitions are implemented as helpers, but no global worker applies them automatically.
+- Failed operation UX is still only a display model, not a drawer, retry control, or user-facing recovery flow.
+- Authenticated dashboard E2E should run before any future checkpoint that touches dashboard behavior.
+
+Next recommended phase:
+
+- `phase/sync-endpoint-integration` or a similarly scoped branch for the live server endpoint and first guarded client transport.
+- Keep it isolated from dashboard local-first migration.
+- Do not wire all dashboard mutations into outbox replay in one branch.
+- Start with one low-risk operation and add ownership/idempotency tests before broader integration.
+
 ## Phase 1 Documentation Reconciliation
 Reviewed `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
 
@@ -311,3 +348,12 @@ No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Pha
 - Manual validation: Not required for this checkpoint because this adds a hidden/debug status display model only. No visible UI was mounted, and no tRPC, TanStack Query, drag/drop, mutation, automatic replay, or dashboard source-of-truth behavior was changed.
 - Known risks: The status surface summarizes operation counts only. It does not read from Dexie, subscribe to live queue changes, expose a visible indicator, provide retry controls, or show failed operation details yet.
 - Next checkpoint: `checkpoint/phase-two-regression-docs`.
+
+### checkpoint/phase-two-regression-docs
+- Status: Ready for review with build blocked by external font fetch.
+- Date: 2026-05-10.
+- Files changed: `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`, `docs/ai/backlog.md`.
+- Validation run: `npm run test:ci` was attempted. `npm run typecheck`, `npm run lint`, and `npm run test` completed successfully inside that run with 11 unit test files and 90 tests passing. The command timed out during the Playwright segment. User reran `npm run test:e2e`, which passed 4 tests in 10.9s. `npm run build` was attempted and failed because Next/Turbopack could not fetch `Geist` and `Geist Mono` from Google Fonts. Network escalation for the build rerun was declined.
+- Manual validation: Documentation review only. Runtime behavior is not changed in this checkpoint.
+- Known risks: Phase 2 remains foundation-only. Future implementation can still overreach by wiring replay into dashboard mutations before the live endpoint, ownership checks, idempotency persistence, and failure UX are ready. Production build still needs to be rerun in an environment that can fetch Next Google fonts or after fonts are made local.
+- Next checkpoint: Phase 2 merge gate / next phase planning.
