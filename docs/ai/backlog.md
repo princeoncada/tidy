@@ -53,6 +53,29 @@ When implementation work completes:
 - Observability later
 - Background jobs later
 
+## Phase 1: Dexie Foundation
+- **Priority:** High / local-first foundation.
+- **Status:** In progress.
+- **Phase log:** `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- **Umbrella branch:** `phase/dexie-foundation`.
+- **Checkpoint branches:**
+  - `checkpoint/docs-roadmap`
+  - `checkpoint/install-dexie-db-shell`
+  - `checkpoint/local-schema-types`
+  - `checkpoint/outbox-operation-types`
+  - `checkpoint/local-repository-helpers`
+  - `checkpoint/sync-status-model`
+  - `checkpoint/first-dexie-integration`
+  - `checkpoint/expand-dexie-coverage`
+- **Acceptance criteria:**
+  - Each checkpoint stays scoped to one concern.
+  - Runtime checkpoints add/update matching tests.
+  - `npm run test:ci` is the default implementation validation command.
+  - `phase/dexie-foundation` does not merge to `master` with partially working local-first or sync behavior.
+- **Validation notes:**
+  - Use `docs/testing-validation.md`, `docs/testing.md`, `ai-docs/testing-workflow.md`, and `docs/ai/13-testing-and-validation.md` as validation source of truth.
+  - Docs-only checkpoints do not require new tests unless test infrastructure changes.
+
 ## NOW
 
 ### NOW-1: Close list item ownership gaps
