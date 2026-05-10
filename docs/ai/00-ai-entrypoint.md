@@ -13,6 +13,8 @@ Read `docs/ai/16-local-first-product-roadmap.md` before implementing major sync,
 
 Read `docs/ai/phase-logs/phase-1-dexie-foundation.md` before any Phase 1 Dexie/local-first foundation checkpoint work.
 
+Read `docs/ai/phase-logs/phase-2-outbox-sync-queue.md` before any Phase 2 outbox sync queue checkpoint work.
+
 ## Mandatory Branch Isolation For Architecture Work
 
 Before implementing:
@@ -71,6 +73,7 @@ The main product surface is the authenticated dashboard:
 - `docs/ai/15-decision-log.md`: important decisions and why they exist.
 - `docs/ai/16-local-first-product-roadmap.md`: product-readiness roadmap for local-first sync, outbox queues, rollback safety, scale prep, security, observability, and background jobs.
 - `docs/ai/phase-logs/phase-1-dexie-foundation.md`: Phase 1 Dexie foundation checkpoints, validation gates, and phase log.
+- `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`: Phase 2 outbox sync queue checkpoints, validation gates, and phase log.
 - `docs/ai/backlog.md`: living implementation backlog.
 
 ## Data Flow
@@ -111,6 +114,7 @@ The main product surface is the authenticated dashboard:
 - Mobile/PWA task: `10-mobile-and-pwa-readiness.md`, `09-ui-components.md`.
 - Major sync, persistence, offline, rollback, or product-readiness task: `16-local-first-product-roadmap.md`, `06-optimistic-sync.md`, `14-production-readiness.md`.
 - Phase 1 Dexie/local-first foundation task: `phase-logs/phase-1-dexie-foundation.md`, `16-local-first-product-roadmap.md`, `06-optimistic-sync.md`.
+- Phase 2 outbox sync queue task: `phase-logs/phase-2-outbox-sync-queue.md`, `phase-logs/phase-1-dexie-foundation.md`, `16-local-first-product-roadmap.md`, `06-optimistic-sync.md`.
 
 ## What Codex Must Update After Editing
 - Update the most relevant `docs/ai/*.md` file with changed behavior, files, data flow, invariants, or risks.
