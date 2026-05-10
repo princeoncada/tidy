@@ -293,3 +293,12 @@ No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Pha
 - Manual validation: Not required for this checkpoint because replay is an isolated service with injected transport and is not connected to UI, mutations, tRPC, TanStack Query, drag/drop, automatic background jobs, or server endpoints.
 - Known risks: Replay currently calls an injected transport only. It does not define the server endpoint contract, validate server ownership, auto-run in the app, persist advanced ordering constraints, or surface failed operations to users. Failed operations are isolated and retried later, but entity-level dependency ordering still needs endpoint/replay contract review.
 - Next checkpoint: `checkpoint/sync-endpoint-contract`.
+
+### checkpoint/sync-endpoint-contract
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/sync/sync-endpoint-contract.ts`, `tests/unit/sync-endpoint-contract.test.ts`, `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:ci`, and `npm run build` passed.
+- Manual validation: Not required for this checkpoint because this adds contract validation helpers only. No tRPC router, API route, UI, mutation, TanStack Query, drag/drop, or automatic replay behavior was connected.
+- Known risks: The live server endpoint is still not implemented. Contract validation checks request shape, idempotency key, authenticated user match, payload size, replayable status, entity/operation compatibility, and basic payload requirements, but it does not yet validate database ownership, entity existence, operation permission, order values against persisted state, or idempotency persistence.
+- Next checkpoint: `checkpoint/basic-sync-status-surface`.
