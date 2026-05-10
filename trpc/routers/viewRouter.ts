@@ -6,7 +6,6 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 import {
   ensureAllListsView,
   ensureDefaultView,
-  recomputeCustomView,
   setSelectedView,
 } from "./viewHelpers";
 
@@ -18,76 +17,141 @@ function isPrismaKnownError(error: unknown) {
   return error instanceof Prisma.PrismaClientKnownRequestError;
 }
 
-export const viewRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async ({ ctx: { userId } }) => {
-    await ensureDefaultView(userId);
+const viewInclude = {
+  viewTags: {
+    include: {
+      tag: true,
+    },
+  },
+  viewLists: {
+    select: {
+      listId: true,
+      order: true,
+    },
+    orderBy: {
+      order: "asc" as const,
+    },
+  },
+};
 
-    return await db.view.findMany({
-      where: { userId },
+async function getListsForView(userId: string, viewId: string) {
+  const view = await db.view.findFirst({
+    where: {
+      id: viewId,
+      userId,
+    },
+    include: viewInclude,
+  });
+
+  if (!view) throw new TRPCError({ code: "NOT_FOUND" });
+
+  if (view.type === ViewType.ALL_LISTS) {
+    const viewLists = await db.viewList.findMany({
+      where: {
+        viewId,
+        list: { userId },
+      },
       orderBy: { order: "asc" },
       include: {
-        viewTags: {
+        list: {
           include: {
-            tag: true,
-          },
-        },
-        viewLists: {
-          select: {
-            listId: true,
-            order: true,
-          },
-          orderBy: {
-            order: "asc",
+            listTags: { include: { tag: true } },
+            listItems: { orderBy: { order: "asc" } },
           },
         },
       },
     });
+
+    return {
+      view,
+      lists: viewLists.map((viewList) => ({
+        ...viewList.list,
+        order: viewList.order,
+      })),
+    };
+  }
+
+  if (view.type !== ViewType.CUSTOM || view.viewTags.length === 0) {
+    return {
+      view: {
+        ...view,
+        viewLists: [],
+      },
+      lists: [],
+    };
+  }
+
+  const allListsView = await ensureAllListsView(userId);
+  const [allViewLists, matchingLists] = await Promise.all([
+    db.viewList.findMany({
+      where: {
+        viewId: allListsView.id,
+        list: { userId },
+      },
+      select: {
+        listId: true,
+        order: true,
+      },
+    }),
+    db.list.findMany({
+      where: {
+        userId,
+        AND: view.viewTags.map((viewTag) => ({
+          listTags: {
+            some: { tagId: viewTag.tagId },
+          },
+        })),
+      },
+      include: {
+        listTags: { include: { tag: true } },
+        listItems: { orderBy: { order: "asc" } },
+      },
+    }),
+  ]);
+
+  const allListOrders = new Map(
+    allViewLists.map((viewList) => [viewList.listId, viewList.order])
+  );
+  const lists = matchingLists
+    .map((list, index) => ({
+      ...list,
+      order: allListOrders.get(list.id) ?? index,
+    }))
+    .sort((a, b) => a.order - b.order);
+
+  return {
+    view: {
+      ...view,
+      viewLists: lists.map((list) => ({
+        listId: list.id,
+        order: list.order,
+      })),
+    },
+    lists,
+  };
+}
+
+export const viewRouter = createTRPCRouter({
+  getAll: protectedProcedure.query(async ({ ctx: { userId } }) => {
+    await ensureDefaultView(userId);
+
+    const views = await db.view.findMany({
+      where: { userId },
+      orderBy: { order: "asc" },
+      include: viewInclude,
+    });
+
+    return views.map((view) =>
+      view.type === ViewType.CUSTOM
+        ? { ...view, viewLists: [] }
+        : view
+    );
   }),
 
   getViewListsWithItems: protectedProcedure
     .input(z.object({ viewId: z.uuid() }))
     .query(async ({ ctx: { userId }, input: { viewId } }) => {
-      const view = await db.view.findFirst({
-        where: {
-          id: viewId,
-          userId,
-        },
-        include: {
-          viewTags: {
-            include: { tag: true },
-          },
-          viewLists: {
-            select: { listId: true, order: true },
-            orderBy: { order: "asc" },
-          },
-        },
-      });
-
-      if (!view) throw new TRPCError({ code: "NOT_FOUND" });
-
-      const viewLists = await db.viewList.findMany({
-        where: {
-          viewId,
-          list: { userId },
-        },
-        orderBy: { order: "asc" },
-        include: {
-          list: {
-            include: {
-              listTags: { include: { tag: true } },
-              listItems: { orderBy: { order: "asc" } },
-            },
-          },
-        },
-      });
-
-      return {
-        view,
-        lists: viewLists.map((vl) => ({
-          ...vl.list,
-          order: vl.order,
-        })),
-      };
+      return await getListsForView(userId, viewId);
     }),
 
   getCurrentViewListsWithItems: protectedProcedure.query(
@@ -99,57 +163,7 @@ export const viewRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const selectedView = await db.view.findUniqueOrThrow({
-        where: { id: selectedDefaultView.id },
-        include: {
-          viewTags: {
-            include: {
-              tag: true,
-            },
-          },
-          viewLists: {
-            select: {
-              listId: true,
-              order: true,
-            },
-            orderBy: {
-              order: "asc",
-            },
-          },
-        },
-      });
-
-      const viewLists = await db.viewList.findMany({
-        where: {
-          viewId: selectedView.id,
-          list: { userId },
-        },
-        orderBy: { order: "asc" },
-        include: {
-          list: {
-            include: {
-              listTags: {
-                include: {
-                  tag: true,
-                },
-              },
-              listItems: {
-                orderBy: {
-                  order: "asc",
-                },
-              },
-            },
-          },
-        },
-      });
-
-      return {
-        view: selectedView,
-        lists: viewLists.map((viewList) => ({
-          ...viewList.list,
-          order: viewList.order,
-        })),
-      };
+      return await getListsForView(userId, selectedDefaultView.id);
     }
   ),
 
@@ -221,32 +235,18 @@ export const viewRouter = createTRPCRouter({
           });
         });
 
-        // Keep recompute outside the interactive transaction to avoid the
-        // default Prisma transaction timeout on large production accounts.
-        await recomputeCustomView(userId, view.id);
-
-        return await db.view.findFirstOrThrow({
+        const createdView = await db.view.findFirstOrThrow({
           where: {
             id: view.id,
             userId,
           },
-          include: {
-            viewTags: {
-              include: {
-                tag: true,
-              },
-            },
-            viewLists: {
-              select: {
-                listId: true,
-                order: true,
-              },
-              orderBy: {
-                order: "asc",
-              },
-            },
-          },
+          include: viewInclude,
         });
+
+        return {
+          ...createdView,
+          viewLists: [],
+        };
       } catch (error) {
         if (
           isPrismaKnownError(error) &&
@@ -322,7 +322,7 @@ export const viewRouter = createTRPCRouter({
           throw new TRPCError({ code: "FORBIDDEN" });
         }
 
-        const view = await tx.view.findFirst({
+        const existingView = await tx.view.findFirst({
           where: {
             id,
             userId,
@@ -331,7 +331,7 @@ export const viewRouter = createTRPCRouter({
           select: { id: true },
         });
 
-        if (!view) {
+        if (!existingView) {
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
@@ -352,27 +352,15 @@ export const viewRouter = createTRPCRouter({
           });
         }
 
-        await recomputeCustomView(userId, id, tx);
-
-        return await tx.view.findUniqueOrThrow({
+        const view = await tx.view.findUniqueOrThrow({
           where: { id },
-          include: {
-            viewTags: {
-              include: {
-                tag: true,
-              },
-            },
-            viewLists: {
-              select: {
-                listId: true,
-                order: true,
-              },
-              orderBy: {
-                order: "asc",
-              },
-            },
-          },
+          include: viewInclude,
         });
+
+        return {
+          ...view,
+          viewLists: [],
+        };
       });
     }),
 
@@ -470,10 +458,10 @@ export const viewRouter = createTRPCRouter({
           id: viewId,
           userId,
         },
-        select: { id: true },
+        select: { id: true, type: true },
       });
 
-      if (!view) {
+      if (!view || view.type !== ViewType.ALL_LISTS) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
