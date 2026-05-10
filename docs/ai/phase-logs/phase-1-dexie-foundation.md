@@ -274,3 +274,18 @@ A checkpoint can merge into `phase/dexie-foundation` only when:
 - Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors and confirmed `localDbSchemaVersion`, `localDbInitializedAt`, and `lastLocalDbHealthCheckAt` metadata exist in `tidy-local-db`. No authenticated dashboard validation was run because dashboard behavior was not changed.
 - Known risks: This is metadata-only Dexie integration. It does not make views, lists, items, tags, relations, or outbox operations local-first. It does not add sync UI, sync workers, replay, rollback, conflict handling, or server idempotency. IndexedDB failures are reported by helper snapshots but are not surfaced to users yet.
 - Next checkpoint: `checkpoint/expand-dexie-coverage`.
+
+### checkpoint/expand-dexie-coverage
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/local-db-diagnostics.ts`, `tests/unit/local-db-diagnostics.test.ts`, `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:e2e:smoke`, `npm run test:ci`, and `npm run build` passed.
+- Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors, confirmed `localDbSchemaVersion` is `1`, and confirmed the expected Dexie stores exist: `views`, `lists`, `listItems`, `tags`, `viewTags`, `listTags`, `viewLists`, `outboxOperations`, and `metadata`. Authenticated E2E was skipped because dashboard behavior was not changed.
+- Known risks: Diagnostics are read-only and do not validate real dashboard local-first behavior. Phase 1 still has no sync worker, outbox replay, operation coalescing, conflict handling, rollback recovery, or user-facing sync status UI.
+- Next checkpoint: Phase 1 final review / merge gate.
+
+## Final Phase 1 Merge-Gate Note
+- Do not merge `phase/dexie-foundation` into `master` until `npm run test:ci` passes.
+- `npm run build` should pass when the environment supports Prisma and Next build requirements.
+- Manual dashboard regression should be documented before the phase branch merge.
+- No partially working sync worker, outbox replay, or dashboard local-first source-of-truth behavior should be present in the merge.
