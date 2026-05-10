@@ -5,6 +5,8 @@ This is the first file future Codex sessions should read for Tidy. Its job is to
 
 Every implementation PR must update the relevant `docs/ai/*.md` file and `docs/ai/backlog.md` in the same PR.
 
+Every implementation must add or update matching tests in the same branch. Read `docs/testing-validation.md` before implementation work so the happy path, common cases, edge cases, unit coverage, and E2E coverage are identified before coding.
+
 Use `docs/ai/task-routing-guide.md` before opening many files. The routing guide is intended to keep future AI sessions focused on the smallest relevant docs and source files. `docs/ai/codex-prompt-template.md` provides a reusable prompt format for handing focused implementation tasks from ChatGPT to Codex.
 
 Read `docs/ai/16-local-first-product-roadmap.md` before implementing major sync, persistence, offline, rollback, or product-readiness work.
@@ -95,6 +97,7 @@ The main product surface is the authenticated dashboard:
 
 ## What Codex Should Read Before Editing
 - Any code task: this file, `task-routing-guide.md`, `12-implementation-rules.md`, and `13-testing-and-validation.md`.
+- Any implementation task: also read `docs/testing-validation.md` before coding and plan matching tests.
 - Use `task-routing-guide.md` first, then read only the smallest matching feature docs.
 - Dashboard/list/item task: `05-dashboard-state-cache.md`, `06-optimistic-sync.md`, `07-drag-and-drop.md`, `09-ui-components.md`.
 - Tags/views task: `05-dashboard-state-cache.md`, `08-views-tags-system.md`, `03-data-model.md`.
