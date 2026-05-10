@@ -28,6 +28,7 @@ import {
   applyTagChangeToCaches,
   DashboardKeys,
   DashboardSnapshot,
+  invalidateViewPayloadQueries,
   reconcileAffectedViewLists,
   reconcileSavedListTags,
   ViewsCache,
@@ -244,6 +245,7 @@ export default function ListTagPicker({
             dashboardKeys,
             result.affectedViews
           );
+          await invalidateViewPayloadQueries(queryClient);
         })
         .catch((error) => {
           if (flushVersion === tagOptimisticVersionRef.current) {
@@ -396,6 +398,7 @@ export default function ListTagPicker({
     },
     async onSuccess(result) {
       reconcileAffectedViewLists(queryClient, dashboardKeys, result.affectedViews);
+      await invalidateViewPayloadQueries(queryClient);
     },
   }));
 
