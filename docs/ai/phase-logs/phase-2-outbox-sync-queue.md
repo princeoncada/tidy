@@ -284,3 +284,12 @@ No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Pha
 - Manual validation: Not required for this checkpoint because coalescing is pure logic and is not connected to UI, mutations, tRPC, TanStack Query, drag/drop, sync replay, or server endpoints.
 - Known risks: Coalescing currently handles generic operation-level rules only. It does not apply discard markers to Dexie, inspect operation-specific payload semantics, validate entity ownership, or guarantee server replay safety. Move/reorder coalescing assumes the latest operation payload represents the final visible state.
 - Next checkpoint: `checkpoint/sync-replay-client`.
+
+### checkpoint/sync-replay-client
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/sync-replay-client.ts`, `tests/unit/sync-replay-client.test.ts`, `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:ci`, and `npm run build` passed.
+- Manual validation: Not required for this checkpoint because replay is an isolated service with injected transport and is not connected to UI, mutations, tRPC, TanStack Query, drag/drop, automatic background jobs, or server endpoints.
+- Known risks: Replay currently calls an injected transport only. It does not define the server endpoint contract, validate server ownership, auto-run in the app, persist advanced ordering constraints, or surface failed operations to users. Failed operations are isolated and retried later, but entity-level dependency ordering still needs endpoint/replay contract review.
+- Next checkpoint: `checkpoint/sync-endpoint-contract`.
