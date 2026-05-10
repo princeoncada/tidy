@@ -12,6 +12,7 @@ Use `docs/ai/task-routing-guide.md` before opening many files. The routing guide
 Read `docs/ai/16-local-first-product-roadmap.md` before implementing major sync, persistence, offline, rollback, or product-readiness work.
 
 ## Mandatory Branch Isolation For Architecture Work
+
 Before implementing:
 
 - local-first persistence
@@ -70,6 +71,7 @@ The main product surface is the authenticated dashboard:
 - `docs/ai/backlog.md`: living implementation backlog.
 
 ## Data Flow
+
 1. Browser renders `app/layout.tsx`, which mounts `TRPCReactProvider`, `QueryClientProvider`, and `AuthSync`.
 2. `/dashboard` is guarded by `proxy.ts`, which calls `lib/supabase/proxy.ts` to refresh/verify Supabase auth.
 3. `app/dashboard/page.tsx` renders `components/Dashboard.tsx`.
