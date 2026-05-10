@@ -302,3 +302,12 @@ No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Pha
 - Manual validation: Not required for this checkpoint because this adds contract validation helpers only. No tRPC router, API route, UI, mutation, TanStack Query, drag/drop, or automatic replay behavior was connected.
 - Known risks: The live server endpoint is still not implemented. Contract validation checks request shape, idempotency key, authenticated user match, payload size, replayable status, entity/operation compatibility, and basic payload requirements, but it does not yet validate database ownership, entity existence, operation permission, order values against persisted state, or idempotency persistence.
 - Next checkpoint: `checkpoint/basic-sync-status-surface`.
+
+### checkpoint/basic-sync-status-surface
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/sync/sync-status-surface.ts`, `tests/unit/sync-status-surface.test.ts`, `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:e2e:smoke`, `npm run test:ci`, and `npm run build` passed.
+- Manual validation: Not required for this checkpoint because this adds a hidden/debug status display model only. No visible UI was mounted, and no tRPC, TanStack Query, drag/drop, mutation, automatic replay, or dashboard source-of-truth behavior was changed.
+- Known risks: The status surface summarizes operation counts only. It does not read from Dexie, subscribe to live queue changes, expose a visible indicator, provide retry controls, or show failed operation details yet.
+- Next checkpoint: `checkpoint/phase-two-regression-docs`.
