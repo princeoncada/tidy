@@ -43,6 +43,7 @@ The project explores advanced optimistic UI patterns, scalable frontend architec
 🚧 In active development.
 
 The project is continuously evolving with improvements to:
+
 - Real-time interaction handling
 - Optimistic mutation queues
 - Drag-and-drop UX
