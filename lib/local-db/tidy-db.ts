@@ -1,21 +1,47 @@
 import Dexie, { type Table } from "dexie";
 
+import type {
+  LocalDbMetadata,
+  LocalList,
+  LocalListItem,
+  LocalListTag,
+  LocalTag,
+  LocalView,
+  LocalViewList,
+  LocalViewTag,
+} from "./local-schema";
+
 export const TIDY_LOCAL_DB_NAME = "tidy-local-db";
 
-export type LocalDbMetadata = {
-  key: string;
-  value: string;
-  updatedAt: string;
-};
-
 class TidyLocalDb extends Dexie {
+  views!: Table<LocalView, string>;
+  lists!: Table<LocalList, string>;
+  listItems!: Table<LocalListItem, string>;
+  tags!: Table<LocalTag, string>;
+  viewTags!: Table<LocalViewTag, string>;
+  listTags!: Table<LocalListTag, string>;
+  viewLists!: Table<LocalViewList, string>;
   metadata!: Table<LocalDbMetadata, string>;
 
   constructor() {
     super(TIDY_LOCAL_DB_NAME);
 
-    // Foundation-only store. Future checkpoints will add real local entity tables.
+    // Foundation-only schema. Future checkpoints will add repositories and app integration.
     this.version(1).stores({
+      views:
+        "clientId, serverId, userId, syncStatus, updatedAt, deletedAt, [userId+serverId], [userId+syncStatus], [userId+type], [userId+order]",
+      lists:
+        "clientId, serverId, userId, syncStatus, updatedAt, deletedAt, [userId+serverId], [userId+syncStatus]",
+      listItems:
+        "clientId, serverId, userId, listClientId, listServerId, syncStatus, updatedAt, deletedAt, [userId+serverId], [userId+syncStatus], [userId+listClientId], [listClientId+order]",
+      tags:
+        "clientId, serverId, userId, syncStatus, updatedAt, deletedAt, [userId+serverId], [userId+syncStatus], [userId+name]",
+      viewTags:
+        "clientId, serverId, userId, viewClientId, viewServerId, tagClientId, tagServerId, syncStatus, updatedAt, deletedAt, [userId+syncStatus], [viewClientId+tagClientId], [tagClientId+viewClientId]",
+      listTags:
+        "clientId, serverId, userId, listClientId, listServerId, tagClientId, tagServerId, syncStatus, updatedAt, deletedAt, [userId+syncStatus], [listClientId+tagClientId], [tagClientId+listClientId]",
+      viewLists:
+        "clientId, serverId, userId, viewClientId, viewServerId, listClientId, listServerId, syncStatus, updatedAt, deletedAt, [userId+syncStatus], [viewClientId+listClientId], [listClientId+viewClientId], [viewClientId+order]",
       metadata: "key",
     });
   }
