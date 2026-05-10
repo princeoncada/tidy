@@ -22,6 +22,8 @@ test("create a view if the feature exists in the current app", async ({ page }) 
   await createList(page, listName);
   await createTag(page, listName, tagName);
   await createView(page, viewName, tagName);
+  await page.reload();
+  await expect(page.getByTestId("view-card").filter({ hasText: viewName })).toBeVisible();
   await deleteList(page, listName);
 });
 
@@ -34,6 +36,7 @@ test("verify created view appears", async ({ page }) => {
   await createTag(page, listName, tagName);
   await createView(page, viewName, tagName);
   await expect(page.getByTestId("view-card").filter({ hasText: viewName })).toBeVisible();
+  await expect(page.getByTestId("view-card").filter({ hasText: uniqueTestName("missing-view") })).toHaveCount(0);
   await deleteList(page, listName);
 });
 
@@ -46,6 +49,8 @@ test("verify view can be selected/opened", async ({ page }) => {
   await createTag(page, listName, tagName);
   await createView(page, viewName, tagName);
   await page.getByTestId("view-card").filter({ hasText: viewName }).getByRole("button", { name: viewName }).click();
+  await expect(page.getByTestId("list-card").filter({ hasText: listName })).toBeVisible();
+  await page.reload();
   await expect(page.getByTestId("list-card").filter({ hasText: listName })).toBeVisible();
   await deleteList(page, listName);
 });
@@ -64,4 +69,6 @@ test("basic tag-filtered view", async ({ page }) => {
   await expect(page.getByTestId("list-card").filter({ hasText: matchingList })).toBeVisible();
   await expect(page.getByTestId("list-card").filter({ hasText: hiddenList })).toHaveCount(0);
   await deleteList(page, matchingList);
+  await page.getByRole("button", { name: /all lists/i }).first().click();
+  await deleteList(page, hiddenList);
 });
