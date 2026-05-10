@@ -247,3 +247,12 @@ A checkpoint can merge into `phase/dexie-foundation` only when:
 - Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors. Outbox types and the Dexie store remain disconnected from UI, tRPC, TanStack Query, drag/drop, repositories, sync workers, and server replay.
 - Known risks: Outbox payloads are JSON-compatible but not yet entity-specific. Operation coalescing, replay ordering, idempotency semantics, retry behavior, and user-facing sync failure handling are intentionally deferred. The outbox store is part of the pre-release Dexie `version(1)` schema.
 - Next checkpoint: `checkpoint/local-repository-helpers`.
+
+### checkpoint/local-repository-helpers
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/local-repositories.ts`, `tests/unit/local-repositories.test.ts`, `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- Validation run: `npm run typecheck` passed; `npm run lint` passed; `npm run test` passed with 2 files and 13 tests; `npm run test:ci` passed including 4 non-auth E2E tests; `npm run build` passed.
+- Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors. Repository helpers remain disconnected from UI, tRPC, TanStack Query, drag/drop, sync workers, and server replay.
+- Known risks: Dexie-backed `put*` helpers are thin wrappers and are not integrated or E2E-covered yet because no user-facing behavior changed. Outbox creation is generic and does not yet enforce entity-specific payload contracts. No repository read/query helpers, transactions, sync replay, or conflict handling exist yet.
+- Next checkpoint: `checkpoint/sync-status-model`.
