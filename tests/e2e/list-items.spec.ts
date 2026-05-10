@@ -1,7 +1,7 @@
 import { test } from "@playwright/test";
 
 import { createItem, createList, deleteItem, renameItem } from "./utils/app";
-import { expectItemVisible, reloadAndExpectPersisted } from "./utils/assertions";
+import { expectItemNotVisible, expectItemVisible, reloadAndExpectMissing, reloadAndExpectPersisted } from "./utils/assertions";
 import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 
 let consoleErrors: string[];
@@ -21,6 +21,7 @@ test("create item inside a list", async ({ page }) => {
   await createList(page, listName);
   await createItem(page, listName, itemName);
   await expectItemVisible(page, itemName);
+  await reloadAndExpectPersisted(page, itemName);
   await cleanupNamedList(page, listName);
 });
 
@@ -29,6 +30,8 @@ test("create multiple items", async ({ page }) => {
   const items = [uniqueTestName("item-a"), uniqueTestName("item-b"), uniqueTestName("item-c")];
   await createList(page, listName);
   for (const item of items) await createItem(page, listName, item);
+  for (const item of items) await expectItemVisible(page, item);
+  await page.reload();
   for (const item of items) await expectItemVisible(page, item);
   await cleanupNamedList(page, listName);
 });
@@ -40,6 +43,8 @@ test("rename item if supported", async ({ page }) => {
   await createList(page, listName);
   await createItem(page, listName, itemName);
   await renameItem(page, itemName, renamedItem);
+  await reloadAndExpectPersisted(page, renamedItem);
+  await expectItemNotVisible(page, itemName);
   await cleanupNamedList(page, listName);
 });
 
@@ -49,6 +54,7 @@ test("delete item if supported", async ({ page }) => {
   await createList(page, listName);
   await createItem(page, listName, itemName);
   await deleteItem(page, itemName);
+  await reloadAndExpectMissing(page, itemName);
   await cleanupNamedList(page, listName);
 });
 
