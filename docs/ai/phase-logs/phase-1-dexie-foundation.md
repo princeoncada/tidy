@@ -265,3 +265,12 @@ A checkpoint can merge into `phase/dexie-foundation` only when:
 - Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors. Sync status constants and guards remain disconnected from UI, tRPC, TanStack Query, drag/drop, Dexie repository behavior, sync workers, and server replay.
 - Known risks: Status helpers define only local type guards and terminal/retryable semantics. They do not enforce state transitions, operation replay order, conflict handling, user-visible sync status, or server idempotency yet.
 - Next checkpoint: `checkpoint/first-dexie-integration`.
+
+### checkpoint/first-dexie-integration
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/metadata-repository.ts`, `hooks/use-local-db-health-check.ts`, `trpc/client.tsx`, `tests/unit/local-db-metadata.test.ts`, `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- Validation run: `npm run typecheck` first failed because test fakes depended on the full Dexie `Table` type; the helper dependency was narrowed to the `get`/`put` methods it uses. After that fix, `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:e2e:smoke`, `npm run test:ci`, and `npm run build` passed.
+- Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors and confirmed `localDbSchemaVersion`, `localDbInitializedAt`, and `lastLocalDbHealthCheckAt` metadata exist in `tidy-local-db`. No authenticated dashboard validation was run because dashboard behavior was not changed.
+- Known risks: This is metadata-only Dexie integration. It does not make views, lists, items, tags, relations, or outbox operations local-first. It does not add sync UI, sync workers, replay, rollback, conflict handling, or server idempotency. IndexedDB failures are reported by helper snapshots but are not surfaced to users yet.
+- Next checkpoint: `checkpoint/expand-dexie-coverage`.
