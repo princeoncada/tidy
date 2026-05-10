@@ -8,6 +8,53 @@ This is a docs-only rules file. It reflects the current architecture and the use
 
 Every future implementation must update the relevant docs and backlog in the same PR.
 
+## Commit Discipline
+
+Default rules:
+
+- Prefer one commit per file for documentation and small focused changes.
+- For code changes, prefer one commit per logical unit when a single file is not enough.
+- Do not mix unrelated files in the same commit.
+- Do not combine unrelated docs updates, feature implementation, refactors, dependency changes, and formatting cleanup in one commit.
+- Keep commits small, scoped, understandable, and revertable.
+- Architecture phase branches must avoid large dump commits.
+- Do not use one broad commit for a whole local-first phase, sync rewrite, query split, or rollback rewrite.
+- If a commit cannot be described with one direct sentence, split it.
+
+Default commit pattern:
+
+1. Commit the new or updated roadmap/doc file.
+2. Commit entrypoint/backlog references separately.
+3. Commit source changes by feature area.
+4. Commit validation/test updates separately.
+
+Commit message format:
+
+```text
+type(scope): short imperative summary
+```
+
+Examples:
+
+```text
+docs(ai): add local-first roadmap
+docs(ai): add phase branch rules
+docs(ai): document commit discipline
+feat(sync): add outbox operation model
+fix(dnd): validate target list ownership
+test(cache): cover dashboard projection helpers
+refactor(cache): centralize dashboard query keys
+```
+
+Avoid vague dump commit messages:
+
+```text
+update stuff
+local-first work
+big sync changes
+wip
+```
+
 ## Important Files
 - `AGENTS.md`: local instruction about Next.js docs.
 - `docs/ai/00-ai-entrypoint.md`: reading path.
