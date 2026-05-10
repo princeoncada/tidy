@@ -2,7 +2,6 @@ import { db } from "@/lib/db"
 import { createTRPCRouter, protectedProcedure } from "../init"
 import z from "zod"
 import { TRPCError } from "@trpc/server"
-import { ViewType } from "@/app/generated/prisma/client"
 import {
   ensureAllListsView,
   ensureDefaultView,
@@ -65,23 +64,6 @@ export const listRouter = createTRPCRouter({
         selectedView.type === "CUSTOM"
           ? selectedView.viewTags.map((viewTag) => viewTag.tagId)
           : [];
-      const matchingCustomViews = viewTagIds.length > 0
-        ? await tx.view.findMany({
-          where: {
-            userId,
-            type: ViewType.CUSTOM,
-          },
-          select: {
-            id: true,
-            viewTags: {
-              select: {
-                tagId: true,
-              },
-            },
-          },
-        })
-        : [];
-
       const createdList = await tx.list.create({
         data: {
           id: input.id,
@@ -110,25 +92,12 @@ export const listRouter = createTRPCRouter({
         },
       });
 
-      const customViewIds = matchingCustomViews
-        .filter((view) =>
-          view.viewTags.length > 0 &&
-          view.viewTags.every((viewTag) => viewTagIds.includes(viewTag.tagId))
-        )
-        .map((view) => view.id)
-        .filter((viewId) => viewId !== allListsView.id);
-
       await tx.viewList.createMany({
         data: [{
           viewId: allListsView.id,
           listId: createdList.id,
           order: topAllViewList ? topAllViewList.order - 1 : 0,
-        },
-        ...customViewIds.map((viewId) => ({
-          viewId,
-          listId: createdList.id,
-          order: topAllViewList ? topAllViewList.order - 1 : 0,
-        }))],
+        }],
         skipDuplicates: true,
       });
 
