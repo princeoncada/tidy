@@ -7,6 +7,29 @@ Every implementation PR must update the relevant `docs/ai/*.md` file and `docs/a
 
 Use `docs/ai/task-routing-guide.md` before opening many files. The routing guide is intended to keep future AI sessions focused on the smallest relevant docs and source files. `docs/ai/codex-prompt-template.md` provides a reusable prompt format for handing focused implementation tasks from ChatGPT to Codex.
 
+Read `docs/ai/16-local-first-product-roadmap.md` before implementing major sync, persistence, offline, rollback, or product-readiness work.
+
+## Mandatory Branch Isolation For Architecture Work
+Before implementing:
+
+- local-first persistence
+- sync systems
+- rollback rewrites
+- reorder rewrites
+- offline support
+- database architecture changes
+- heavy query refactors
+- background job systems
+
+You MUST:
+
+1. Create a dedicated `phase/*` branch.
+2. Keep the implementation isolated.
+3. Validate stability before merge.
+4. Avoid direct development on master/main.
+
+This is mandatory for all future product-readiness phases.
+
 ## Current Implementation
 Tidy is a Next.js 16, React 19, TypeScript strict productivity app with Supabase auth, tRPC 11, TanStack Query 5, Prisma 7, PostgreSQL, dnd-kit, shadcn/radix, and Tailwind v4.
 
@@ -41,6 +64,7 @@ The main product surface is the authenticated dashboard:
 - `docs/ai/13-testing-and-validation.md`: what to run and what to manually verify.
 - `docs/ai/14-production-readiness.md`: deployment and operational gaps.
 - `docs/ai/15-decision-log.md`: important decisions and why they exist.
+- `docs/ai/16-local-first-product-roadmap.md`: product-readiness roadmap for local-first sync, outbox queues, rollback safety, scale prep, security, observability, and background jobs.
 - `docs/ai/backlog.md`: living implementation backlog.
 
 ## Data Flow
@@ -77,6 +101,7 @@ The main product surface is the authenticated dashboard:
 - Auth/API task: `04-auth-and-api.md`, `03-data-model.md`.
 - Prisma/database task: `03-data-model.md`, `14-production-readiness.md`.
 - Mobile/PWA task: `10-mobile-and-pwa-readiness.md`, `09-ui-components.md`.
+- Major sync, persistence, offline, rollback, or product-readiness task: `16-local-first-product-roadmap.md`, `06-optimistic-sync.md`, `14-production-readiness.md`.
 
 ## What Codex Must Update After Editing
 - Update the most relevant `docs/ai/*.md` file with changed behavior, files, data flow, invariants, or risks.
