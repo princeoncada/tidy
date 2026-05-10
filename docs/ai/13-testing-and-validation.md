@@ -8,11 +8,16 @@ There is no dedicated automated test suite in `package.json`. Available scripts:
 
 - `npm run lint`: ESLint with Next core web vitals and TypeScript config.
 - `npm run typecheck`: `tsc --noEmit`.
+- `npm run test`: Vitest unit tests.
+- `npm run test:e2e`: Playwright E2E tests.
+- `npm run test:all`: Vitest followed by Playwright.
 - `npm run build`: `prisma generate && next build`.
 - `npm run dev`: local Next dev server.
 - `npm start`: production server after build.
 
-Approved local commands in this Codex environment include `npm run typecheck` and `npm run lint`.
+Dashboard E2E tests require `TIDY_E2E_STORAGE_STATE` to point to an authenticated Playwright storage-state file. Without it, dashboard tests skip and public smoke tests still run.
+
+See `docs/testing.md` and `ai-docs/testing-workflow.md` before changing test infrastructure.
 
 ## Important Files
 - `package.json`: scripts and dependency versions.
@@ -21,11 +26,17 @@ Approved local commands in this Codex environment include `npm run typecheck` an
 - `prisma.config.ts`: Prisma config.
 - `prisma/schema.prisma`: generate/build dependency.
 - `trpc/query-client.ts`: query defaults that affect runtime validation.
+- `playwright.config.ts`: E2E config and dev server startup.
+- `vitest.config.ts`: unit test config.
+- `tests/e2e/*`: Playwright tests and helpers.
+- `tests/unit/*`: Vitest unit tests.
 
 ## Data Flow
 Suggested validation by change type:
 
 - Docs-only: no build required unless links/reference names are uncertain.
+- Pure helper/cache logic: `npm run test`.
+- Browser/dashboard behavior: targeted `npm run test:e2e -- <spec>` first, then `npm run test:e2e`.
 - Type-only or router/component change: `npm run typecheck` and `npm run lint`.
 - Prisma/schema change: `prisma generate`, typecheck, migration review, build.
 - Next route/layout/config change: read local Next docs if available, then typecheck/build.
