@@ -1,21 +1,75 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-import { authStorageState, gotoDashboardOrSkip } from "./utils/seed";
+import { createItem, createList } from "./utils/app";
+import { dragByMouse } from "./utils/drag";
+import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
+import { testIds } from "./utils/test-ids";
 
-test.use(authStorageState ? { storageState: authStorageState } : {});
+let consoleErrors: string[];
 
 test.beforeEach(async ({ page }) => {
-  await gotoDashboardOrSkip(page);
+  consoleErrors = collectConsoleErrors(page);
+  await gotoDashboard(page);
 });
 
-test("reorder lists if drag/drop is currently implemented", async () => {
-  test.skip(true, "TODO: add deterministic dnd-kit pointer helper for list drag handles before enabling.");
+test.afterEach(async () => {
+  expectNoConsoleErrors(consoleErrors);
 });
 
-test("move item between lists if implemented", async () => {
-  test.skip(true, "TODO: add deterministic dnd-kit pointer helper for item drag handles before enabling.");
+test("reorder lists if drag/drop is currently implemented", async ({ page }) => {
+  const first = uniqueTestName("drag-list-first");
+  const second = uniqueTestName("drag-list-second");
+  await createList(page, first);
+  await createList(page, second);
+
+  const firstCard = page.getByTestId(testIds.listCard).filter({ hasText: first }).first();
+  const secondCard = page.getByTestId(testIds.listCard).filter({ hasText: second }).first();
+  await dragByMouse(
+    page,
+    firstCard.getByTestId(testIds.listDragHandle),
+    secondCard.getByTestId(testIds.listDragHandle)
+  );
+
+  await expect(page.getByTestId(testIds.listCard).filter({ hasText: first })).toBeVisible();
+  await expect(page.getByTestId(testIds.listCard).filter({ hasText: second })).toBeVisible();
+  await cleanupNamedList(page, first);
+  await cleanupNamedList(page, second);
 });
 
-test("move item into empty list if implemented", async () => {
-  test.skip(true, "TODO: add deterministic dnd-kit pointer helper and empty-list fixture before enabling.");
+test("move item between lists if implemented", async ({ page }) => {
+  const sourceList = uniqueTestName("move-source");
+  const targetList = uniqueTestName("move-target");
+  const itemName = uniqueTestName("move-item");
+  await createList(page, sourceList);
+  await createList(page, targetList);
+  await createItem(page, sourceList, itemName);
+
+  const item = page.getByTestId(testIds.listItem).filter({ hasText: itemName }).first();
+  const targetCard = page.getByTestId(testIds.listCard).filter({ hasText: targetList }).first();
+  await dragByMouse(
+    page,
+    item.getByTestId(testIds.itemDragHandle),
+    targetCard.getByTestId(testIds.listDropZone)
+  );
+
+  await expect(targetCard.getByTestId(testIds.listItem).filter({ hasText: itemName })).toBeVisible();
+  await cleanupNamedList(page, sourceList);
+  await cleanupNamedList(page, targetList);
+});
+
+test("move item into empty list if implemented", async ({ page }) => {
+  const sourceList = uniqueTestName("empty-move-source");
+  const targetList = uniqueTestName("empty-move-target");
+  const itemName = uniqueTestName("empty-move-item");
+  await createList(page, sourceList);
+  await createList(page, targetList);
+  await createItem(page, sourceList, itemName);
+
+  const item = page.getByTestId(testIds.listItem).filter({ hasText: itemName }).first();
+  const targetCard = page.getByTestId(testIds.listCard).filter({ hasText: targetList }).first();
+  await dragByMouse(page, item.getByTestId(testIds.itemDragHandle), targetCard.getByTestId(testIds.listDropZone));
+
+  await expect(targetCard.getByTestId(testIds.listItem).filter({ hasText: itemName })).toBeVisible();
+  await cleanupNamedList(page, sourceList);
+  await cleanupNamedList(page, targetList);
 });

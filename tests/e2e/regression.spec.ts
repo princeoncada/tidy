@@ -2,12 +2,17 @@ import { test } from "@playwright/test";
 
 import { createItem, createList } from "./utils/app";
 import { expectNoDuplicateText, reloadAndExpectPersisted } from "./utils/assertions";
-import { authStorageState, cleanupNamedList, gotoDashboardOrSkip, uniqueTestName } from "./utils/seed";
+import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 
-test.use(authStorageState ? { storageState: authStorageState } : {});
+let consoleErrors: string[];
 
 test.beforeEach(async ({ page }) => {
-  await gotoDashboardOrSkip(page);
+  consoleErrors = collectConsoleErrors(page);
+  await gotoDashboard(page);
+});
+
+test.afterEach(async () => {
+  expectNoConsoleErrors(consoleErrors);
 });
 
 test("rapid create 5 lists, reload, and verify no duplicate visible names", async ({ page }) => {

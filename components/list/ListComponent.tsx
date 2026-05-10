@@ -431,6 +431,7 @@ const ListComponent = ({
             <div className="flex flex-col flex-1">
               <div className="flex items-start gap-3 px-4">
                 <div
+                  data-testid="list-drag-handle"
                   ref={handleRef}
                   className="-mt-1 shrink-0 cursor-grab active:cursor-grabbing touch-none select-none p-2 -m-2"
                 >
@@ -477,6 +478,7 @@ const ListComponent = ({
               })}>
 
                 <ScrollArea
+                  data-testid="list-drop-zone"
                   ref={dropRef}
                   className={cn("h-60! min-h-45 w-full touch-pan-y relative")}
                 >
@@ -488,6 +490,7 @@ const ListComponent = ({
                     )}
                   >
                     <div
+                      data-testid="item-drag-handle-placeholder"
                       className="touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-gray-400"
                     >
                       <GripVertical className="w-3.5 h-3.5" />

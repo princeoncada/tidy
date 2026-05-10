@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-import { authStorageState, gotoDashboardOrSkip } from "./utils/seed";
-
-test.use(authStorageState ? { storageState: authStorageState } : {});
-
 test("app loads successfully", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Simple Todo App")).toBeVisible();
@@ -23,6 +19,7 @@ test("no critical console errors on initial page load", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test("main app shell is visible", async ({ page }) => {
-  await gotoDashboardOrSkip(page);
+test("login page loads successfully", async ({ page }) => {
+  await page.goto("/login");
+  await expect(page.getByText("Login to your account")).toBeVisible();
 });

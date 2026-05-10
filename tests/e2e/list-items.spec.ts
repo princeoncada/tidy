@@ -2,12 +2,17 @@ import { test } from "@playwright/test";
 
 import { createItem, createList, deleteItem, renameItem } from "./utils/app";
 import { expectItemVisible, reloadAndExpectPersisted } from "./utils/assertions";
-import { authStorageState, cleanupNamedList, gotoDashboardOrSkip, uniqueTestName } from "./utils/seed";
+import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 
-test.use(authStorageState ? { storageState: authStorageState } : {});
+let consoleErrors: string[];
 
 test.beforeEach(async ({ page }) => {
-  await gotoDashboardOrSkip(page);
+  consoleErrors = collectConsoleErrors(page);
+  await gotoDashboard(page);
+});
+
+test.afterEach(async () => {
+  expectNoConsoleErrors(consoleErrors);
 });
 
 test("create item inside a list", async ({ page }) => {

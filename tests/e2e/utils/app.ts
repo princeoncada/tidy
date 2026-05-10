@@ -49,9 +49,18 @@ export async function deleteItem(page: Page, itemName: string) {
   await expect(item).toBeHidden({ timeout: 10_000 });
 }
 
-export async function createView(page: Page, viewName: string) {
+export async function createTag(page: Page, listName: string, tagName: string) {
+  const card = page.getByTestId(testIds.listCard).filter({ hasText: listName }).first();
+  await card.getByTestId(testIds.tagSelector).click();
+  await page.getByPlaceholder("Search or create tag...").fill(tagName);
+  await page.getByText(`Create "${tagName}"`).click();
+  await expect(card.getByText(tagName, { exact: true })).toBeVisible();
+}
+
+export async function createView(page: Page, viewName: string, tagName: string) {
   await page.getByTestId(testIds.viewCreateButton).first().click();
   await page.getByLabel("Name").fill(viewName);
+  await page.getByText(tagName, { exact: true }).click();
   await page.getByTestId(testIds.saveViewButton).click();
   await expect(page.getByTestId(testIds.viewCard).filter({ hasText: viewName })).toBeVisible();
 }

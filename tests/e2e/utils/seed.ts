@@ -1,20 +1,31 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
-export const authStorageState = process.env.TIDY_E2E_STORAGE_STATE;
-export const hasAuthStorageState = Boolean(authStorageState);
+export const authStoragePath = "tests/.auth/user.json";
 
 export function uniqueTestName(prefix: string) {
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   return `e2e-${prefix}-${suffix}`;
 }
 
-export async function gotoDashboardOrSkip(page: Page) {
-  if (!hasAuthStorageState) {
-    test.skip(true, "Dashboard E2E requires TIDY_E2E_STORAGE_STATE with an authenticated Playwright storage state.");
-  }
-
+export async function gotoDashboard(page: Page) {
   await page.goto("/dashboard");
   await expect(page.getByTestId("app-shell")).toBeVisible();
+}
+
+export function collectConsoleErrors(page: Page) {
+  const errors: string[] = [];
+
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      errors.push(message.text());
+    }
+  });
+
+  return errors;
+}
+
+export function expectNoConsoleErrors(errors: string[]) {
+  expect(errors).toEqual([]);
 }
 
 export async function cleanupNamedList(page: Page, name: string) {

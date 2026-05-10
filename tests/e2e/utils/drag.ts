@@ -1,0 +1,21 @@
+import { expect, type Locator, type Page } from "@playwright/test";
+
+async function center(locator: Locator) {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+
+  return {
+    x: box!.x + box!.width / 2,
+    y: box!.y + box!.height / 2,
+  };
+}
+
+export async function dragByMouse(page: Page, source: Locator, target: Locator) {
+  const from = await center(source);
+  const to = await center(target);
+
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 12 });
+  await page.mouse.up();
+}

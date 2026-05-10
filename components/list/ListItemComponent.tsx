@@ -273,6 +273,7 @@ const ListItemComponent = ({
       )}
     >
       <div
+        data-testid="item-drag-handle"
         ref={itemHandle}
         className="cursor-grab active:cursor-grabbing touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-gray-400"
       >
