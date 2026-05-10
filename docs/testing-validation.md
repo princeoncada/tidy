@@ -1,6 +1,7 @@
 # Testing Validation
 
 ## Commands
+
 - `npm run typecheck`: TypeScript validation.
 - `npm run lint`: ESLint validation.
 - `npm run test`: Vitest unit tests.
@@ -11,6 +12,7 @@
 - `npm run test:ci`: typecheck, lint, unit tests, and non-authenticated E2E.
 
 ## Coverage
+
 - Unit tests cover pure dashboard cache projection and view matching logic.
 - Non-authenticated E2E covers public app load, login page load, initial console health, and unauthenticated dashboard redirect behavior.
 - Authenticated E2E covers list create/rename/delete/persistence, item create/rename/delete/persistence, rapid create regression checks, basic view/tag filtering, and drag/drop persistence.
@@ -51,6 +53,7 @@ Test rules:
 | Refactors | Existing behavior tests must keep passing; add focused tests for any extracted logic or changed public contract. |
 
 ## Common Case Checklist
+
 - Happy path.
 - Empty state.
 - Loading state.
@@ -61,6 +64,7 @@ Test rules:
 - Mobile or narrow viewport behavior when UI layout changes.
 
 ## Edge Case Checklist
+
 - Invalid input.
 - Null or undefined values.
 - Duplicate action.
@@ -116,6 +120,7 @@ npm run test:e2e:auth
 `tests/.auth/user.json` is local-only and ignored by git. Do not commit it.
 
 ## Manual Checklist
+
 - Login and confirm the dashboard loads.
 - Create, rename, delete, and refresh a list.
 - Create, rename, delete, and refresh an item.
@@ -135,6 +140,7 @@ A branch is complete only when:
 - Manual validation notes exist only for flows not yet automated.
 
 ## Known Gaps
+
 - Authenticated dashboard E2E requires a real Supabase test user and database; it is not part of `npm run test:e2e` or `npm run test:ci`.
 - API ownership/security tests are not implemented yet.
 - Drag/drop uses a mouse movement helper because dnd-kit is not reliably exercised by Playwright `locator.dragTo`.
