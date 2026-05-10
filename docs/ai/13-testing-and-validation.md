@@ -3,6 +3,8 @@
 ## Purpose
 Document available validation commands and high-value manual regression checks.
 
+No implementation is complete without validation. Every Codex implementation must update or add tests in the same branch. Before coding, identify the happy path, common cases, edge cases, unit coverage, and E2E coverage. After coding, run `npm run test:ci` and report exact results. Do not mark complete if tests were not added or updated unless clearly justified.
+
 ## Current Implementation
 The repo has Vitest unit tests and Playwright E2E tests. Available scripts:
 
@@ -20,7 +22,7 @@ The repo has Vitest unit tests and Playwright E2E tests. Available scripts:
 
 Dashboard E2E tests require `tests/.auth/user.json`, real Supabase public env vars, and `DATABASE_URL`. Generate storage state locally with `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` by running `npm run test:e2e:auth:setup`.
 
-See `docs/testing.md` and `ai-docs/testing-workflow.md` before changing test infrastructure.
+See `docs/testing-validation.md`, `docs/testing.md`, and `ai-docs/testing-workflow.md` before changing test infrastructure or implementing app behavior.
 
 ## Important Files
 - `package.json`: scripts and dependency versions.
@@ -38,6 +40,7 @@ See `docs/testing.md` and `ai-docs/testing-workflow.md` before changing test inf
 Suggested validation by change type:
 
 - Docs-only: no build required unless links/reference names are uncertain.
+- Any implementation: add or update matching tests before claiming completion.
 - Pure helper/cache logic: `npm run test`.
 - Public browser behavior: targeted `npm run test:e2e -- <spec>` first, then `npm run test:e2e`.
 - Authenticated dashboard behavior: targeted `npm run test:e2e:auth -- <spec>` first, then `npm run test:e2e:auth`.
@@ -63,6 +66,7 @@ Manual dashboard checks:
 
 ## Invariants
 - Validation should match risk. Small docs changes do not need a full build.
+- Tests should match the changed behavior. Unit tests are required for isolated logic; E2E tests are required for user-facing flows; bug fixes require regression tests.
 - Any server/API ownership fix should include a manual or automated unauthorized-access check if possible.
 - Any cache/sync change should include at least one refresh-after-save check.
 - Any drag/drop change should test canceled drag and final drop.
@@ -76,6 +80,7 @@ Manual dashboard checks:
 
 ## What Codex Should Read Before Editing
 - This file before finishing any code change.
+- `docs/testing-validation.md` before starting implementation.
 - Relevant feature doc for manual scenario list.
 - `package.json` before invoking scripts.
 
