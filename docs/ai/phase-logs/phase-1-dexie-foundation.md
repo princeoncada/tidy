@@ -256,3 +256,12 @@ A checkpoint can merge into `phase/dexie-foundation` only when:
 - Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors. Repository helpers remain disconnected from UI, tRPC, TanStack Query, drag/drop, sync workers, and server replay.
 - Known risks: Dexie-backed `put*` helpers are thin wrappers and are not integrated or E2E-covered yet because no user-facing behavior changed. Outbox creation is generic and does not yet enforce entity-specific payload contracts. No repository read/query helpers, transactions, sync replay, or conflict handling exist yet.
 - Next checkpoint: `checkpoint/sync-status-model`.
+
+### checkpoint/sync-status-model
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/sync-status.ts`, `tests/unit/sync-status.test.ts`, `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- Validation run: `npm run typecheck` passed; `npm run lint` passed; `npm run test` passed with 3 files and 20 tests; `npm run build` passed; `npm run test:ci` first failed when broad app types could not resolve cleanly while `npm run build` was generating Prisma output, then passed on rerun after build completed including 4 non-auth E2E tests.
+- Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors. Sync status constants and guards remain disconnected from UI, tRPC, TanStack Query, drag/drop, Dexie repository behavior, sync workers, and server replay.
+- Known risks: Status helpers define only local type guards and terminal/retryable semantics. They do not enforce state transitions, operation replay order, conflict handling, user-visible sync status, or server idempotency yet.
+- Next checkpoint: `checkpoint/first-dexie-integration`.
