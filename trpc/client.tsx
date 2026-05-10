@@ -11,6 +11,7 @@ import type { AppRouter } from './routers/_app';
 import SuperJSON from 'superjson';
 import { absoluteUrl } from '@/lib/utils';
 import { AuthSync } from '@/components/AuthSync';
+import { useLocalDbHealthCheck } from '@/hooks/use-local-db-health-check';
 
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 
@@ -41,6 +42,8 @@ export function TRPCReactProvider(
     children: React.ReactNode;
   }>,
 ) {
+  useLocalDbHealthCheck();
+
   // NOTE: Avoid useState when initializing the query client if you don't
   //       have a suspense boundary between this and the code that may
   //       suspend because React will throw away the client on the initial
