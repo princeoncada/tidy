@@ -1,0 +1,259 @@
+# Phase 2: Outbox Sync Queue
+
+## Goal
+Build a durable outbox sync queue on top of the Phase 1 Dexie foundation without replacing the whole app data flow at once.
+
+## Current Baseline
+Phase 1 added Dexie foundation, local schema, outbox types, local repositories, sync status helpers, and metadata/diagnostics coverage.
+
+The current UI still primarily uses the existing server/TanStack/tRPC flow. Lists, items, views, tags, drag/drop, and optimistic updates are not fully local-first yet.
+
+Phase 2 starts making queued local operations reliable, testable, and ready for gradual integration.
+
+## Branch Structure
+- Umbrella branch: `phase/outbox-sync-queue`
+- Checkpoint branches branch from `phase/outbox-sync-queue`.
+- Checkpoint branches merge back into `phase/outbox-sync-queue` only after validation.
+- `phase/outbox-sync-queue` merges into `master` only after all Phase 2 gates pass.
+
+Checkpoint branches:
+
+- `checkpoint/phase-two-roadmap`
+- `checkpoint/outbox-model-finalization`
+- `checkpoint/outbox-repository-helpers`
+- `checkpoint/outbox-coalescing-rules`
+- `checkpoint/sync-replay-client`
+- `checkpoint/sync-endpoint-contract`
+- `checkpoint/basic-sync-status-surface`
+- `checkpoint/phase-two-regression-docs`
+
+## Checkpoint Plan
+
+### 1. checkpoint/phase-two-roadmap
+Purpose:
+
+- Create this Phase 2 log.
+- Reconcile Phase 1 documentation status if needed.
+- No runtime behavior change.
+
+Validation:
+
+- `git status`
+- `git diff --stat`
+- Confirm docs-only change.
+
+### 2. checkpoint/outbox-model-finalization
+Purpose:
+
+- Finalize outbox operation shape and semantics.
+- Ensure `operationId`, `idempotencyKey`, `status`, and retry metadata are consistent.
+- Add type guards if needed.
+- No replay worker yet.
+
+Validation:
+
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+
+### 3. checkpoint/outbox-repository-helpers
+Purpose:
+Add isolated Dexie helpers for:
+
+- `enqueueOutboxOperation`
+- `getPendingOutboxOperations`
+- `markOutboxOperationSyncing`
+- `markOutboxOperationSynced`
+- `markOutboxOperationFailed`
+- `markOutboxOperationDiscarded`
+- `incrementRetryCount`
+- `getOutboxOperationById`
+
+Rules:
+
+- Helpers must be isolated.
+- Do not connect to UI yet.
+- Do not connect to mutations yet.
+
+Validation:
+
+- Add/update unit tests.
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+
+### 4. checkpoint/outbox-coalescing-rules
+Purpose:
+Add pure coalescing logic for pending operations.
+
+Coalescing rules:
+
+- Multiple updates on the same entity collapse to latest update.
+- Multiple reorders collapse to latest order payload.
+- Delete discards pending updates for the same entity.
+- Create followed by delete can be discarded if unsynced.
+- Move plus reorder should keep only final visible state where possible.
+- Coalescing must be pure/tested before runtime integration.
+
+Validation:
+
+- Add unit tests for each coalescing rule.
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+
+### 5. checkpoint/sync-replay-client
+Purpose:
+Add client-side sync replay foundation.
+
+Allowed:
+
+- A pure replay service that reads pending operations and calls a provided transport function.
+- Retry handling.
+- Status transitions.
+- No automatic background interval yet unless explicitly tiny and disabled by default.
+
+Required:
+
+- `idempotencyKey` must be passed to transport.
+- Replay must process in safe order.
+- Replay must stop or isolate failures safely.
+- Failed operations must not block unrelated safe operations unless ordering requires it.
+
+Do not:
+
+- Wire it into all app mutations yet.
+- Auto-run sync globally without guardrails.
+- Replace current server writes.
+
+Validation:
+
+- Unit tests with mocked transport.
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+
+### 6. checkpoint/sync-endpoint-contract
+Purpose:
+Add server-side sync endpoint contract or documented contract.
+
+Preferred:
+
+- Start with contract/types and validation helpers before full endpoint behavior.
+- If endpoint is added, keep it disabled or unused by UI unless explicitly scoped.
+- Validate `operationId`, `idempotencyKey`, user ownership, payload shape, entity type, and operation type.
+
+Do not:
+
+- Trust client ownership.
+- Accept unlimited payload size.
+- Replay destructive operations without validation.
+
+Validation:
+
+- Unit tests for validation helpers.
+- API tests if endpoint is added.
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+
+### 7. checkpoint/basic-sync-status-surface
+Purpose:
+Add a tiny non-invasive sync status surface.
+
+Allowed:
+
+- Dev-only diagnostics component, or
+- hidden/debug status utility, or
+- minimal non-blocking indicator.
+
+Do not:
+
+- Add complex failed operation drawer yet.
+- Redesign UI.
+- Change dashboard data source.
+
+Validation:
+
+- Smoke E2E.
+- Manual browser console check.
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+- `npm run test:e2e:smoke`
+
+### 8. checkpoint/phase-two-regression-docs
+Purpose:
+Finalize Phase 2 docs, validation evidence, known risks, and next phase recommendations.
+
+Validation:
+
+- `npm run test:ci`
+- `npm run build` if env supports it.
+- Manual dashboard regression.
+- Confirm no hidden local-first rewrite.
+
+## Phase 2 Manual Regression Checklist
+Use when runtime behavior changes:
+
+- App starts with `npm run dev`.
+- Landing page loads.
+- Login page loads.
+- Dashboard loads existing server data.
+- Create list still works.
+- Rename list still works.
+- Delete list still works.
+- Create item still works.
+- Rename item still works.
+- Delete item still works.
+- Reorder items within same list still works.
+- Move item across lists still works.
+- Drop item into empty list still works.
+- Reorder lists still works.
+- Switch views still works.
+- Refresh keeps expected server state.
+- Browser console has no Dexie, IndexedDB, hydration, tRPC, DND, or React errors.
+- Network tab does not show unexpected request spam.
+- Failed sync test does not corrupt visible state, if sync replay is integrated.
+- Outbox operations do not duplicate after retry.
+
+## Phase 2 Merge Gate
+A checkpoint can merge into `phase/outbox-sync-queue` only when:
+
+- Scope stayed inside checkpoint.
+- Tests were added or updated for runtime behavior.
+- Validation commands were run or skipped with exact reason.
+- No unrelated refactors.
+- Phase log updated.
+- Known risks documented.
+
+`phase/outbox-sync-queue` can merge into `master` only when:
+
+- `npm run test:ci` passes.
+- `npm run build` passes where env supports it.
+- Smoke E2E passes.
+- Authenticated E2E runs if dashboard behavior changed and credentials are available.
+- Manual dashboard regression is documented.
+- No unstable sync worker behavior is auto-running unexpectedly.
+- No full dashboard local-first rewrite snuck into this phase.
+
+## Phase 1 Documentation Reconciliation
+Reviewed `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+
+No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Phase 1 log already includes entries for:
+
+- `checkpoint/local-repository-helpers`
+- `checkpoint/sync-status-model`
+- `checkpoint/first-dexie-integration`
+- `checkpoint/expand-dexie-coverage`
+
+## Checkpoint Log
+
+### checkpoint/phase-two-roadmap
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`, `docs/ai/00-ai-entrypoint.md`, `docs/ai/backlog.md`.
+- Validation run: `git status --short --branch`, `git diff --stat`, and docs-only scope review.
+- Manual validation: Confirmed no runtime source files were intentionally changed.
+- Known risks: Phase 2 can easily overreach into dashboard source-of-truth changes. Keep each checkpoint narrow and update this log before merge.
+- Next checkpoint: `checkpoint/outbox-model-finalization`.
