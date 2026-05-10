@@ -78,7 +78,7 @@ When implementation work completes:
 
 ## Phase 2: Outbox Sync Queue
 - **Priority:** High / durable sync foundation.
-- **Status:** In progress.
+- **Status:** Done on `phase/outbox-sync-queue`; pending phase merge review.
 - **Phase log:** `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
 - **Umbrella branch:** `phase/outbox-sync-queue`.
 - **Checkpoint branches:**
@@ -91,14 +91,15 @@ When implementation work completes:
   - `checkpoint/basic-sync-status-surface`
   - `checkpoint/phase-two-regression-docs`
 - **Acceptance criteria:**
-  - Each checkpoint stays scoped to one concern.
-  - Runtime checkpoints add/update matching unit or E2E tests.
-  - Outbox replay and sync status work is introduced gradually and remains isolated until validated.
-  - `phase/outbox-sync-queue` does not merge to `master` with unstable auto-running sync behavior or a hidden full dashboard local-first rewrite.
+  - Done: each checkpoint stayed scoped to one concern.
+  - Done: runtime checkpoints added matching unit tests.
+  - Done: outbox replay and sync status work was introduced as isolated foundation code.
+  - Done: no unstable auto-running sync behavior or hidden full dashboard local-first rewrite was introduced.
 - **Validation notes:**
   - Use `docs/testing-validation.md`, `docs/testing.md`, `ai-docs/testing-workflow.md`, and `docs/ai/13-testing-and-validation.md` as validation source of truth.
   - Authenticated E2E is required when dashboard behavior changes and credentials/storage state are available.
   - Docs-only checkpoints do not require new tests unless test infrastructure changes.
+  - Final checkpoint validation: typecheck, lint, unit tests, and non-auth E2E passed; `npm run build` must be rerun in an environment with access to Next Google font fetches or after fonts are made local.
 
 ## NOW
 
