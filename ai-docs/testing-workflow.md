@@ -2,9 +2,10 @@
 
 ## Before Implementing A Feature
 1. Read `docs/testing.md`.
-2. Run `npm run test:all` for unit tests plus public smoke E2E.
-3. Run `npm run test:e2e:auth` when `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `DATABASE_URL` are available.
-4. If authenticated dashboard E2E cannot run, document the missing credential or service. Do not describe that as dashboard coverage.
+2. Run `npm run test:ci` for typecheck, lint, unit tests, and default E2E.
+3. Run `npm run test:e2e:auth:setup` when `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `DATABASE_URL` are available.
+4. Run `npm run test:e2e:auth` after `tests/.auth/user.json` exists.
+5. If authenticated dashboard E2E cannot run, document the missing credential or service. Do not describe `npm run test:e2e` as dashboard-auth coverage.
 5. Identify existing coverage before adding new tests.
 
 ## After Implementing
