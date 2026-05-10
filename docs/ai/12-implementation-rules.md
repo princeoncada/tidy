@@ -58,6 +58,7 @@ wip
 ```
 
 ## Important Files
+
 - `AGENTS.md`: local instruction about Next.js docs.
 - `docs/ai/00-ai-entrypoint.md`: reading path.
 - `docs/ai/backlog.md`: living backlog.
@@ -77,6 +78,7 @@ Implementation workflow:
 8. Update docs and backlog in the same PR.
 
 ## Invariants
+
 - Do not modify app behavior for documentation-only tasks.
 - Do not ship implementation without matching tests unless the untested behavior is explicitly documented as a gap with a reason.
 - Do not refactor unrelated source code while fixing a narrow bug.
@@ -91,11 +93,13 @@ Implementation workflow:
 - If changing Next app APIs, read relevant local Next docs under `node_modules/next/dist/docs/` when available.
 
 ## Known Risks
+
 - The repo does not currently contain `node_modules` in every environment, so local Next docs may be unavailable.
 - Some existing implementation violates ideal ownership rules; fix incrementally and document.
 - Broad invalidation or cache refetch can hide consistency bugs during manual testing.
 
 ## What Codex Should Read Before Editing
+
 - This file.
 - `docs/testing-validation.md`.
 - Feature docs relevant to the change.
@@ -103,6 +107,7 @@ Implementation workflow:
 - `11-known-issues.md`.
 
 ## What Codex Must Update After Editing
+
 - Relevant `docs/ai/*.md`.
 - `docs/ai/backlog.md`.
 - `docs/ai/15-decision-log.md` for behavior/architecture decisions.
