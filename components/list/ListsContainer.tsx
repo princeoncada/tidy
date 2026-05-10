@@ -3,7 +3,6 @@
 import {
   DashboardSnapshot,
   selectedViewFromCache,
-  ViewsCache,
 } from '@/lib/dashboard-cache';
 import {
   measureCacheWrite,
@@ -247,32 +246,10 @@ const ListsContainer = () => {
   const reorderListItemsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const scheduleReorderListsSave = useCallback((nextLists: Lists) => {
+    if (currentView?.view.type !== "ALL_LISTS") return;
+
     if (currentView?.view.type === "ALL_LISTS") {
       measureCacheWrite("lists.drop.all-lists", nextLists);
-      queryClient.setQueryData<CurrentView>(queryKey, (current) =>
-        current ? { ...current, lists: nextLists } : current
-      );
-      queryClient.setQueryData<CurrentView>(currentViewQueryKey, (current) =>
-        current ? { ...current, lists: nextLists } : current
-      );
-    } else {
-      measureCacheWrite("lists.drop.view-order", nextLists.map((list, index) => ({
-        listId: list.id,
-        order: index,
-      })));
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
-        currentViews?.map((view) =>
-          view.id === currentView?.view.id
-            ? {
-              ...view,
-              viewLists: nextLists.map((list, index) => ({
-                listId: list.id,
-                order: index,
-              })),
-            }
-            : view
-        )
-      );
       queryClient.setQueryData<CurrentView>(queryKey, (current) =>
         current ? { ...current, lists: nextLists } : current
       );
@@ -308,7 +285,6 @@ const ListsContainer = () => {
     optimisticSync,
     queryClient,
     reorderViewListsMutation,
-    viewsQueryKey,
   ]);
 
   const scheduleReorderListItemsSave = useCallback((nextLists: Lists) => {
@@ -436,6 +412,10 @@ const ListsContainer = () => {
           lists: finalPreview.length,
         });
 
+        if (source.type === "list" && currentView?.view.type !== "ALL_LISTS") {
+          return;
+        }
+
         // Only save the final dropped order. Older drag positions do not matter.
         switch (source.type) {
           case "list":
@@ -469,7 +449,11 @@ const ListsContainer = () => {
           targetType: target.type,
         });
 
-        if (source.type === "list" && target.type === "list") {
+        if (
+          source.type === "list" &&
+          target.type === "list" &&
+          currentView?.view.type === "ALL_LISTS"
+        ) {
           const sourceListId = String(source.id).replace("list-", "");
           const targetListId = String(target.id).replace("list-", "");
           const nextLists = reorderListsForDrag(
