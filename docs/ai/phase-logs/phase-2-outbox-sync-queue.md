@@ -266,3 +266,12 @@ No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Pha
 - Manual validation: Not required for this checkpoint because the changes are pure model/type guards and are not connected to UI, mutations, tRPC, TanStack Query, drag/drop, sync replay, or server endpoints.
 - Known risks: Guards validate operation shape and JSON-compatible payloads only. They do not validate entity ownership, entity existence, payload semantics per operation type, replay order, coalescing behavior, or server idempotency yet.
 - Next checkpoint: `checkpoint/outbox-repository-helpers`.
+
+### checkpoint/outbox-repository-helpers
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/outbox-repository.ts`, `tests/unit/outbox-repository.test.ts`, `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:ci`, `npm run build`, and `npm run test:e2e:smoke` passed.
+- Manual validation: Not required for this checkpoint because the helpers are isolated and are not connected to UI, mutations, tRPC, TanStack Query, drag/drop, sync replay, or server endpoints.
+- Known risks: Helpers only enqueue, read, and transition outbox records. They do not coalesce operations, replay operations, validate entity ownership, enforce server idempotency, or change dashboard data flow yet.
+- Next checkpoint: `checkpoint/outbox-coalescing-rules`.
