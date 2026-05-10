@@ -25,6 +25,7 @@ Dashboard E2E tests require `tests/.auth/user.json`, real Supabase public env va
 See `docs/testing-validation.md`, `docs/testing.md`, and `ai-docs/testing-workflow.md` before changing test infrastructure or implementing app behavior.
 
 ## Important Files
+
 - `package.json`: scripts and dependency versions.
 - `eslint.config.mjs`: lint config.
 - `tsconfig.json`: TypeScript strict config.
@@ -73,18 +74,21 @@ Manual dashboard checks:
 - Any mobile layout change should check at least one narrow viewport.
 
 ## Known Risks
+
 - Authenticated dashboard E2E requires a real Supabase test user and database.
 - Database-backed validation requires valid `DATABASE_URL` and Supabase env vars.
 - Build runs Prisma generate, so missing env/setup can block validation in fresh environments.
 - Manual testing is currently the only way to validate most optimistic race cases.
 
 ## What Codex Should Read Before Editing
+
 - This file before finishing any code change.
 - `docs/testing-validation.md` before starting implementation.
 - Relevant feature doc for manual scenario list.
 - `package.json` before invoking scripts.
 
 ## What Codex Must Update After Editing
+
 - Add new validation commands or manual test cases here.
 - Update `backlog.md` testing section with missing automated coverage.
 - Mention in final PR notes which validations ran and which could not run.
