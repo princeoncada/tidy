@@ -238,3 +238,12 @@ A checkpoint can merge into `phase/dexie-foundation` only when:
 - Manual validation: Public landing page and `/login` loaded through the dev server with zero browser console errors. Local schema remains disconnected from UI, tRPC, TanStack Query, drag/drop, repositories, and sync behavior.
 - Known risks: Local schema names and indexes are initial foundation choices and may need adjustment once repository helpers and outbox operation types make access patterns concrete. Version remains `1` because no released local data migration exists yet.
 - Next checkpoint: `checkpoint/outbox-operation-types`.
+
+### checkpoint/outbox-operation-types
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/outbox-schema.ts`, `lib/local-db/tidy-db.ts`, `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- Validation run: `npm run typecheck` passed; `npm run lint` passed; `npm run test` passed; `npm run build` passed; `npm run test:ci` first failed when `tsc --noEmit` started before generated Prisma browser files were available while `npm run build` was running, then passed on rerun after Prisma generation completed.
+- Manual validation: Existing dev server browser check loaded `/` and `/login` with zero browser console errors. Outbox types and the Dexie store remain disconnected from UI, tRPC, TanStack Query, drag/drop, repositories, sync workers, and server replay.
+- Known risks: Outbox payloads are JSON-compatible but not yet entity-specific. Operation coalescing, replay ordering, idempotency semantics, retry behavior, and user-facing sync failure handling are intentionally deferred. The outbox store is part of the pre-release Dexie `version(1)` schema.
+- Next checkpoint: `checkpoint/local-repository-helpers`.
