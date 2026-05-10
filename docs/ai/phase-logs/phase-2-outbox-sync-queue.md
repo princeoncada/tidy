@@ -257,3 +257,12 @@ No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Pha
 - Manual validation: Confirmed no runtime source files were intentionally changed.
 - Known risks: Phase 2 can easily overreach into dashboard source-of-truth changes. Keep each checkpoint narrow and update this log before merge.
 - Next checkpoint: `checkpoint/outbox-model-finalization`.
+
+### checkpoint/outbox-model-finalization
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/outbox-schema.ts`, `tests/unit/outbox-schema.test.ts`, `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:ci`, and `npm run build` passed.
+- Manual validation: Not required for this checkpoint because the changes are pure model/type guards and are not connected to UI, mutations, tRPC, TanStack Query, drag/drop, sync replay, or server endpoints.
+- Known risks: Guards validate operation shape and JSON-compatible payloads only. They do not validate entity ownership, entity existence, payload semantics per operation type, replay order, coalescing behavior, or server idempotency yet.
+- Next checkpoint: `checkpoint/outbox-repository-helpers`.
