@@ -261,6 +261,7 @@ const ListItemComponent = ({
 
   return (
     <div
+      data-testid="list-item"
       ref={ref}
       className={cn(
         `flex items-start gap-1.5 pr-1.5 rounded-md border border-white hover:bg-gray-50 hover:border-gray-100 overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group`,
@@ -291,6 +292,8 @@ const ListItemComponent = ({
 
       <div className="min-w-0 flex-1">
         <ListInlineEdit
+          displayTestId="list-item-title"
+          inputTestId="list-title-input"
           className={cn(
             "block w-full min-w-0 text-sm whitespace-normal break-all break-normal transition-colors duration-300 leading-6!",
             listItem.completed && "line-through text-gray-500"

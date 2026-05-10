@@ -228,6 +228,7 @@ const ListAdder = () => {
       <DialogTrigger className="h-full" asChild>
         <div className="h-full flex items-end">
           <Button
+            data-testid="create-list-button"
             className="font-semibold hidden md:flex"
             variant="outline"
             onClick={() => {
@@ -237,6 +238,7 @@ const ListAdder = () => {
             <Plus className="-ml-1" />Add List
           </Button>
           <Button
+            data-testid="create-list-button"
             className="font-semibold md:hidden p-4"
             size="icon-lg"
             onClick={() => {

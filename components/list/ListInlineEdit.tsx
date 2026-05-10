@@ -9,6 +9,8 @@ interface ListInlineEditProps {
   className?: string;
   inputClassName?: string;
   displayClassName?: string;
+  inputTestId?: string;
+  displayTestId?: string;
 }
 
 export default function ListInlineEdit({
@@ -19,6 +21,8 @@ export default function ListInlineEdit({
   className = "",
   inputClassName = "",
   displayClassName = "",
+  inputTestId,
+  displayTestId,
 }: ListInlineEditProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -81,6 +85,7 @@ export default function ListInlineEdit({
   if (isEditing && !disabled) {
     return (
       <Textarea
+        data-testid={inputTestId}
         ref={inputRef as React.Ref<HTMLTextAreaElement>}
         value={editValue}
         disabled={disabled}
@@ -101,6 +106,7 @@ export default function ListInlineEdit({
 
   return (
     <span
+      data-testid={displayTestId}
       onClick={startEditing}
       className={`${className} ${displayClassName} break-all! cursor-pointer rounded-sm transition-colors block w-full min-w-0`}
     >

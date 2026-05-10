@@ -163,6 +163,7 @@ function SortableViewRowComponent({
 
   return (
     <div
+      data-testid="view-card"
       ref={ref}
       className={cn(
         "group/view-row flex items-center gap-0.5 rounded-md border border-transparent pr-0.5 transition",
@@ -388,7 +389,7 @@ function ViewDialog({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="button" disabled={!name.trim() || selectedTagIds.length === 0} onClick={submit}>
+          <Button data-testid="save-view-button" type="button" disabled={!name.trim() || selectedTagIds.length === 0} onClick={submit}>
             {state?.mode === "edit" ? "Save View" : "Create View"}
           </Button>
         </DialogFooter>
@@ -758,6 +759,7 @@ export default function ViewsSidebarPreview() {
               Views
             </span>
             <Button
+              data-testid="view-create-button"
               type="button"
               size="xs"
               variant="outline"
