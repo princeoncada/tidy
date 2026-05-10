@@ -41,6 +41,18 @@ When implementation work completes:
 - `Done`: completed and should include a PR/commit note before eventual archival.
 - `Superseded`: no longer applicable because another change made it obsolete.
 
+## Local-First Product Readiness
+- Dexie local database foundation
+- Outbox mutation queue
+- Operation coalescing
+- Sync worker
+- Sync status UI
+- Rollback-safe error handling
+- Query splitting and scale prep
+- Security hardening later
+- Observability later
+- Background jobs later
+
 ## NOW
 
 ### NOW-1: Close list item ownership gaps
