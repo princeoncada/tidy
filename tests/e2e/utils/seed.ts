@@ -1,9 +1,12 @@
 import { expect, type Page } from "@playwright/test";
 
 export const authStoragePath = "tests/.auth/user.json";
+const runId = process.env.E2E_RUN_ID ?? new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+let sequence = 0;
 
 export function uniqueTestName(prefix: string) {
-  const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  sequence += 1;
+  const suffix = `${runId}-${String(sequence).padStart(3, "0")}`;
   return `e2e-${prefix}-${suffix}`;
 }
 
@@ -35,5 +38,5 @@ export async function cleanupNamedList(page: Page, name: string) {
 
   await card.getByRole("button", { name: /list options/i }).click();
   await page.getByTestId("delete-list-button").click();
-  await expect(card).toBeHidden({ timeout: 10_000 }).catch(() => undefined);
+  await expect(page.getByTestId("list-card").filter({ hasText: name })).toHaveCount(0);
 }
