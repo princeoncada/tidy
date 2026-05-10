@@ -229,3 +229,12 @@ A checkpoint can merge into `phase/dexie-foundation` only when:
 - Manual validation: Public landing page and `/login` loaded through the dev server with zero browser console errors. No UI/server/query/DND behavior was intentionally changed, and the Dexie shell is not imported by app UI.
 - Known risks: The DB shell currently exposes only a placeholder metadata store. Future checkpoints must add real local schema/types before any UI integration and must keep IndexedDB access browser-safe.
 - Next checkpoint: `checkpoint/local-schema-types`.
+
+### checkpoint/local-schema-types
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/local-schema.ts`, `lib/local-db/tidy-db.ts`, `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test` attempted without escalation and failed with sandbox `spawn EPERM`; `npm run test:ci` passed and included unit tests plus non-auth E2E; `npm run build` passed; temporary `npm run dev` browser console check for `/` and `/login` passed.
+- Manual validation: Public landing page and `/login` loaded through the dev server with zero browser console errors. Local schema remains disconnected from UI, tRPC, TanStack Query, drag/drop, repositories, and sync behavior.
+- Known risks: Local schema names and indexes are initial foundation choices and may need adjustment once repository helpers and outbox operation types make access patterns concrete. Version remains `1` because no released local data migration exists yet.
+- Next checkpoint: `checkpoint/outbox-operation-types`.
