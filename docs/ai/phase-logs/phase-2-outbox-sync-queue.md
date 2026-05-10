@@ -275,3 +275,12 @@ No reconciliation edit was needed during `checkpoint/phase-two-roadmap`; the Pha
 - Manual validation: Not required for this checkpoint because the helpers are isolated and are not connected to UI, mutations, tRPC, TanStack Query, drag/drop, sync replay, or server endpoints.
 - Known risks: Helpers only enqueue, read, and transition outbox records. They do not coalesce operations, replay operations, validate entity ownership, enforce server idempotency, or change dashboard data flow yet.
 - Next checkpoint: `checkpoint/outbox-coalescing-rules`.
+
+### checkpoint/outbox-coalescing-rules
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `lib/local-db/outbox-coalescing.ts`, `tests/unit/outbox-coalescing.test.ts`, `docs/ai/phase-logs/phase-2-outbox-sync-queue.md`.
+- Validation run: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:ci`, and `npm run build` passed.
+- Manual validation: Not required for this checkpoint because coalescing is pure logic and is not connected to UI, mutations, tRPC, TanStack Query, drag/drop, sync replay, or server endpoints.
+- Known risks: Coalescing currently handles generic operation-level rules only. It does not apply discard markers to Dexie, inspect operation-specific payload semantics, validate entity ownership, or guarantee server replay safety. Move/reorder coalescing assumes the latest operation payload represents the final visible state.
+- Next checkpoint: `checkpoint/sync-replay-client`.
