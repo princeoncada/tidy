@@ -4,7 +4,7 @@
 Tidy uses two test layers:
 
 - Unit tests for pure logic that should not need a browser, database, Supabase session, or Next server.
-- Playwright E2E tests for route loading, core list/item/view flows, persistence checks, and regression coverage around optimistic behavior.
+- Playwright E2E tests for public smoke coverage and authenticated dashboard flows.
 
 Keep tests focused on current behavior. Do not rewrite product behavior only to satisfy tests.
 
@@ -12,24 +12,56 @@ Keep tests focused on current behavior. Do not rewrite product behavior only to 
 - `npm run test`: run Vitest unit tests once.
 - `npm run test:watch`: run Vitest in watch mode.
 - `npm run test:ui`: run the Vitest UI.
-- `npm run test:e2e`: run Playwright tests headless.
-- `npm run test:e2e:headed`: run Playwright with a visible browser.
-- `npm run test:e2e:debug`: run Playwright in debug mode.
+- `npm run test:e2e`: run public smoke E2E only.
+- `npm run test:e2e:smoke`: same as `test:e2e`.
+- `npm run test:e2e:auth`: log in through the real app and run dashboard E2E.
+- `npm run test:e2e:auth:setup`: generate `tests/.auth/user.json`.
+- `npm run test:e2e:headed`: run smoke E2E with a visible browser.
+- `npm run test:e2e:debug`: run smoke E2E in debug mode.
 - `npm run test:e2e:report`: open the last Playwright HTML report.
-- `npm run test:all`: run unit tests, then E2E tests.
+- `npm run test:all`: run unit tests, then public smoke E2E.
 
-## Authenticated Dashboard E2E
-Dashboard tests require an authenticated Supabase session.
-
-By default, tests that need `/dashboard` skip with a clear reason unless `TIDY_E2E_STORAGE_STATE` points to a Playwright storage-state JSON file.
-
-Example:
+## Smoke E2E
+Smoke tests cover public routes that do not require Supabase auth.
 
 ```text
-TIDY_E2E_STORAGE_STATE=.playwright/auth/tidy-user.json npm run test:e2e
+npm run test:e2e
 ```
 
-Create that file manually with Playwright codegen or a one-off setup script after logging in as a disposable test user. Do not commit storage-state files or real credentials.
+This runs only the Playwright `smoke` project.
+
+## Authenticated Dashboard E2E
+Dashboard tests require a real Supabase test user and a reachable database.
+
+Set:
+
+- `E2E_TEST_EMAIL`
+- `E2E_TEST_PASSWORD`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `DATABASE_URL`
+
+Then run:
+
+```text
+npm run test:e2e:auth
+```
+
+The `auth-setup` project logs in through `/login` and writes storage state to:
+
+```text
+tests/.auth/user.json
+```
+
+That file is ignored by git. Do not commit storage state or credentials.
+
+To generate or refresh only the auth state:
+
+```text
+npm run test:e2e:auth:setup
+```
+
+If credentials are missing, authenticated E2E fails loudly with setup instructions. It does not silently skip dashboard coverage.
 
 ## Playwright Traces
 Playwright records traces on first retry and screenshots/videos on failure.
@@ -57,9 +89,12 @@ Allowed current test IDs:
 - `list-card`
 - `list-title`
 - `list-title-input`
+- `list-drag-handle`
+- `list-drop-zone`
 - `create-item-input`
 - `list-item`
 - `list-item-title`
+- `item-drag-handle`
 - `delete-list-button`
 - `view-create-button`
 - `view-card`
@@ -74,6 +109,7 @@ Do not add test IDs everywhere. Prefer role, label, placeholder, and visible tex
 - Do not use random data without the `e2e-` prefix.
 - Do not overuse `test.skip`; skip only the specific test that cannot run in the current environment.
 - Document every skipped test with the exact missing fixture, selector, or capability.
+- Do not silently skip authenticated dashboard tests because credentials are missing.
 - Do not delete failing tests to make a suite pass.
 
 ## Extending Tests
@@ -85,7 +121,7 @@ When adding a feature:
 4. Update this document if a new command, fixture, or selector convention is introduced.
 
 ## Current Gaps
-- Dashboard E2E needs a committed auth setup strategy or a documented CI secret flow before it can run unskipped in CI.
-- Drag/drop tests are skipped until deterministic dnd-kit pointer helpers are added.
-- Tag-filtered view tests are skipped until deterministic tag creation and cleanup helpers exist.
+- No Playwright tests are intentionally skipped in the current suite. Public smoke runs with `npm run test:e2e`; authenticated dashboard tests run with `npm run test:e2e:auth` and fail in setup if credentials are missing.
+- Authenticated dashboard E2E requires CI secrets before it can run in GitHub Actions.
+- Drag/drop tests use a lower-level mouse movement helper because dnd-kit does not always work with `locator.dragTo`.
 - API ownership tests are still needed for protected tRPC procedures.

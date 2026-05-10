@@ -2,9 +2,10 @@
 
 ## Before Implementing A Feature
 1. Read `docs/testing.md`.
-2. Run `npm run test:all` when the environment can start the app and has required test auth state.
-3. If authenticated dashboard E2E cannot run, run `npm run test` and document that dashboard tests were skipped because `TIDY_E2E_STORAGE_STATE` was unavailable.
-4. Identify existing coverage before adding new tests.
+2. Run `npm run test:all` for unit tests plus public smoke E2E.
+3. Run `npm run test:e2e:auth` when `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `DATABASE_URL` are available.
+4. If authenticated dashboard E2E cannot run, document the missing credential or service. Do not describe that as dashboard coverage.
+5. Identify existing coverage before adding new tests.
 
 ## After Implementing
 1. Add or update the smallest relevant test.
@@ -25,6 +26,7 @@
 ## Do Not
 - Delete failing tests to pass.
 - Overuse `test.skip`.
+- Silently skip authenticated dashboard tests because credentials are missing.
 - Rely on arbitrary timeouts.
 - Use random data without a visible `e2e-` prefix.
 - Change product behavior only to satisfy tests.
