@@ -1,19 +1,22 @@
 # Testing Workflow For Codex
 
+## Required Rule
+Every Codex implementation must update or add tests in the same branch. Before coding, identify the happy path, common cases, edge cases, unit coverage, and E2E coverage. After coding, run `npm run test:ci` and report exact results. Do not mark complete if tests were not added or updated unless clearly justified.
+
 ## Before Implementing A Feature
-1. Read `docs/testing.md`.
+1. Read `docs/testing-validation.md` and `docs/testing.md`.
 2. Run `npm run test:ci` for typecheck, lint, unit tests, and default E2E.
 3. Run `npm run test:e2e:auth:setup` when `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `DATABASE_URL` are available.
 4. Run `npm run test:e2e:auth` after `tests/.auth/user.json` exists.
 5. If authenticated dashboard E2E cannot run, document the missing credential or service. Do not describe `npm run test:e2e` as dashboard-auth coverage.
-5. Identify existing coverage before adding new tests.
+6. Identify existing coverage before adding new tests.
 
 ## After Implementing
 1. Add or update the smallest relevant test.
 2. Run the targeted test first.
 3. Run the full relevant suite.
 4. Document skipped tests with the exact reason.
-5. Update `docs/testing.md` when commands, fixtures, selectors, or test data rules change.
+5. Update `docs/testing-validation.md` or `docs/testing.md` when commands, fixtures, selectors, coverage rules, or test data rules change.
 
 ## When A Test Fails
 1. Do not guess.
