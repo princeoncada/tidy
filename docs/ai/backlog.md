@@ -87,7 +87,7 @@ When implementation work completes:
 
 ### NOW-3: Add automated coverage for dashboard cache projection
 - **Priority:** P1 / data-loss and regression prevention.
-- **Status:** Open.
+- **Status:** In progress.
 - **Files:** `lib/dashboard-cache.ts`, `components/list/types.ts`, test config/files to be introduced, `docs/ai/05-dashboard-state-cache.md`, `docs/ai/13-testing-and-validation.md`.
 - **Problem:** Cross-cache projections drive optimistic list/tag/item behavior, but no automated tests currently protect custom-view filtering, selected-view projection, or rollback assumptions.
 - **Acceptance criteria:**
@@ -95,6 +95,8 @@ When implementation work completes:
   - Tests include custom views matching all tags and all-lists behavior.
   - Test setup is documented in `13-testing-and-validation.md`.
 - **Validation notes:**
+  - Initial `tests/unit/dashboard-cache.test.ts` coverage exists for `selectedViewFromCache`, `projectView`, and `listMatchesView`.
+  - Still add coverage for list update/removal helpers, tag add/remove projection, and view-selection cache projection.
   - Run the new targeted test command plus `npm run typecheck` and `npm run lint`.
   - Verify tests do not require a live database unless explicitly documented.
 

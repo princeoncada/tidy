@@ -3,29 +3,48 @@
 ## Purpose
 Document available validation commands and high-value manual regression checks.
 
+No implementation is complete without validation. Every Codex implementation must update or add tests in the same branch. Before coding, identify the happy path, common cases, edge cases, unit coverage, and E2E coverage. After coding, run `npm run test:ci` and report exact results. Do not mark complete if tests were not added or updated unless clearly justified.
+
 ## Current Implementation
-There is no dedicated automated test suite in `package.json`. Available scripts:
+The repo has Vitest unit tests and Playwright E2E tests. Available scripts:
 
 - `npm run lint`: ESLint with Next core web vitals and TypeScript config.
 - `npm run typecheck`: `tsc --noEmit`.
+- `npm run test`: Vitest unit tests.
+- `npm run test:e2e`: non-authenticated Playwright E2E.
+- `npm run test:e2e:auth:setup`: log in through `/login` and write ignored storage state to `tests/.auth/user.json`.
+- `npm run test:e2e:auth`: authenticated dashboard Playwright E2E using existing storage state.
+- `npm run test:ci`: typecheck, lint, unit tests, and default E2E.
+- `npm run test:all`: Vitest followed by Playwright.
 - `npm run build`: `prisma generate && next build`.
 - `npm run dev`: local Next dev server.
 - `npm start`: production server after build.
 
-Approved local commands in this Codex environment include `npm run typecheck` and `npm run lint`.
+Dashboard E2E tests require `tests/.auth/user.json`, real Supabase public env vars, and `DATABASE_URL`. Generate storage state locally with `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` by running `npm run test:e2e:auth:setup`.
+
+See `docs/testing-validation.md`, `docs/testing.md`, and `ai-docs/testing-workflow.md` before changing test infrastructure or implementing app behavior.
 
 ## Important Files
+
 - `package.json`: scripts and dependency versions.
 - `eslint.config.mjs`: lint config.
 - `tsconfig.json`: TypeScript strict config.
 - `prisma.config.ts`: Prisma config.
 - `prisma/schema.prisma`: generate/build dependency.
 - `trpc/query-client.ts`: query defaults that affect runtime validation.
+- `playwright.config.ts`: E2E config and dev server startup.
+- `vitest.config.ts`: unit test config.
+- `tests/e2e/*`: Playwright tests and helpers.
+- `tests/unit/*`: Vitest unit tests.
 
 ## Data Flow
 Suggested validation by change type:
 
 - Docs-only: no build required unless links/reference names are uncertain.
+- Any implementation: add or update matching tests before claiming completion.
+- Pure helper/cache logic: `npm run test`.
+- Public browser behavior: targeted `npm run test:e2e -- <spec>` first, then `npm run test:e2e`.
+- Authenticated dashboard behavior: targeted `npm run test:e2e:auth -- <spec>` first, then `npm run test:e2e:auth`.
 - Type-only or router/component change: `npm run typecheck` and `npm run lint`.
 - Prisma/schema change: `prisma generate`, typecheck, migration review, build.
 - Next route/layout/config change: read local Next docs if available, then typecheck/build.
@@ -48,23 +67,28 @@ Manual dashboard checks:
 
 ## Invariants
 - Validation should match risk. Small docs changes do not need a full build.
+- Tests should match the changed behavior. Unit tests are required for isolated logic; E2E tests are required for user-facing flows; bug fixes require regression tests.
 - Any server/API ownership fix should include a manual or automated unauthorized-access check if possible.
 - Any cache/sync change should include at least one refresh-after-save check.
 - Any drag/drop change should test canceled drag and final drop.
 - Any mobile layout change should check at least one narrow viewport.
 
 ## Known Risks
-- No Playwright, Vitest, or integration tests are configured.
+
+- Authenticated dashboard E2E requires a real Supabase test user and database.
 - Database-backed validation requires valid `DATABASE_URL` and Supabase env vars.
 - Build runs Prisma generate, so missing env/setup can block validation in fresh environments.
 - Manual testing is currently the only way to validate most optimistic race cases.
 
 ## What Codex Should Read Before Editing
+
 - This file before finishing any code change.
+- `docs/testing-validation.md` before starting implementation.
 - Relevant feature doc for manual scenario list.
 - `package.json` before invoking scripts.
 
 ## What Codex Must Update After Editing
+
 - Add new validation commands or manual test cases here.
 - Update `backlog.md` testing section with missing automated coverage.
 - Mention in final PR notes which validations ran and which could not run.

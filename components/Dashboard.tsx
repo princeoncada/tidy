@@ -37,7 +37,7 @@ const Dashboard = () => {
   return (
     <MaxWidthWrapper>
       <div className="flex gap-4">
-        <main className="min-w-0 flex-1 flex flex-col gap-3 py-10">
+        <main data-testid="app-shell" className="min-w-0 flex-1 flex flex-col gap-3 py-10">
           <div className="flex flex-col gap-2.5 w-full items-center">
             <div className="w-full flex flex-col">
               <div className="w-full flex justify-between items-end h-12">

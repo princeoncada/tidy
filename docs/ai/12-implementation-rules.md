@@ -8,6 +8,8 @@ This is a docs-only rules file. It reflects the current architecture and the use
 
 Every future implementation must update the relevant docs and backlog in the same PR.
 
+Every future implementation must update or add tests in the same branch. Before coding, identify the happy path, common cases, edge cases, unit coverage, and E2E coverage. After coding, run `npm run test:ci` and report exact results. Do not mark complete if tests were not added or updated unless clearly justified.
+
 ## Commit Discipline
 
 Default rules:
@@ -56,6 +58,7 @@ wip
 ```
 
 ## Important Files
+
 - `AGENTS.md`: local instruction about Next.js docs.
 - `docs/ai/00-ai-entrypoint.md`: reading path.
 - `docs/ai/backlog.md`: living backlog.
@@ -66,14 +69,18 @@ wip
 Implementation workflow:
 
 1. Read `00-ai-entrypoint.md`.
-2. Read the feature-specific docs.
-3. Read the smallest set of source files needed.
-4. Make the code change.
-5. Validate with lint/type/build/manual checks appropriate to risk.
-6. Update docs and backlog in the same PR.
+2. Read `docs/testing-validation.md`.
+3. Read the feature-specific docs.
+4. Identify required unit and E2E coverage before coding.
+5. Read the smallest set of source files needed.
+6. Make the code change and matching test change.
+7. Validate with `npm run test:ci` plus any targeted/auth checks appropriate to risk.
+8. Update docs and backlog in the same PR.
 
 ## Invariants
+
 - Do not modify app behavior for documentation-only tasks.
+- Do not ship implementation without matching tests unless the untested behavior is explicitly documented as a gap with a reason.
 - Do not refactor unrelated source code while fixing a narrow bug.
 - Use existing patterns before adding abstractions.
 - Keep dashboard cache mutations centralized in `lib/dashboard-cache.ts` when behavior crosses components.
@@ -86,17 +93,21 @@ Implementation workflow:
 - If changing Next app APIs, read relevant local Next docs under `node_modules/next/dist/docs/` when available.
 
 ## Known Risks
+
 - The repo does not currently contain `node_modules` in every environment, so local Next docs may be unavailable.
 - Some existing implementation violates ideal ownership rules; fix incrementally and document.
 - Broad invalidation or cache refetch can hide consistency bugs during manual testing.
 
 ## What Codex Should Read Before Editing
+
 - This file.
+- `docs/testing-validation.md`.
 - Feature docs relevant to the change.
 - `13-testing-and-validation.md`.
 - `11-known-issues.md`.
 
 ## What Codex Must Update After Editing
+
 - Relevant `docs/ai/*.md`.
 - `docs/ai/backlog.md`.
 - `docs/ai/15-decision-log.md` for behavior/architecture decisions.

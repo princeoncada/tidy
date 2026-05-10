@@ -38,6 +38,7 @@ const ListMenu = ({
         </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
+          data-testid="delete-list-button"
           variant='destructive'
           className='hover:cursor-pointer text-xs!'
           onSelect={handleDeleteList}

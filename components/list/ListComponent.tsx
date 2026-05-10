@@ -426,11 +426,12 @@ const ListComponent = ({
           )
         )}
       >
-          <Card data-list-id={list.id} className={`transition-all duration-300 h-full min-h-92.5 flex flex-col ${isDragging ? "scale-[1.03] backdrop-blur-[5px] shadow-xl" : ""}`}>
+          <Card data-testid="list-card" data-list-id={list.id} className={`transition-all duration-300 h-full min-h-92.5 flex flex-col ${isDragging ? "scale-[1.03] backdrop-blur-[5px] shadow-xl" : ""}`}>
           <CardContent className="px-0 flex flex-col flex-1">
             <div className="flex flex-col flex-1">
               <div className="flex items-start gap-3 px-4">
                 <div
+                  data-testid="list-drag-handle"
                   ref={handleRef}
                   className="-mt-1 shrink-0 cursor-grab active:cursor-grabbing touch-none select-none p-2 -m-2"
                 >
@@ -439,6 +440,8 @@ const ListComponent = ({
 
                 <div className="flex-1 min-w-0 space-y-1">
                   <ListInlineEdit
+                    displayTestId="list-title"
+                    inputTestId="list-title-input"
                     className="block font-semibold leading-7! text-xl!"
                     inputClassName=""
                     displayClassName=""
@@ -475,6 +478,7 @@ const ListComponent = ({
               })}>
 
                 <ScrollArea
+                  data-testid="list-drop-zone"
                   ref={dropRef}
                   className={cn("h-60! min-h-45 w-full touch-pan-y relative")}
                 >
@@ -486,6 +490,7 @@ const ListComponent = ({
                     )}
                   >
                     <div
+                      data-testid="item-drag-handle-placeholder"
                       className="touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-gray-400"
                     >
                       <GripVertical className="w-3.5 h-3.5" />
@@ -498,6 +503,7 @@ const ListComponent = ({
 
                     <div className="min-w-0 flex-1">
                       <Textarea
+                        data-testid="create-item-input"
                         ref={inputRef}
                         value={createListItemName}
                         placeholder="Add new item here..."

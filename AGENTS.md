@@ -18,6 +18,12 @@ Before editing any file, route yourself through the repo-specific AI docs instea
 
 Do not broadly inspect the repo unless the task cannot be understood from the AI docs plus the smallest relevant source files.
 
+## Required Test Workflow
+
+Every Codex implementation must update or add tests in the same branch. Before coding, identify the happy path, common cases, edge cases, unit coverage, and E2E coverage. After coding, run `npm run test:ci` and report exact results. Do not mark complete if tests were not added or updated unless clearly justified.
+
+Use `docs/testing-validation.md` as the source of truth for the test-first change workflow, coverage by change type, edge-case checklist, and definition of done.
+
 ## Scope Control
 
 - Keep diffs small and focused on the requested task.

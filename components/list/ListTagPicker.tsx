@@ -468,6 +468,7 @@ export default function ListTagPicker({
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Badge
+            data-testid="tag-selector"
             variant="outline"
             className="h-5 gap-1 rounded-full border px-1.5 text-[11px]"
           >
