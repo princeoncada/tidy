@@ -220,3 +220,12 @@ A checkpoint can merge into `phase/dexie-foundation` only when:
 - Manual validation: Confirmed this checkpoint is documentation-only and references existing testing docs instead of duplicating them.
 - Known risks: Later runtime checkpoints can still overreach unless each branch keeps to one narrow concern and updates this log before merge.
 - Next checkpoint: `checkpoint/install-dexie-db-shell`.
+
+### checkpoint/install-dexie-db-shell
+- Status: Ready for review.
+- Date: 2026-05-10.
+- Files changed: `package.json`, `package-lock.json`, `lib/local-db/tidy-db.ts`, `docs/ai/phase-logs/phase-1-dexie-foundation.md`.
+- Validation run: `npm install dexie`, `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:e2e:smoke`, `npm run test:ci`, `npm run build`, and a temporary `npm run dev` browser console check for `/` and `/login`.
+- Manual validation: Public landing page and `/login` loaded through the dev server with zero browser console errors. No UI/server/query/DND behavior was intentionally changed, and the Dexie shell is not imported by app UI.
+- Known risks: The DB shell currently exposes only a placeholder metadata store. Future checkpoints must add real local schema/types before any UI integration and must keep IndexedDB access browser-safe.
+- Next checkpoint: `checkpoint/local-schema-types`.
