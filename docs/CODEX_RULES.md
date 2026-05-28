@@ -23,6 +23,10 @@ Standing ruleset for every Codex implementation session. Read this before writin
 - Do not add features, refactor, or introduce abstractions beyond what the task requires
 - If a commit cannot be described with one direct sentence, split it
 - Architecture phase branches must avoid large dump commits
+- Before scoping any phase that creates scripts or tooling, list scripts/
+  to verify no equivalent already exists — never duplicate an existing script
+- When STATE.json state = "alpha", apply fixes as in-alpha corrections only —
+  do not re-scope, do not bump versions
 
 ---
 
@@ -91,7 +95,17 @@ refactor(cache): centralize dashboard query keys
 chore(release): promote 1.0.0-alpha to 1.0.0-stable
 ```
 
+Usage example:
+```
+.\scripts\commit.ps1 -Files "path/to/file" -Message "type(scope): message"
+```
+
 Avoid: `update stuff`, `local-first work`, `big sync changes`, `wip`
+
+Never do:
+- Use raw git add + git commit — always use .\scripts\commit.ps1
+- Batch multiple files into one commit
+- Add Co-Authored-By or any AI co-author trailer to commit messages
 
 ---
 
