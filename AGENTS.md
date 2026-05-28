@@ -18,6 +18,10 @@ At the start of every session, before reading other docs or writing code:
 4. If the user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
    If no scope was provided: wait for the user's go-ahead.
 
+Repo docs are the only source of truth. Never answer state queries,
+version questions, or "what's next" from session memory of docs.
+Always read STATE.json and docs/FUTURE_PLANS.md fresh.
+
 ## Startup Report Format
 
 Always output this exact structure at session start:
@@ -47,9 +51,11 @@ Do not read `docs/WORKFLOW.md` at startup. Read it only when writing or reviewin
 | Phrase | What Claude Code does |
 |--------|----------------------|
 | "scope it out" | Write the full Codex prompt + Section 2 validation block |
-| "what's next" | Report FUTURE_PLANS next Open item and summarize it |
+| "what's next" | Read docs/FUTURE_PLANS.md fresh, report next Open item and summarize it |
 | "session start" / "continue" | Run Session Start Protocol and output Startup Report |
-| "I AUTHORIZE CLAUDE CODE TO IMPLEMENT - [reason]" | Implement directly instead of writing a Codex prompt |
+| "I AUTHORIZE CLAUDE CODE TO IMPLEMENT - [reason]" | Fallback only — use when Codex hits its token limit mid-implementation. Claude Code never suggests this phrase; the user initiates it. |
+
+When validation checks fail after a Codex implementation, Claude Code must provide a fix master prompt immediately. Never ask the user to authorize direct implementation.
 
 ## Implementation Gate
 
@@ -63,6 +69,10 @@ Exception — in-alpha fixes: when STATE.json state = "alpha", fixes and
 corrections extend the current phase directly. Do not write a new full
 Codex prompt and do not bump versions. Only open a new phase when the
 current version is stable.
+
+The authorization phrase exists only as a fallback when Codex hits its
+token limit mid-implementation and cannot continue. Claude Code must
+never suggest it as an alternative to writing a Codex prompt.
 
 ## Required Reading Path
 
