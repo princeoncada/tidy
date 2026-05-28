@@ -45,6 +45,9 @@ if ($stableVer -eq $alphaVer) {
 Write-Host "Promoting $alphaVer -> $stableVer" -ForegroundColor Cyan
 $today = Get-Date -Format "yyyy-MM-dd"
 
+# UTF-8 without BOM encoder (BOM breaks JSON parsers for package.json / STATE.json)
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+
 # Helper: string-replace in a text file
 function Update-FileText {
     param([string]$Path, [string]$OldStr, [string]$NewStr)
@@ -58,7 +61,7 @@ function Update-FileText {
         return
     }
     $updated = $content.Replace($OldStr, $NewStr)
-    [System.IO.File]::WriteAllText((Resolve-Path $Path).Path, $updated, [System.Text.Encoding]::UTF8)
+    [System.IO.File]::WriteAllText((Resolve-Path $Path).Path, $updated, $utf8NoBom)
     Write-Host "  Updated: $Path" -ForegroundColor Green
 }
 
@@ -70,7 +73,7 @@ $stateJson = $state | ConvertTo-Json -Depth 5
 [System.IO.File]::WriteAllText(
     (Resolve-Path "STATE.json").Path,
     $stateJson,
-    [System.Text.Encoding]::UTF8
+    $utf8NoBom
 )
 Write-Host "  Updated: STATE.json" -ForegroundColor Green
 
@@ -91,7 +94,7 @@ $pkgUpdated = [System.Text.RegularExpressions.Regex]::Replace(
     '"version":\s*"[^"]*"',
     "`"version`": `"$stableVer`""
 )
-[System.IO.File]::WriteAllText($pkgPath.Path, $pkgUpdated, [System.Text.Encoding]::UTF8)
+[System.IO.File]::WriteAllText($pkgPath.Path, $pkgUpdated, $utf8NoBom)
 Write-Host "  Updated: package.json" -ForegroundColor Green
 
 # 5. docs/WORKFLOW.md
