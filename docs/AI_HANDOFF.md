@@ -1,8 +1,8 @@
-﻿<!-- Current Version: 1.0.0 -->
+<!-- Current Version: 1.0.0 -->
 
 # AI Handoff
 
-**Current Version**: 1.0.0-alpha â€” read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.0.0 — read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.0.0 â€” AI Workflow Foundation
 **Next**: Complete Phase 3 (View Filter Hardening) â†’ v1.2.0
 
