@@ -20,20 +20,25 @@ Each item includes priority, status, files, acceptance criteria, and validation 
 
 ## Upcoming Patches
 
-### v1.0.2 — Commit Sequence Automation
+### v1.0.2 — Commit Automation and Prompt Format Hardening
 - **Priority:** Workflow / developer experience
 - **Status:** Open
-- **Problem:** After validation passes, Claude Code gives 20+ individual git commit commands to run by hand. The fix is a manifest-driven script.
+- **Problem:** After validation passes, Claude Code gives 20+ individual git commit commands to run by hand. The fix is a single-file commit helper and hardened prompt format.
 - **Scope:**
-  - `scripts/phase-commit-sequence.ps1` — reads `.commit-sequence` manifest, commits each entry (format: `path1[,pathN]|commit message`) one by one
-  - `docs/WORKFLOW.md` Post-Validation section — rewrite to say Claude Code writes `.commit-sequence`, user runs `.\scripts\phase-commit-sequence.ps1`
-  - `AGENTS.md` + `docs/CODEX_RULES.md` — add explicit no-batching and no-Co-Authored-By commit discipline rules
-  - `.gitignore` — add `.commit-sequence`
+  - `scripts/commit.ps1` — parameter-driven commit helper;
+    replaces raw git add + git commit in all post-validation blocks
+  - `docs/WORKFLOW.md` — rewrite Codex prompt format section to structured
+    format (READ THESE FILES FIRST, CURRENT PROJECT STATE, IMPLEMENTATION
+    REQUIREMENTS, SAFETY CONSTRAINTS, STOP AND SUMMARIZE); update
+    post-validation section to use commit.ps1 call sequences
+  - `docs/CODEX_RULES.md` — update commit discipline to reference commit.ps1
+  - `AGENTS.md` — update commit discipline to reference commit.ps1
+  - `.gitignore` — no local commit manifest entry
 - **Acceptance criteria:**
-  - User runs one command after validation instead of 20+
-  - Manifest format is documented in WORKFLOW.md
-  - Script handles new, modified, and deleted files
-
+  - commit.ps1 stages and commits one or more files, prints hash on success,
+    errors with clear message on failure
+  - WORKFLOW.md Codex prompt format matches the structured HFK-style format
+  - No raw git add + git commit blocks remain in any workflow doc
 ---
 
 ## Active Phases
