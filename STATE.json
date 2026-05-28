@@ -1,6 +1,6 @@
 {
-    "version":  "1.0.3-alpha",
-    "state":  "alpha",
+    "version":  "1.0.3",
+    "state":  "stable",
     "phase":  "1.0.3",
     "phaseTitle":  "Promote Encoding Fix and Source-of-Truth Hardening",
     "nextPhase":  "1.1.0 - Graphify Integration",
