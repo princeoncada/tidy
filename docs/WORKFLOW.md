@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.0.1 -->
+<!-- Current Version: 1.0.2-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start alongside `STATE.json`. It is the authoritative protocol for all implementation phases.
 
@@ -65,92 +65,119 @@ QUERY (ChromaDB) -> READ (STATE.json + minimal docs) -> CONFIRM (user direction)
   -> PROMOTE (.\scripts\promote.ps1) -> COMMIT (user runs git)
 ```
 
----
+### Alpha vs. Stable Scope Rule
 
-## Codex Prompt Format (2 Sections)
+Check STATE.json before deciding how to respond to a fix or change request:
 
-Every Codex prompt must use this 2-section format:
+- state = "alpha" — apply the fix directly as an in-alpha correction.
+  No new Codex prompt, no version bump, no re-scope. Extend the current
+  phase prompt with the additional changes only.
+- state = "stable" — open a new phase. Write a full Codex prompt with
+  version bump, READ THESE FILES FIRST, IMPLEMENTATION REQUIREMENTS,
+  SAFETY CONSTRAINTS, and STOP AND SUMMARIZE.
 
-### Section 1 â€” Plain Text Block (Codex reads and implements)
-
-```
-SECTION 1 â€” FOR CODEX
-
-Read first:
-- STATE.json
-- docs/AI_HANDOFF.md
-- docs/CODEX_RULES.md
-- [phase log section from docs/PHASE_LOG.md if phase work]
-- [2â€“3 source files directly affected]
-
-Current state:
-Version: [X.Y.Z-alpha]
-Phase: [phase title]
-Branch: [branch name]
-
-Implementation requirements:
-[Numbered list of exact changes to make]
-
-Safety constraints:
-- Do not modify unrelated files
-- Do not rename public APIs, tRPC procedures, query keys, or Prisma models
-- Do not modify app/generated/prisma
-- Do not commit, push, or run npm scripts
-- Preserve optimistic update and TanStack Query cache behavior
-- Preserve drag-and-drop invariants (local hover, stable drop writes)
-- Preserve Supabase user scoping in all procedures
-
-Files to change:
-[Explicit list of files to edit]
-
-Documentation to update:
-- docs/AI_HANDOFF.md â€” note any changed invariants, data flow, risks, or key files
-- docs/FUTURE_PLANS.md â€” mark completed work, add discovered risks or follow-up tasks
-
-After implementing: stop and summarize changes made. Do not run any scripts.
-```
-
-### Section 2 â€” PowerShell Block (User runs after Codex finishes)
-
-```powershell
-# Run AFTER Codex implementation is complete
-
-# 1. Full CI validation
-npm run test:ci
-
-# 2. Phase-specific spot checks
-# Select-String -Path "lib/..." -Pattern "..."
-# (add targeted grep checks here for the specific invariants this phase touches)
-```
+Never re-scope a full phase for a fix when the current version is already alpha.
 
 ---
 
-## Post-Validation Workflow (Claude Code provides, user runs)
+## Codex Prompt Format
 
-After `npm run test:ci` passes, Claude Code provides **all of the following in a single message**:
+Every Codex prompt uses a two-section format. Section headings are markdown
+headers sitting above their code block — not inside it.
 
-1. **Validation summary** â€” typecheck/lint/test pass counts, any warnings
-2. **Implementation commit block**:
-   ```
-   git add [specific files â€” never git add -A]
-   git commit -m "feat([scope]): [what changed and why]"
-   ```
-3. **Promote block** (run immediately after implementation commit):
-   ```
-   .\scripts\promote.ps1
-   ```
-4. **Stable-promotion commit block** (run immediately after promote.ps1):
-   ```
-   git add STATE.json docs/VERSIONING.md docs/AI_HANDOFF.md package.json docs/WORKFLOW.md
-   git commit -m "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
-   ```
-5. **Push block** (same message, user decides when to run):
-   ```
-   git push origin [branch]
-   ```
+### Section 1 — Master Prompt
 
-All five are provided together. User runs them in order.
+A plain text code block containing all of the following blocks in this exact order:
 
+    You are implementing Phase X.Y.Z — [Name] for Tidy.
+    Current stable version: X.Y.Z-stable.
+    This implementation opens X.Y.Z-alpha.
+
+    ---
+
+    READ THESE FILES FIRST before writing any code:
+
+    - STATE.json
+    - docs/AI_HANDOFF.md
+    - docs/CODEX_RULES.md
+    - [2–3 source files directly relevant to this change]
+    - [if the phase creates or modifies scripts: list scripts/ to check for
+      existing implementations before scoping anything new]
+
+    ---
+
+    CURRENT PROJECT STATE:
+
+    Version: X.Y.Z-alpha
+    Series: [series label]
+    Last phase: [title] ([one-line result])
+    Next phase: [this prompt title]
+
+    ---
+
+    IMPLEMENTATION REQUIREMENTS:
+
+    Every requirement is mandatory. Do not skip, defer, or partially implement.
+
+    [Numbered items. Label each CREATE or MODIFY.
+     MODIFY items include exact OLD TEXT and NEW TEXT pairs.
+     Do not alter any text outside the specified pairs.]
+
+    ---
+
+    SAFETY CONSTRAINTS:
+
+    - Do not commit, push, or create branches
+    - Do not run npm scripts, git commands, or validation scripts
+    - Do not modify app/generated/prisma
+    - Do not touch unrelated files
+    - [phase-specific constraints]
+
+    ---
+
+    STOP AND SUMMARIZE:
+
+    After completing all changes, stop and provide:
+    1. Files created (path + one-sentence purpose)
+    2. Files modified (path + what changed)
+    3. Any assumptions made during implementation
+
+### Section 2 — Validation
+
+A PowerShell code block. Structure:
+
+    # Baseline
+    npm run test:ci
+
+    # Phase-specific spot checks
+    [Select-String and Test-Path checks for this phase's invariants]
+---
+
+## Post-Validation Workflow
+
+After npm run test:ci passes, Claude Code provides all of the following
+in a single message:
+
+1. Validation summary — pass counts, any warnings
+2. commit.ps1 call sequence — one call per changed file, in commit order:
+
+    .\scripts\commit.ps1 -Files "path/to/file" -Message "type(scope): message"
+
+3. Promote block (run immediately after all commits complete):
+
+    .\scripts\promote.ps1
+
+4. Stable-promotion commit sequence — one call per versioning file:
+
+    .\scripts\commit.ps1 -Files "STATE.json" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
+    .\scripts\commit.ps1 -Files "docs/VERSIONING.md" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
+    .\scripts\commit.ps1 -Files "docs/AI_HANDOFF.md" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
+    .\scripts\commit.ps1 -Files "package.json" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
+    .\scripts\commit.ps1 -Files "docs/WORKFLOW.md" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
+
+5. Push block (user decides when to run):
+
+    git push origin master
 ---
 
 ## Session Checkpoint (Pausing Mid-Phase)
