@@ -1,4 +1,4 @@
-﻿# Agent Workflow
+# Agent Workflow
 
 <!-- Current Version: 1.0.0 -->
 
