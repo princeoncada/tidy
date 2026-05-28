@@ -1,4 +1,4 @@
-﻿# Future Plans
+# Future Plans
 
 Living backlog for future sessions. Keep this updated in every implementation PR so future agents can choose focused work without broad source scanning.
 
@@ -13,7 +13,7 @@ Each item includes priority, status, files, acceptance criteria, and validation 
 - `Open`: not started
 - `In progress`: currently being implemented in an active branch
 - `Blocked`: cannot proceed without an external decision/dependency
-- `Done`: completed â€” include PR/commit note before eventual archival
+- `Done`: completed — include PR/commit note before eventual archival
 - `Superseded`: no longer applicable because another change made it obsolete
 
 ---
