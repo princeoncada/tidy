@@ -26,7 +26,7 @@ if (-not (Test-Path "STATE.json")) {
     exit 1
 }
 
-$stateRaw  = Get-Content "STATE.json" -Raw
+$stateRaw  = Get-Content "STATE.json" -Raw -Encoding UTF8
 $state     = $stateRaw | ConvertFrom-Json
 $alphaVer  = $state.version
 
@@ -55,7 +55,7 @@ function Update-FileText {
         Write-Warning "File not found, skipping: $Path"
         return
     }
-    $content = Get-Content $Path -Raw
+    $content = Get-Content $Path -Raw -Encoding UTF8
     if ($content.IndexOf($OldStr) -lt 0) {
         Write-Warning "Pattern not found in $Path - manual update may be needed: '$OldStr'"
         return
@@ -88,7 +88,7 @@ Update-FileText "docs/AI_HANDOFF.md" `
 
 # 4. package.json
 $pkgPath    = Resolve-Path "package.json"
-$pkgContent = Get-Content $pkgPath -Raw
+$pkgContent = Get-Content $pkgPath -Raw -Encoding UTF8
 $pkgUpdated = [System.Text.RegularExpressions.Regex]::Replace(
     $pkgContent,
     '"version":\s*"[^"]*"',
