@@ -1,4 +1,4 @@
-<!-- Current Version: 1.0.3-alpha -->
+<!-- Current Version: 1.0.3 -->
 # AI Handoff
 **Current Version**: 1.0.3-alpha - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.0.3 - Promote Encoding Fix and Source-of-Truth Hardening
