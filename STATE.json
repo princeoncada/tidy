@@ -1,9 +1,9 @@
 {
-    "version":  "1.0.1",
-    "state":  "stable",
-    "phase":  "1.0.1",
-    "phaseTitle":  "AGENTS.md Hardening",
-    "nextPhase":  "1.0.2 - Commit Sequence Automation",
+    "version":  "1.0.2-alpha",
+    "state":  "alpha",
+    "phase":  "1.0.2",
+    "phaseTitle":  "Commit Automation and Prompt Format Hardening",
+    "nextPhase":  "1.1.0 — Graphify Integration",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-28",
     "preVersioningBaseline":  {
