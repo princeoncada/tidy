@@ -1,7 +1,7 @@
-# validate.ps1 — Tidy validation script
+# validate.ps1 - Tidy validation script
 #
 # Runs: STATE.json check, optional ChromaDB ingest, TypeScript, ESLint, Vitest.
-# E2E tests require a running dev server — run `npm run test:e2e` separately.
+# E2E tests require a running dev server -- run `npm run test:e2e` separately.
 #
 # Usage:
 #   .\scripts\validate.ps1              # full run
@@ -24,7 +24,7 @@ function Add-Result {
 Write-Host "`n=== Tidy Validation ===" -ForegroundColor Cyan
 Write-Host "Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
 
-# ── STATE.json ─────────────────────────────────────────────────────────────────
+# STATE.json
 Write-Host "`n--- Project State ---"
 if (Test-Path "STATE.json") {
     $state = Get-Content "STATE.json" -Raw | ConvertFrom-Json
@@ -37,17 +37,17 @@ if (Test-Path "STATE.json") {
     Add-Result "STATE.json" $false "file missing"
 }
 
-# ── ChromaDB (optional) ────────────────────────────────────────────────────────
+# ChromaDB (optional)
 if (-not $SkipChroma) {
     Write-Host "`n--- ChromaDB ---"
     $chromaUp = $false
     try {
-        $null = Invoke-WebRequest -Uri "http://localhost:8000/api/v1/heartbeat" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
+        $null = Invoke-WebRequest -Uri "http://localhost:8000/api/v2/heartbeat" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
         $chromaUp = $true
         Write-Host "ChromaDB: running" -ForegroundColor Green
         Add-Result "ChromaDB health" $true
     } catch {
-        Write-Host "ChromaDB: not running — skipping ingest (run 'npm run chroma' to enable)" -ForegroundColor DarkYellow
+        Write-Host "ChromaDB: not running - skipping ingest (run 'npm run chroma' to enable)" -ForegroundColor DarkYellow
         Add-Result "ChromaDB health" $true "not running, skipped"
     }
 
@@ -59,27 +59,27 @@ if (-not $SkipChroma) {
     }
 }
 
-# ── TypeScript ─────────────────────────────────────────────────────────────────
+# TypeScript
 if (-not $SkipTests) {
     Write-Host "`n--- TypeScript ---"
     npm run typecheck
     $tsExit = $LASTEXITCODE
     Add-Result "TypeScript" ($tsExit -eq 0) "exit $tsExit"
 
-    # ── ESLint ─────────────────────────────────────────────────────────────────
+    # ESLint
     Write-Host "`n--- ESLint ---"
     npm run lint
     $lintExit = $LASTEXITCODE
     Add-Result "ESLint" ($lintExit -eq 0) "exit $lintExit"
 
-    # ── Vitest ─────────────────────────────────────────────────────────────────
+    # Vitest
     Write-Host "`n--- Unit Tests (Vitest) ---"
     npm run test
     $testExit = $LASTEXITCODE
     Add-Result "Unit tests" ($testExit -eq 0) "exit $testExit"
 }
 
-# ── Summary ───────────────────────────────────────────────────────────────────
+# Summary
 Write-Host "`n=== Summary ===" -ForegroundColor Cyan
 
 $passed = ($results | Where-Object { $_.Passed }).Count
@@ -94,8 +94,8 @@ foreach ($r in $results) {
 
 Write-Host ""
 if ($failed -gt 0) {
-    Write-Host "$passed passed, $failed failed — fix failures before promoting." -ForegroundColor Red
+    Write-Host "$passed passed, $failed failed - fix failures before promoting." -ForegroundColor Red
     exit 1
 } else {
-    Write-Host "$passed passed — ready for promote.ps1." -ForegroundColor Green
+    Write-Host "$passed passed - ready for promote.ps1." -ForegroundColor Green
 }
