@@ -60,7 +60,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.0.9-alpha
+- **Current version:** 1.0.9
 - **Current phase:** 1.0.9 - Promote Self-Verify and CLAUDE.md Continuity
 - **Next phase:** 1.1.0 - Graphify Integration
 
@@ -122,7 +122,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.0.9 | alpha | 2026-05-29 | Promote Self-Verify and CLAUDE.md Continuity | promote.ps1 self-verifies the five versioning locations and fixes its commit echo; WORKFLOW.md drops the redundant post-promote validation; Doc Continuity Model now covers CLAUDE.md. |
+| 1.0.9 | stable | 2026-05-29 | Promote Self-Verify and CLAUDE.md Continuity | promote.ps1 self-verifies the five versioning locations and fixes its commit echo; WORKFLOW.md drops the redundant post-promote validation; Doc Continuity Model now covers CLAUDE.md. |
 | 1.0.8 | stable | 2026-05-29 | Doc Continuity Model | Doc Continuity Model added to VERSIONING.md; opener state snapshot removed and AGENTS.md/WORKFLOW.md updated to point at STATE.json + FUTURE_PLANS; stale PHASE_LOG target-version fixed (1.2.0 -> 1.3.0). |
 | 1.0.7 | stable | 2026-05-29 | Anti-Drift Baseline | Version-consistency gate added to validate.ps1; Drift Guardrails + Startup Report disambiguation in AGENTS.md; 1.1.0/1.2.0 roadmap entries added; stale version markers removed. |
 | 1.0.6 | stable | 2026-05-28 | Mojibake Resolution and Scan | fix-mojibake.ps1 created; AI_HANDOFF.md, VERSIONING.md, WORKFLOW.md repaired; mojibake scan step added to validate.ps1. |
