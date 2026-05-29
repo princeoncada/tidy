@@ -1,16 +1,15 @@
-# validate.ps1 - Tidy validation script
+# validate.ps1 - Tidy validation runner
 #
-# Runs: STATE.json check, optional ChromaDB ingest, TypeScript, ESLint, Vitest.
-# E2E tests require a running dev server -- run `npm run test:e2e` separately.
+# Captures output per step. Silent on pass, verbose on fail.
 #
 # Usage:
-#   .\scripts\validate.ps1              # full run
-#   .\scripts\validate.ps1 -SkipChroma # skip ChromaDB step
-#   .\scripts\validate.ps1 -SkipTests  # state + chroma check only
+#   .\scripts\validate.ps1             # full run (typecheck, lint, unit, e2e)
+#   .\scripts\validate.ps1 -SkipChroma # skip ChromaDB check
+#   .\scripts\validate.ps1 -SkipE2E   # skip Playwright e2e
 
 param(
     [switch]$SkipChroma,
-    [switch]$SkipTests
+    [switch]$SkipE2E
 )
 
 $ErrorActionPreference = "Continue"
@@ -21,81 +20,81 @@ function Add-Result {
     $results.Add([PSCustomObject]@{ Label = $Label; Passed = $Passed; Detail = $Detail })
 }
 
-Write-Host "`n=== Tidy Validation ===" -ForegroundColor Cyan
-Write-Host "Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
+function Run-Step {
+    param([string]$Label, [string[]]$Cmd, [string]$SummaryPattern = "")
+    $tmpFile = [System.IO.Path]::GetTempFileName()
+    $passed  = $false
+    $detail  = ""
+    try {
+        & $Cmd[0] $Cmd[1..($Cmd.Length - 1)] 2>&1 | Out-File $tmpFile -Encoding UTF8
+        $passed = $LASTEXITCODE -eq 0
+        $out    = Get-Content $tmpFile -Encoding UTF8
+        if ($SummaryPattern -and $passed -and $out) {
+            $clean = $out | ForEach-Object { $_ -replace '\x1b\[[0-9;]*[mGKHF]', '' }
+            $match = @($clean | Where-Object { $_ -match $SummaryPattern })[0]
+            if ($match) { $detail = ($match -replace '\s+', ' ').Trim() }
+        }
+        if (-not $passed) {
+            Write-Host "`n--- $Label output ---" -ForegroundColor Red
+            $out | ForEach-Object { Write-Host $_ }
+        }
+    } finally {
+        Remove-Item $tmpFile -ErrorAction SilentlyContinue
+    }
+    Add-Result $Label $passed $detail
+}
+
+Write-Host "`n=== Tidy Validation === $(Get-Date -Format 'yyyy-MM-dd HH:mm')" -ForegroundColor Cyan
 
 # STATE.json
-Write-Host "`n--- Project State ---"
 if (Test-Path "STATE.json") {
-    $state = Get-Content "STATE.json" -Raw | ConvertFrom-Json
-    Write-Host "Version  : $($state.version)"
-    Write-Host "Phase    : $($state.phaseTitle)"
-    Write-Host "Next     : $($state.nextPhase)"
-    Add-Result "STATE.json" $true
+    $state = Get-Content "STATE.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+    Add-Result "STATE.json" $true "$($state.version) - $($state.phaseTitle)"
 } else {
-    Write-Host "WARNING: STATE.json not found" -ForegroundColor Red
     Add-Result "STATE.json" $false "file missing"
 }
 
-# ChromaDB (optional)
+# ChromaDB
 if (-not $SkipChroma) {
-    Write-Host "`n--- ChromaDB ---"
-    $chromaUp = $false
     try {
         $null = Invoke-WebRequest -Uri "http://localhost:8000/api/v2/heartbeat" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
-        $chromaUp = $true
-        Write-Host "ChromaDB: running" -ForegroundColor Green
-        Add-Result "ChromaDB health" $true
+        Add-Result "ChromaDB" $true "running"
     } catch {
-        Write-Host "ChromaDB: not running - skipping ingest (run 'npm run chroma' to enable)" -ForegroundColor DarkYellow
-        Add-Result "ChromaDB health" $true "not running, skipped"
-    }
-
-    if ($chromaUp) {
-        Write-Host "Ingesting docs into tidy_docs..."
-        python scripts/ingest_docs.py
-        $ingestExit = $LASTEXITCODE
-        Add-Result "ChromaDB ingest" ($ingestExit -eq 0) "exit $ingestExit"
+        Add-Result "ChromaDB" $true "not running, skipped"
     }
 }
 
-# TypeScript
-if (-not $SkipTests) {
-    Write-Host "`n--- TypeScript ---"
-    npm run typecheck
-    $tsExit = $LASTEXITCODE
-    Add-Result "TypeScript" ($tsExit -eq 0) "exit $tsExit"
+# Typecheck
+Run-Step "typecheck" @("npm", "run", "typecheck")
 
-    # ESLint
-    Write-Host "`n--- ESLint ---"
-    npm run lint
-    $lintExit = $LASTEXITCODE
-    Add-Result "ESLint" ($lintExit -eq 0) "exit $lintExit"
+# Lint
+Run-Step "lint" @("npm", "run", "lint")
 
-    # Vitest
-    Write-Host "`n--- Unit Tests (Vitest) ---"
-    npm run test
-    $testExit = $LASTEXITCODE
-    Add-Result "Unit tests" ($testExit -eq 0) "exit $testExit"
+# Unit tests
+Run-Step "unit tests" @("npm", "run", "test") "Tests\s+\d+ passed"
+
+# E2E
+if (-not $SkipE2E) {
+    Run-Step "e2e" @("npm", "run", "test:e2e", "--", "--reporter=dot") "\d+ passed"
 }
 
 # Summary
-Write-Host "`n=== Summary ===" -ForegroundColor Cyan
-
-$passed = ($results | Where-Object { $_.Passed }).Count
-$failed = ($results | Where-Object { -not $_.Passed }).Count
+Write-Host ""
+$passCount = ($results | Where-Object { $_.Passed }).Count
+$failCount  = ($results | Where-Object { -not $_.Passed }).Count
 
 foreach ($r in $results) {
-    $icon  = if ($r.Passed) { "PASS" } else { "FAIL" }
-    $color = if ($r.Passed) { "Green" } else { "Red" }
-    $detail = if ($r.Detail) { "  ($($r.Detail))" } else { "" }
+    $icon   = if ($r.Passed) { "PASS" } else { "FAIL" }
+    $color  = if ($r.Passed) { "Green" } else { "Red" }
+    $detail = if ($r.Detail) { "  $($r.Detail)" } else { "" }
     Write-Host "  [$icon] $($r.Label)$detail" -ForegroundColor $color
 }
 
 Write-Host ""
-if ($failed -gt 0) {
-    Write-Host "$passed passed, $failed failed - fix failures before promoting." -ForegroundColor Red
+if ($failCount -gt 0) {
+    Write-Host "$passCount passed, $failCount FAILED - fix before promoting." -ForegroundColor Red
     exit 1
 } else {
-    Write-Host "$passed passed - ready for promote.ps1." -ForegroundColor Green
+    Write-Host "$passCount passed - ready for promote.ps1." -ForegroundColor Green
+    exit 0
 }
