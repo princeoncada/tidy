@@ -1,4 +1,4 @@
-<!-- Current Version: 1.0.4-alpha -->
+<!-- Current Version: 1.0.4 -->
 # AI Handoff
 **Current Version**: 1.0.4-alpha - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.0.4 - Validate Script Output Compression
