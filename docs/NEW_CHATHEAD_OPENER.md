@@ -19,9 +19,8 @@ Before doing anything else:
    - FUTURE_PLANS next Open item
 4. Run: git status --short and report any uncommitted work
 
-Current expected state: 1.0.5-stable.
-Next planned work: 1.1.0 - Graphify Integration. Install graphify,
-generate codebase-graph.json, add graph navigation discipline to AGENTS.md.
+Current expected state: [current state].
+Next planned work: [future plans listed]
 
 Do not read other docs or begin implementation until I confirm.
 See CLAUDE.md and docs/CODEX_RULES.md for full rules after confirmation.
