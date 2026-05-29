@@ -1,6 +1,6 @@
-<!-- Current Version: 1.0.9-alpha -->
+<!-- Current Version: 1.0.9 -->
 # AI Handoff
-**Current Version**: 1.0.9-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.0.9 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.0.9 - Promote Self-Verify and CLAUDE.md Continuity
 **Next**: 1.1.0 - Graphify Integration
 ---
