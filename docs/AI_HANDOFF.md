@@ -1,10 +1,15 @@
-<!-- Current Version: 1.0.10 -->
+<!-- Current Version: 1.0.11-alpha -->
 # AI Handoff
-**Current Version**: 1.0.10 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.0.10 - Roadmap Consolidation
+**Current Version**: 1.0.11-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.0.11 - Session Continuity and Bounded Initiative
 **Next**: 1.1.0 - Graphify Integration
 ---
 ## What Was Last Done
+**Phase 1.0.11** opened session continuity and bounded initiative:
+- Added a Session Continuity section to `AGENTS.md` (proactively offer a SESSION_LOG checkpoint before context loss)
+- Added a Working Posture section to `AGENTS.md` (strict rails + active initiative)
+- Cross-referenced proactive checkpointing in `docs/WORKFLOW.md` Session Checkpoint
+- Fixed stale "first Open item" references to point at the FUTURE_PLANS Planned section
 **Phase 1.0.10** opened roadmap consolidation:
 - Rewrote `docs/FUTURE_PLANS.md` into a single version-sequenced plan (Completed / In Progress / Planned / Potential Directions)
 - Removed the duplicate Planned Phases table from `docs/VERSIONING.md`; it now holds history + rules only
