@@ -80,11 +80,15 @@ Write-Host "  Updated: STATE.json" -ForegroundColor Green
 # 2. docs/VERSIONING.md
 $baseVer = $stableVer
 Update-FileText "docs/VERSIONING.md" "| $baseVer | alpha |" "| $baseVer | stable |"
+Update-FileText "docs/VERSIONING.md" "**Current version:** $alphaVer" "**Current version:** $stableVer"
 
 # 3. docs/AI_HANDOFF.md
 Update-FileText "docs/AI_HANDOFF.md" `
     "<!-- Current Version: $alphaVer -->" `
     "<!-- Current Version: $stableVer -->"
+Update-FileText "docs/AI_HANDOFF.md" `
+    "**Current Version**: $alphaVer" `
+    "**Current Version**: $stableVer"
 
 # 4. package.json
 $pkgPath    = Resolve-Path "package.json"
