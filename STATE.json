@@ -1,8 +1,8 @@
 {
-    "version":  "1.0.5",
-    "state":  "stable",
-    "phase":  "1.0.5",
-    "phaseTitle":  "New Chathead Opener",
+    "version":  "1.0.6-alpha",
+    "state":  "alpha",
+    "phase":  "1.0.6",
+    "phaseTitle":  "Mojibake Resolution and Scan",
     "nextPhase":  "1.1.0 - Graphify Integration",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-28",
