@@ -1,6 +1,6 @@
 {
-    "version":  "1.0.9-alpha",
-    "state":  "alpha",
+    "version":  "1.0.9",
+    "state":  "stable",
     "phase":  "1.0.9",
     "phaseTitle":  "Promote Self-Verify and CLAUDE.md Continuity",
     "nextPhase":  "1.1.0 - Graphify Integration",
