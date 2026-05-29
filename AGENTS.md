@@ -30,7 +30,7 @@ These rules exist so lower-capability models cannot silently drift:
   other doc disagrees with STATE.json, STOP and flag the conflict - never
   guess which is correct and never reconcile silently.
 - "Next phase" (roadmap, from STATE.json nextPhase) and "Next backlog item"
-  (docs/FUTURE_PLANS.md first Open item) are different questions with
+  (docs/FUTURE_PLANS.md first Planned item) are different questions with
   different answers. Report both, labeled distinctly. Never conflate them.
 - If ChromaDB is offline, say so explicitly and read files directly. Never
   fabricate or paraphrase query results that were not actually returned.
@@ -39,6 +39,43 @@ These rules exist so lower-capability models cannot silently drift:
 - scripts/validate.ps1 enforces version consistency across all five
   versioning locations. A failing consistency gate blocks promotion.
 
+## Session Continuity
+
+Context can be compacted or lost in long sessions. To survive compaction or a
+model handoff, Claude Code must protect continuity proactively:
+
+- Proactively OFFER a SESSION_LOG checkpoint (do not wait to be asked) when any of:
+  - the session has run long or context may be compacted soon
+  - a phase was just promoted to stable
+  - before a large, risky, or many-file operation
+  - the user signals stopping, switching tasks, or stepping away
+- The user decides whether to checkpoint; Claude Code only proposes it.
+- A checkpoint = write docs/SESSION_LOG/YYYY-MM-DD-session-NN.md per the Session
+  Checkpoint format in docs/WORKFLOW.md.
+- Continuity invariant: STATE.json + docs/FUTURE_PLANS.md + the latest SESSION_LOG
+  must together let a brand-new model resume with no prior conversation. If they
+  would not, say so and fix the docs before continuing.
+
+## Working Posture (Strict Rails, Active Initiative)
+
+Follow the docs strictly AND work with initiative. The rails are non-negotiable;
+within them, do not be passive.
+
+Strict (never cross without the authorization phrase):
+- The Implementation Gate, commit discipline, scope control, and five-location
+  versioning rules are absolute.
+- Never invent state, version, or "what's next" - read the docs fresh.
+
+Initiative (expected, not optional):
+- Surface drift, conflicts, and risks the moment you see them - STOP and flag,
+  do not smooth over (see Drift Guardrails).
+- After finishing a step, state what you verified and recommend the next action
+  or phase; do not wait to be asked "what now".
+- Proactively offer a SESSION_LOG checkpoint per Session Continuity.
+- On ambiguity, propose your best interpretation and proceed - flag it once, do
+  not stall. Ask only when the answer is genuinely the user's to make.
+- If you notice an out-of-scope issue, name it and where - do not silently fix it.
+
 ## Startup Report Format
 
 Always output this exact structure at session start:
@@ -46,7 +83,7 @@ Always output this exact structure at session start:
     Version: X.Y.Z-[state]
     Phase: [phaseTitle]
     Next phase (roadmap): [nextPhase from STATE.json]
-    Next backlog item: [title of first Open item in docs/FUTURE_PLANS.md]
+    Next backlog item: [title of first item in the Planned section of docs/FUTURE_PLANS.md]
     ChromaDB: [online | offline]
     [one of:]
     Proceeding to Codex prompts for [scope].
@@ -68,9 +105,9 @@ Do not read `docs/WORKFLOW.md` at startup. Read it only when writing or reviewin
 | Phrase | What Claude Code does |
 |--------|----------------------|
 | "scope it out" | Write the full Codex prompt + Section 2 validation block |
-| "what's next" | Read docs/FUTURE_PLANS.md fresh, report the next Open backlog item and summarize it. This is the backlog item, not the roadmap "Next phase" (which comes from STATE.json nextPhase) - distinguish them if both are relevant |
+| "what's next" | Read docs/FUTURE_PLANS.md fresh, report the next item in the Planned section and summarize it. This is the next planned item, not the roadmap "Next phase" (which comes from STATE.json nextPhase) - distinguish them if both are relevant |
 | "session start" / "continue" | Run Session Start Protocol and output Startup Report |
-| "session checkpoint" / "handoff" | Write SESSION_LOG entry. Do not write version/phase state into docs/NEW_CHATHEAD_OPENER.md - the opener points to STATE.json + FUTURE_PLANS by design (see Doc Continuity Model in docs/VERSIONING.md) |
+| "session checkpoint" / "handoff" | Write SESSION_LOG entry (Claude Code may also propose this proactively - see Session Continuity). Do not write version/phase state into docs/NEW_CHATHEAD_OPENER.md - the opener points to STATE.json + FUTURE_PLANS by design (see Doc Continuity Model in docs/VERSIONING.md) |
 | "I AUTHORIZE CLAUDE CODE TO IMPLEMENT - [reason]" | Fallback only  -  use when Codex hits its token limit mid-implementation. Claude Code never suggests this phrase; the user initiates it. |
 
 When validation checks fail after a Codex implementation, Claude Code must provide a fix master prompt immediately. Never ask the user to authorize direct implementation.
