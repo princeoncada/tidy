@@ -1,6 +1,6 @@
-<!-- Current Version: 1.0.7-alpha -->
+<!-- Current Version: 1.0.7 -->
 # AI Handoff
-**Current Version**: 1.0.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.0.7 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.0.7 - Anti-Drift Baseline
 **Next**: 1.1.0 - Graphify Integration
 ---
