@@ -1,6 +1,6 @@
-<!-- Current Version: 1.0.8-alpha -->
+<!-- Current Version: 1.0.8 -->
 # AI Handoff
-**Current Version**: 1.0.8-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.0.8 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.0.8 - Doc Continuity Model
 **Next**: 1.1.0 - Graphify Integration
 ---
