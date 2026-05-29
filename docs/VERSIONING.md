@@ -35,8 +35,8 @@ Use `.\scripts\promote.ps1` to promote `-alpha` -> `-stable` across all five loc
 
 ## Current State
 
-- **Current version:** 1.0.3-alpha
-- **Current phase:** 1.0.3 - Promote Encoding Fix and Source-of-Truth Hardening
+- **Current version:** 1.0.4-alpha
+- **Current phase:** 1.0.4 - Validate Script Output Compression
 - **Next phase:** 1.1.0 - Graphify Integration
 
 ---
@@ -97,6 +97,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.0.4 | alpha | 2026-05-28 | Validate Script Output Compression | validate.ps1 rewritten to suppress output on pass, surface on fail, add e2e step, fix -Encoding UTF8 on STATE.json read. WORKFLOW.md Section 2 template updated to use validate.ps1. |
 | 1.0.3 | stable | 2026-05-28 | Promote Encoding Fix and Source-of-Truth Hardening | promote.ps1 Get-Content calls fixed with -Encoding UTF8; AGENTS.md repo source-of-truth rule added; FUTURE_PLANS v1.0.2 marked Done. |
 | 1.0.2 | stable | 2026-05-28 | Commit Automation and Prompt Format Hardening | commit.ps1 canonical commit helper; WORKFLOW.md prompt format rewrite; CODEX_RULES.md and AGENTS.md commit discipline updated. |
 | 1.0.1 | stable | 2026-05-28 | AGENTS.md Hardening | Rewrites AGENTS.md startup guidance, removes inline-breaking fenced blocks, documents Claude Code command vocabulary, and tracks the v1.0.2 commit automation patch. |
