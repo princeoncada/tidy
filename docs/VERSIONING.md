@@ -35,8 +35,8 @@ Use `.\scripts\promote.ps1` to promote `-alpha` -> `-stable` across all five loc
 
 ## Current State
 
-- **Current version:** 1.0.6-alpha
-- **Current phase:** 1.0.6 - Mojibake Resolution and Scan
+- **Current version:** 1.0.7-alpha
+- **Current phase:** 1.0.7 - Anti-Drift Baseline
 - **Next phase:** 1.1.0 - Graphify Integration
 
 ---
@@ -97,6 +97,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.0.7 | alpha | 2026-05-29 | Anti-Drift Baseline | Version-consistency gate added to validate.ps1; Drift Guardrails + Startup Report disambiguation in AGENTS.md; 1.1.0/1.2.0 roadmap entries added; stale version markers removed. |
 | 1.0.6 | stable | 2026-05-28 | Mojibake Resolution and Scan | fix-mojibake.ps1 created; AI_HANDOFF.md, VERSIONING.md, WORKFLOW.md repaired; mojibake scan step added to validate.ps1. |
 | 1.0.5 | stable | 2026-05-28 | New Chathead Opener | docs/NEW_CHATHEAD_OPENER.md created with START/END copy-paste format; WORKFLOW.md session checkpoint updated to reference opener file; AGENTS.md command vocabulary extended with handoff command. |
 | 1.0.4 | stable | 2026-05-28 | Validate Script Output Compression | validate.ps1 rewritten to suppress output on pass, surface on fail, add e2e step, fix -Encoding UTF8 on STATE.json read. WORKFLOW.md Section 2 template updated to use validate.ps1. |
@@ -113,9 +114,11 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 |---------|-------|-------------|
 | 1.0.0 | AI Workflow Foundation | STATE.json, versioning, workflow docs, ChromaDB doc query scripts, automation scripts. |
 | 1.0.1 | AGENTS.md Hardening | LF-only AGENTS.md rewrite, indented command examples, streamlined startup protocol, and Claude Code command vocabulary. |
-| **1.0.2** | Commit Automation and Prompt Format Hardening | Single-file commit helper and structured Codex prompt/post-validation workflow. **(current)** |
-| 1.1.0 | Graphify Integration | Install graphify, generate codebase-graph.json, add graph navigation discipline to AGENTS.md |
-| 1.2.0 | Phase 3 Completion | Finish View Filter Hardening checkpoints 4-6 |
+| 1.0.2 | Commit Automation and Prompt Format Hardening | Single-file commit helper and structured Codex prompt/post-validation workflow. |
+| 1.0.7 | Anti-Drift Baseline | Version-consistency gate, Drift Guardrails, Startup Report disambiguation, roadmap grooming |
+| 1.1.0 | Graphify Integration | Port hfk-system graphify wiring (generate-codebase-graph scripts, .graphifyignore, CODEBASE_GRAPH.md), generate codebase-graph.json, route orientation through the graph in AGENTS.md |
+| 1.2.0 | ChromaDB Bootstrap | Operationalize ChromaDB: reconcile query/ingest scripts, npm run chroma, create + ingest chroma-data, validate.ps1 auto-start + ingest |
+| 1.3.0 | Phase 3 Completion | Finish View Filter Hardening checkpoints 4-6 |
 | 2.0.0 | Phase 4: Operation Coalescing | Outbox coalescing + replay client wiring |
 | 2.1.0 | Phase 5: Rollback Safety | Dexie-backed rollback for optimistic write failures |
 | 3.0.0 | Phase 6: Scale Prep | Performance + query optimization |
