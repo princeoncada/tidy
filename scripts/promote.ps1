@@ -106,11 +106,33 @@ Update-FileText "docs/WORKFLOW.md" `
     "<!-- Current Version: $alphaVer -->" `
     "<!-- Current Version: $stableVer -->"
 
+# Self-verify: every versioning location must now carry the stable version
+$verifyErrors = @()
+$postState = Get-Content "STATE.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+if ($postState.version -ne $stableVer) { $verifyErrors += "STATE.json=$($postState.version)" }
+if ($postState.state -ne "stable")     { $verifyErrors += "STATE.json state=$($postState.state)" }
+$postPkg = (Get-Content "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json).version
+if ($postPkg -ne $stableVer) { $verifyErrors += "package.json=$postPkg" }
+$postHandoff = Get-Content "docs/AI_HANDOFF.md" -Raw -Encoding UTF8
+if ($postHandoff -notmatch ("<!-- Current Version: " + [regex]::Escape($stableVer) + " -->")) { $verifyErrors += "AI_HANDOFF.md comment" }
+$postWorkflow = Get-Content "docs/WORKFLOW.md" -Raw -Encoding UTF8
+if ($postWorkflow -notmatch ("<!-- Current Version: " + [regex]::Escape($stableVer) + " -->")) { $verifyErrors += "WORKFLOW.md comment" }
+$postVersioning = Get-Content "docs/VERSIONING.md" -Raw -Encoding UTF8
+if ($postVersioning -notmatch ("Current version:\*\*\s*" + [regex]::Escape($stableVer) + "(\s|$)")) { $verifyErrors += "VERSIONING.md current line" }
+if ($verifyErrors.Count -gt 0) {
+    Write-Error ("Promote self-verify FAILED - locations inconsistent: " + ($verifyErrors -join ", "))
+    exit 1
+}
+Write-Host "  Self-verify: all five locations at $stableVer" -ForegroundColor Green
+
 # Done
 Write-Host ""
 Write-Host "Promotion complete: $alphaVer -> $stableVer" -ForegroundColor Green
 Write-Host ""
-Write-Host "Next steps:"
-Write-Host "  git add STATE.json docs/VERSIONING.md docs/AI_HANDOFF.md package.json docs/WORKFLOW.md"
-Write-Host "  git commit -m `"chore(release): promote $alphaVer to $stableVer`""
-Write-Host "  git push origin [branch]"
+Write-Host "Next steps (one commit per file, per commit discipline):"
+Write-Host "  .\scripts\commit.ps1 -Files `"STATE.json`"         -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
+Write-Host "  .\scripts\commit.ps1 -Files `"docs/VERSIONING.md`" -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
+Write-Host "  .\scripts\commit.ps1 -Files `"docs/AI_HANDOFF.md`" -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
+Write-Host "  .\scripts\commit.ps1 -Files `"package.json`"       -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
+Write-Host "  .\scripts\commit.ps1 -Files `"docs/WORKFLOW.md`"   -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
+Write-Host "  git push origin master"
