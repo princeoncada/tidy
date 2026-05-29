@@ -1,8 +1,8 @@
 {
-    "version":  "1.0.3",
-    "state":  "stable",
-    "phase":  "1.0.3",
-    "phaseTitle":  "Promote Encoding Fix and Source-of-Truth Hardening",
+    "version":  "1.0.4-alpha",
+    "state":  "alpha",
+    "phase":  "1.0.4",
+    "phaseTitle":  "Validate Script Output Compression",
     "nextPhase":  "1.1.0 - Graphify Integration",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-28",
