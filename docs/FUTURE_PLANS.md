@@ -1,322 +1,169 @@
 # Future Plans
 
-Living backlog for future sessions. Keep this updated in every implementation PR so future agents can choose focused work without broad source scanning.
+Single version-sequenced plan for Tidy. This file is the ONE owner of the roadmap;
+`docs/VERSIONING.md` holds history + rules only. Every committed item carries its
+target version. Only Potential Next Directions are unversioned. Update every phase.
 
-Organized by execution horizon:
-- **NOW**: high-risk correctness/security/data-loss issues that should be prioritized
-- **NEXT**: important product, reliability, and maintainability improvements after NOW is stable
-- **LATER**: larger investments, polish, or future architecture work
+Current version: see `STATE.json` (do not restate it here).
 
-Each item includes priority, status, files, acceptance criteria, and validation notes.
+Version rules: patches (Z) may ship under the current minor before the next X/Y.
+Inserting a new minor/major pushes later Planned numbers back to stay monotonic
+(see the Planned Renumber Rule in `docs/VERSIONING.md`).
 
 ## Status Legend
 - `Open`: not started
-- `In progress`: currently being implemented in an active branch
-- `Blocked`: cannot proceed without an external decision/dependency
-- `Done`: completed  -  include PR/commit note before eventual archival
-- `Superseded`: no longer applicable because another change made it obsolete
+- `In progress`: active branch
+- `Blocked`: needs an external decision/dependency
+- `Done`: completed (struck through under Completed)
 
 ---
 
-## Upcoming Patches
+## Completed
 
-### v1.0.2  -  Commit Automation and Prompt Format Hardening
-- **Priority:** Workflow / developer experience
-- **Status:** Done  -  committed to master 2026-05-28
-- **Problem:** After validation passes, Claude Code gives 20+ individual git commit commands to run by hand. The fix is a single-file commit helper and hardened prompt format.
-- **Scope:**
-  - `scripts/commit.ps1`  -  parameter-driven commit helper;
-    replaces raw git add + git commit in all post-validation blocks
-  - `docs/WORKFLOW.md`  -  rewrite Codex prompt format section to structured
-    format (READ THESE FILES FIRST, CURRENT PROJECT STATE, IMPLEMENTATION
-    REQUIREMENTS, SAFETY CONSTRAINTS, STOP AND SUMMARIZE); update
-    post-validation section to use commit.ps1 call sequences
-  - `docs/CODEX_RULES.md`  -  update commit discipline to reference commit.ps1
-  - `AGENTS.md`  -  update commit discipline to reference commit.ps1
-  - `.gitignore`  -  no local commit manifest entry
-- **Acceptance criteria:**
-  - commit.ps1 stages and commits one or more files, prints hash on success,
-    errors with clear message on failure
-  - WORKFLOW.md Codex prompt format matches the structured HFK-style format
-  - No raw git add + git commit blocks remain in any workflow doc
----
+- ~~1.0.0 - AI Workflow Foundation~~ (stable 2026-05-28)
+- ~~1.0.1 - AGENTS.md Hardening~~ (stable 2026-05-28)
+- ~~1.0.2 - Commit Automation and Prompt Format Hardening~~ (stable 2026-05-28)
+- ~~1.0.3 - Promote Encoding Fix and Source-of-Truth Hardening~~ (stable 2026-05-28)
+- ~~1.0.4 - Validate Script Output Compression~~ (stable 2026-05-28)
+- ~~1.0.5 - New Chathead Opener~~ (stable 2026-05-28)
+- ~~1.0.6 - Mojibake Resolution and Scan~~ (stable 2026-05-28)
+- ~~1.0.7 - Anti-Drift Baseline~~ (stable 2026-05-29)
+- ~~1.0.8 - Doc Continuity Model~~ (stable 2026-05-29)
+- ~~1.0.9 - Promote Self-Verify and CLAUDE.md Continuity~~ (stable 2026-05-29)
 
-## Upcoming Phases (Roadmap)
-
-These mirror the version roadmap in `docs/VERSIONING.md` (Planned Phases),
-cross-referenced so backlog and roadmap stay in sync.
-
-### v1.1.0 - Graphify Integration
-- **Priority:** Workflow / token-cost reduction
-- **Status:** Open
-- **Problem:** The AI orients by scanning many source files at session start. hfk-system reduces this 30-50% with a Graphify knowledge graph; tidy has none.
-- **Scope:**
-  - Port `scripts/generate-codebase-graph.ps1` + `generate_codebase_graph.py` from hfk-system (adapt protected paths to tidy)
-  - Add `.graphifyignore` and `docs/CODEBASE_GRAPH.md`
-  - Generate `codebase-graph.json`; add a `graph:codebase` npm script
-  - Route AGENTS.md startup orientation through the graph instead of source scanning
-  - Add a graph-refresh + freshness check step to `scripts/validate.ps1`
-- **Acceptance criteria:**
-  - `codebase-graph.json` exists and excludes `app/generated/prisma`, `.next`, `node_modules`, `graphify-out`
-  - AGENTS.md startup reads STATE.json + codebase-graph.json first
-  - validate.ps1 refreshes the graph and flags staleness (HEAD vs GRAPH_REPORT.md)
-- **Validation notes:** Port faithfully from hfk-system; document any deviation. The graphify CLI must be on PATH.
-
-### v1.2.0 - ChromaDB Bootstrap
-- **Priority:** Workflow / startup reliability
-- **Status:** Open
-- **Problem:** The startup protocol calls `python scripts/query_docs.py`, but ChromaDB was never bootstrapped (`chroma-data/` absent), so the query silently fails and weak models may fabricate results.
-- **Scope:**
-  - Reconcile `query_docs.py` + `ingest_docs.py` against hfk-system working versions; adapt collection name to `tidy_docs`
-  - Confirm the `chroma` npm script; ensure `chromadb` is in requirements.txt
-  - Create + ingest `chroma-data/`; decide commit / .gitignore policy (match hfk-system)
-  - Port the hfk-system validate.ps1 ChromaDB auto-start + ingest block
-  - Wire the AGENTS.md offline guardrail to the real failure path
-- **Acceptance criteria:**
-  - `npm run chroma` serves on :8000; `query_docs.py "<topic>"` returns a real tidy-doc chunk
-  - validate.ps1 auto-starts ChromaDB and ingests, or FAILs loudly (no silent skip)
-  - Startup reports online/offline honestly; never fabricates results
-- **Validation notes:** The chroma CLI must be on PATH. Port faithfully from hfk-system.
+Pre-versioning (full detail in `docs/PHASE_LOG.md`):
+- ~~Phase 1 - Dexie Foundation~~ (merged to master)
+- ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
 
 ---
 
-## Active Phases
+## In Progress
 
-### Phase 3: View Filter Hardening
-- **Priority:** High / projection correctness
-- **Status:** In progress
-- **Phase log:** `docs/PHASE_LOG.md` (Phase 3 section)
-- **Umbrella branch:** `phase/view-filter-hardening`
-- **Active checkpoint:** `checkpoint/fix-cross-view-list-moves`
-- **Problem:** Lists created in All Lists or custom views do not consistently appear in other custom views even when filter tags should match.
-- **Acceptance criteria:**
-  - All Lists shows all user lists
-  - ANY custom views include lists with at least one required tag
-  - ALL custom views include lists with all required tags
-  - Retagging, creating, moving, reordering, refreshing, and switching views keeps projection deterministic
-  - Runtime checkpoints add/update matching projection tests
-  - No Dexie expansion, dashboard source-of-truth rewrite, drag/drop rewrite, or broad tRPC rewrite
+- 1.0.10 - Roadmap Consolidation (current working alpha; this patch) - see Planned
+- 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
 
 ---
 
-## NOW
+## Planned
 
-### NOW-1: Close list item ownership gaps
-- **Priority:** P0 / security
-- **Status:** Open
-- **Files:** `trpc/routers/listItemRouter.ts`
-- **Problem:** `listItem.getListItems`, `renameListItem`, `deleteListItem`, and `setCompletionListItem` are protected but do not verify `parentList.userId`.
-- **Acceptance criteria:**
-  - Each affected procedure scopes reads/writes through `parentList.userId === ctx.userId`
-  - Foreign item ids return `FORBIDDEN` or `NOT_FOUND` consistently without mutating data
-  - Existing optimistic item rename/delete/completion behavior and return shapes remain compatible
-  - Relevant AI docs describe the final ownership behavior
-- **Validation notes:**
-  - `npm run typecheck && npm run lint`
-  - Add or run API-level ownership tests if a test harness exists
-  - Manually verify item rename, delete, and completion still work for the owning user
+### 1.0.10 - Roadmap Consolidation
+- **Status:** In progress (this patch)
+- **Scope:** Make FUTURE_PLANS.md the single version-sequenced roadmap; remove the duplicate Planned Phases table from VERSIONING.md; add the Planned Renumber Rule; assign target versions to all former backlog items.
 
-### NOW-2: Verify target list ownership in item reorder/move
-- **Priority:** P0 / security + data integrity
-- **Status:** Open
-- **Files:** `trpc/routers/listItemRouter.ts`, `components/list/ListsContainer.tsx`
-- **Problem:** `listItem.reorderListItems` verifies existing item ownership, but the raw SQL update accepts target `listId` values from the client and should explicitly prove all target lists belong to the same user.
-- **Acceptance criteria:**
-  - Reorder validates both item ids and target list ids against `ctx.userId` before raw SQL runs
-  - Cross-list moves among the user's own lists still work
-  - Empty reorder input still returns `{ success: true }`
-  - Error behavior for foreign target lists is documented
-- **Validation notes:**
-  - `npm run typecheck && npm run lint`
-  - Manually drag an item within one list and across two owned lists
-  - Add an API/security regression test when test infrastructure exists
+### 1.0.11 - Phase Identity Sync
+- **Status:** Open | Priority: continuity (anti-drift)
+- **Files:** scripts/promote.ps1, scripts/validate.ps1, STATE.json, docs/VERSIONING.md, docs/AI_HANDOFF.md, docs/PHASE_LOG.md
+- **Problem:** Phase identity (number+title) and next-phase are hand-copied across docs with no Sync or Gate (only version+state is connected).
+- **Acceptance:** decide Point vs Sync per fact and record it in the Doc Continuity Model; phase identity + next-phase agree across docs, enforced by a script or the validate gate; no new hand-copied restatements.
 
-### NOW-3: Add automated coverage for dashboard cache projection
-- **Priority:** P1 / data-loss and regression prevention
-- **Status:** In progress
-- **Files:** `lib/dashboard-cache.ts`, `components/list/types.ts`, `tests/unit/dashboard-cache.test.ts`
-- **Problem:** Cross-cache projections drive optimistic behavior but limited automated tests protect against regression.
-- **Acceptance criteria:**
-  - Tests cover `selectedViewFromCache`, `projectView`, list update/removal helpers, tag add/remove projection, and view-selection cache projection
-  - Tests include custom views matching all tags and all-lists behavior
-  - Test setup is documented in 
-- **Validation notes:**
-  - Initial `tests/unit/dashboard-cache.test.ts` coverage exists (102 tests as of Phase 3 checkpoint 5)
-  - Still add coverage for list update/removal helpers, tag add/remove projection, and view-selection cache projection
+### 1.1.0 - Graphify Integration
+- **Status:** Open | Priority: workflow / token-cost reduction
+- **Problem:** The AI orients by scanning many files at session start; hfk-system reduces this 30-50% with a Graphify knowledge graph; tidy has none.
+- **Scope:** port generate-codebase-graph.ps1 + generate_codebase_graph.py + .graphifyignore + docs/CODEBASE_GRAPH.md from hfk-system (adapt protected paths); generate codebase-graph.json; add graph:codebase npm script; route AGENTS.md startup through the graph; add graph refresh + freshness check to validate.ps1.
+- **Acceptance:** codebase-graph.json excludes app/generated/prisma, .next, node_modules, graphify-out; AGENTS.md startup reads STATE.json + codebase-graph.json first; validate refreshes the graph and flags staleness.
 
-### NOW-4: Add ownership/API tests for protected tRPC procedures
-- **Priority:** P1 / security regression prevention
-- **Status:** Open
-- **Files:** `trpc/init.ts`, `trpc/routers/*.ts`
-- **Problem:** Security-sensitive ownership behavior is documented but not automatically enforced by tests.
-- **Acceptance criteria:**
-  - Tests cover list, list item, tag, and view ownership failures
-  - Tests prove unauthenticated calls to protected procedures fail with `UNAUTHORIZED`
-  - Test data setup/teardown is repeatable and documented
-- **Validation notes:**
-  - Prefer router-level tests with a test database or a documented mock strategy
+### 1.2.0 - ChromaDB Bootstrap
+- **Status:** Open | Priority: workflow / startup reliability
+- **Problem:** Startup calls query_docs.py but ChromaDB was never bootstrapped (chroma-data absent); the query silently fails.
+- **Scope:** reconcile query_docs.py + ingest_docs.py vs hfk-system (collection tidy_docs); confirm chroma npm script + chromadb in requirements.txt; create + ingest chroma-data; port validate.ps1 auto-start + ingest block; wire the AGENTS.md offline guardrail.
+- **Acceptance:** npm run chroma serves :8000; query returns a real tidy-doc chunk; validate auto-starts + ingests or FAILs loudly; startup reports online/offline honestly.
 
-### NOW-5: Fix obvious metadata/asset mismatch
-- **Priority:** P1 / production correctness
-- **Status:** Open
-- **Files:** `app/layout.tsx`, `public/icon-clean.png`
-- **Problem:** Metadata references `/apple-icon.png` but the file is missing from `public/`.
-- **Acceptance criteria:**
-  - Either add a valid Apple icon asset or remove/update the metadata reference
-  - Metadata continues to reference existing icon assets
+### 1.3.0 - Phase 3 Completion: View Filter Hardening
+- **Status:** In progress | Priority: projection correctness
+- **Phase log:** docs/PHASE_LOG.md (Phase 3)
+- **Problem:** Lists created in All Lists or custom views do not consistently appear in other custom views when filter tags match.
+- **Scope:** finish checkpoints 4-6; includes dashboard cache projection test coverage (selectedViewFromCache, projectView, list update/removal helpers, tag add/remove projection, view-selection projection).
+- **Acceptance:** All Lists shows all lists; ANY/ALL custom views correct; retag/create/move/reorder/refresh/switch deterministic; matching projection tests; no Dexie expansion, source-of-truth rewrite, drag/drop rewrite, or broad tRPC rewrite.
 
----
+### 1.4.0 - Ownership Hardening (Security)
+- **Status:** Open | Priority: P0/P1 security
+- **Files:** trpc/routers/listItemRouter.ts, components/list/ListsContainer.tsx, trpc/init.ts, trpc/routers/*.ts
+- **Problem:** listItem getListItems/renameListItem/deleteListItem/setCompletionListItem are protected but do not verify parentList.userId; reorderListItems does not verify target list ownership.
+- **Scope:** scope each listItem procedure through parentList.userId === ctx.userId (foreign ids -> FORBIDDEN/NOT_FOUND without mutating); reorder validates item ids AND target list ids before raw SQL (empty input still { success: true }); add ownership/API tests for list/listItem/tag/view ownership failures and unauthenticated -> UNAUTHORIZED.
+- **Acceptance:** optimistic rename/delete/completion shapes unchanged; cross-list moves among owned lists still work; tests repeatable and documented.
 
-## NEXT
+### 1.5.0 - Product Polish
+- **Status:** Open | Priority: P1/P2 UX + correctness
+- **Files:** app/layout.tsx, public/icon-clean.png, components/auth/Register.tsx, app/page.tsx
+- **Scope:** fix metadata/asset mismatch (metadata references /apple-icon.png missing from public/ - add the asset or update the reference); Register submit copy says "Login" -> account-creation language; fix landing typo "optimisic" and generic "Simple Todo App" branding.
+- **Acceptance:** metadata references existing assets only; no auth flow behavior change.
 
-### NEXT-9: Connect phase identity and next-work across docs
-- **Priority:** P2 / continuity (anti-drift)
-- **Status:** Open
-- **Files:** `scripts/promote.ps1`, `scripts/validate.ps1`, `STATE.json`, `docs/VERSIONING.md`, `docs/AI_HANDOFF.md`, `docs/PHASE_LOG.md`
-- **Problem:** Per the Doc Continuity Model (docs/VERSIONING.md), version+state is synced and gated, but phase identity (number+title) and next-phase are hand-copied across STATE.json, VERSIONING, AI_HANDOFF, and PHASE_LOG with no Sync or Gate. They drift on every phase change.
-- **Acceptance criteria:**
-  - Decide Point vs Sync per fact and record it in the Doc Continuity Model
-  - Phase identity and next-phase agree across all docs, enforced by a script or the validate gate
-  - No new hand-copied restatements introduced
-- **Validation notes:** Mirror the version-consistency gate pattern; consider a "phase open" helper that sets phase fields the way promote.ps1 sets the version.
+### 1.6.0 - Cache & Tag Maintainability
+- **Status:** Open | Priority: P2 maintainability + consistency
+- **Files:** trpc/routers/tagRouter.ts, trpc/routers/viewHelpers.ts, components/list/ListAdder.tsx, components/list/ListsContainer.tsx, components/list/ListComponent.tsx, components/list/ListTagPicker.tsx, lib/dashboard-cache.ts
+- **Scope:** tag.removeFromList recompute once per logical remove; shared dashboard query-key helper (no key-shape change); replace string-matching invalidateViewPayloadQueries with typed/stable key matching.
+- **Acceptance:** optimistic + invalidation behavior unchanged; custom-view membership correct after tag remove.
 
-### NEXT-1: Fix auth and landing-page copy polish
-- **Priority:** P2 / UX polish
-- **Status:** Open
-- **Files:** `components/auth/Register.tsx`, `app/page.tsx`
-- **Problem:** Register button copy says "Login"; landing page contains typo "optimisic" and generic "Simple Todo App" branding.
-- **Acceptance criteria:**
-  - Register submit button uses account-creation language
-  - Landing copy spelling fixed and better aligned with Tidy branding
-  - No auth flow behavior changes
+### 1.7.0 - Component Decomposition
+- **Status:** Open | Priority: P2 maintainability
+- **Files:** components/views/ViewsSidebarPreview.tsx, components/list/ListTagPicker.tsx, components/list/ListComponent.tsx, components/list/ListsContainer.tsx
+- **Scope:** extract small named hooks/helpers from the large dashboard components.
+- **Acceptance:** no query keys, mutation inputs, optimistic rollback behavior, or drag/drop invariants change.
 
-### NEXT-2: Review and simplify tag remove recompute path
-- **Priority:** P2 / performance + consistency
-- **Status:** Open
-- **Files:** `trpc/routers/tagRouter.ts`, `trpc/routers/viewHelpers.ts`
-- **Problem:** `tag.removeFromList` recomputes all custom views inside the transaction and again outside for tag-specific views.
-- **Acceptance criteria:**
-  - Recompute happens once per logical remove operation unless a documented reason remains
-  - Custom view membership remains correct after removing a tag from a list
+### 1.8.0 - Test Coverage Expansion
+- **Status:** Open | Priority: P2 correctness + regression prevention
+- **Files:** trpc/routers/viewHelpers.ts, tests/, components/list/*, components/views/*
+- **Scope:** view-helper recompute tests (empty tag sets, all-tags matching, previous-order preservation, all-lists fallback, no-match); E2E for list creation, tag changes affecting custom views, fast view switching, drag/drop reorder; documented auth/test-user setup.
+- **Acceptance:** tests repeatable; authenticated E2E setup documented.
 
-### NEXT-3: Consolidate dashboard key construction
-- **Priority:** P2 / maintainability
-- **Status:** Open
-- **Files:** `components/list/ListAdder.tsx`, `components/list/ListsContainer.tsx`, `components/list/ListComponent.tsx`, `components/list/ListTagPicker.tsx`, `lib/dashboard-cache.ts`
-- **Problem:** Multiple components reconstruct all-lists/current/selected dashboard query keys, increasing drift risk.
-- **Acceptance criteria:**
-  - Shared helper or hook returns dashboard keys without changing existing key shapes
-  - Optimistic updates and invalidation behavior remain unchanged
+### 1.9.0 - Deploy Readiness
+- **Status:** Open | Priority: P2 production readiness
+- **Files:** README.md, .env.example
+- **Scope:** document DATABASE_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SITE_URL; build/deploy steps note Prisma generate + migration expectations.
 
-### NEXT-4: Replace broad view-payload invalidation predicate
-- **Priority:** P2 / maintainability + cache precision
-- **Status:** Open
-- **Files:** `lib/dashboard-cache.ts`
-- **Problem:** `invalidateViewPayloadQueries` uses string-matching on query keys.
-- **Acceptance criteria:**
-  - Invalidation uses typed/stable query-key matching if tRPC/TanStack exposes a safer pattern
+### 2.0.0 - Phase 4: Operation Coalescing
+- **Status:** Open | Priority: P3 architecture
+- **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts
+- **Scope:** outbox coalescing + replay client wiring.
 
-### NEXT-5: Split large dashboard components carefully
-- **Priority:** P2 / maintainability
-- **Status:** Open
-- **Files:** `components/views/ViewsSidebarPreview.tsx`, `components/list/ListTagPicker.tsx`, `components/list/ListComponent.tsx`, `components/list/ListsContainer.tsx`
-- **Problem:** Several components own substantial UI, mutation, optimistic, and cache logic directly.
-- **Acceptance criteria:**
-  - Extracted hooks/helpers are small, named around existing responsibilities
-  - No query keys, mutation inputs, optimistic rollback behavior, or drag/drop invariants change
+### 2.1.0 - Phase 5: Rollback Safety
+- **Status:** Open | Priority: P3 architecture
+- **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts
+- **Scope:** Dexie-backed rollback for optimistic write failures; durable optimistic sync/offline strategy (in-memory queues currently lose pending writes on refresh/crash).
 
-### NEXT-6: Add view-helper recompute tests
-- **Priority:** P2 / correctness
-- **Status:** Open
-- **Files:** `trpc/routers/viewHelpers.ts`
-- **Problem:** Custom-view recompute logic lacks tests for matching and order preservation.
-- **Acceptance criteria:**
-  - Tests cover empty tag sets, all-tags matching, previous order preservation, all-lists order fallback, no-match behavior
+### 2.2.0 - Order Compaction
+- **Status:** Open | Priority: P3 long-term data health
+- **Files:** trpc/routers/listRouter.ts, trpc/routers/listItemRouter.ts, trpc/routers/viewRouter.ts, prisma/schema.prisma
+- **Scope:** compaction strategy for sparse/negative order values over long-lived accounts.
 
-### NEXT-7: Add E2E coverage for core dashboard flows
-- **Priority:** P2 / regression prevention
-- **Status:** Open
-- **Files:** `tests/`, `components/list/*`, `components/views/*`
-- **Problem:** List creation races, tag recompute, fast view switching, and drag/drop are not protected by E2E tests.
-- **Acceptance criteria:**
-  - E2E tests cover list creation, tag changes affecting custom views, fast selected-view switching, and drag/drop reorder
-  - Auth/test-user setup is documented and repeatable
+### 3.0.0 - Phase 6: Scale Prep
+- **Status:** Open | Priority: P3 performance
+- **Files:** components/list/ListsContainer.tsx, trpc/routers/viewHelpers.ts, lib/dashboard-cache.ts
+- **Scope:** performance + query optimization; profile and optimize large accounts.
 
-### NEXT-8: Document env vars and deployment checks
-- **Priority:** P2 / production readiness
-- **Status:** Open
-- **Files:** `README.md`, `.env.example`
-- **Problem:** Required env vars and deployment checks are not fully documented in one operator-friendly place.
-- **Acceptance criteria:**
-  - Docs list `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`
-  - Build/deploy steps mention Prisma generate and migration expectations
+### 3.1.0 - Rate Limiting & Abuse Controls
+- **Status:** Open | Priority: P3 production hardening
+- **Files:** trpc/init.ts, trpc/routers/*.ts
+- **Scope:** rate limiting + abuse controls.
+
+### 3.2.0 - Phase 8: Observability
+- **Status:** Open | Priority: P3 operations
+- **Files:** hooks/useOptimisticSync.ts, trpc/routers/*.ts, lib/optimistic-debug.tsx
+- **Scope:** logging, error tracking, monitoring for API + sync failures.
 
 ---
 
-## LATER
+## Potential Next Directions (unversioned)
 
-### LATER-1: Design durable optimistic sync/offline strategy
-- **Priority:** P3 / future architecture
-- **Status:** Open (Phase 5 planned)
-- **Files:** `hooks/useOptimisticSync.ts`, `lib/dashboard-cache.ts`
-- **Problem:** Current optimistic queues are in-memory; pending writes lost on refresh/crash.
+Assigned a version only when scoped.
+- PWA manifest, icon set, service-worker plan (app/layout.tsx, public/*)
+- Mobile/touch drag-drop + responsive QA (components/list/*)
+- Accessibility + UI polish pass (components/list/*, components/views/ViewsSidebarPreview.tsx)
+- Sync or retire older root docs (docs/deprecated/*, README.md)
+- Migration/backfill playbook (prisma/schema.prisma, prisma/migrations/*)
 
-### LATER-2: Add real PWA manifest, icon set, and service-worker plan
-- **Priority:** P3 / PWA readiness
-- **Status:** Open
-- **Files:** `app/layout.tsx`, `public/*`
+---
 
-### LATER-3: Add order compaction strategy
-- **Priority:** P3 / long-term data health
-- **Status:** Open
-- **Files:** `trpc/routers/listRouter.ts`, `trpc/routers/listItemRouter.ts`, `trpc/routers/viewRouter.ts`, `prisma/schema.prisma`
-- **Problem:** Top insertion can create increasingly sparse or negative order values over long-lived accounts.
+## Discarded / Won't Do
 
-### LATER-4: Add rate limiting and abuse controls
-- **Priority:** P3 / production hardening
-- **Status:** Open
-- **Files:** `trpc/init.ts`, `trpc/routers/*.ts`
-
-### LATER-5: Add observability for API and sync failures
-- **Priority:** P3 / operations
-- **Status:** Open
-- **Files:** `hooks/useOptimisticSync.ts`, `trpc/routers/*.ts`, `lib/optimistic-debug.tsx`
-
-### LATER-6: Profile and optimize large accounts
-- **Priority:** P3 / performance
-- **Status:** Open
-- **Files:** `components/list/ListsContainer.tsx`, `trpc/routers/viewHelpers.ts`, `lib/dashboard-cache.ts`
-
-### LATER-7: Improve mobile/touch drag-drop and responsive QA
-- **Priority:** P3 / UX
-- **Status:** Open
-- **Files:** `components/list/ListsContainer.tsx`, `components/list/ListComponent.tsx`, `components/list/ListItemComponent.tsx`
-
-### LATER-8: Accessibility and UI polish pass
-- **Priority:** P3 / UX accessibility
-- **Status:** Open
-- **Files:** `components/list/*`, `components/views/ViewsSidebarPreview.tsx`
-
-### LATER-9: Sync or retire older root docs
-- **Priority:** P3 / documentation hygiene
-- **Status:** Open
-- **Files:** `docs/deprecated/optimistic-updates.md`, `docs/deprecated/app-reverse-engineering.md`, `README.md`
-- **Problem:** Older root-level docs may drift from source and from the AI docs.
-- **Acceptance criteria:**
-  - Older docs are either updated with links to current docs or explicitly marked historical
-  - No contradictory implementation guidance remains
-
-### LATER-10: Create migration/backfill playbook
-- **Priority:** P3 / data operations
-- **Status:** Open
-- **Files:** `prisma/schema.prisma`, `prisma/migrations/*`, `trpc/routers/viewHelpers.ts`
+(none recorded yet)
 
 ---
 
 ## Known Cross-Cutting Risks
 
-- No automated tests currently prove most optimistic race behavior
-- PWA/offline support is not implemented despite product goals
+- No automated tests prove most optimistic race behavior yet
+- PWA/offline is not implemented despite product goals
 - In-memory queues can lose pending writes on refresh or crash
-- Large components increase risk when making focused changes
-- API ownership gaps should be fixed before expanding API surface area
+- Large components increase risk for focused changes
+- API ownership gaps (1.4.0) should land before expanding API surface area
