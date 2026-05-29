@@ -35,7 +35,7 @@ Use `.\scripts\promote.ps1` to promote `-alpha` -> `-stable` across all five loc
 
 ## Current State
 
-- **Current version:** 1.0.7-alpha
+- **Current version:** 1.0.7
 - **Current phase:** 1.0.7 - Anti-Drift Baseline
 - **Next phase:** 1.1.0 - Graphify Integration
 
@@ -97,7 +97,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.0.7 | alpha | 2026-05-29 | Anti-Drift Baseline | Version-consistency gate added to validate.ps1; Drift Guardrails + Startup Report disambiguation in AGENTS.md; 1.1.0/1.2.0 roadmap entries added; stale version markers removed. |
+| 1.0.7 | stable | 2026-05-29 | Anti-Drift Baseline | Version-consistency gate added to validate.ps1; Drift Guardrails + Startup Report disambiguation in AGENTS.md; 1.1.0/1.2.0 roadmap entries added; stale version markers removed. |
 | 1.0.6 | stable | 2026-05-28 | Mojibake Resolution and Scan | fix-mojibake.ps1 created; AI_HANDOFF.md, VERSIONING.md, WORKFLOW.md repaired; mojibake scan step added to validate.ps1. |
 | 1.0.5 | stable | 2026-05-28 | New Chathead Opener | docs/NEW_CHATHEAD_OPENER.md created with START/END copy-paste format; WORKFLOW.md session checkpoint updated to reference opener file; AGENTS.md command vocabulary extended with handoff command. |
 | 1.0.4 | stable | 2026-05-28 | Validate Script Output Compression | validate.ps1 rewritten to suppress output on pass, surface on fail, add e2e step, fix -Encoding UTF8 on STATE.json read. WORKFLOW.md Section 2 template updated to use validate.ps1. |
