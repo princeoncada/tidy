@@ -1,6 +1,6 @@
-<!-- Current Version: 1.0.13-alpha -->
+<!-- Current Version: 1.0.13 -->
 # AI Handoff
-**Current Version**: 1.0.13-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.0.13 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.0.13 - Prompt and Commit Output Format Hardening
 **Next**: 1.1.0 - Graphify Integration
 ---
