@@ -169,6 +169,21 @@ Use `docs/CODEX_RULES.md` (Required Tests section) as the source of truth for te
 - Do not batch multiple files into one commit.
 - Do not add Co-Authored-By or any AI co-author trailer to commit messages.
 
+## Assistant Output Formatting
+
+When writing Codex prompts or command instructions for the user:
+
+- Keep section headings outside code blocks.
+- Never place "Section 1 - Master Prompt" or "Section 2 - Validation" inside
+  the copyable code block.
+- Never house Codex prompt text and PowerShell validation commands in the same code block.
+- Provide alpha commit commands as one PowerShell code block.
+- Provide stable promotion commit commands as one separate PowerShell code block.
+- Provide push commands separately.
+- Prefer fewer, larger runnable command blocks over many one-line code blocks
+  when commands belong to the same execution phase.
+- Make every code block copy-paste safe for its target tool.
+
 ## Behavior to Preserve
 
 Unless the task specifically changes these areas, preserve:
