@@ -68,7 +68,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.1.0-alpha
+- **Current version:** 1.1.0
 - **Current phase:** 1.1.0 - Graphify Integration
 - **Next phase:** 1.2.0 - ChromaDB Bootstrap
 
@@ -130,7 +130,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.1.0 | alpha | 2026-05-29 | Graphify Integration | Adds Graphify/fallback codebase graph generation, committed codebase-graph.json, startup graph orientation, and validate graph freshness checks. |
+| 1.1.0 | stable | 2026-05-29 | Graphify Integration | Adds Graphify/fallback codebase graph generation, committed codebase-graph.json, startup graph orientation, and validate graph freshness checks. |
 | 1.0.13 | stable | 2026-05-29 | Prompt and Commit Output Format Hardening | Hardens copy-paste-safe output rules for Codex prompts, validation blocks, alpha commit blocks, stable promotion commit blocks, and push blocks. |
 | 1.0.12 | stable | 2026-05-29 | Phase Identity Sync | Adds phase identity and roadmap closeout guards; promote.ps1 closes the promoted roadmap item in FUTURE_PLANS.md; validate.ps1 catches stale phase/backlog drift. |
 | 1.0.11 | stable | 2026-05-29 | Session Continuity and Bounded Initiative | AGENTS.md gains Session Continuity (proactive SESSION_LOG checkpoint) and Working Posture (strict rails + active initiative) sections; WORKFLOW.md checkpoint cross-reference; stale Open->Planned references fixed. |
