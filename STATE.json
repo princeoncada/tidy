@@ -1,6 +1,6 @@
 {
-    "version":  "1.1.0-alpha",
-    "state":  "alpha",
+    "version":  "1.1.0",
+    "state":  "stable",
     "phase":  "1.1.0",
     "phaseTitle":  "Graphify Integration",
     "nextPhase":  "1.2.0 - ChromaDB Bootstrap",
