@@ -49,3 +49,10 @@ fallback generator output. If it fails freshness, regenerate with
 
 Stable promotion refreshes `codebase-graph.json` so its embedded version matches
 `STATE.json`. If validation reports graph staleness, run `npm run graph:codebase`.
+
+## Audit Harness
+
+`npm run graph:audit` validates graph quality. The audit proves the graph has
+required nodes, expected classifications, protected-path exclusions, and routing
+metadata. It is part of validation, not a required startup-loop read. The graph
+remains an orientation map, not a source of truth.
