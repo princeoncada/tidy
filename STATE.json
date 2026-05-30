@@ -1,9 +1,9 @@
 {
-    "version":  "1.0.13",
-    "state":  "stable",
-    "phase":  "1.0.13",
-    "phaseTitle":  "Prompt and Commit Output Format Hardening",
-    "nextPhase":  "1.1.0 - Graphify Integration",
+    "version":  "1.1.0-alpha",
+    "state":  "alpha",
+    "phase":  "1.1.0",
+    "phaseTitle":  "Graphify Integration",
+    "nextPhase":  "1.2.0 - ChromaDB Bootstrap",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-29",
     "preVersioningBaseline":  {
