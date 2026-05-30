@@ -46,3 +46,6 @@ generated paths. Intentionally excluded paths include:
 `STATE.json` version, excludes protected paths, and is fresh against the
 fallback generator output. If it fails freshness, regenerate with
 `npm run graph:codebase`.
+
+Stable promotion refreshes `codebase-graph.json` so its embedded version matches
+`STATE.json`. If validation reports graph staleness, run `npm run graph:codebase`.
