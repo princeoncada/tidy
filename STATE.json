@@ -1,8 +1,8 @@
 {
-    "version":  "1.1.0",
-    "state":  "stable",
-    "phase":  "1.1.0",
-    "phaseTitle":  "Graphify Integration",
+    "version":  "1.1.1-alpha",
+    "state":  "alpha",
+    "phase":  "1.1.1",
+    "phaseTitle":  "Graph Stable Refresh Fix",
     "nextPhase":  "1.2.0 - ChromaDB Bootstrap",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-29",
