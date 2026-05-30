@@ -1,7 +1,9 @@
 # promote.ps1 - Tidy version promotion script
 #
-# Strips -alpha from the current STATE.json version and marks all five
-# versioning locations as stable.
+# Strips -alpha from the current STATE.json version, marks all five
+# versioning locations as stable, and closes the promoted roadmap item in
+# docs/FUTURE_PLANS.md. FUTURE_PLANS.md is roadmap state, not a sixth
+# versioning location.
 #
 # Usage:
 #   .\scripts\promote.ps1                     # auto-detects version from STATE.json
@@ -13,6 +15,9 @@
 #   3. docs/AI_HANDOFF.md
 #   4. package.json
 #   5. docs/WORKFLOW.md
+#
+# Roadmap closeout:
+#   docs/FUTURE_PLANS.md
 
 param(
     [string]$Version = ""
@@ -29,6 +34,7 @@ if (-not (Test-Path "STATE.json")) {
 $stateRaw  = Get-Content "STATE.json" -Raw -Encoding UTF8
 $state     = $stateRaw | ConvertFrom-Json
 $alphaVer  = $state.version
+$phaseTitle = $state.phaseTitle
 
 # Determine stable version
 if ($Version -ne "") {
@@ -44,6 +50,7 @@ if ($stableVer -eq $alphaVer) {
 
 Write-Host "Promoting $alphaVer -> $stableVer" -ForegroundColor Cyan
 $today = Get-Date -Format "yyyy-MM-dd"
+$futurePlansChanged = $false
 
 # UTF-8 without BOM encoder (BOM breaks JSON parsers for package.json / STATE.json)
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
@@ -63,6 +70,31 @@ function Update-FileText {
     $updated = $content.Replace($OldStr, $NewStr)
     [System.IO.File]::WriteAllText((Resolve-Path $Path).Path, $updated, $utf8NoBom)
     Write-Host "  Updated: $Path" -ForegroundColor Green
+}
+
+function Get-MatchedSection {
+    param([string]$Content, [string]$Heading)
+    $pattern = "(?ms)^## " + [regex]::Escape($Heading) + "\s*\r?\n(?<body>.*?)(?=^---\s*$|^## |\z)"
+    return [regex]::Match($Content, $pattern)
+}
+
+function Test-InProgressPhase {
+    param([string]$Content, [string]$Version, [string]$Title)
+    $section = Get-MatchedSection $Content "In Progress"
+    if (-not $section.Success) { return $false }
+    $pattern = "(?m)^\s*-\s+" + [regex]::Escape($Version) + "\s+-\s+" + [regex]::Escape($Title) + "(\s|\(|-|$)"
+    return $section.Groups["body"].Value -match $pattern
+}
+
+function Test-PlannedHeading {
+    param([string]$Content, [string]$Version, [string]$Title)
+    $pattern = "(?m)^###\s+" + [regex]::Escape($Version) + "\s+-\s+" + [regex]::Escape($Title) + "\s*$"
+    return $Content -match $pattern
+}
+
+function Test-CompletedPhase {
+    param([string]$Content, [string]$Bullet)
+    return $Content.Contains($Bullet)
 }
 
 # 1. STATE.json
@@ -106,6 +138,68 @@ Update-FileText "docs/WORKFLOW.md" `
     "<!-- Current Version: $alphaVer -->" `
     "<!-- Current Version: $stableVer -->"
 
+# Roadmap closeout: docs/FUTURE_PLANS.md is not a versioning location
+$futurePlansPath = "docs/FUTURE_PLANS.md"
+if (-not (Test-Path $futurePlansPath)) {
+    Write-Error "$futurePlansPath not found. Cannot close promoted roadmap item."
+    exit 1
+}
+
+$futurePlansBefore = Get-Content $futurePlansPath -Raw -Encoding UTF8
+$completedBullet = "- ~~$stableVer - $phaseTitle~~ (stable $today)"
+$alreadyClosed = (
+    (Test-CompletedPhase $futurePlansBefore $completedBullet) -and
+    (-not (Test-InProgressPhase $futurePlansBefore $stableVer $phaseTitle)) -and
+    (-not (Test-PlannedHeading $futurePlansBefore $stableVer $phaseTitle))
+)
+$hadPlannedHeading = Test-PlannedHeading $futurePlansBefore $stableVer $phaseTitle
+
+if ((-not $hadPlannedHeading) -and (-not $alreadyClosed)) {
+    Write-Error "$futurePlansPath does not contain expected Planned heading '### $stableVer - $phaseTitle' and is not already closed out."
+    exit 1
+}
+
+$futurePlansUpdated = $futurePlansBefore
+
+if (-not (Test-CompletedPhase $futurePlansUpdated $completedBullet)) {
+    $completedSection = Get-MatchedSection $futurePlansUpdated "Completed"
+    if (-not $completedSection.Success) {
+        Write-Error "$futurePlansPath is missing the Completed section."
+        exit 1
+    }
+    $completedBody = $completedSection.Groups["body"].Value
+    $preVersioningIndex = $completedBody.IndexOf("Pre-versioning")
+    if ($preVersioningIndex -ge 0) {
+        $insertAt = $completedSection.Groups["body"].Index + $preVersioningIndex
+    } else {
+        $insertAt = $completedSection.Index + $completedSection.Length
+    }
+    $futurePlansUpdated = $futurePlansUpdated.Insert($insertAt, "$completedBullet`n`n")
+}
+
+$inProgressSection = Get-MatchedSection $futurePlansUpdated "In Progress"
+if ($inProgressSection.Success) {
+    $phaseLinePattern = "(?m)^\s*-\s+" + [regex]::Escape($stableVer) + "\s+-\s+" + [regex]::Escape($phaseTitle) + ".*(?:\r?\n)?"
+    $newBody = [regex]::Replace($inProgressSection.Groups["body"].Value, $phaseLinePattern, "")
+    if ($newBody -ne $inProgressSection.Groups["body"].Value) {
+        $futurePlansUpdated = $futurePlansUpdated.Substring(0, $inProgressSection.Groups["body"].Index) +
+            $newBody +
+            $futurePlansUpdated.Substring($inProgressSection.Groups["body"].Index + $inProgressSection.Groups["body"].Length)
+    }
+}
+
+$plannedSectionPattern = "(?ms)^###\s+" + [regex]::Escape($stableVer) + "\s+-\s+" + [regex]::Escape($phaseTitle) + "\s*\r?\n.*?(?=^###\s+|^---\s*$|^##\s+|\z)"
+$futurePlansUpdated = [regex]::Replace($futurePlansUpdated, $plannedSectionPattern, "", 1)
+$futurePlansUpdated = [regex]::Replace($futurePlansUpdated, "(?m)\n{3,}(?=### )", "`n`n")
+
+if ($futurePlansUpdated -ne $futurePlansBefore) {
+    [System.IO.File]::WriteAllText((Resolve-Path $futurePlansPath).Path, $futurePlansUpdated, $utf8NoBom)
+    $futurePlansChanged = $true
+    Write-Host "  Updated: $futurePlansPath (roadmap closeout)" -ForegroundColor Green
+} else {
+    Write-Host "  Roadmap already closed: $futurePlansPath" -ForegroundColor Yellow
+}
+
 # Self-verify: every versioning location must now carry the stable version
 $verifyErrors = @()
 $postState = Get-Content "STATE.json" -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -119,11 +213,16 @@ $postWorkflow = Get-Content "docs/WORKFLOW.md" -Raw -Encoding UTF8
 if ($postWorkflow -notmatch ("<!-- Current Version: " + [regex]::Escape($stableVer) + " -->")) { $verifyErrors += "WORKFLOW.md comment" }
 $postVersioning = Get-Content "docs/VERSIONING.md" -Raw -Encoding UTF8
 if ($postVersioning -notmatch ("Current version:\*\*\s*" + [regex]::Escape($stableVer) + "(\s|$)")) { $verifyErrors += "VERSIONING.md current line" }
+if ($postVersioning -notmatch ("\|\s*" + [regex]::Escape($stableVer) + "\s*\|\s*stable\s*\|")) { $verifyErrors += "VERSIONING.md history row" }
+$postFuturePlans = Get-Content "docs/FUTURE_PLANS.md" -Raw -Encoding UTF8
+if (-not (Test-CompletedPhase $postFuturePlans $completedBullet)) { $verifyErrors += "FUTURE_PLANS.md completed closeout" }
+if (Test-InProgressPhase $postFuturePlans $stableVer $phaseTitle) { $verifyErrors += "FUTURE_PLANS.md still in progress" }
+if (Test-PlannedHeading $postFuturePlans $stableVer $phaseTitle) { $verifyErrors += "FUTURE_PLANS.md still planned" }
 if ($verifyErrors.Count -gt 0) {
     Write-Error ("Promote self-verify FAILED - locations inconsistent: " + ($verifyErrors -join ", "))
     exit 1
 }
-Write-Host "  Self-verify: all five locations at $stableVer" -ForegroundColor Green
+Write-Host "  Self-verify: all five locations at $stableVer and roadmap closeout complete" -ForegroundColor Green
 
 # Done
 Write-Host ""
@@ -135,4 +234,7 @@ Write-Host "  .\scripts\commit.ps1 -Files `"docs/VERSIONING.md`" -Message `"chor
 Write-Host "  .\scripts\commit.ps1 -Files `"docs/AI_HANDOFF.md`" -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
 Write-Host "  .\scripts\commit.ps1 -Files `"package.json`"       -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
 Write-Host "  .\scripts\commit.ps1 -Files `"docs/WORKFLOW.md`"   -Message `"chore(release): promote $alphaVer to $stableVer-stable`""
+if ($futurePlansChanged) {
+    Write-Host "  .\scripts\commit.ps1 -Files `"docs/FUTURE_PLANS.md`" -Message `"chore(release): close $stableVer roadmap item`""
+}
 Write-Host "  git push origin master"
