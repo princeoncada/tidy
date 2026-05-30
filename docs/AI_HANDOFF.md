@@ -1,10 +1,16 @@
-<!-- Current Version: 1.0.12 -->
+<!-- Current Version: 1.0.13-alpha -->
 # AI Handoff
-**Current Version**: 1.0.12 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.0.12 - Phase Identity Sync
+**Current Version**: 1.0.13-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.0.13 - Prompt and Commit Output Format Hardening
 **Next**: 1.1.0 - Graphify Integration
 ---
 ## What Was Last Done
+**Phase 1.0.13** opens copy-paste safety hardening:
+- Documents strict output formatting for Codex prompt and validation sections
+- Requires section headings outside code blocks
+- Requires alpha commit commands in one PowerShell code block
+- Requires stable promotion commit commands in one separate PowerShell code block
+- Keeps push commands separate from commit blocks
 **Phase 1.0.12** opens phase identity and roadmap closeout sync:
 - Corrects stale 1.0.11 FUTURE_PLANS state
 - Updates the Doc Continuity Model for phase identity, next phase, and roadmap closeout
@@ -49,8 +55,8 @@
 `master`
 ## What the Next Session Should Do
 1. Read `STATE.json` and `docs/FUTURE_PLANS.md`
-2. Query ChromaDB: `python scripts/query_docs.py "Phase Identity Sync v1.0.12 roadmap closeout"`
-3. Finish or validate v1.0.12 - Phase Identity Sync while this phase is alpha
+2. Query ChromaDB: `python scripts/query_docs.py "Prompt and Commit Output Format Hardening v1.0.13"`
+3. Finish or validate v1.0.13 - Prompt and Commit Output Format Hardening while this phase is alpha
 ---
 
 ## Current Product Snapshot
