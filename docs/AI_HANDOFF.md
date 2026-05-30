@@ -1,6 +1,6 @@
-<!-- Current Version: 1.1.2-alpha -->
+<!-- Current Version: 1.1.2 -->
 # AI Handoff
-**Current Version**: 1.1.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.1.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.1.2 - Graph Audit Harness
 **Next**: 1.2.0 - ChromaDB Bootstrap
 ---
