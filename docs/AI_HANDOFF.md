@@ -1,10 +1,16 @@
-<!-- Current Version: 1.1.3 -->
+<!-- Current Version: 1.1.4-alpha -->
 # AI Handoff
-**Current Version**: 1.1.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.1.3 - Codex Validation Boundary Hardening
+**Current Version**: 1.1.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.1.4 - Graph Routing Usage Contract
 **Next**: 1.2.0 - ChromaDB Bootstrap
 ---
 ## What Was Last Done
+**Phase 1.1.4** opens graph routing usage hardening:
+- Requires Graph Routing Summary before implementation prompts
+- Makes graph-selected file choices visible
+- Requires intentionally skipped broad files/docs to be listed
+- Confirms direct source reads are still required before editing
+- Defers actual token measurement to a separate token dashboard
 **Phase 1.1.3** opens validation boundary hardening:
 - Fixes Codex self-validation output drift
 - Clarifies validation is user/controller-run
@@ -78,8 +84,8 @@
 `master`
 ## What the Next Session Should Do
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md`
-2. Query ChromaDB: `python scripts/query_docs.py "Codex Validation Boundary Hardening v1.1.3"`
-3. Finish or validate v1.1.3 - Codex Validation Boundary Hardening while this phase is alpha
+2. Query ChromaDB: `python scripts/query_docs.py "Graph Routing Usage Contract v1.1.4"`
+3. Finish or validate v1.1.4 - Graph Routing Usage Contract while this phase is alpha
 ---
 
 ## Current Product Snapshot
