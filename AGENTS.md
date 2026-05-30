@@ -10,12 +10,15 @@ This project uses newer framework versions with breaking changes  -  APIs, conve
 
 At the start of every session, before reading other docs or writing code:
 
-1. Read `STATE.json` and `docs/FUTURE_PLANS.md`  -  together these give version, active phase, next phase, and the full work backlog.
-2. Query ChromaDB if available on `localhost:8000`:
+1. Read `STATE.json` first  -  it is the machine-readable oracle for version, active phase, next phase, and notes.
+2. Read `codebase-graph.json` if it exists  -  it is an orientation map for choosing the smallest relevant direct-read set.
+   If it is missing, stale, or invalid, state that and fall back to direct file reads.
+3. Read `docs/FUTURE_PLANS.md` fresh  -  it owns the full work backlog and next planned item.
+4. Query ChromaDB if available on `localhost:8000`:
         python scripts/query_docs.py "<question about current task>"
    One query per topic. Trust the first result. Fall back to direct file read only if query returns zero results  -  state why when falling back.
-3. Output the startup report (see Startup Report Format below).
-4. If the user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
+5. Output the startup report (see Startup Report Format below).
+6. If the user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
    If no scope was provided: wait for the user's go-ahead.
 
 Repo docs are the only source of truth. Never answer state queries,
@@ -42,6 +45,9 @@ These rules exist so lower-capability models cannot silently drift:
   fresh every session.
 - scripts/validate.ps1 enforces version consistency across all five
   versioning locations. A failing consistency gate blocks promotion.
+- `codebase-graph.json` is an orientation map, not a source of truth. For
+  implementation, still read `docs/AI_HANDOFF.md`, `docs/CODEX_RULES.md`, and
+  directly relevant source files before editing.
 
 ## Session Continuity
 
@@ -97,7 +103,7 @@ Always output this exact structure at session start:
 
 | Task type | Read these |
 |-----------|-----------|
-| Startup | `STATE.json` + `docs/FUTURE_PLANS.md` |
+| Startup | `STATE.json` + `codebase-graph.json` if present + `docs/FUTURE_PLANS.md` |
 | Implementation | `docs/AI_HANDOFF.md` + `docs/CODEX_RULES.md` + 2 - 3 source files |
 | Patch / docs work | `docs/CODEX_RULES.md` + affected files only |
 | Session close | Write `SESSION_LOG` -> update `STATE.json` |
@@ -138,8 +144,9 @@ never suggest it as an alternative to writing a Codex prompt.
 Before editing any file, route yourself through the repo-specific AI docs instead of scanning the whole repository:
 
 0. Read `STATE.json` first  -  compact project oracle (version, active phase, notes).
-1. Read `docs/AI_HANDOFF.md`  -  current product snapshot, invariants, data flow, known risks, and next action.
-2. Read `docs/CODEX_RULES.md` before implementation  -  scope control, invariants, commit discipline, required tests, task routing table.
+1. Read `codebase-graph.json` when present  -  orientation only, to pick the smallest relevant source file set.
+2. Read `docs/AI_HANDOFF.md`  -  current product snapshot, invariants, data flow, known risks, and next action.
+3. Read `docs/CODEX_RULES.md` before implementation  -  scope control, invariants, commit discipline, required tests, task routing table.
 
 See `docs/PHASE_LOG.md` for active phase checkpoint context. See `docs/FUTURE_PLANS.md` for the prioritized work backlog.
 
