@@ -43,11 +43,20 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
+- 1.0.13 - Prompt and Commit Output Format Hardening (current working alpha; this patch) - see Planned
 - 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
 
 ---
 
 ## Planned
+
+### 1.0.13 - Prompt and Commit Output Format Hardening
+- **Status:** In progress (this patch)
+- **Priority:** workflow / copy-paste safety
+- **Files:** AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md, docs/VERSIONING.md, STATE.json, package.json
+- **Problem:** Assistant output can still mix section headings into copyable code blocks, combine Codex prompts and PowerShell commands into unsafe blocks, or emit commit commands as many scattered code blocks.
+- **Scope:** Harden the documented response format for Codex prompts, validation blocks, alpha commit blocks, stable promotion commit blocks, and push blocks; make the format explicit in AGENTS.md and WORKFLOW.md; update handoff/version docs.
+- **Acceptance:** Future scoping responses place Section 1 and Section 2 headings outside code blocks; the Codex prompt is one text code block; validation is one PowerShell code block; alpha commits are one PowerShell code block; stable promotion commits are one separate PowerShell code block; push commands are separate; no wrapper text is included inside copyable blocks.
 
 ### 1.1.0 - Graphify Integration
 - **Status:** Open | Priority: workflow / token-cost reduction
