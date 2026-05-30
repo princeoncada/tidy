@@ -45,6 +45,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.1.3 - Codex Validation Boundary Hardening~~ (stable 2026-05-29)
 
+- ~~1.1.4 - Graph Routing Usage Contract~~ (stable 2026-05-29)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -53,20 +55,11 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
-- 1.1.4 - Graph Routing Usage Contract (current working alpha; this patch) - see Planned
 - 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
 
 ---
 
 ## Planned
-
-### 1.1.4 - Graph Routing Usage Contract
-- **Status:** In progress (this patch)
-- **Priority:** workflow / graph utilization
-- **Files:** STATE.json, package.json, codebase-graph.json, AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/CODEBASE_GRAPH.md, docs/FUTURE_PLANS.md, docs/VERSIONING.md, docs/AI_HANDOFF.md
-- **Problem:** Graphify is generated, fresh, and audited, but the workflow does not yet require assistants to show how the graph narrowed file selection. This makes token-reduction claims unproven.
-- **Scope:** Add a Graph Routing Summary requirement for implementation scoping; require selected files, reasons, intentionally skipped broad files/docs, and direct-read reminders; document that this is utilization proof, not token measurement.
-- **Acceptance:** Future scoping responses include a short Graph Routing Summary outside code blocks; graph-selected files are explained before Codex prompts; broad docs/source areas are intentionally skipped unless needed; graph audit remains validation-only; no token benchmark or ChromaDB work is added.
 
 ### 1.2.0 - ChromaDB Bootstrap
 - **Status:** Open | Priority: workflow / startup reliability
