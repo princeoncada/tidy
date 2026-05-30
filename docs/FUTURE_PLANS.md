@@ -45,6 +45,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
+- 1.1.0 - Graphify Integration (current working alpha; this phase) - see Planned
 - 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
 
 ---
@@ -52,9 +53,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## Planned
 
 ### 1.1.0 - Graphify Integration
-- **Status:** Open | Priority: workflow / token-cost reduction
+- **Status:** In progress (this phase) | Priority: workflow / token-cost reduction
 - **Problem:** The AI orients by scanning many files at session start; hfk-system reduces this 30-50% with a Graphify knowledge graph; tidy has none.
-- **Scope:** port generate-codebase-graph.ps1 + generate_codebase_graph.py + .graphifyignore + docs/CODEBASE_GRAPH.md from hfk-system (adapt protected paths); generate codebase-graph.json; add graph:codebase npm script; route AGENTS.md startup through the graph; add graph refresh + freshness check to validate.ps1.
+- **Scope:** port generate-codebase-graph.ps1 + generate_codebase_graph.py + .graphifyignore + docs/CODEBASE_GRAPH.md from hfk-system (adapt protected paths); generate codebase-graph.json; add graph:codebase npm script; route AGENTS.md startup through the graph; add graph refresh + freshness check to validate.ps1. Fallback scanner output is allowed when Graphify CLI is unavailable.
 - **Acceptance:** codebase-graph.json excludes app/generated/prisma, .next, node_modules, graphify-out; AGENTS.md startup reads STATE.json + codebase-graph.json first; validate refreshes the graph and flags staleness.
 
 ### 1.2.0 - ChromaDB Bootstrap
