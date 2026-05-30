@@ -68,7 +68,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.0.12-alpha
+- **Current version:** 1.0.12
 - **Current phase:** 1.0.12 - Phase Identity Sync
 - **Next phase:** 1.1.0 - Graphify Integration
 
@@ -130,7 +130,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.0.12 | alpha | 2026-05-29 | Phase Identity Sync | Adds phase identity and roadmap closeout guards; promote.ps1 closes the promoted roadmap item in FUTURE_PLANS.md; validate.ps1 catches stale phase/backlog drift. |
+| 1.0.12 | stable | 2026-05-29 | Phase Identity Sync | Adds phase identity and roadmap closeout guards; promote.ps1 closes the promoted roadmap item in FUTURE_PLANS.md; validate.ps1 catches stale phase/backlog drift. |
 | 1.0.11 | stable | 2026-05-29 | Session Continuity and Bounded Initiative | AGENTS.md gains Session Continuity (proactive SESSION_LOG checkpoint) and Working Posture (strict rails + active initiative) sections; WORKFLOW.md checkpoint cross-reference; stale Open->Planned references fixed. |
 | 1.0.10 | stable | 2026-05-29 | Roadmap Consolidation | FUTURE_PLANS.md rewritten as the single version-sequenced roadmap; Planned Phases table removed from VERSIONING.md; Planned Renumber Rule added; all former NOW/NEXT/LATER items assigned target versions. |
 | 1.0.9 | stable | 2026-05-29 | Promote Self-Verify and CLAUDE.md Continuity | promote.ps1 self-verifies the five versioning locations and fixes its commit echo; WORKFLOW.md drops the redundant post-promote validation; Doc Continuity Model now covers CLAUDE.md. |
