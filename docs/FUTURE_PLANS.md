@@ -51,11 +51,20 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
+- 1.1.3 - Codex Validation Boundary Hardening (current working alpha; this patch) - see Planned
 - 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
 
 ---
 
 ## Planned
+
+### 1.1.3 - Codex Validation Boundary Hardening
+- **Status:** In progress (this patch)
+- **Priority:** workflow / validation boundary
+- **Files:** STATE.json, package.json, codebase-graph.json, AGENTS.md, docs/CODEX_RULES.md, docs/WORKFLOW.md, docs/FUTURE_PLANS.md, docs/VERSIONING.md, docs/AI_HANDOFF.md
+- **Problem:** Codex output claimed direct validation despite standing rules that validation is user/controller-run. Required Tests wording still implied Codex should run tests and report exact results.
+- **Scope:** Harden Codex validation boundary rules; remove contradictory wording; forbid "Verified directly" style output; require Codex to provide validation commands only; refresh graph/version docs.
+- **Acceptance:** Codex rules clearly say validation is user/controller-run, not Codex-run; Codex cannot claim validation passed without user-provided output; implementation summaries say validation was not run by Codex; no startup-loop reads are added; 1.2.0 remains next after this patch.
 
 ### 1.2.0 - ChromaDB Bootstrap
 - **Status:** Open | Priority: workflow / startup reliability
