@@ -50,6 +50,18 @@ fallback generator output. If it fails freshness, regenerate with
 Stable promotion refreshes `codebase-graph.json` so its embedded version matches
 `STATE.json`. If validation reports graph staleness, run `npm run graph:codebase`.
 
+## Routing Usage
+
+`codebase-graph.json` reduces token usage only when it changes file-selection
+behavior. Implementation scoping now requires a Graph Routing Summary that shows
+which files the graph selected, why those files were selected, which broad
+docs/source areas were intentionally skipped, and whether direct reads are still
+required before editing.
+
+This is utilization proof, not token measurement. Actual token measurement is
+deferred outside this patch to the separate token dashboard. Graph audit remains
+validation-only work, not startup-loop work.
+
 ## Audit Harness
 
 `npm run graph:audit` validates graph quality. The audit proves the graph has
