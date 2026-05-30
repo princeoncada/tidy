@@ -33,6 +33,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 - ~~1.0.10 - Roadmap Consolidation~~ (stable 2026-05-29)
 - ~~1.0.11 - Session Continuity and Bounded Initiative~~ (stable 2026-05-29)
 
+- ~~1.0.12 - Phase Identity Sync~~ (stable 2026-05-29)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -41,19 +43,11 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
-- 1.0.12 - Phase Identity Sync (current working alpha; this patch) - see Planned
 - 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
 
 ---
 
 ## Planned
-
-### 1.0.12 - Phase Identity Sync
-- **Status:** In progress (this patch)
-- **Files:** scripts/promote.ps1, scripts/validate.ps1, STATE.json, docs/VERSIONING.md, docs/AI_HANDOFF.md, docs/WORKFLOW.md, docs/FUTURE_PLANS.md
-- **Problem:** Phase identity, next phase, and roadmap closeout can drift. 1.0.11 was promoted to stable, but FUTURE_PLANS still listed it as active because promotion only updated the five versioning locations.
-- **Scope:** Decide Point vs Sync vs Gate for phase identity, next phase, and roadmap closeout; update the Doc Continuity Model; make promote.ps1 close the promoted FUTURE_PLANS item; make validate.ps1 catch stale FUTURE_PLANS phase/backlog drift; update WORKFLOW/AGENTS handoff rules.
-- **Acceptance:** 1.0.11 is listed only under Completed; 1.0.12 is the active in-progress patch; promote.ps1 closes the promoted roadmap item without duplicating Completed entries; validate.ps1 fails when a stable STATE.json phase remains in FUTURE_PLANS In Progress or first Planned; startup reports 1.0.12 during alpha and the correct next backlog item after promotion.
 
 ### 1.1.0 - Graphify Integration
 - **Status:** Open | Priority: workflow / token-cost reduction
