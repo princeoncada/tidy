@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.1.2 -->
+<!-- Current Version: 1.1.3-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -20,7 +20,7 @@ Claude Code does **not**: implement code, commit, push, run `npm run test:ci`, c
 
 Codex is the **implementation layer**. It reads docs, edits source files, and summarizes what changed.
 
-Codex does **not**: commit, push, run `npm run test:ci`, create branches, or run any scripts.
+Codex does **not**: commit, push, run `npm run test:ci`, create branches, run validation scripts, run npm scripts, run graph audit commands, or claim validation results unless the user/controller provided the output.
 
 ---
 
@@ -107,6 +107,10 @@ headers sitting above their code block - not inside it.
   should actually run.
 - Use `text` for Codex prompt blocks.
 - Use `powershell` for validation and command blocks.
+- Codex implementation summaries must not include "Verified directly" or equivalent self-validation sections.
+- Validation sections in Codex output must only contain commands for the user/controller to run.
+- If Codex did not run validation, it must say "Validation not run by Codex."
+- Codex must not claim validation/test/audit results unless the user provided them.
 
 When scoping implementation prompts, include `codebase-graph.json` as an early
 read after `STATE.json` when it exists. The graph narrows file selection; it
@@ -185,7 +189,9 @@ STOP AND SUMMARIZE:
 After completing all changes, stop and provide:
 1. Files created (path + one-sentence purpose)
 2. Files modified (path + what changed)
-3. Any assumptions made during implementation
+3. Whether app behavior changed
+4. Validation not run by Codex
+5. Commands for the user/controller to run next
 ```
 
 ### Section 2 - Validation
