@@ -1,10 +1,16 @@
-<!-- Current Version: 1.1.2 -->
+<!-- Current Version: 1.1.3-alpha -->
 # AI Handoff
-**Current Version**: 1.1.2 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.1.2 - Graph Audit Harness
+**Current Version**: 1.1.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.1.3 - Codex Validation Boundary Hardening
 **Next**: 1.2.0 - ChromaDB Bootstrap
 ---
 ## What Was Last Done
+**Phase 1.1.3** opens validation boundary hardening:
+- Fixes Codex self-validation output drift
+- Clarifies validation is user/controller-run
+- Removes contradictory Required Tests wording
+- Forbids "Verified directly" style Codex summaries
+- Keeps validation commands as user-run instructions only
 **Phase 1.1.2** opens graph audit proof:
 - Adds a graph audit harness
 - Proves required graph nodes and classifications
@@ -72,8 +78,8 @@
 `master`
 ## What the Next Session Should Do
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md`
-2. Query ChromaDB: `python scripts/query_docs.py "Graph Audit Harness v1.1.2"`
-3. Finish or validate v1.1.2 - Graph Audit Harness while this phase is alpha
+2. Query ChromaDB: `python scripts/query_docs.py "Codex Validation Boundary Hardening v1.1.3"`
+3. Finish or validate v1.1.3 - Codex Validation Boundary Hardening while this phase is alpha
 ---
 
 ## Current Product Snapshot
