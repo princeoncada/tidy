@@ -81,6 +81,14 @@ Unless the task specifically changes these areas, never touch:
   solely from freshness; use the audit harness to prove required graph nodes and
   routing metadata exist.
 - Do not expand startup reads just to prove graph quality.
+- Use `codebase-graph.json` to keep direct file reads minimal, but do not broaden
+  reads just because the graph exists.
+- Do not treat the graph as source of truth; read graph-selected files directly
+  before editing.
+- Do not run graph audit unless explicitly asked by the user/controller.
+- Do not claim token savings were achieved from graph routing alone.
+- Say the graph was used for routing only if graph-selected files actually
+  guided the direct-read set.
 
 ## Validation Boundary
 
