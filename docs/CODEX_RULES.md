@@ -77,6 +77,10 @@ Unless the task specifically changes these areas, never touch:
 - Do not use the graph as a replacement for reading actual files before editing.
 - If modifying graph scripts or tooling, list `scripts/` first and avoid duplicate scripts.
 - Keep protected/generated paths excluded from graph output.
+- For Graphify or graph-routing changes, do not claim graph workflow quality
+  solely from freshness; use the audit harness to prove required graph nodes and
+  routing metadata exist.
+- Do not expand startup reads just to prove graph quality.
 
 ---
 
