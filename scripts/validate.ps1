@@ -44,6 +44,47 @@ function Run-Step {
     Add-Result $Label $passed $detail
 }
 
+function Get-MarkdownSection {
+    param([string]$Content, [string]$Heading)
+    $pattern = "(?ms)^## " + [regex]::Escape($Heading) + "\s*\r?\n(?<body>.*?)(?=^---\s*$|^## |\z)"
+    return [regex]::Match($Content, $pattern)
+}
+
+function Test-InProgressPhase {
+    param([string]$Content, [string]$PhaseLabel)
+    $section = Get-MarkdownSection $Content "In Progress"
+    if (-not $section.Success) { return $false }
+    $pattern = "(?m)^\s*-\s+" + [regex]::Escape($PhaseLabel) + "(\s|\(|-|$)"
+    return $section.Groups["body"].Value -match $pattern
+}
+
+function Test-PlannedPhaseHeading {
+    param([string]$Content, [string]$PhaseLabel)
+    $pattern = "(?m)^###\s+" + [regex]::Escape($PhaseLabel) + "\s*$"
+    return $Content -match $pattern
+}
+
+function Get-PlannedPhaseSection {
+    param([string]$Content, [string]$PhaseLabel)
+    $pattern = "(?ms)^###\s+" + [regex]::Escape($PhaseLabel) + "\s*\r?\n(?<body>.*?)(?=^###\s+|^---\s*$|^##\s+|\z)"
+    return [regex]::Match($Content, $pattern)
+}
+
+function Test-CompletedPhase {
+    param([string]$Content, [string]$PhaseLabel)
+    $pattern = "(?m)^\s*-\s+~~" + [regex]::Escape($PhaseLabel) + "~~\s+\(stable\s+\d{4}-\d{2}-\d{2}\)"
+    return $Content -match $pattern
+}
+
+function Get-FirstPlannedHeading {
+    param([string]$Content)
+    $section = Get-MarkdownSection $Content "Planned"
+    if (-not $section.Success) { return "" }
+    $match = [regex]::Match($section.Groups["body"].Value, "(?m)^###\s+(?<heading>.+?)\s*$")
+    if ($match.Success) { return $match.Groups["heading"].Value }
+    return ""
+}
+
 Write-Host "`n=== Tidy Validation === $(Get-Date -Format 'yyyy-MM-dd HH:mm')" -ForegroundColor Cyan
 
 # STATE.json
@@ -83,6 +124,83 @@ if (Test-Path "STATE.json") {
     }
 } else {
     Add-Result "version consistency" $false "STATE.json missing"
+}
+
+# Phase identity and roadmap drift gate
+if (Test-Path "STATE.json") {
+    $phaseState = Get-Content "STATE.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+    $phaseLabel = "$($phaseState.phase) - $($phaseState.phaseTitle)"
+    $nextPhase = $phaseState.nextPhase
+    $phaseErrors = @()
+
+    if (Test-Path "docs/VERSIONING.md") {
+        $versioning = Get-Content "docs/VERSIONING.md" -Raw -Encoding UTF8
+        if ($versioning -notmatch ("(?m)^-\s+\*\*Current phase:\*\*\s+" + [regex]::Escape($phaseLabel) + "\s*$")) {
+            $phaseErrors += "docs/VERSIONING.md Current phase does not match STATE.json phase '$phaseLabel'"
+        }
+        if ($versioning -notmatch ("(?m)^-\s+\*\*Next phase:\*\*\s+" + [regex]::Escape($nextPhase) + "\s*$")) {
+            $phaseErrors += "docs/VERSIONING.md Next phase does not match STATE.json nextPhase '$nextPhase'"
+        }
+    } else {
+        $phaseErrors += "docs/VERSIONING.md missing"
+    }
+
+    if (Test-Path "docs/AI_HANDOFF.md") {
+        $handoff = Get-Content "docs/AI_HANDOFF.md" -Raw -Encoding UTF8
+        if ($handoff -notmatch ("(?m)^\*\*Current Phase\*\*:\s+" + [regex]::Escape($phaseLabel) + "\s*$")) {
+            $phaseErrors += "docs/AI_HANDOFF.md Current Phase does not match STATE.json phase '$phaseLabel'"
+        }
+        if ($handoff -notmatch ("(?m)^\*\*Next\*\*:\s+" + [regex]::Escape($nextPhase) + "\s*$")) {
+            $phaseErrors += "docs/AI_HANDOFF.md Next does not match STATE.json nextPhase '$nextPhase'"
+        }
+    } else {
+        $phaseErrors += "docs/AI_HANDOFF.md missing"
+    }
+
+    if (Test-Path "docs/FUTURE_PLANS.md") {
+        $futurePlans = Get-Content "docs/FUTURE_PLANS.md" -Raw -Encoding UTF8
+        $inProgress = Test-InProgressPhase $futurePlans $phaseLabel
+        $plannedHeading = Test-PlannedPhaseHeading $futurePlans $phaseLabel
+        $plannedPhaseSection = Get-PlannedPhaseSection $futurePlans $phaseLabel
+        $completed = Test-CompletedPhase $futurePlans $phaseLabel
+        $firstPlannedHeading = Get-FirstPlannedHeading $futurePlans
+
+        if ($phaseState.state -eq "alpha") {
+            if (-not $inProgress) {
+                $phaseErrors += "docs/FUTURE_PLANS.md In Progress is missing current alpha phase '$phaseLabel'"
+            }
+            if (-not $plannedHeading) {
+                $phaseErrors += "docs/FUTURE_PLANS.md Planned is missing current alpha heading '### $phaseLabel'"
+            } elseif ($plannedPhaseSection.Groups["body"].Value -notmatch "(?m)^-\s+\*\*Status:\*\*\s+In progress(\s|\(|$)") {
+                $phaseErrors += "docs/FUTURE_PLANS.md Planned heading '### $phaseLabel' is missing Status: In progress"
+            }
+        } elseif ($phaseState.state -eq "stable") {
+            if (-not $completed) {
+                $phaseErrors += "docs/FUTURE_PLANS.md Completed is missing stable phase '$phaseLabel'"
+            }
+            if ($inProgress) {
+                $phaseErrors += "docs/FUTURE_PLANS.md In Progress still contains stable phase '$phaseLabel'"
+            }
+            if ($plannedHeading) {
+                $phaseErrors += "docs/FUTURE_PLANS.md Planned still contains stable heading '### $phaseLabel'"
+            }
+            if ($firstPlannedHeading -eq $phaseLabel) {
+                $phaseErrors += "docs/FUTURE_PLANS.md first Planned heading is already-stable phase '$phaseLabel'"
+            }
+        } else {
+            $phaseErrors += "STATE.json state '$($phaseState.state)' is not alpha or stable"
+        }
+    } else {
+        $phaseErrors += "docs/FUTURE_PLANS.md missing"
+    }
+
+    if ($phaseErrors.Count -eq 0) {
+        Add-Result "phase/roadmap consistency" $true "$phaseLabel"
+    } else {
+        Add-Result "phase/roadmap consistency" $false ($phaseErrors -join "; ")
+    }
+} else {
+    Add-Result "phase/roadmap consistency" $false "STATE.json missing"
 }
 
 # ChromaDB
