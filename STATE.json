@@ -1,6 +1,6 @@
 {
-    "version":  "1.1.2-alpha",
-    "state":  "alpha",
+    "version":  "1.1.2",
+    "state":  "stable",
     "phase":  "1.1.2",
     "phaseTitle":  "Graph Audit Harness",
     "nextPhase":  "1.2.0 - ChromaDB Bootstrap",
