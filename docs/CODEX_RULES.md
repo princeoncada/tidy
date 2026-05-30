@@ -61,14 +61,22 @@ Unless the task specifically changes these areas, never touch:
 ## Implementation Workflow
 
 1. Read `STATE.json`  -  current version, active phase, active branch
-2. Read `docs/AI_HANDOFF.md`  -  product snapshot, invariants, known risks
-3. Use the task routing table below to pick the smallest relevant source file set
-4. Identify required test coverage before coding (see Required Tests below)
-5. Read the active phase log from `docs/PHASE_LOG.md` (if implementing phase work)
-6. Read 2 - 3 source files directly relevant to the change
-7. Make the code change and matching test change in the same branch
-8. Validate: `npm run test:ci` after implementation (user runs this, not Codex)
-9. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
+2. Read `codebase-graph.json` when present to pick the smallest relevant source file set
+3. Read `docs/AI_HANDOFF.md`  -  product snapshot, invariants, known risks
+4. Use the task routing table below to pick the smallest relevant source file set
+5. Identify required test coverage before coding (see Required Tests below)
+6. Read the active phase log from `docs/PHASE_LOG.md` (if implementing phase work)
+7. Read 2 - 3 source files directly relevant to the change
+8. Make the code change and matching test change in the same branch
+9. Validate: `npm run test:ci` after implementation (user runs this, not Codex)
+10. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
+
+## Graphify / Codebase Graph
+
+- Use `codebase-graph.json` to choose a small relevant direct-read set for implementation tasks.
+- Do not use the graph as a replacement for reading actual files before editing.
+- If modifying graph scripts or tooling, list `scripts/` first and avoid duplicate scripts.
+- Keep protected/generated paths excluded from graph output.
 
 ---
 
