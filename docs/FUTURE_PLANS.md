@@ -39,6 +39,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.1.0 - Graphify Integration~~ (stable 2026-05-29)
 
+- ~~1.1.1 - Graph Stable Refresh Fix~~ (stable 2026-05-29)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -47,20 +49,11 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
-- 1.1.1 - Graph Stable Refresh Fix (current working alpha; this patch) - see Planned
 - 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
 
 ---
 
 ## Planned
-
-### 1.1.1 - Graph Stable Refresh Fix
-- **Status:** In progress (this patch)
-- **Priority:** workflow / graph freshness
-- **Files:** STATE.json, package.json, codebase-graph.json, scripts/promote.ps1, scripts/validate.ps1, docs/FUTURE_PLANS.md, docs/VERSIONING.md, docs/AI_HANDOFF.md, docs/WORKFLOW.md
-- **Problem:** 1.1.0 promoted STATE.json to stable, but codebase-graph.json still carried the alpha version because promote.ps1 did not regenerate or self-verify the graph artifact after promotion.
-- **Scope:** Refresh codebase-graph.json for 1.1.1-alpha; update promote.ps1 to regenerate and verify codebase-graph.json during stable promotion; tighten validation only if needed; update workflow docs.
-- **Acceptance:** codebase-graph.json version matches STATE.json in alpha and after promotion; promote.ps1 fails if graph refresh fails or graph version is stale; promote.ps1 echoes a codebase-graph.json commit command when it changes the graph; validate.ps1 catches stale graph versions.
 
 ### 1.2.0 - ChromaDB Bootstrap
 - **Status:** Open | Priority: workflow / startup reliability
