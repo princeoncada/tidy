@@ -1,6 +1,6 @@
 {
-    "version":  "1.2.3-alpha",
-    "state":  "alpha",
+    "version":  "1.2.3",
+    "state":  "stable",
     "phase":  "1.2.3",
     "phaseTitle":  "Startup Oracle Cleanup",
     "nextPhase":  "1.2.4 - Handoff Drift Cleanup",
