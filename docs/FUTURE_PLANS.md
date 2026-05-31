@@ -59,6 +59,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.2.5 - Phase Routing Guardrail Cleanup~~ (stable 2026-05-30)
 
+- ~~1.2.6 - Roadmap Next-Phase Gate~~ (stable 2026-05-30)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -68,17 +70,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.2.6 - Roadmap Next-Phase Gate (active) - see Planned
 ---
 
 ## Planned
-
-### 1.2.6 - Roadmap Next-Phase Gate
-- **Status:** In progress | Priority: P0 workflow anti-drift
-- **Files:** scripts/validate.ps1, scripts/open-phase.ps1, scripts/promote.ps1, docs/FUTURE_PLANS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/VERSIONING.md, docs/AI_HANDOFF.md
-- **Problem:** STATE.json.nextPhase can diverge from the first Planned heading in FUTURE_PLANS, allowing roadmap drift to pass validation and promotion.
-- **Scope:** insert the ChatGPT Architect Local Context Workflow as the next 1.3.0 phase; renumber later planned phases to preserve monotonic order; add validation/open/promote script gates so STATE.json.nextPhase must match the first Planned heading when stable and must exist in Planned when alpha.
-- **Acceptance:** STATE.json.nextPhase and the first FUTURE_PLANS Planned heading agree; validate.ps1 fails if they diverge; open-phase.ps1 blocks or explicitly allows missing nextPhase roadmap targets; promote.ps1 blocks promotion if post-closeout nextPhase drift exists; no app behavior changes.
 
 ### 1.3.0 - ChatGPT Architect Local Context Workflow
 - **Status:** Open | Priority: P0 workflow reliability
