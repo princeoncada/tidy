@@ -6,13 +6,13 @@ Chronological record of all implementation phases and their checkpoint validatio
 
 ## Phase 1.0.0: AI Workflow Foundation  -  COMPLETE
 
-**Version**: 1.0.0-alpha -> 1.0.0-stable (pending promotion)
+**Version**: 1.0.0-alpha -> 1.0.0-stable
 **Date**: 2026-05-28
 **Branch**: (committed directly to master / current branch)
 
 ### What Was Done
 Introduced the full HFK-style AI workflow infrastructure to tidy:
-- `STATE.json` oracle (version, phase, next phase, pre-versioning baseline)
+- `STATE.json` oracle (version, state, phase, phase title, next phase)
 - `docs/VERSIONING.md`  -  version history, five-location versioning rules
 - `docs/WORKFLOW.md`  -  Claude Code + Codex session protocol
 - `docs/COMPACT_STRATEGY.md`  -  token budget rules, ChromaDB query discipline
