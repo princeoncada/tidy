@@ -73,6 +73,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.0 - View Projection Reproduction Tests~~ (stable 2026-05-31)
 
+- ~~1.4.1 - AI Handoff Next Session Cleanup~~ (stable 2026-05-31)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -82,17 +84,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.1 - AI Handoff Next Session Cleanup (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.1 - AI Handoff Next Session Cleanup
-- **Status:** In progress | Priority: P0 workflow correctness
-- **Files:** docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
-- **Problem:** AI_HANDOFF still points next sessions at completed 1.4.0 startup/scoping instructions.
-- **Scope:** replace stale next-session instructions and renumber the 1.4.x planned product phases so backend view membership remains next after cleanup.
-- **Acceptance:** startup handoff points to 1.4.2 backend scoping packet, 1.4.0 remains completed, PHASE_LOG remains historical only, no product files are touched.
 
 ### 1.4.2 - Backend View Membership Contract
 - **Status:** Open | Priority: P0 projection correctness
