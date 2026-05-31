@@ -1,6 +1,6 @@
-<!-- Current Version: 1.2.7-alpha -->
+<!-- Current Version: 1.2.7 -->
 # AI Handoff
-**Current Version**: 1.2.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.2.7 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.2.7 - Prompt Fence Safety Hardening
 **Next**: 1.3.0 - ChatGPT Architect Local Context Workflow
 ---
