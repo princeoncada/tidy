@@ -1,6 +1,6 @@
-<!-- Current Version: 1.4.3-alpha -->
+<!-- Current Version: 1.4.3 -->
 # AI Handoff
-**Current Version**: 1.4.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.3 - Dashboard Cache Projection Contract
 **Next**: 1.4.4 - Tag Mutation Projection Regression
 ---
