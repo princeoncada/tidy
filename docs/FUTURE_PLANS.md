@@ -53,6 +53,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.2.2 - Chroma Visibility Fix~~ (stable 2026-05-30)
 
+- ~~1.2.3 - Startup Oracle Cleanup~~ (stable 2026-05-30)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -61,18 +63,10 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
-- 1.2.3 - Startup Oracle Cleanup (active) - see Planned
 
 ---
 
 ## Planned
-
-### 1.2.3 - Startup Oracle Cleanup
-- **Status:** In progress | Priority: P0 workflow anti-drift
-- **Files:** STATE.json, docs/WORKFLOW.md, docs/COMPACT_STRATEGY.md, docs/CODEX_RULES.md, docs/FUTURE_PLANS.md
-- **Problem:** STATE.json contains pre-versioning historical context, which makes the startup oracle noisier than needed and increases drift risk.
-- **Scope:** remove `preVersioningBaseline` from STATE.json; remove startup/doc references that describe pre-versioning history as part of STATE.json; add the Planned Phase Capture workflow norm; insert the agreed 1.2.3-1.2.5 cleanup sequence before 1.3.0 while preserving monotonic version order.
-- **Acceptance:** STATE.json is current-state-only; pre-versioning history remains in VERSIONING/PHASE_LOG only; FUTURE_PLANS records the agreed cleanup patch series before 1.3.0; no app behavior changes.
 
 ### 1.2.4 - Handoff Drift Cleanup
 - **Status:** Open | Priority: P0 workflow anti-drift
