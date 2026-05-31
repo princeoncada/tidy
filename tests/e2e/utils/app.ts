@@ -27,6 +27,18 @@ export async function deleteList(page: Page, name: string) {
   await expectListNotVisible(page, name);
 }
 
+export async function openAllLists(page: Page) {
+  await page.getByRole("button", { name: /all lists/i }).first().click();
+}
+
+export async function openViewByName(page: Page, viewName: string) {
+  await page
+    .getByTestId(testIds.viewCard)
+    .filter({ hasText: viewName })
+    .getByRole("button", { name: viewName })
+    .click();
+}
+
 export async function createItem(page: Page, listName: string, itemName: string) {
   const card = page.getByTestId(testIds.listCard).filter({ hasText: listName }).first();
   await card.getByRole("button", { name: /list options/i }).click();
@@ -58,6 +70,12 @@ export async function createTag(page: Page, listName: string, tagName: string) {
   await page.getByPlaceholder("Search or create tag...").fill(tagName);
   await page.getByText(`Create "${tagName}"`).click();
   await expect(card.getByText(tagName, { exact: true })).toBeVisible();
+}
+
+export async function removeTagFromList(page: Page, listName: string, tagName: string) {
+  const card = page.getByTestId(testIds.listCard).filter({ hasText: listName }).first();
+  await card.getByRole("button", { name: `Remove ${tagName} tag` }).click();
+  await expect(card.getByText(tagName, { exact: true })).toHaveCount(0);
 }
 
 export async function createView(page: Page, viewName: string, tagName: string) {
