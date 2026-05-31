@@ -94,12 +94,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.7 - Create List + Create Item Race Regression (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.4.7 - Create List + Create Item Race Regression
-- **Status:** Open | Priority: P0 optimistic correctness
+- **Status:** In progress | Priority: P0 optimistic correctness
 - **Files:** components/list/ListAdder.tsx, components/list/ListComponent.tsx, hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/e2e/list-items.spec.ts
 - **Problem:** Creating an item immediately after creating a list can break if the parent optimistic list has not reconciled with the server row.
 - **Scope:** test and harden the create-list-then-create-item flow; preserve the lightweight optimistic feel; avoid Dexie/source-of-truth expansion.
