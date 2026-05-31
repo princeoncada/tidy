@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import {
   DashboardKeys,
+  hasSavedListInDashboardSnapshots,
   removeListFromDashboardCaches,
   updateListInDashboardCaches,
 } from "@/lib/dashboard-cache";
@@ -50,14 +51,12 @@ function removeItemFromCache(currentView: CurrentView | undefined, itemId: strin
   };
 }
 
-async function waitForSavedList(
-  getCurrentView: () => CurrentView | undefined,
+async function waitForSavedListInDashboardCaches(
+  getSnapshots: () => Array<CurrentView | undefined>,
   listId: string
 ) {
   for (let attempt = 0; attempt < 40; attempt += 1) {
-    const currentList = getCurrentView()?.lists.find((list) => list.id === listId);
-
-    if (currentList && !listIsOptimistic(currentList)) {
+    if (hasSavedListInDashboardSnapshots(getSnapshots(), listId)) {
       return true;
     }
 
@@ -119,7 +118,6 @@ const ListComponent = ({
   const [newItemId, setNewItemId] = useState(() => crypto.randomUUID());
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const queryKey = dashboardKeys.allLists;
 
   const { mutate: renameList, isPending: renameListPending } = useMutation(trpc.list.renameList.mutationOptions({
     async onMutate(variables) {
@@ -325,8 +323,12 @@ const ListComponent = ({
       enqueue(
         "item-edits",
         async () => {
-          const listWasSaved = await waitForSavedList(
-            () => queryClient.getQueryData<CurrentView>(queryKey),
+          const listWasSaved = await waitForSavedListInDashboardCaches(
+            () => [
+              queryClient.getQueryData<CurrentView>(dashboardKeys.allLists),
+              queryClient.getQueryData<CurrentView>(dashboardKeys.currentView),
+              queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView),
+            ],
             list.id
           );
 
