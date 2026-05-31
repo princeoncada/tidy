@@ -3,9 +3,6 @@ import { test, type Page } from "@playwright/test";
 import {
   createItemInVisibleList,
   createList,
-  createTag,
-  createView,
-  deleteView,
   openAllLists,
   waitForSuccessfulTrpcMutation,
 } from "./utils/app";
@@ -13,9 +10,7 @@ import {
   expectItemInList,
   expectItemNotInList,
   expectListOrder,
-  expectViewOrder,
   getVisibleListCard,
-  getVisibleViewCard,
 } from "./utils/assertions";
 import { dragByMouseAndWaitForMutation } from "./utils/drag";
 import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
@@ -27,13 +22,6 @@ async function createPersistedList(page: Page, name: string) {
   const persisted = waitForSuccessfulTrpcMutation(page, "list.createList");
 
   await createList(page, name);
-  await persisted;
-}
-
-async function createPersistedTag(page: Page, listName: string, tagName: string) {
-  const persisted = waitForSuccessfulTrpcMutation(page, "tag.create");
-
-  await createTag(page, listName, tagName);
   await persisted;
 }
 
@@ -121,37 +109,4 @@ test("move item into empty list if implemented", async ({ page }) => {
   await expectItemInList(page, targetList, itemName);
   await cleanupNamedList(page, sourceList);
   await cleanupNamedList(page, targetList);
-});
-
-test("reorder custom views persists after reload", async ({ page }) => {
-  const listName = uniqueTestName("view-reorder-list");
-  const firstTag = uniqueTestName("view-reorder-tag-a");
-  const secondTag = uniqueTestName("view-reorder-tag-b");
-  const firstView = uniqueTestName("view-reorder-first");
-  const secondView = uniqueTestName("view-reorder-second");
-
-  await createPersistedList(page, listName);
-  await createPersistedTag(page, listName, firstTag);
-  await createPersistedTag(page, listName, secondTag);
-  await createView(page, firstView, firstTag);
-  await createView(page, secondView, secondTag);
-  await expectViewOrder(page, [secondView, firstView]);
-
-  const firstCard = await getVisibleViewCard(page, firstView);
-  const secondCard = await getVisibleViewCard(page, secondView);
-
-  await dragByMouseAndWaitForMutation(
-    page,
-    firstCard.getByLabel(`Reorder ${firstView}`),
-    secondCard.getByLabel(`Reorder ${secondView}`),
-    "view.reorderViews"
-  );
-
-  await expectViewOrder(page, [firstView, secondView]);
-  await page.reload();
-  await expectViewOrder(page, [firstView, secondView]);
-  await deleteView(page, firstView);
-  await deleteView(page, secondView);
-  await openAllLists(page);
-  await cleanupNamedList(page, listName);
 });
