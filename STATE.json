@@ -1,9 +1,9 @@
 {
-    "version":  "1.3.3",
-    "state":  "stable",
-    "phase":  "1.3.3",
-    "phaseTitle":  "Docs Surface and Product Roadmap Rebaseline",
-    "nextPhase":  "1.4.0 - View Projection Reproduction Tests",
+    "version":  "1.4.0-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.0",
+    "phaseTitle":  "View Projection Reproduction Tests",
+    "nextPhase":  "1.4.1 - Backend View Membership Contract",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-30"
 }
