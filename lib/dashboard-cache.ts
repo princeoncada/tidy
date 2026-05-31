@@ -98,6 +98,27 @@ export function selectedViewFromCache(views: ViewsCache | undefined) {
     views?.find((view) => view.type === "ALL_LISTS");
 }
 
+export function isLatestSelectedView(
+  latestSelectedViewId: string | null | undefined,
+  viewId: string | null | undefined
+) {
+  return Boolean(latestSelectedViewId && viewId && latestSelectedViewId === viewId);
+}
+
+export function canApplySelectedViewPayload(
+  latestSelectedViewId: string | null | undefined,
+  payload: DashboardSnapshot | undefined
+) {
+  return isLatestSelectedView(latestSelectedViewId, payload?.view.id);
+}
+
+export function canRollbackViewSelection(
+  latestSelectedViewId: string | null | undefined,
+  failedViewId: string | null | undefined
+) {
+  return isLatestSelectedView(latestSelectedViewId, failedViewId);
+}
+
 export function applyViewSelectionToViews(
   views: ViewsCache | undefined,
   viewId: string
