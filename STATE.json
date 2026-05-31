@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.5-alpha",
-    "state":  "alpha",
+    "version":  "1.4.5",
+    "state":  "stable",
     "phase":  "1.4.5",
     "phaseTitle":  "Tag Mutation Projection Regression",
     "nextPhase":  "1.4.6 - View Switching Race Regression",
