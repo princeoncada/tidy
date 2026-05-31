@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.4.3",
+  "version": "1.4.4-alpha",
   "generatedAt": "2026-05-31",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2040,7 +2040,8 @@
       "symbols": [
         "Update",
         "Get",
-        "Test"
+        "Test",
+        "Set"
       ],
       "imports": []
     },
