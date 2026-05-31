@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.2.6 -->
+<!-- Current Version: 1.2.7-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -87,6 +87,14 @@ Plain assertion: STATE.json.nextPhase must equal the first Planned heading.
 When opening an alpha phase, `STATE.json.nextPhase` must exist as a Planned heading unless the phase is explicitly scoped to add or renumber `docs/FUTURE_PLANS.md` in the same patch.
 
 Use `open-phase.ps1 -AllowMissingNextPhase` only for explicitly scoped roadmap rewrite patches. No phase may be promoted stable while `STATE.json.nextPhase` and the first Planned roadmap item disagree. `docs/FUTURE_PLANS.md` remains roadmap state, not a sixth versioning location.
+
+### Prompt Fence Safety
+
+When an implementation prompt is delivered inside a fenced code block, do not place additional triple-backtick fenced blocks inside it. Nested fences can prematurely terminate the outer prompt and make copy-paste instructions unsafe.
+
+Inside a fenced master prompt, represent commands/templates using plain text labels or indented lines, not nested fences. Keep Section 1 master prompts and Section 2 validation commands as separate top-level code blocks in the assistant response.
+
+If the master prompt needs to include command examples, use labels like POWERSHELL COMMANDS, VALIDATION COMMANDS, or LOCAL EVIDENCE PACKET, followed by indented command lines. Do not use markdown triple-backtick fences inside a fenced master prompt.
 
 ### Alpha vs. Stable Scope Rule
 
