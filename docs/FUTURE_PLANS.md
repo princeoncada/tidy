@@ -71,6 +71,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.3.3 - Docs Surface and Product Roadmap Rebaseline~~ (stable 2026-05-30)
 
+- ~~1.4.0 - View Projection Reproduction Tests~~ (stable 2026-05-31)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -80,17 +82,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.0 - View Projection Reproduction Tests (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.0 - View Projection Reproduction Tests
-- **Status:** In progress | Priority: P0 correctness test baseline
-- **Files:** tests/unit/dashboard-cache.test.ts, tests/e2e/views.spec.ts, tests/e2e/utils/*
-- **Problem:** View/list/tag projection bugs are currently too broad and under-specified. The app needs tests that reproduce the exact user-visible failures before implementation fixes begin.
-- **Scope:** add or update tests for list creation in All Lists, list creation inside custom views, matching tag add/remove behavior, custom view visibility, refresh persistence, and fast view switching.
-- **Acceptance:** tests describe the intended projection behavior; failures are explicit if current behavior is wrong; no broad implementation fix is bundled unless a tiny test harness adjustment is required.
 
 ### 1.4.1 - Backend View Membership Contract
 - **Status:** Open | Priority: P0 projection correctness
