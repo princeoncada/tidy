@@ -1,6 +1,15 @@
 import { expect, test } from "@playwright/test";
 
-import { createList, createTag, createView, deleteList } from "./utils/app";
+import {
+  createList,
+  createTag,
+  createView,
+  deleteList,
+  openAllLists,
+  openViewByName,
+  removeTagFromList,
+} from "./utils/app";
+import { expectListNotVisible, expectListVisible } from "./utils/assertions";
 import { collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 
 let consoleErrors: string[];
@@ -14,61 +23,105 @@ test.afterEach(async () => {
   expectNoConsoleErrors(consoleErrors);
 });
 
-test("create a view if the feature exists in the current app", async ({ page }) => {
-  const listName = uniqueTestName("view-list");
-  const tagName = uniqueTestName("view-tag");
-  const viewName = uniqueTestName("view");
+test("tagged All Lists entries appear in custom views after reload", async ({ page }) => {
+  const listName = uniqueTestName("all-lists-view-list");
+  const tagName = uniqueTestName("all-lists-view-tag");
+  const viewName = uniqueTestName("all-lists-view");
 
   await createList(page, listName);
   await createTag(page, listName, tagName);
   await createView(page, viewName, tagName);
+  await openViewByName(page, viewName);
+  await expectListVisible(page, listName);
   await page.reload();
-  await expect(page.getByTestId("view-card").filter({ hasText: viewName })).toBeVisible();
+  await expectListVisible(page, listName);
+  await openAllLists(page);
   await deleteList(page, listName);
 });
 
-test("verify created view appears", async ({ page }) => {
-  const listName = uniqueTestName("view-appears-list");
-  const tagName = uniqueTestName("view-appears-tag");
-  const viewName = uniqueTestName("view-appears");
+test("lists created inside a custom view remain visible in that view after reload", async ({ page }) => {
+  const seedListName = uniqueTestName("custom-create-seed-list");
+  const createdInViewListName = uniqueTestName("custom-create-list");
+  const tagName = uniqueTestName("custom-create-tag");
+  const viewName = uniqueTestName("custom-create-view");
 
-  await createList(page, listName);
-  await createTag(page, listName, tagName);
+  await createList(page, seedListName);
+  await createTag(page, seedListName, tagName);
   await createView(page, viewName, tagName);
-  await expect(page.getByTestId("view-card").filter({ hasText: viewName })).toBeVisible();
-  await expect(page.getByTestId("view-card").filter({ hasText: uniqueTestName("missing-view") })).toHaveCount(0);
-  await deleteList(page, listName);
-});
-
-test("verify view can be selected/opened", async ({ page }) => {
-  const listName = uniqueTestName("view-select-list");
-  const tagName = uniqueTestName("view-select-tag");
-  const viewName = uniqueTestName("view-select");
-
-  await createList(page, listName);
-  await createTag(page, listName, tagName);
-  await createView(page, viewName, tagName);
-  await page.getByTestId("view-card").filter({ hasText: viewName }).getByRole("button", { name: viewName }).click();
-  await expect(page.getByTestId("list-card").filter({ hasText: listName })).toBeVisible();
+  await openViewByName(page, viewName);
+  await createList(page, createdInViewListName);
+  const createdListCard = page
+    .getByTestId("list-card")
+    .filter({ hasText: createdInViewListName });
+  await expect(createdListCard.getByText(tagName, { exact: true })).toBeVisible();
   await page.reload();
-  await expect(page.getByTestId("list-card").filter({ hasText: listName })).toBeVisible();
-  await deleteList(page, listName);
+  await expectListVisible(page, createdInViewListName);
+  await openAllLists(page);
+  await deleteList(page, createdInViewListName);
+  await deleteList(page, seedListName);
 });
 
-test("basic tag-filtered view", async ({ page }) => {
-  const matchingList = uniqueTestName("tag-view-match-list");
-  const hiddenList = uniqueTestName("tag-view-hidden-list");
-  const tagName = uniqueTestName("tag-view-tag");
-  const viewName = uniqueTestName("tag-view");
+test("custom views show tagged lists without hiding All Lists entries", async ({ page }) => {
+  const matchingList = uniqueTestName("tagged-only-match-list");
+  const hiddenList = uniqueTestName("tagged-only-hidden-list");
+  const tagName = uniqueTestName("tagged-only-tag");
+  const viewName = uniqueTestName("tagged-only-view");
 
   await createList(page, matchingList);
   await createList(page, hiddenList);
   await createTag(page, matchingList, tagName);
   await createView(page, viewName, tagName);
-  await page.getByTestId("view-card").filter({ hasText: viewName }).getByRole("button", { name: viewName }).click();
-  await expect(page.getByTestId("list-card").filter({ hasText: matchingList })).toBeVisible();
-  await expect(page.getByTestId("list-card").filter({ hasText: hiddenList })).toHaveCount(0);
+  await openViewByName(page, viewName);
+  await expectListVisible(page, matchingList);
+  await expectListNotVisible(page, hiddenList);
+  await openAllLists(page);
+  await expectListVisible(page, matchingList);
+  await expectListVisible(page, hiddenList);
   await deleteList(page, matchingList);
-  await page.getByRole("button", { name: /all lists/i }).first().click();
+  await deleteList(page, hiddenList);
+});
+
+test("removed matching tags keep lists out of custom views after reload", async ({ page }) => {
+  const listName = uniqueTestName("removed-tag-list");
+  const tagName = uniqueTestName("removed-tag");
+  const viewName = uniqueTestName("removed-tag-view");
+
+  await createList(page, listName);
+  await createTag(page, listName, tagName);
+  await createView(page, viewName, tagName);
+  await openViewByName(page, viewName);
+  await expectListVisible(page, listName);
+  await removeTagFromList(page, listName, tagName);
+  await expectListNotVisible(page, listName);
+  await page.reload();
+  await expectListNotVisible(page, listName);
+  await openAllLists(page);
+  await expectListVisible(page, listName);
+  await deleteList(page, listName);
+});
+
+test("latest selected view wins after fast switching", async ({ page }) => {
+  const matchingList = uniqueTestName("fast-switch-match-list");
+  const hiddenList = uniqueTestName("fast-switch-hidden-list");
+  const tagName = uniqueTestName("fast-switch-tag");
+  const viewName = uniqueTestName("fast-switch-view");
+
+  await createList(page, matchingList);
+  await createList(page, hiddenList);
+  await createTag(page, matchingList, tagName);
+  await createView(page, viewName, tagName);
+
+  for (let i = 0; i < 3; i += 1) {
+    await openAllLists(page);
+    await openViewByName(page, viewName);
+  }
+
+  await expect(page.getByTestId("list-card").filter({ hasText: matchingList })).toBeVisible();
+  await expectListNotVisible(page, hiddenList);
+  await page.waitForTimeout(750);
+  await expectListVisible(page, matchingList);
+  await expectListNotVisible(page, hiddenList);
+  await openAllLists(page);
+  await deleteList(page, matchingList);
   await deleteList(page, hiddenList);
 });
