@@ -4,6 +4,8 @@ import { QueryClient } from "@tanstack/react-query";
 import {
   applyDeletedTagToDashboardCaches,
   applyTagChangeToCaches,
+  canApplySelectedViewPayload,
+  canRollbackViewSelection,
   type DashboardSnapshot,
   listMatchesView,
   projectView,
@@ -336,5 +338,31 @@ describe("dashboard cache projection", () => {
 
     expect(selectedViewFromCache([allListsView, defaultView])?.id).toBe("default");
     expect(selectedViewFromCache([allListsView])?.id).toBe("all");
+  });
+
+  it("rejects older selected view payloads when the latest selection differs", () => {
+    const olderPayload = {
+      view: view({ id: "older-view" }),
+      lists: [list("older-list")],
+    };
+
+    expect(canApplySelectedViewPayload("latest-view", olderPayload)).toBe(false);
+  });
+
+  it("accepts selected view payloads when the payload matches the latest selection", () => {
+    const latestPayload = {
+      view: view({ id: "latest-view" }),
+      lists: [list("latest-list")],
+    };
+
+    expect(canApplySelectedViewPayload("latest-view", latestPayload)).toBe(true);
+  });
+
+  it("ignores rollback for older failed selections after the latest selection changes", () => {
+    expect(canRollbackViewSelection("latest-view", "older-view")).toBe(false);
+  });
+
+  it("allows rollback for the latest failed selection", () => {
+    expect(canRollbackViewSelection("latest-view", "latest-view")).toBe(true);
   });
 });
