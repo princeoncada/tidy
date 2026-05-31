@@ -88,32 +88,40 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.4 - Open Phase Roadmap Status Automation (active) - see Planned
 ---
 
 ## Planned
 
-### 1.4.4 - Tag Mutation Projection Regression
+### 1.4.4 - Open Phase Roadmap Status Automation
+- **Status:** In progress | Priority: P0 workflow correctness
+- **Files:** scripts/open-phase.ps1, scripts/validate.ps1, docs/FUTURE_PLANS.md
+- **Problem:** open-phase.ps1 opens alpha roadmap state only halfway by adding In Progress but not changing the matching Planned section to Status: In progress, causing repeated manual in-alpha fixes.
+- **Scope:** make open-phase.ps1 update the matching Planned status line automatically and keep validate.ps1 strict.
+- **Acceptance:** opening a future alpha marks both In Progress and Planned Status: In progress; repeated open-phase repair does not duplicate roadmap status; validation catches drift; no product files are touched.
+
+### 1.4.5 - Tag Mutation Projection Regression
 - **Status:** Open | Priority: P0 tag/view consistency
 - **Files:** trpc/routers/tagRouter.ts, trpc/routers/viewHelpers.ts, components/list/ListTagPicker.tsx, lib/dashboard-cache.ts, tests/
 - **Problem:** Tag add/remove/delete flows can leave affected custom views stale or duplicated because recompute and cache update paths are split.
 - **Scope:** make tag mutations reconcile affected custom views through one predictable path; preserve batching behavior; add tests for add/remove/delete and refresh persistence.
 - **Acceptance:** adding/removing/deleting tags updates all affected custom views; refresh matches the optimistic UI; tests prevent regressions.
 
-### 1.4.5 - View Switching Race Regression
+### 1.4.6 - View Switching Race Regression
 - **Status:** Open | Priority: P0 race correctness
 - **Files:** components/views/ViewsSidebarPreview.tsx, components/list/ListsContainer.tsx, lib/dashboard-cache.ts, tests/e2e/views.spec.ts
 - **Problem:** Fast view switching and late query responses can repaint the dashboard with stale data.
 - **Scope:** lock down current-view writes so late responses cannot overwrite the latest selected view; add tests or E2E coverage for fast switching and refresh.
 - **Acceptance:** latest selected view wins; stale fetches do not repaint the dashboard; tests cover the race or document why E2E is required.
 
-### 1.4.6 - Create List + Create Item Race Regression
+### 1.4.7 - Create List + Create Item Race Regression
 - **Status:** Open | Priority: P0 optimistic correctness
 - **Files:** components/list/ListAdder.tsx, components/list/ListComponent.tsx, hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/e2e/list-items.spec.ts
 - **Problem:** Creating an item immediately after creating a list can break if the parent optimistic list has not reconciled with the server row.
 - **Scope:** test and harden the create-list-then-create-item flow; preserve the lightweight optimistic feel; avoid Dexie/source-of-truth expansion.
 - **Acceptance:** user can create a list and immediately add items; refresh keeps the list and items; regression tests cover the flow.
 
-### 1.4.7 - Drag/Reorder Persistence Regression
+### 1.4.8 - Drag/Reorder Persistence Regression
 - **Status:** Open | Priority: P1 reorder correctness
 - **Files:** components/list/ListsContainer.tsx, components/list/ListComponent.tsx, components/list/ListItemComponent.tsx, components/views/ViewsSidebarPreview.tsx, trpc/routers/listItemRouter.ts, trpc/routers/viewRouter.ts, tests/e2e/drag-drop.spec.ts
 - **Problem:** Reorder behavior must remain lightweight, optimistic, and persistent without rewriting caches during hover or sending optimistic-only IDs to the server.
