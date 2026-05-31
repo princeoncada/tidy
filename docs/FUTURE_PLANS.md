@@ -67,6 +67,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.3.1 - ChatGPT Architect Workflow Proof and Layout Review~~ (stable 2026-05-30)
 
+- ~~1.3.2 - ChatGPT Architect Real Workflow Test~~ (stable 2026-05-30)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -76,17 +78,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.3.2 - ChatGPT Architect Real Workflow Test (active) - see Planned
 ---
 
 ## Planned
-
-### 1.3.2 - ChatGPT Architect Real Workflow Test
-- **Status:** In progress | Priority: P0 workflow reliability
-- **Files:** scripts/export-chatgpt-architect-context.ps1, scripts/validate.ps1, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, docs/CHATGPT_ARCHITECT_WORKFLOW_REVIEW.md
-- **Problem:** 1.3.1 created a static review document, but the user wanted an actual workflow test that shows the real context-passing packet in action.
-- **Scope:** remove the static review document; create a local export script that generates the ChatGPT-ready evidence packet; validate the script output layout; keep 1.4.0 blocked until the user approves the actual packet layout.
-- **Acceptance:** export script exists; validation proves it outputs the required context packet sections; packet shows 1.3.0 changes, local state, ChromaDB/graph context handling, workflow preview, and approval checkpoint; static review document is removed; no app behavior changes.
 
 ### 1.4.0 - Phase 3 Completion: View Filter Hardening
 - **Status:** Open | Priority: projection correctness
