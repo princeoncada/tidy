@@ -1,6 +1,6 @@
-<!-- Current Version: 1.4.4-alpha -->
+<!-- Current Version: 1.4.4 -->
 # AI Handoff
-**Current Version**: 1.4.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.4 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.4 - Open Phase Roadmap Status Automation
 **Next**: 1.4.5 - Tag Mutation Projection Regression
 ---
