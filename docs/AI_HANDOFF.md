@@ -1,10 +1,14 @@
-<!-- Current Version: 1.3.2 -->
+<!-- Current Version: 1.3.3-alpha -->
 # AI Handoff
-**Current Version**: 1.3.2 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.3.2 - ChatGPT Architect Real Workflow Test
-**Next**: 1.4.0 - Phase 3 Completion: View Filter Hardening
+**Current Version**: 1.3.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.3.3 - Docs Surface and Product Roadmap Rebaseline
+**Next**: 1.4.0 - View Projection Reproduction Tests
 ---
 ## What Was Last Done
+**Phase 1.3.2** completed ChatGPT architect real workflow test:
+- Replaced static workflow review doc with export-chatgpt-architect-context.ps1
+- Added validation coverage for the real context packet layout
+- Confirmed ChatGPT architecture should use pushed GitHub state plus pasted local evidence
 **Phase 1.3.1** completed ChatGPT workflow proof/layout review:
 - Added a static workflow review document
 - Added validation coverage for the review document
@@ -128,16 +132,17 @@
 - **Phase 3: View Filter Hardening** - in progress, active on `checkpoint/fix-cross-view-list-moves` (checkpoint 3 of 6 complete; final manual-regression documentation is a merge-gate step, not an implementation checkpoint)
 ## Active Branch
 `master`
-## Current 1.3.2 Context
-1.3.2 replaces the static review-document approach with a real export script.
+## Current 1.3.3 Context
+1.3.3 rebaselines the product roadmap into smaller test-backed phases, marks `docs/PHASE_LOG.md` historical only, and keeps UI/UX polish late.
 
 ## What the Next Session Should Do
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md`.
-2. If 1.3.2 is stable, ask the user to run `scripts/export-chatgpt-architect-context.ps1` for the next source-heavy phase.
-3. Review the generated packet layout with the user.
-4. Only scope 1.4.0 after the user approves or revises the packet layout.
-5. Keep all generated implementation prompts prompt-fence safe.
-6. Do not include nested fenced code blocks inside fenced master prompts.
+2. If 1.3.3 is stable, ask the user to run `scripts/export-chatgpt-architect-context.ps1` for 1.4.0.
+3. Scope `1.4.0 - View Projection Reproduction Tests` using the exported local evidence packet.
+4. Do not use `docs/PHASE_LOG.md` as active phase guidance; it is historical only.
+5. Do not create a new product audit doc; capture product behavior understanding through tests, FUTURE_PLANS acceptance criteria, AI_HANDOFF risks, and DECISIONS only for durable architecture choices.
+6. Keep all generated implementation prompts prompt-fence safe.
+7. Do not include nested fenced code blocks inside fenced master prompts.
 ---
 
 ## Architecture Boundary
@@ -198,6 +203,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 **Views and tags:**
 - Custom view membership is materialized in `ViewList` rows - not computed at read time
+- Frontend projection and backend refresh must agree before UI/UX polish.
 - Tag operations batch with a 150ms window via `pendingTagOperationsRef` in `ListTagPicker`; `tag.applyListTagChanges` is the preferred batch write path
 - View selection uses `replacePending`; only the newest in-flight fetch may write the current view cache after async completes
 - `tag.removeFromList` recomputes custom views twice (once inside transaction, once after) - known duplication; `applyListTagChanges` avoids this
@@ -256,6 +262,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `tag.removeFromList` triggers duplicate custom view recompute (inside transaction + after)
 
 **Testing:**
+- Tests should protect every product implementation phase unless a phase is explicitly docs-only or test-only.
 - No API-level ownership tests yet
 - Authenticated E2E requires Supabase credentials (`tests/.auth/user.json` + real env vars)
 - No automated drag/drop tests; no keyboard drag accessibility validation
@@ -265,6 +272,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - No conflict policy for offline replay
 
 **Product polish:**
+- UI/UX polish is intentionally late, after projection correctness, ownership, optimistic behavior, and test baselines.
 - Register submit button says "Login" (wrong copy)
 - Landing page typo "optimisic" + generic "Simple Todo App" branding
 - `apple-icon.png` referenced in metadata but missing from `public/`
