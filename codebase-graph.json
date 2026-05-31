@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.2.1",
+  "version": "1.2.2-alpha",
   "generatedAt": "2026-05-30",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2021,6 +2021,17 @@
       "kind": "script",
       "extension": ".py",
       "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "scripts/open-phase.ps1",
+      "kind": "script",
+      "extension": ".ps1",
+      "symbols": [
+        "Update",
+        "Get",
+        "Test"
+      ],
       "imports": []
     },
     {
