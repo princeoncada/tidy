@@ -83,6 +83,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.5 - Tag Mutation Projection Regression~~ (stable 2026-05-31)
 
+- ~~1.4.6 - View Switching Race Regression~~ (stable 2026-05-31)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -92,17 +94,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.6 - View Switching Race Regression (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.6 - View Switching Race Regression
-- **Status:** In progress | Priority: P0 race correctness
-- **Files:** components/views/ViewsSidebarPreview.tsx, components/list/ListsContainer.tsx, lib/dashboard-cache.ts, tests/e2e/views.spec.ts
-- **Problem:** Fast view switching and late query responses can repaint the dashboard with stale data.
-- **Scope:** lock down current-view writes so late responses cannot overwrite the latest selected view; add tests or E2E coverage for fast switching and refresh.
-- **Acceptance:** latest selected view wins; stale fetches do not repaint the dashboard; tests cover the race or document why E2E is required.
 
 ### 1.4.7 - Create List + Create Item Race Regression
 - **Status:** Open | Priority: P0 optimistic correctness
