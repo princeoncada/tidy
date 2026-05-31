@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.4.2",
+  "version": "1.4.3-alpha",
   "generatedAt": "2026-05-31",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1434,6 +1434,7 @@
         "removeListFromDashboardCaches",
         "invalidateViewPayloadQueries",
         "applyTagChangeToCaches",
+        "applyDeletedTagToDashboardCaches",
         "reconcileSavedListTags",
         "reconcileAffectedViewLists",
         "rollbackScope",
@@ -1441,8 +1442,7 @@
         "updateListInViewSnapshot",
         "keyHash",
         "requiredTagIds",
-        "listTagIds",
-        "viewListOrders"
+        "listTagIds"
       ],
       "imports": [
         "@tanstack/react-query",
@@ -2349,13 +2349,18 @@
         "list",
         "view",
         "customView",
+        "untaggedView",
         "allListsView",
         "snapshot",
-        "untaggedView",
-        "defaultView"
+        "queryClient",
+        "keys",
+        "defaultView",
+        "DashboardSnapshot",
+        "ViewsCache"
       ],
       "imports": [
         "vitest",
+        "@tanstack/react-query",
         "@/lib/dashboard-cache"
       ]
     },
