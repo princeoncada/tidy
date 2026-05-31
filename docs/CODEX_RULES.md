@@ -92,6 +92,22 @@ Unless the task specifically changes these areas, never touch:
 - Say the graph was used for routing only if graph-selected files actually
   guided the direct-read set.
 
+## ChatGPT Architect Evidence Boundary
+
+- Codex prompts written by ChatGPT architect must state whether they were scoped
+  from pushed remote state, pasted local evidence, or both.
+- For source-heavy prompts, include the Local Evidence Packet in the prompt
+  context or require Codex to read local files directly before editing.
+- Codex must not assume remote GitHub state includes local working tree changes.
+- Codex must not claim ChromaDB or graph query results unless they are provided
+  in the prompt or generated locally by Codex within its allowed boundaries.
+- If a prompt relies on local evidence, list the evidence under a "LOCAL
+  EVIDENCE PROVIDED" section.
+- If no local evidence was provided, list "LOCAL EVIDENCE PROVIDED: none,
+  scoped from pushed remote state only."
+- ChatGPT architect prompts must remain prompt-fence safe and must not nest
+  markdown fences inside master prompts.
+
 ## Validation Boundary
 
 Validation is user/controller-run, not Codex-run.
