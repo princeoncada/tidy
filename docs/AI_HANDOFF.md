@@ -1,6 +1,6 @@
-<!-- Current Version: 1.3.3-alpha -->
+<!-- Current Version: 1.3.3 -->
 # AI Handoff
-**Current Version**: 1.3.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.3.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.3.3 - Docs Surface and Product Roadmap Rebaseline
 **Next**: 1.4.0 - View Projection Reproduction Tests
 ---
