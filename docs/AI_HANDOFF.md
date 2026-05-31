@@ -1,10 +1,15 @@
-<!-- Current Version: 1.2.5 -->
+<!-- Current Version: 1.2.6-alpha -->
 # AI Handoff
-**Current Version**: 1.2.5 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.2.5 - Phase Routing Guardrail Cleanup
+**Current Version**: 1.2.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.2.6 - Roadmap Next-Phase Gate
 **Next**: 1.3.0 - ChatGPT Architect Local Context Workflow
 ---
 ## What Was Last Done
+**Phase 1.2.5** completed phase routing guardrail cleanup:
+- Aligned AGENTS.md and WORKFLOW.md local git pull fallback behavior
+- Tightened Codex roadmap movement boundaries
+- Normalized Phase 3 to one checkpoint model
+- Reclassified manual-regression docs as merge-gate documentation, not a numbered implementation checkpoint
 **Phase 1.2.4** completed handoff drift cleanup:
 - Removed stale next-session instructions pointing to completed 1.1.4 graph-routing work
 - Corrected stale stable history notes for 1.2.2 and 1.2.3
@@ -104,9 +109,9 @@
 `master`
 ## What the Next Session Should Do
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md`.
-2. Query ChromaDB for the current planned task.
-3. If 1.2.5 is stable, plan or scope `1.3.0 - ChatGPT Architect Local Context Workflow`.
-4. Do not start product View Filter Hardening until the new ChatGPT-local-context workflow phase is planned and the roadmap is updated.
+2. Confirm STATE.json.nextPhase matches the first Planned heading in FUTURE_PLANS.
+3. If 1.2.6 is stable, scope `1.3.0 - ChatGPT Architect Local Context Workflow`.
+4. Do not scope product View Filter Hardening until the ChatGPT architect local-context workflow is stable.
 ---
 
 ## Current Product Snapshot
