@@ -1,8 +1,8 @@
-<!-- Current Version: 1.2.2 -->
+<!-- Current Version: 1.2.3-alpha -->
 # AI Handoff
-**Current Version**: 1.2.2 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.2.2 - Chroma Visibility Fix
-**Next**: 1.3.0 - Phase 3 Completion: View Filter Hardening
+**Current Version**: 1.2.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.2.3 - Startup Oracle Cleanup
+**Next**: 1.2.4 - Handoff Drift Cleanup
 ---
 ## What Was Last Done
 **Phase 1.2.1** opens graph navigation doc consistency:
