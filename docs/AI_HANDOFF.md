@@ -1,6 +1,6 @@
-<!-- Current Version: 1.4.6-alpha -->
+<!-- Current Version: 1.4.6 -->
 # AI Handoff
-**Current Version**: 1.4.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.6 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.6 - View Switching Race Regression
 **Next**: 1.4.7 - Create List + Create Item Race Regression
 ---
