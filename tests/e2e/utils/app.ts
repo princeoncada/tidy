@@ -3,11 +3,49 @@ import { expect, type Page } from "@playwright/test";
 import { testIds } from "./test-ids";
 import { expectItemNotVisible, expectListNotVisible } from "./assertions";
 
+function waitForSuccessfulTrpcMutation(page: Page, procedure: string) {
+  return page.waitForResponse((response) =>
+    response.request().method() === "POST" &&
+    response.url().includes(`/api/trpc/${procedure}`) &&
+    response.ok()
+  );
+}
+
 export async function createList(page: Page, name: string) {
   await page.getByTestId(testIds.createListButton).first().click();
   await page.getByPlaceholder("Enter your list name...").fill(name);
   await page.getByRole("button", { name: "Create List" }).click();
   await expect(page.getByTestId(testIds.listCard).filter({ hasText: name })).toBeVisible();
+}
+
+export async function createItemInVisibleList(
+  page: Page,
+  listName: string,
+  itemName: string,
+  options: { waitForPersistence?: boolean } = {}
+) {
+  const card = page.getByTestId(testIds.listCard).filter({ hasText: listName }).first();
+  await expect(card).toBeVisible();
+  await card.getByRole("button", { name: /list options/i }).click();
+  await page.getByRole("menuitem", { name: "Add Item" }).click();
+  await card.getByTestId(testIds.createItemInput).fill(itemName);
+  const persisted = options.waitForPersistence
+    ? waitForSuccessfulTrpcMutation(page, "listItem.createListItem")
+    : undefined;
+  await card.getByTestId(testIds.createItemInput).press("Enter");
+  await expect(card.getByTestId(testIds.listItem).filter({ hasText: itemName })).toBeVisible();
+  await persisted;
+}
+
+export async function createListAndImmediatelyAddItem(
+  page: Page,
+  listName: string,
+  itemName: string
+) {
+  await createList(page, listName);
+  await createItemInVisibleList(page, listName, itemName, {
+    waitForPersistence: true,
+  });
 }
 
 export async function renameList(page: Page, oldName: string, newName: string) {
@@ -40,12 +78,7 @@ export async function openViewByName(page: Page, viewName: string) {
 }
 
 export async function createItem(page: Page, listName: string, itemName: string) {
-  const card = page.getByTestId(testIds.listCard).filter({ hasText: listName }).first();
-  await card.getByRole("button", { name: /list options/i }).click();
-  await page.getByRole("menuitem", { name: "Add Item" }).click();
-  await card.getByTestId(testIds.createItemInput).fill(itemName);
-  await card.getByTestId(testIds.createItemInput).press("Enter");
-  await expect(card.getByTestId(testIds.listItem).filter({ hasText: itemName })).toBeVisible();
+  await createItemInVisibleList(page, listName, itemName);
 }
 
 export async function renameItem(page: Page, oldName: string, newName: string) {
