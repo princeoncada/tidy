@@ -525,6 +525,8 @@
       "symbols": [
         "reorderListsForDrag",
         "reorderItemsForDrag",
+        "listOrderMatches",
+        "itemPlacementMatches",
         "sourceIndex",
         "targetIndex",
         "nextLists",
@@ -540,9 +542,7 @@
         "allListsView",
         "selectedView",
         "selectedViewId",
-        "allListsQueryKey",
-        "selectedViewQueryKey",
-        "dashboardKeys"
+        "allListsQueryKey"
       ],
       "imports": [
         "@/lib/dashboard-cache",
@@ -2132,7 +2132,6 @@
       "extension": ".ts",
       "symbols": [
         "createPersistedList",
-        "createPersistedTag",
         "persisted",
         "first",
         "second",
@@ -2143,11 +2142,6 @@
         "itemName",
         "item",
         "targetCard",
-        "listName",
-        "firstTag",
-        "secondTag",
-        "firstView",
-        "secondView",
         "Page"
       ],
       "imports": [
