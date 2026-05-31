@@ -69,9 +69,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.2.2
-- **Current phase:** 1.2.2 - Chroma Visibility Fix
-- **Next phase:** 1.3.0 - Phase 3 Completion: View Filter Hardening
+- **Current version:** 1.2.3-alpha
+- **Current phase:** 1.2.3 - Startup Oracle Cleanup
+- **Next phase:** 1.2.4 - Handoff Drift Cleanup
 
 ---
 
@@ -131,6 +131,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.2.3 | alpha | 2026-05-30 | Startup Oracle Cleanup | (in progress) |
 | 1.2.2 | stable | 2026-05-30 | Chroma Visibility Fix | (in progress) |
 | 1.2.1 | stable | 2026-05-30 | Graph Navigation Doc Consistency | COMPACT_STRATEGY.md graphify section rewritten to the static codebase-graph.json path (removed broken graphify-out/live-CLI steps); validate.ps1 graph-usage guard fails if any doc instructs the unavailable live graphify CLI. |
 | 1.2.0 | stable | 2026-05-30 | ChromaDB Bootstrap | ingest_docs.py BOM-safe + cosine + indexes CODEBASE_GRAPH.md; validate.ps1 auto-starts ChromaDB and ingests or FAILs loudly; chroma-data bootstrapped so query_docs.py returns real chunks. |
