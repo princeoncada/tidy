@@ -457,38 +457,39 @@ if ($chatGptArchitectErrors.Count -eq 0) {
     Add-Result "chatgpt architect docs" $false ($chatGptArchitectErrors -join "; ")
 }
 
-# ChatGPT architect workflow review guard - ensure the review artifact remains visible.
-$workflowReviewPath = "docs/CHATGPT_ARCHITECT_WORKFLOW_REVIEW.md"
-$workflowReviewSections = @(
-    "ChatGPT Architect Workflow Review",
-    "What Changed in 1.3.0",
-    "Proof That 1.3.0 Is Implemented",
-    "Before vs After",
-    "Context Flow Layout",
-    "Local Evidence Packet Layout",
-    "Remote-Only Mode",
-    "ChromaDB Context Flow",
-    "Graph Context Flow",
-    "Example Good Packet",
-    "Example Incomplete Packet",
-    "1.4.0 Scoping Layout Preview",
-    "Approval Checklist"
+# ChatGPT architect workflow test guard - ensure the real export packet remains usable.
+$workflowTestScript = "scripts/export-chatgpt-architect-context.ps1"
+$workflowTestSections = @(
+    "CHATGPT ARCHITECT CONTEXT PACKET",
+    "WHAT CHANGED IN 1.3.0",
+    "CURRENT LOCAL STATE",
+    "REMOTE VS LOCAL AUTHORITY",
+    "LOCAL EVIDENCE PACKET",
+    "CHROMADB CONTEXT",
+    "GRAPH CONTEXT",
+    "WORKFLOW PREVIEW",
+    "APPROVAL CHECKPOINT"
 )
-$workflowReviewErrors = @()
-if (-not (Test-Path $workflowReviewPath)) {
-    $workflowReviewErrors += "$workflowReviewPath missing"
+$workflowTestErrors = @()
+if (-not (Test-Path $workflowTestScript)) {
+    $workflowTestErrors += "$workflowTestScript missing"
 } else {
-    $workflowReviewContent = Get-Content $workflowReviewPath -Raw -Encoding UTF8
-    foreach ($section in $workflowReviewSections) {
-        if (-not $workflowReviewContent.Contains($section)) {
-            $workflowReviewErrors += "$workflowReviewPath missing section '$section'"
+    $workflowTestOutput = & powershell -ExecutionPolicy Bypass -File $workflowTestScript -Question "1.4.0 Phase 3 Completion View Filter Hardening" -SkipChroma -SkipDiff 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        $workflowTestErrors += "$workflowTestScript safe-mode run failed: $($workflowTestOutput -join ' ')"
+    } else {
+        $workflowTestText = $workflowTestOutput -join "`n"
+        foreach ($section in $workflowTestSections) {
+            if (-not $workflowTestText.Contains($section)) {
+                $workflowTestErrors += "$workflowTestScript output missing section '$section'"
+            }
         }
     }
 }
-if ($workflowReviewErrors.Count -eq 0) {
-    Add-Result "chatgpt architect workflow review" $true "review document present"
+if ($workflowTestErrors.Count -eq 0) {
+    Add-Result "chatgpt architect workflow test" $true "export packet layout present"
 } else {
-    Add-Result "chatgpt architect workflow review" $false ($workflowReviewErrors -join "; ")
+    Add-Result "chatgpt architect workflow test" $false ($workflowTestErrors -join "; ")
 }
 
 # ChromaDB - auto-start if needed, then ingest docs (FAIL loudly if unreachable)
