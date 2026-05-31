@@ -10,6 +10,8 @@ Standing ruleset for every Codex implementation session. Read this before writin
 - Do not run `npm run test:ci`, `npm run build`, validation scripts, graph audit commands, git commands, or commit commands
 - Do not modify `app/generated/prisma` (generated Prisma output)
 - Do not modify lockfiles unless the package manager automatically requires it for an explicitly requested dependency change
+- Do not manually update any versioning location (STATE.json, package.json, docs/AI_HANDOFF.md, docs/WORKFLOW.md, docs/VERSIONING.md). Version changes happen only through .\scripts\open-phase.ps1 (alpha) and .\scripts\promote.ps1 (stable).
+- Do not update docs/FUTURE_PLANS.md In Progress or Planned sections for versioning purposes; open-phase.ps1 and promote.ps1 handle roadmap state.
 - Do not update package versions unless explicitly asked
 - Do not rename public APIs, tRPC procedures, query keys, Prisma models, or component contracts unless the task explicitly requires it
 
