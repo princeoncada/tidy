@@ -1,6 +1,6 @@
 {
-    "version":  "1.2.2-alpha",
-    "state":  "alpha",
+    "version":  "1.2.2",
+    "state":  "stable",
     "phase":  "1.2.2",
     "phaseTitle":  "Chroma Visibility Fix",
     "nextPhase":  "1.3.0 - Phase 3 Completion: View Filter Hardening",
