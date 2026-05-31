@@ -45,12 +45,20 @@ export function getAllListsSnapshot(
 }
 
 export function listMatchesView(list: DashboardList, view: ViewCacheItem) {
-  if (view.type !== "CUSTOM") return true;
+  if (view.type === "ALL_LISTS") return true;
+
+  if (view.type === "UNTAGGED") {
+    return list.listTags.length === 0;
+  }
 
   const requiredTagIds = view.viewTags.map((viewTag) => viewTag.tagId);
   if (requiredTagIds.length === 0) return false;
 
   const listTagIds = new Set(list.listTags.map((listTag) => listTag.tagId));
+  if (view.matchMode === "ANY") {
+    return requiredTagIds.some((tagId) => listTagIds.has(tagId));
+  }
+
   return requiredTagIds.every((tagId) => listTagIds.has(tagId));
 }
 
@@ -79,7 +87,7 @@ export function projectView(
         ...list,
         order: viewListOrders.get(list.id) ?? list.order,
       }))
-      .sort((a, b) => a.order - b.order),
+      .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id)),
   };
 }
 
@@ -167,13 +175,6 @@ function updateListInViewSnapshot(
     list.id === listId ? updater(list) : list
   );
 
-  if (selectedView.type !== "CUSTOM") {
-    return {
-      ...snapshot,
-      lists: updatedLists,
-    };
-  }
-
   return {
     ...snapshot,
     lists: updatedLists.filter((list) => listMatchesView(list, selectedView)),
@@ -233,6 +234,74 @@ export function applyTagChangeToCaches(
         : list.listTags.filter((listTag) => listTag.tagId !== tag.id),
     };
   });
+}
+
+export function applyDeletedTagToDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  tagId: string
+) {
+  const stripDeletedTagFromView = (view: ViewCacheItem) => ({
+    ...view,
+    viewTags: view.viewTags.filter((viewTag) => viewTag.tagId !== tagId),
+  });
+  const stripDeletedTagFromList = (list: DashboardList) => ({
+    ...list,
+    listTags: list.listTags.filter((listTag) => listTag.tagId !== tagId),
+  });
+  const updatedKeys = new Set<string>();
+  let updatedAllListsSnapshot: DashboardSnapshot | undefined;
+
+  queryClient.setQueryData<ViewsCache>(keys.views, (views) =>
+    views?.map(stripDeletedTagFromView)
+  );
+
+  const views = queryClient.getQueryData<ViewsCache>(keys.views);
+  const viewFromCache = (view: ViewCacheItem) =>
+    views?.find((cachedView) => cachedView.id === view.id) ??
+    stripDeletedTagFromView(view);
+
+  setDashboardQueryDataOnce<DashboardSnapshot>(
+    queryClient,
+    updatedKeys,
+    keys.allLists,
+    (snapshot) => {
+      if (!snapshot) return snapshot;
+
+      updatedAllListsSnapshot = {
+        ...snapshot,
+        view: viewFromCache(snapshot.view),
+        lists: snapshot.lists.map(stripDeletedTagFromList),
+      };
+
+      return updatedAllListsSnapshot;
+    }
+  );
+
+  const reprojectDeletedTag = (snapshot: DashboardSnapshot | undefined) => {
+    if (!snapshot) return snapshot;
+
+    const projectionSource = updatedAllListsSnapshot ?? {
+      ...snapshot,
+      view: viewFromCache(snapshot.view),
+      lists: snapshot.lists.map(stripDeletedTagFromList),
+    };
+
+    return projectView(viewFromCache(snapshot.view), projectionSource);
+  };
+
+  setDashboardQueryDataOnce<DashboardSnapshot>(
+    queryClient,
+    updatedKeys,
+    keys.currentView,
+    reprojectDeletedTag
+  );
+  setDashboardQueryDataOnce<DashboardSnapshot>(
+    queryClient,
+    updatedKeys,
+    keys.selectedView,
+    reprojectDeletedTag
+  );
 }
 
 export function reconcileSavedListTags(
