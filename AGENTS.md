@@ -10,6 +10,7 @@ This project uses newer framework versions with breaking changes  -  APIs, conve
 
 At the start of every session, before reading other docs or writing code:
 
+0. If operating in a local repo, run `git pull origin master` first. If local git is unavailable, report why and continue with remote/direct reads only.
 1. Read `STATE.json` first  -  it is the machine-readable oracle for version, active phase, next phase, and notes.
 2. Read `codebase-graph.json` if it exists  -  it is an orientation map for choosing the smallest relevant direct-read set.
    If it is missing, stale, or invalid, state that and fall back to direct file reads.
