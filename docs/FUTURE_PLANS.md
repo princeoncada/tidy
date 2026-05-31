@@ -57,6 +57,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.2.4 - Handoff Drift Cleanup~~ (stable 2026-05-30)
 
+- ~~1.2.5 - Phase Routing Guardrail Cleanup~~ (stable 2026-05-30)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -66,17 +68,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.2.5 - Phase Routing Guardrail Cleanup (active) - see Planned
 ---
 
 ## Planned
-
-### 1.2.5 - Phase Routing Guardrail Cleanup
-- **Status:** In progress | Priority: P0 workflow anti-drift
-- **Files:** AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, docs/PHASE_LOG.md
-- **Problem:** Phase 3 checkpoint count and routing language are inconsistent across docs; startup protocol differs between AGENTS and WORKFLOW; Codex roadmap-update wording can be misread as permission to move roadmap state manually.
-- **Scope:** normalize Phase 3 checkpoint count and treatment of manual-regression docs; align startup protocol wording around `git pull origin master`; tighten Codex roadmap-update boundaries.
-- **Acceptance:** one Phase 3 checkpoint model exists across docs; startup protocol has no AGENTS/WORKFLOW contradiction; Codex cannot misread FUTURE_PLANS wording as broad permission to move roadmap state.
 
 ### 1.3.0 - Phase 3 Completion: View Filter Hardening
 - **Status:** Open | Priority: projection correctness
