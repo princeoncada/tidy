@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.0",
-    "state":  "stable",
-    "phase":  "1.4.0",
-    "phaseTitle":  "View Projection Reproduction Tests",
-    "nextPhase":  "1.4.1 - Backend View Membership Contract",
+    "version":  "1.4.1-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.1",
+    "phaseTitle":  "AI Handoff Next Session Cleanup",
+    "nextPhase":  "1.4.2 - Backend View Membership Contract",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-31"
 }
