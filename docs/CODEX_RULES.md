@@ -67,11 +67,10 @@ Unless the task specifically changes these areas, never touch:
 3. Read `docs/AI_HANDOFF.md`  -  product snapshot, invariants, known risks
 4. Use the task routing table below to pick the smallest relevant source file set
 5. Identify required test coverage before coding (see Required Tests below)
-6. Read the active phase log from `docs/PHASE_LOG.md` (if implementing phase work)
-7. Read 2 - 3 source files directly relevant to the change
-8. Make the code change and matching test change in the same branch
-9. Identify the validation commands required after implementation and provide them for the user/controller to run
-10. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
+6. Read 2 - 3 source files directly relevant to the change
+7. Make the code change and matching test change in the same branch
+8. Identify the validation commands required after implementation and provide them for the user/controller to run
+9. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
 
 ## Graphify / Codebase Graph
 
@@ -173,6 +172,7 @@ When updating workflow docs involving assistant output, preserve copy-paste safe
 
 Every implementation PR must:
 - Update or add tests in the same branch
+- New product phases must update tests in the same phase unless the phase is explicitly test-only or docs-only.
 - Before coding: identify happy path, common cases, edge cases, unit coverage, and E2E coverage
 - After coding: identify the required validation commands and provide them for the user/controller to run
 - Not claim validation, test, build, or audit commands passed unless the user/controller provided the output in the same conversation
@@ -206,9 +206,9 @@ Manual dashboard regression checklist (run after any cache/optimistic/DnD change
 
 After every implementation:
 - Update `docs/AI_HANDOFF.md` if invariants, risks, data flow, key files, active branch, or next recommended action changed.
-- Update `docs/PHASE_LOG.md` when a phase checkpoint completes
 - If a decision changes, update `docs/DECISIONS.md`
 - Update `docs/FUTURE_PLANS.md` only when the prompt explicitly scopes roadmap maintenance, when adding discovered follow-up tasks/risks, or when recording a user-approved phase sequence.
+- Product audit findings should be captured as tests, `docs/FUTURE_PLANS.md` updates, `docs/AI_HANDOFF.md` known risks, or `docs/DECISIONS.md` architecture records, not new standalone audit docs by default.
 - Do not manually move items between Planned, In Progress, and Completed for versioning purposes unless the prompt explicitly scopes that roadmap maintenance.
 - Version open/close movement remains owned by `open-phase.ps1` and `promote.ps1`.
 - `docs/FUTURE_PLANS.md` remains roadmap state, not a sixth versioning location.
@@ -233,7 +233,7 @@ FUTURE_PLANS remains roadmap state, not a sixth versioning location.
 | Tags / custom views | `trpc/routers/tagRouter.ts`, `viewHelpers.ts`, `ListTagPicker.tsx`, `ViewsSidebarPreview.tsx`, `lib/dashboard-cache.ts` |
 | Auth / tRPC / API procedures | `trpc/init.ts`, `trpc/routers/_app.ts`, target router file |
 | Prisma schema / data model | `prisma/schema.prisma`, `lib/db.ts` |
-| Phase work | `docs/PHASE_LOG.md` (active phase section) |
+| Roadmap/docs phase work | `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md`, affected workflow docs |
 | Security fix | target router file + `trpc/init.ts` |
 | Mobile / PWA / metadata | `app/layout.tsx`, `next.config.ts`, `public/` |
 
