@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.2",
-    "state":  "stable",
-    "phase":  "1.4.2",
-    "phaseTitle":  "Backend View Membership Contract",
-    "nextPhase":  "1.4.3 - Dashboard Cache Projection Contract",
+    "version":  "1.4.3-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.3",
+    "phaseTitle":  "Dashboard Cache Projection Contract",
+    "nextPhase":  "1.4.4 - Tag Mutation Projection Regression",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-31"
 }
