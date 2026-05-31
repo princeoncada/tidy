@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ViewMatchMode } from "@/app/generated/prisma/client";
+import { ViewMatchMode, ViewType } from "@/app/generated/prisma/client";
 
 vi.mock("@/lib/db", () => ({
   db: {},
@@ -9,6 +9,7 @@ vi.mock("@/lib/db", () => ({
 import {
   buildCustomViewListRows,
   customViewMembershipWhere,
+  customViewsAffectedByTagsWhere,
   listMatchesViewTags,
 } from "@/trpc/routers/viewHelpers";
 
@@ -51,6 +52,22 @@ describe("view helper membership contract", () => {
         },
       },
     });
+  });
+
+  it("builds affected custom view query shape with unique changed tag ids", () => {
+    expect(customViewsAffectedByTagsWhere("user-1", ["a", "b", "a"])).toEqual({
+      userId: "user-1",
+      type: ViewType.CUSTOM,
+      viewTags: {
+        some: {
+          tagId: { in: ["a", "b"] },
+        },
+      },
+    });
+  });
+
+  it("builds no affected custom view query for empty changed tag ids", () => {
+    expect(customViewsAffectedByTagsWhere("user-1", [])).toBeNull();
   });
 
   it("preserves existing view order, falls back to All Lists order, then deterministic tail order", () => {
