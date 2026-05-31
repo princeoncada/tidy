@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.3",
-    "state":  "stable",
-    "phase":  "1.4.3",
-    "phaseTitle":  "Dashboard Cache Projection Contract",
-    "nextPhase":  "1.4.4 - Tag Mutation Projection Regression",
+    "version":  "1.4.4-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.4",
+    "phaseTitle":  "Open Phase Roadmap Status Automation",
+    "nextPhase":  "1.4.5 - Tag Mutation Projection Regression",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-31"
 }
