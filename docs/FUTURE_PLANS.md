@@ -70,9 +70,17 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.2.7 - Prompt Fence Safety Hardening (active) - see Planned
 ---
 
 ## Planned
+
+### 1.2.7 - Prompt Fence Safety Hardening
+- **Status:** In progress | Priority: P0 workflow reliability
+- **Files:** docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/VERSIONING.md, docs/AI_HANDOFF.md, scripts/validate.ps1, docs/FUTURE_PLANS.md
+- **Problem:** Implementation prompts can become copy-paste unsafe when a fenced master prompt contains nested fenced code blocks.
+- **Scope:** document prompt-fence safety rules; require commands/templates inside fenced master prompts to use plain indented text or unfenced labeled sections; add validation checks that required prompt-fence safety documentation exists.
+- **Acceptance:** workflow docs explicitly forbid nested fenced code blocks inside fenced master prompts; Codex prompt rules include copy-paste-safe alternatives; validation checks for prompt fence safety documentation; no app behavior changes.
 
 ### 1.3.0 - ChatGPT Architect Local Context Workflow
 - **Status:** Open | Priority: P0 workflow reliability
