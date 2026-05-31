@@ -61,14 +61,35 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
-- 1.3.0 - Phase 3: View Filter Hardening (active branch `phase/view-filter-hardening`, checkpoint `fix-cross-view-list-moves`) - see Planned
+- 1.2.3 - Startup Oracle Cleanup (active) - see Planned
 
 ---
 
 ## Planned
 
+### 1.2.3 - Startup Oracle Cleanup
+- **Status:** In progress | Priority: P0 workflow anti-drift
+- **Files:** STATE.json, docs/WORKFLOW.md, docs/COMPACT_STRATEGY.md, docs/CODEX_RULES.md, docs/FUTURE_PLANS.md
+- **Problem:** STATE.json contains pre-versioning historical context, which makes the startup oracle noisier than needed and increases drift risk.
+- **Scope:** remove `preVersioningBaseline` from STATE.json; remove startup/doc references that describe pre-versioning history as part of STATE.json; add the Planned Phase Capture workflow norm; insert the agreed 1.2.3-1.2.5 cleanup sequence before 1.3.0 while preserving monotonic version order.
+- **Acceptance:** STATE.json is current-state-only; pre-versioning history remains in VERSIONING/PHASE_LOG only; FUTURE_PLANS records the agreed cleanup patch series before 1.3.0; no app behavior changes.
+
+### 1.2.4 - Handoff Drift Cleanup
+- **Status:** Open | Priority: P0 workflow anti-drift
+- **Files:** docs/AI_HANDOFF.md, docs/VERSIONING.md, docs/PHASE_LOG.md
+- **Problem:** AI_HANDOFF contains stale next-session instructions pointing to completed 1.1.4 work; VERSIONING has a stable 1.2.2 row that still says in progress; PHASE_LOG has old 1.0.0 wording that says promotion is pending.
+- **Scope:** update handoff next-session instructions to point to the current cleanup sequence and then 1.3.0; fix stale historical wording without changing app behavior.
+- **Acceptance:** no doc tells the architect to resume completed 1.1.x work; stable history does not say in progress; old promotion-pending wording is removed or corrected.
+
+### 1.2.5 - Phase Routing Guardrail Cleanup
+- **Status:** Open | Priority: P0 workflow anti-drift
+- **Files:** AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, docs/PHASE_LOG.md
+- **Problem:** Phase 3 checkpoint count and routing language are inconsistent across docs; startup protocol differs between AGENTS and WORKFLOW; Codex roadmap-update wording can be misread as permission to move roadmap state manually.
+- **Scope:** normalize Phase 3 checkpoint count and treatment of manual-regression docs; align startup protocol wording around `git pull origin master`; tighten Codex roadmap-update boundaries.
+- **Acceptance:** one Phase 3 checkpoint model exists across docs; startup protocol has no AGENTS/WORKFLOW contradiction; Codex cannot misread FUTURE_PLANS wording as broad permission to move roadmap state.
+
 ### 1.3.0 - Phase 3 Completion: View Filter Hardening
-- **Status:** In progress | Priority: projection correctness
+- **Status:** Open | Priority: projection correctness
 - **Phase log:** docs/PHASE_LOG.md (Phase 3)
 - **Problem:** Lists created in All Lists or custom views do not consistently appear in other custom views when filter tags match.
 - **Scope:** finish checkpoints 4-6; includes dashboard cache projection test coverage (selectedViewFromCache, projectView, list update/removal helpers, tag add/remove projection, view-selection projection).
