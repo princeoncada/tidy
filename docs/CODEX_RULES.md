@@ -190,6 +190,15 @@ After every implementation:
 - Update `docs/AI_HANDOFF.md` when the active branch or next recommended action changes
 - If a decision changes, update `docs/DECISIONS.md`
 
+When a user-approved phase sequence exists before implementation, the scoped phase must update `docs/FUTURE_PLANS.md` to reflect that sequence before product work continues.
+
+Rules:
+- Codex may update FUTURE_PLANS for explicitly scoped roadmap maintenance.
+- Codex must preserve monotonic version order.
+- Codex must not silently move roadmap items between Planned, In Progress, and Completed unless the prompt explicitly scopes that roadmap maintenance.
+- Version closeout remains handled by `promote.ps1`.
+- FUTURE_PLANS remains roadmap state, not a sixth versioning location.
+
 ---
 
 ## What to Read For Specific Tasks
