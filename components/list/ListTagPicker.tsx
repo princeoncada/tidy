@@ -25,6 +25,7 @@ import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc";
 import type { CurrentView, Lists } from "./types";
 import {
+  applyDeletedTagToDashboardCaches,
   applyTagChangeToCaches,
   DashboardKeys,
   DashboardSnapshot,
@@ -338,61 +339,21 @@ export default function ListTagPicker({
       const previousLists = queryClient.getQueryData<CurrentView>(queryKey);
       const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
       const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
+      const previousViews = queryClient.getQueryData<ViewsCache>(dashboardKeys.views);
 
       queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
         currentTags.filter((tag) => tag.id !== deletedTag.id)
       );
-      queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, (currentView) =>
-        currentView
-          ? {
-            ...currentView,
-            lists: currentView.lists.map((list) => ({
-              ...list,
-              listTags: list.listTags.filter((listTag) => listTag.tagId !== deletedTag.id),
-            })),
-          }
-          : currentView
-      );
-      queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, (currentView) =>
-        currentView
-          ? {
-            ...currentView,
-            lists: currentView.lists
-              .map((list) => ({
-                ...list,
-                listTags: list.listTags.filter((listTag) => listTag.tagId !== deletedTag.id),
-              }))
-              .filter((list) => currentView.view.type !== "CUSTOM" ||
-                currentView.view.viewTags.every((viewTag) =>
-                  list.listTags.some((listTag) => listTag.tagId === viewTag.tagId)
-                )),
-          }
-          : currentView
-      );
-      queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, (currentView) =>
-        currentView
-          ? {
-            ...currentView,
-            lists: currentView.lists
-              .map((list) => ({
-                ...list,
-                listTags: list.listTags.filter((listTag) => listTag.tagId !== deletedTag.id),
-              }))
-              .filter((list) => currentView.view.type !== "CUSTOM" ||
-                currentView.view.viewTags.every((viewTag) =>
-                  list.listTags.some((listTag) => listTag.tagId === viewTag.tagId)
-                )),
-          }
-          : currentView
-      );
+      applyDeletedTagToDashboardCaches(queryClient, dashboardKeys, deletedTag.id);
 
-      return { previousTags, previousLists, previousCurrentView, previousSelectedView };
+      return { previousTags, previousLists, previousCurrentView, previousSelectedView, previousViews };
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(tagsQueryKey, context?.previousTags);
       queryClient.setQueryData(queryKey, context?.previousLists);
       queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
       queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
+      queryClient.setQueryData(dashboardKeys.views, context?.previousViews);
     },
     async onSuccess(result) {
       reconcileAffectedViewLists(queryClient, dashboardKeys, result.affectedViews);
