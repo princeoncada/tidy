@@ -118,6 +118,85 @@ function Test-PlannedHeading {
     return $Content -match $pattern
 }
 
+function Set-PlannedPhaseStatusInProgress {
+    param([string]$Content, [string]$Version, [string]$Title)
+
+    $plannedSection = Get-MatchedSection $Content "Planned"
+    if (-not $plannedSection.Success) {
+        return [PSCustomObject]@{
+            Content = $Content
+            Found = $false
+            Changed = $false
+            StatusFound = $false
+        }
+    }
+
+    $plannedBody = $plannedSection.Groups["body"].Value
+    $phasePattern = "(?ms)^###\s+" + [regex]::Escape($Version) + "\s+-\s+" + [regex]::Escape($Title) + "\s*\r?\n(?<body>.*?)(?=^###\s+|^---\s*$|^##\s+|\z)"
+    $phaseMatch = [regex]::Match($plannedBody, $phasePattern)
+    if (-not $phaseMatch.Success) {
+        return [PSCustomObject]@{
+            Content = $Content
+            Found = $false
+            Changed = $false
+            StatusFound = $false
+        }
+    }
+
+    $phaseBody = $phaseMatch.Groups["body"].Value
+    $statusPattern = "(?m)^(?<prefix>\s*-\s+\*\*Status:\*\*\s+)(?<status>[^|\r\n]*?)(?<suffix>\s*(?:\|[^\r\n]*)?)$"
+    $statusMatch = [regex]::Match($phaseBody, $statusPattern)
+    if (-not $statusMatch.Success) {
+        return [PSCustomObject]@{
+            Content = $Content
+            Found = $true
+            Changed = $false
+            StatusFound = $false
+        }
+    }
+
+    if ($statusMatch.Groups["status"].Value.Trim() -eq "In progress") {
+        return [PSCustomObject]@{
+            Content = $Content
+            Found = $true
+            Changed = $false
+            StatusFound = $true
+        }
+    }
+
+    $statusPrefix = $statusMatch.Groups["prefix"].Value
+    $statusSuffix = $statusMatch.Groups["suffix"].Value
+    $nextStatusLine = "${statusPrefix}In progress${statusSuffix}"
+    $nextPhaseBody = $phaseBody.Remove(
+        $statusMatch.Index,
+        $statusMatch.Length
+    ).Insert(
+        $statusMatch.Index,
+        $nextStatusLine
+    )
+    $nextPlannedBody = $plannedBody.Remove(
+        $phaseMatch.Groups["body"].Index,
+        $phaseMatch.Groups["body"].Length
+    ).Insert(
+        $phaseMatch.Groups["body"].Index,
+        $nextPhaseBody
+    )
+    $nextContent = $Content.Remove(
+        $plannedSection.Groups["body"].Index,
+        $plannedSection.Groups["body"].Length
+    ).Insert(
+        $plannedSection.Groups["body"].Index,
+        $nextPlannedBody
+    )
+
+    return [PSCustomObject]@{
+        Content = $nextContent
+        Found = $true
+        Changed = $true
+        StatusFound = $true
+    }
+}
+
 function Test-PlannedPhaseLabel {
     param([string]$Content, [string]$PhaseLabel)
     $section = Get-MatchedSection $Content "Planned"
@@ -235,11 +314,17 @@ if (Test-Path $futurePlansPath) {
     }
     if (-not (Test-PlannedHeading $futurePlansUpdated $Version $PhaseTitle)) {
         Write-Warning "$futurePlansPath is missing Planned heading '### $Version - $PhaseTitle'."
+    } else {
+        $plannedStatusResult = Set-PlannedPhaseStatusInProgress $futurePlansUpdated $Version $PhaseTitle
+        $futurePlansUpdated = $plannedStatusResult.Content
+        if (-not $plannedStatusResult.StatusFound) {
+            Write-Warning "$futurePlansPath Planned heading '### $Version - $PhaseTitle' is missing a Status line."
+        }
     }
     if ($futurePlansUpdated -ne $futurePlans) {
         [System.IO.File]::WriteAllText((Resolve-Path $futurePlansPath).Path, $futurePlansUpdated, $utf8NoBom)
         $futurePlansChanged = $true
-        Write-Host "  Updated: $futurePlansPath (roadmap in-progress)" -ForegroundColor Green
+        Write-Host "  Updated: $futurePlansPath (roadmap in-progress/status)" -ForegroundColor Green
     }
 } else {
     Write-Warning "$futurePlansPath not found; roadmap in-progress state was not updated."
