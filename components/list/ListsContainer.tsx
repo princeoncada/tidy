@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  canApplySelectedViewPayload,
   DashboardSnapshot,
   selectedViewFromCache,
   ViewsCache,
@@ -222,16 +223,22 @@ const ListsContainer = () => {
   );
 
   useEffect(() => {
-    if (!bootCurrentView) return;
+    if (!canApplySelectedViewPayload(selectedViewId, bootCurrentView)) return;
     queryClient.setQueryData(currentViewQueryKey, bootCurrentView);
-  }, [bootCurrentView, currentViewQueryKey, queryClient]);
+  }, [bootCurrentView, currentViewQueryKey, queryClient, selectedViewId]);
 
   useEffect(() => {
-    if (!selectedViewSnapshot) return;
+    if (!canApplySelectedViewPayload(selectedViewId, selectedViewSnapshot)) return;
     queryClient.setQueryData(currentViewQueryKey, selectedViewSnapshot);
-  }, [currentViewQueryKey, queryClient, selectedViewSnapshot]);
+  }, [currentViewQueryKey, queryClient, selectedViewId, selectedViewSnapshot]);
 
-  const currentView = selectedViewSnapshot ?? bootCurrentView;
+  const currentView =
+    (canApplySelectedViewPayload(selectedViewId, selectedViewSnapshot)
+      ? selectedViewSnapshot
+      : undefined) ??
+    (canApplySelectedViewPayload(selectedViewId, bootCurrentView)
+      ? bootCurrentView
+      : undefined);
   const lists = currentView?.lists ?? [];
   const visibleLists = dragPreviewLists ?? lists;
 
