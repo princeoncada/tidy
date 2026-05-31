@@ -1,10 +1,15 @@
-<!-- Current Version: 1.2.6 -->
+<!-- Current Version: 1.2.7-alpha -->
 # AI Handoff
-**Current Version**: 1.2.6 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.2.6 - Roadmap Next-Phase Gate
+**Current Version**: 1.2.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.2.7 - Prompt Fence Safety Hardening
 **Next**: 1.3.0 - ChatGPT Architect Local Context Workflow
 ---
 ## What Was Last Done
+**Phase 1.2.6** completed roadmap next-phase gate:
+- Inserted `1.3.0 - ChatGPT Architect Local Context Workflow` as the next planned phase
+- Renumbered product View Filter Hardening to 1.4.0
+- Added validation, open-phase, and promote guards for nextPhase/FUTURE_PLANS drift
+- Documented the stable nextPhase/first Planned invariant
 **Phase 1.2.5** completed phase routing guardrail cleanup:
 - Aligned AGENTS.md and WORKFLOW.md local git pull fallback behavior
 - Tightened Codex roadmap movement boundaries
@@ -109,9 +114,9 @@
 `master`
 ## What the Next Session Should Do
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md`.
-2. Confirm STATE.json.nextPhase matches the first Planned heading in FUTURE_PLANS.
-3. If 1.2.6 is stable, scope `1.3.0 - ChatGPT Architect Local Context Workflow`.
-4. Do not scope product View Filter Hardening until the ChatGPT architect local-context workflow is stable.
+2. Confirm prompt-fence safety rules remain in place before generating implementation prompts.
+3. If 1.2.7 is stable, scope `1.3.0 - ChatGPT Architect Local Context Workflow`.
+4. Do not include nested fenced code blocks inside fenced master prompts.
 ---
 
 ## Current Product Snapshot
