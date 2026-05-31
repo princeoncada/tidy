@@ -6,6 +6,10 @@
 # Usage:
 #   .\scripts\open-phase.ps1 -Version "1.2.2" -PhaseTitle "Chroma Visibility Fix"
 #   .\scripts\open-phase.ps1 -Version "1.2.2" -PhaseTitle "Chroma Visibility Fix" -Repair
+#   .\scripts\open-phase.ps1 -Version "1.2.6" -PhaseTitle "Roadmap Rewrite" -NextPhase "1.3.0 - Next Phase" -AllowMissingNextPhase
+#
+# Use -AllowMissingNextPhase only when the scoped patch explicitly adds or
+# renumbers docs/FUTURE_PLANS.md in the same phase.
 #
 # Five versioning locations updated:
 #   1. STATE.json
@@ -24,7 +28,8 @@ param(
     [string]$Version = "",
     [string]$PhaseTitle = "",
     [string]$NextPhase = "",
-    [switch]$Repair
+    [switch]$Repair,
+    [switch]$AllowMissingNextPhase
 )
 
 $ErrorActionPreference = "Stop"
@@ -111,6 +116,27 @@ function Test-PlannedHeading {
     param([string]$Content, [string]$Version, [string]$Title)
     $pattern = "(?m)^###\s+" + [regex]::Escape($Version) + "\s+-\s+" + [regex]::Escape($Title) + "\s*$"
     return $Content -match $pattern
+}
+
+function Test-PlannedPhaseLabel {
+    param([string]$Content, [string]$PhaseLabel)
+    $section = Get-MatchedSection $Content "Planned"
+    if (-not $section.Success) { return $false }
+    $pattern = "(?m)^###\s+" + [regex]::Escape($PhaseLabel) + "\s*$"
+    return $section.Groups["body"].Value -match $pattern
+}
+
+if ((Test-Path "docs/FUTURE_PLANS.md") -and -not [string]::IsNullOrWhiteSpace($nextPhaseValue)) {
+    $futurePlansForNextPhase = Get-Content "docs/FUTURE_PLANS.md" -Raw -Encoding UTF8
+    if (-not (Test-PlannedPhaseLabel $futurePlansForNextPhase $nextPhaseValue)) {
+        $message = "docs/FUTURE_PLANS.md Planned is missing nextPhase '$nextPhaseValue'."
+        if ($AllowMissingNextPhase) {
+            Write-Warning "$message The current scoped phase must add or renumber FUTURE_PLANS before validation/promotion."
+        } else {
+            Write-Error "$message Use -AllowMissingNextPhase only when this phase explicitly updates FUTURE_PLANS in the same patch."
+            exit 1
+        }
+    }
 }
 
 # 1. STATE.json
