@@ -1,6 +1,6 @@
-<!-- Current Version: 1.4.2-alpha -->
+<!-- Current Version: 1.4.2 -->
 # AI Handoff
-**Current Version**: 1.4.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.2 - Backend View Membership Contract
 **Next**: 1.4.3 - Dashboard Cache Projection Contract
 ---
