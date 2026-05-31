@@ -6,9 +6,11 @@ import {
   applyTagChangeToCaches,
   canApplySelectedViewPayload,
   canRollbackViewSelection,
+  hasSavedListInDashboardSnapshots,
   type DashboardSnapshot,
   listMatchesView,
   projectView,
+  reconcileCreatedListInSnapshot,
   selectedViewFromCache,
   type ViewsCache,
 } from "@/lib/dashboard-cache";
@@ -23,7 +25,18 @@ const tag = (id: string, name = id) => ({
   listTags: [],
 });
 
-const list = (id: string, tagIds: string[] = [], order = 0) => ({
+const item = (id: string, listId: string, order = 0) => ({
+  id,
+  name: id,
+  listId,
+  order,
+  completed: false,
+  createdAt: new Date("2026-01-01"),
+  updatedAt: new Date("2026-01-01"),
+  notes: "",
+});
+
+const list = (id: string, tagIds: string[] = [], order = 0, overrides = {}) => ({
   id,
   userId: "user-1",
   name: id,
@@ -36,6 +49,7 @@ const list = (id: string, tagIds: string[] = [], order = 0) => ({
     tagId,
     tag: tag(tagId),
   })),
+  ...overrides,
 });
 
 const view = (overrides = {}) => ({
@@ -364,5 +378,132 @@ describe("dashboard cache projection", () => {
 
   it("allows rollback for the latest failed selection", () => {
     expect(canRollbackViewSelection("latest-view", "latest-view")).toBe(true);
+  });
+
+  it("replaces an optimistic list with the saved list while preserving local items", () => {
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const optimisticItem = item("optimistic-item", "list-1");
+    const snapshot = {
+      view: allListsView,
+      lists: [
+        list("list-1", [], -1, {
+          isOptimistic: true,
+          listItems: [optimisticItem],
+        }),
+      ],
+    };
+    const savedList = list("list-1", [], 0, { name: "Saved list" });
+
+    expect(
+      reconcileCreatedListInSnapshot(snapshot, savedList, "list-1")?.lists[0]
+    ).toMatchObject({
+      id: "list-1",
+      name: "Saved list",
+      order: -1,
+      listItems: [optimisticItem],
+    });
+  });
+
+  it("removes duplicate optimistic rows when reconciling a saved list", () => {
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const snapshot = {
+      view: allListsView,
+      lists: [
+        list("list-1", [], -2, { isOptimistic: true }),
+        list("existing-list", [], 0),
+        list("list-1", [], -1, {
+          isOptimistic: true,
+          listItems: [
+            item("optimistic-item-a", "list-1", 0),
+            item("optimistic-item-b", "list-1", 1),
+          ],
+        }),
+      ],
+    };
+    const savedList = list("list-1", [], 10, { name: "Saved list" });
+    const reconciled = reconcileCreatedListInSnapshot(snapshot, savedList, "list-1");
+
+    expect(reconciled?.lists.filter((entry) => entry.id === "list-1")).toHaveLength(1);
+    expect(reconciled?.lists.find((entry) => entry.id === "list-1")).toMatchObject({
+      name: "Saved list",
+      order: -2,
+      listItems: [
+        item("optimistic-item-a", "list-1", 0),
+        item("optimistic-item-b", "list-1", 1),
+      ],
+    });
+  });
+
+  it("preserves optimistic tags when reconciling a saved list", () => {
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const snapshot = {
+      view: allListsView,
+      lists: [
+        list("list-1", ["a"], -1, { isOptimistic: true }),
+      ],
+    };
+    const savedList = list("list-1", [], 0, { name: "Saved list" });
+    const reconciled = reconcileCreatedListInSnapshot(snapshot, savedList, "list-1");
+
+    expect(
+      reconciled?.lists[0].listTags.map((listTag) => listTag.tagId)
+    ).toEqual(["a"]);
+  });
+
+  it("leaves snapshots unchanged when no matching optimistic list exists", () => {
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const snapshot = {
+      view: allListsView,
+      lists: [list("existing-list")],
+    };
+    const savedList = list("list-1", [], 0, { name: "Saved list" });
+
+    expect(reconcileCreatedListInSnapshot(snapshot, savedList, "list-1")).toBe(snapshot);
+  });
+
+  it("finds a saved parent list across dashboard snapshots", () => {
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const allListsSnapshot = {
+      view: allListsView,
+      lists: [
+        list("list-1", [], -1, { isOptimistic: true }),
+      ],
+    };
+    const currentViewSnapshot = {
+      view: allListsView,
+      lists: [
+        list("list-1", [], -1),
+      ],
+    };
+
+    expect(
+      hasSavedListInDashboardSnapshots(
+        [allListsSnapshot, currentViewSnapshot],
+        "list-1"
+      )
+    ).toBe(true);
+  });
+
+  it("does not treat optimistic-only parent lists as saved", () => {
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const allListsSnapshot = {
+      view: allListsView,
+      lists: [
+        list("list-1", [], -1, { isOptimistic: true }),
+      ],
+    };
+    const selectedViewSnapshot = {
+      view: allListsView,
+      lists: [
+        list("list-1", [], -1, { isOptimistic: true }),
+      ],
+    };
+
+    expect(
+      hasSavedListInDashboardSnapshots(
+        [allListsSnapshot, undefined, selectedViewSnapshot],
+        "list-1"
+      )
+    ).toBe(false);
   });
 });
