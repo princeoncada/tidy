@@ -1,8 +1,8 @@
-<!-- Current Version: 1.4.5 -->
+<!-- Current Version: 1.4.6-alpha -->
 # AI Handoff
-**Current Version**: 1.4.5 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.5 - Tag Mutation Projection Regression
-**Next**: 1.4.6 - View Switching Race Regression
+**Current Version**: 1.4.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.6 - View Switching Race Regression
+**Next**: 1.4.7 - Create List + Create Item Race Regression
 ---
 ## What Was Last Done
 **Phase 1.3.2** completed ChatGPT architect real workflow test:
@@ -132,13 +132,13 @@
 - **Phase 3: View Filter Hardening** - in progress, active on `checkpoint/fix-cross-view-list-moves` (checkpoint 3 of 6 complete; final manual-regression documentation is a merge-gate step, not an implementation checkpoint)
 ## Active Branch
 `master`
-## Current 1.4.5 Context
-1.4.5 aligns tag mutation recompute and affected-view payloads with the backend membership contract and dashboard-cache projection contract. Tag mutations should use short write transactions first, then recompute affected custom views after the transaction and return refreshed affected view projection payloads.
+## Current 1.4.6 Context
+1.4.6 hardens fast view switching so older selected-view payloads and older selection rollback paths cannot repaint the dashboard after the user has selected a newer view. The latest-selected-view guard lives in `lib/dashboard-cache.ts` and is used by `ViewsSidebarPreview` plus `ListsContainer` before writing selected-view payloads into the current-view cache.
 
 ## What the Next Session Should Do
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md`.
-2. If 1.4.5 is stable, scope `1.4.6 - View Switching Race Regression`.
-3. Use the 1.4.0 reproduction tests, the 1.4.2 backend membership contract, the 1.4.3 dashboard projection contract, and the 1.4.5 tag mutation affected-view contract as the source for expected view switching behavior.
+2. If 1.4.6 is stable, scope `1.4.7 - Create List + Create Item Race Regression`.
+3. Use the 1.4.0 reproduction tests, the 1.4.2 backend membership contract, the 1.4.3 dashboard projection contract, the 1.4.5 tag mutation affected-view contract, and the 1.4.6 latest-selected-view guard as the source for expected optimistic behavior.
 4. Do not use `docs/PHASE_LOG.md` as active phase guidance; it is historical only.
 5. Do not create a product audit doc by default; capture product behavior through tests, FUTURE_PLANS acceptance criteria, AI_HANDOFF risks, and DECISIONS only for durable architecture choices.
 6. Keep all generated implementation prompts prompt-fence safe.
@@ -190,6 +190,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `View.order` owns custom view order
 - Dashboard cache key aliases: `views` -> `view.getAll`, `allLists` -> `view.getViewListsWithItems({ viewId: allListsView.id })`, `currentView` -> `view.getCurrentViewListsWithItems`, `selectedView` -> `view.getViewListsWithItems({ viewId: selectedViewId })`
 - Projection: `ALL_LISTS` returns all lists; `CUSTOM` filters with `listMatchesView` using `ALL`/`ANY` match modes and zero-tag custom views match no lists; `UNTAGGED` returns only lists without tags; projected views apply per-view order from `ViewList` with list order fallback
+- Latest-selected-view guard: selected-view payloads and selection rollbacks must match the currently latest requested view before writing `currentView`
 
 **Optimistic updates:**
 - Dashboard writes cache first, queues server saves second
@@ -206,7 +207,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Frontend projection and backend refresh agree for dashboard-cache helper behavior before UI/UX polish.
 - Tag operations batch with a 150ms window via `pendingTagOperationsRef` in `ListTagPicker`; `tag.applyListTagChanges` is the preferred batch write path
 - Tag mutations keep writes in short transactions, then recompute affected custom views and return refreshed affected view projection payloads.
-- View selection uses `replacePending`; only the newest in-flight fetch may write the current view cache after async completes
+- View selection uses `replacePending`; only the newest in-flight fetch or matching selected-view payload may write the current view cache after async completes
 
 **Drag and drop:**
 - Drag ids: `list-${id}` (list card), `list-item-${id}` (item row), `list-drop-${id}` (list drop zone)
@@ -253,7 +254,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 **Optimistic race scenarios (manual testing only):**
 - Optimistic list creation followed by immediate item/tag changes before server save
-- Fast view switching with multiple fetches in flight - stale fetch must not repaint dashboard
+- Fast view switching is guarded by latest-selected-view checks; keep regression coverage for stale payloads and stale rollback
 - Reorders involving optimistic-only rows - IDs must be filtered before sending to server
 - Tag deletes or toggles that affect custom view membership mid-operation
 
