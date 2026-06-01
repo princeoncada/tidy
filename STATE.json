@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.14-alpha",
-    "state":  "alpha",
+    "version":  "1.4.14",
+    "state":  "stable",
     "phase":  "1.4.14",
     "phaseTitle":  "Phase Branch Commit Workflow Finalization",
     "nextPhase":  "1.4.15 - Custom View Reorder E2E Stabilization",
