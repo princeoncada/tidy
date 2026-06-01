@@ -32,6 +32,19 @@ Standing ruleset for every Codex implementation session. Read this before writin
 
 ---
 
+## Karpathy-Style Engineering Discipline
+
+This discipline improves the existing Tidy workflow. It does not replace the
+workflow, validation boundaries, versioning rules, branch process, or scope
+control rules.
+
+- Think before coding: state assumptions before modifying code and surface uncertainty early.
+- Simplicity first: prefer one proven change over multiple speculative fixes.
+- Surgical changes only: every changed line should trace directly to the task.
+- Goal-driven execution: define the intended proof before changing files.
+
+---
+
 ## Behavior to Preserve
 
 Unless the task specifically changes these areas, never touch:
@@ -71,6 +84,67 @@ Unless the task specifically changes these areas, never touch:
 7. Make the code change and matching test change in the same branch
 8. Identify the validation commands required after implementation and provide them for the user/controller to run
 9. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
+
+## Debugging Attempt Discipline
+
+Before fixing a failing validation or test issue, Codex must classify the
+failure. The classification must be exactly one of:
+
+- Product behavior bug
+- Test interaction bug
+- Test timing/wait bug
+- Seed/data isolation bug
+- Assertion bug
+- Environment/tooling bug
+- Documentation validation contract bug
+
+Before any fix attempt, Codex must provide:
+
+- Failing test/check name
+- Exact failing assertion, timeout, validation message, or error
+- Expected behavior
+- Actual behavior
+- Suspected failure class
+- Smallest suspected file set
+- One diagnostic observation or diagnostic change
+
+Before changing files, Codex must also provide this before-fix attempt block:
+
+    Hypothesis:
+    Files to inspect:
+    Files allowed to change:
+    Expected proof:
+    Rollback condition:
+
+Rules:
+- Codex must not modify product code and test helpers in the same attempt unless the failure classification proves both are involved.
+- Each attempt may change only the files needed to prove or disprove the stated hypothesis.
+- If the hypothesis fails, record why, reclassify, and do not stack speculative fixes.
+- Do not convert a failing validation/check into broad cleanup. Fix the smallest validation contract or behavior issue first.
+
+Bad example:
+
+    Fix drag/drop test flakiness.
+
+Good example:
+
+    Hypothesis:
+    Playwright releases the mouse before DnD Kit registers the target, causing no reorder mutation to fire.
+
+    Files to inspect:
+    tests/e2e/drag-drop.spec.ts
+    tests/e2e/utils/drag.ts
+
+    Files allowed to change:
+    tests/e2e/utils/drag.ts
+
+    Expected proof:
+    Targeted drag reorder test reaches the reorder mutation and reload assertion passes.
+
+    Rollback condition:
+    If mutation still does not fire, revert the helper change and reclassify as product behavior or test interaction issue.
+
+---
 
 ## Graphify / Codebase Graph
 
