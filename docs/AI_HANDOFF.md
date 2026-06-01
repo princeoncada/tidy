@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.16-alpha -->
+<!-- Current Version: 1.4.16 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.16-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.16 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.16 - Session Checkpoint Output Contract Hardening
 **Next**: 1.4.17 - Custom View Reorder E2E Stabilization
 
