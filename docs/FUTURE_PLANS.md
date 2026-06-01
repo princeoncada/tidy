@@ -104,25 +104,33 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.12 - Validation-Gated Assistant Response Hardening (active) - see Planned
 ---
 
 ## Planned
 
-### 1.4.12 - Codex Debugging Discipline Hardening
+### 1.4.12 - Validation-Gated Assistant Response Hardening
+- **Status:** In progress | Priority: P1 workflow safety
+- **Files:** docs/FUTURE_PLANS.md, docs/WORKFLOW.md, docs/AI_HANDOFF.md if needed
+- **Problem:** Assistant responses must not jump ahead to commit, merge, promote, or push commands before the user/controller has provided the required validation and status evidence.
+- **Scope:** Define validation-gated assistant response stages so responses provide only the next valid command stage based on the evidence the user has provided.
+- **Acceptance:** The workflow clearly requires assistant responses to provide only the next valid command stage based on the evidence the user has provided.
+
+### 1.4.13 - Codex Debugging Discipline Hardening
 - **Status:** Open | Priority: P1 debugging efficiency
 - **Files:** docs/CODEX_RULES.md, docs/WORKFLOW.md if needed
 - **Problem:** 1.4.8 showed that repeated in-alpha fixes can burn tokens and time when failure mode is not classified before changes.
 - **Scope:** Add Karpathy-style engineering discipline as an improvement to the existing workflow, including failure classification, hypothesis blocks, allowed file sets, expected proof, rollback conditions, and product-code/test-helper separation rules.
 - **Acceptance:** Codex must classify failures before fixes and avoid stacking speculative changes; existing validation boundaries and scope control remain intact.
 
-### 1.4.13 - Phase Branch Commit Workflow Finalization
+### 1.4.14 - Phase Branch Commit Workflow Finalization
 - **Status:** Open | Priority: P1 workflow reliability
 - **Files:** docs/WORKFLOW.md, docs/CODEX_RULES.md, AGENTS.md, scripts/* only if enforcement is explicitly needed
 - **Problem:** The workflow needs a finalized branch-based phase lifecycle that keeps master stable while preserving meaningful alpha/debugging commit history.
 - **Scope:** Finalize phase branch lifecycle, merge strategy, meaningful commit rules, and optional script guardrails after the draft has been reviewed.
 - **Acceptance:** master remains stable-only; phase branches preserve useful engineering history; fake activity commits are forbidden; workflow remains validation-gated and prompt-safe.
 
-### 1.4.14 - Custom View Reorder E2E Stabilization
+### 1.4.15 - Custom View Reorder E2E Stabilization
 - **Status:** Open | Priority: P1 reorder test stability
 - **Files:** components/views/ViewsSidebarPreview.tsx, tests/e2e/drag-drop.spec.ts, tests/e2e/utils/app.ts, tests/e2e/utils/assertions.ts, tests/e2e/utils/drag.ts, tests/e2e/utils/seed.ts
 - **Problem:** Custom view reorder product code exists, but the authenticated E2E path was unstable and expanded 1.4.8 into helper/harness stabilization.

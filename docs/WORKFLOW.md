@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.11 -->
+<!-- Current Version: 1.4.12-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -299,20 +299,48 @@ Test-Path "STATE.json"
 
 ---
 
+## Validation-Gated Assistant Responses
+
+Assistant command instructions are stage-gated by user-provided evidence. Provide
+only the next valid command stage for the evidence the user/controller has
+already supplied; do not provide commands that lead all the way to
+`git push origin master` until the user has confirmed each prior stage is
+complete and valid.
+
+- Stage A - Implementation/in-alpha changes exist but validation not provided: give validation commands only.
+- Stage B - Validation failed: give failure classification and an in-alpha fix prompt. Do not give commit, merge, promote, or push commands.
+- Stage C - Validation passed and alpha branch has uncommitted changes: give alpha commit commands only.
+- Stage D - Alpha branch is clean and validation passed: the assistant may give the merge-to-master command.
+- Stage E - Master merge completed but master validation not provided: give master validation commands only.
+- Stage F - Master validation passed and promotion not done: give the promote command only.
+- Stage G - Promotion completed and stable files are modified: give stable promotion commit commands.
+- Stage H - Master is stable, committed, validated, and clean: the assistant may give the push command.
+
+If the user says "we won't be promoting because we have a problem" or equivalent
+during alpha, treat it as an in-alpha fix situation. Provide an in-alpha fix
+prompt plus revalidation commands, not commit, merge, promote, or push
+instructions.
+
+---
+
 ## Post-Validation Workflow
 
-After npm run test:ci passes, Claude Code provides all of the following
-in a single message:
+After the user/controller provides validation output or status evidence, Claude
+Code first classifies the current stage from
+[Validation-Gated Assistant Responses](#validation-gated-assistant-responses).
+Provide exactly one next command stage. Do not provide commit, merge, promote,
+and push blocks together.
 
-1. Validation summary - pass counts, any warnings
-2. Alpha commit sequence - The alpha commit sequence must be one PowerShell code block containing all alpha commit commands, one command per line.
+1. Validation summary - pass counts, failures, and warnings from user-provided output only. If validation failed, provide an in-alpha fix prompt and revalidation commands only.
+2. Stage C alpha commit sequence - The alpha commit sequence must be one PowerShell code block containing all alpha commit commands, one command per line.
 
 ```powershell
 .\scripts\commit.ps1 -Files "path/to/file" -Message "type(scope): message"
 ```
 
-3. Promote block - the promote command may be its own `powershell` code block
-   run immediately after all alpha commits complete:
+3. Stage F promote block - the promote command may be its own `powershell` code
+   block only after alpha commits are complete, the alpha branch is clean, master
+   merge is complete, and master validation has passed:
 
 ```powershell
 .\scripts\promote.ps1
@@ -331,7 +359,7 @@ in a single message:
    strings, roadmap state, and generated graph metadata. If promote reports
    success, proceed directly to the promotion commits.
 
-4. Stable-promotion commit sequence - The stable promotion commit sequence must be one separate PowerShell code block containing all stable promotion commit commands, one command per line.
+4. Stage G stable-promotion commit sequence - The stable promotion commit sequence must be one separate PowerShell code block containing all stable promotion commit commands, one command per line.
 
 ```powershell
 .\scripts\commit.ps1 -Files "STATE.json" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
@@ -345,7 +373,8 @@ in a single message:
 
 Include the `codebase-graph.json` commit only when `promote.ps1` changes it.
 
-5. Push block - separate from commit command blocks; user decides when to run:
+5. Stage H push block - separate from commit command blocks; provide only when
+   master is stable, committed, validated, and clean:
 
 ```powershell
 git push origin master
