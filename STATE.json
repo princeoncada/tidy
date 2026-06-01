@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.10-alpha",
-    "state":  "alpha",
+    "version":  "1.4.10",
+    "state":  "stable",
     "phase":  "1.4.10",
     "phaseTitle":  "Context Index Routing Map",
     "nextPhase":  "1.4.11 - AI Handoff Compression",
