@@ -534,7 +534,7 @@ Section 1 - Session Log Master Prompt for Codex
 Section 2 - Next ChatGPT Handoff Prompt
 
 Both Section 1 and Section 2 should be inside code blocks in the assistant response, with the section headings outside the code blocks.
-Do not include nested fenced code blocks inside those prompts.
+Do not include nested fenced code blocks inside fenced master prompts or handoff prompts.
 
 Section 1 must be a copy-paste-safe prompt for Codex to create or update
 `docs/SESSION_LOG.md`. It must tell Codex to read `STATE.json`,
