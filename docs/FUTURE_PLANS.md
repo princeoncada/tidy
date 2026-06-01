@@ -106,6 +106,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.13 - Codex Debugging Discipline Hardening (active) - see Planned
 ---
 
 ## Planned
