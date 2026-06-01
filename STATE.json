@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.16-alpha",
-    "state":  "alpha",
+    "version":  "1.4.16",
+    "state":  "stable",
     "phase":  "1.4.16",
     "phaseTitle":  "Session Checkpoint Output Contract Hardening",
     "nextPhase":  "1.4.17 - Custom View Reorder E2E Stabilization",
