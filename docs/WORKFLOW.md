@@ -400,9 +400,9 @@ treat full `.\scripts\validate.ps1` as required before closeout.
 
 ## Closeout Evidence
 
-`git status --short` is the primary check for uncommitted work and closeout
-cleanliness. `git log --oneline -12` is optional audit evidence, not the default
-cleanliness check.
+Plainly: git status --short is the primary check for uncommitted work and
+closeout cleanliness. Plainly: git log --oneline -12 is optional audit evidence,
+not the default cleanliness check.
 
 Use `git log` when auditing meaningful alpha history, commit order, branch tip,
 merge history, troubleshooting, or when the user asks to review the commit
@@ -418,7 +418,7 @@ product source, tests, scripts, dependencies, validation logic, conflict
 resolution, or a significantly moved master could change final behavior.
 
 For docs-only clean merges from freshly pulled master, after full alpha branch
-validation has passed, targeted post-merge checks are acceptable. Targeted
+validation has passed, targeted post-merge checks may be acceptable. Targeted
 post-merge checks can include `git status --short`, selected version/roadmap
 `Select-String` checks, graph freshness checks when graph metadata changed, and
 task-specific file inspection. The user/controller may still choose full
