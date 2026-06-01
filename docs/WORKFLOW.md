@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.17 -->
+<!-- Current Version: 1.4.18-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -32,12 +32,7 @@ Run these steps at the start of every Claude Code session before asking for dire
 2. **Read `STATE.json`** - report: version, state, phase, phaseTitle, nextPhase, and any in-progress branch when present
 3. **Read `codebase-graph.json` if present** - use it only as an orientation map to choose the smallest direct-read source/doc set. If it is missing, stale, or invalid, state that and fall back to direct file reads.
 4. **Read `docs/FUTURE_PLANS.md` fresh** - report the first Planned backlog item separately from STATE.json `nextPhase`.
-5. **Query ChromaDB** (when running on `localhost:8000`):
-   ```bash
-   python scripts/query_docs.py "<your question about the current task>"
-   ```
-   One query per topic. Trust the first result. Only open the full doc file if the query returns zero relevant content. State why if falling back: "Query returned zero results for X, falling back because..."
-6. **Report findings**. Wait for explicit user direction before scoping or implementing.
+5. **Report findings**. Wait for explicit user direction before scoping or implementing.
 
 See `docs/COMPACT_STRATEGY.md` for token budget targets and the full context-minimization protocol.
 
@@ -47,8 +42,8 @@ See `docs/COMPACT_STRATEGY.md` for token budget targets and the full context-min
 
 ChatGPT architect works from remote GitHub state plus pasted local evidence.
 Remote master is authoritative only after push. The local working tree is
-authoritative for uncommitted work, active branch edits, local ChromaDB output,
-local validation output, and regenerated graph output.
+authoritative for uncommitted work, active branch edits, local validation
+output, and regenerated graph output.
 
 Before source-heavy scoping, the user/controller must paste a Local Evidence
 Packet into ChatGPT chat. For docs-only roadmap/workflow phases, remote GitHub
@@ -62,7 +57,6 @@ LOCAL EVIDENCE PACKET TEMPLATE:
     git status --short
     git log --oneline -5
     Get-Content STATE.json
-    python scripts/query_docs.py "<question about the current task>"
     npm run graph:codebase
     git diff --stat
 
@@ -94,7 +88,7 @@ Even when authorized, Claude Code never commits, pushes, creates branches, or ru
 ## Standard Phase Cycle
 
 ```
-QUERY (ChromaDB) -> READ (STATE.json + codebase graph + minimal docs) -> CONFIRM (user direction)
+READ (STATE.json + codebase graph + minimal docs) -> CONFIRM (user direction)
   -> PLAN -> CLARIFY -> PROMPT (write Codex prompt)
   -> OPEN (.\scripts\open-phase.ps1) -> BUILD (Codex implements) -> TEST (user runs npm run test:ci)
   -> ANALYZE (pass/fail) -> FIX (if needed)
