@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.17-alpha",
-    "state":  "alpha",
+    "version":  "1.4.17",
+    "state":  "stable",
     "phase":  "1.4.17",
     "phaseTitle":  "Session Log Folder Contract Correction",
     "nextPhase":  "1.4.18 - Custom View Reorder E2E Stabilization",
