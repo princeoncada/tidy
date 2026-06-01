@@ -107,6 +107,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.17 - Session Log Folder Contract Correction~~ (stable 2026-05-31)
 
+- ~~1.4.18 - Retire ChromaDB~~ (stable 2026-06-01)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -116,17 +118,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.18 - Retire ChromaDB (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.18 - Retire ChromaDB
-- **Status:** In progress | Priority: P1 workflow simplification
-- **Files:** scripts/validate.ps1, scripts/export-chatgpt-architect-context.ps1, scripts/query_docs.py, scripts/ingest_docs.py, package.json, requirements.txt, .gitignore, .graphifyignore, AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/AI_HANDOFF.md, docs/COMPACT_STRATEGY.md, docs/CODEBASE_GRAPH.md
-- **Problem:** ChromaDB added standing overhead (server + re-ingest) but only helped via manual paste under the ChatGPT-architect model; Graphify already covers symbol/file orientation.
-- **Scope:** remove Chroma scripts, validate/export tooling hooks, config entries, and active-doc references; do not restructure startup ordering.
-- **Acceptance:** no Chroma references remain in active workflow files; validate.ps1 passes with no Chroma step.
 
 ### 1.4.19 - Startup Contract Unification
 - **Status:** Open | Priority: P1 workflow correctness
