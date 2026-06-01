@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.17",
-    "state":  "stable",
-    "phase":  "1.4.17",
-    "phaseTitle":  "Session Log Folder Contract Correction",
-    "nextPhase":  "1.4.18 - Custom View Reorder E2E Stabilization",
+    "version":  "1.4.18-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.18",
+    "phaseTitle":  "Retire ChromaDB",
+    "nextPhase":  "1.4.19 - Startup Contract Unification",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-05-31"
+    "lastUpdated":  "2026-06-01"
 }
