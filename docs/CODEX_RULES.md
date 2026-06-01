@@ -211,9 +211,9 @@ One commit should represent one reviewable engineering unit. Do not batch
 unrelated changes.
 
 Meaningful failed validation states may be committed on phase branches when
-they document a real debugging checkpoint. Fake activity commits remain
-forbidden. Do not hide meaningful failed attempts by silently rewriting history
-during alpha.
+they document a real debugging checkpoint. Fake activity commits are forbidden.
+Do not hide meaningful failed attempts by silently rewriting history during
+alpha.
 
 Commit message format:
 ```
