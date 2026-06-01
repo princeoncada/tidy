@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.18-alpha -->
+<!-- Current Version: 1.4.18 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.18-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.18 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.18 - Retire ChromaDB
 **Next**: 1.4.19 - Startup Contract Unification
 
