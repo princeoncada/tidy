@@ -15,11 +15,8 @@ At the start of every session, before reading other docs or writing code:
 2. Read `codebase-graph.json` if it exists  -  it is an orientation map for choosing the smallest relevant direct-read set.
    If it is missing, stale, or invalid, state that and fall back to direct file reads.
 3. Read `docs/FUTURE_PLANS.md` fresh  -  it owns the full work backlog and next planned item.
-4. Query ChromaDB if available on `localhost:8000`:
-        python scripts/query_docs.py "<question about current task>"
-   One query per topic. Trust the first result. Fall back to direct file read only if query returns zero results  -  state why when falling back.
-5. Output the startup report (see Startup Report Format below).
-6. If the user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
+4. Output the startup report (see Startup Report Format below).
+5. If the user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
    If no scope was provided: wait for the user's go-ahead.
 
 Repo docs are the only source of truth. Never answer state queries,
@@ -29,21 +26,20 @@ Always read STATE.json and docs/FUTURE_PLANS.md fresh.
 ## ChatGPT Architect Mode
 
 ChatGPT chat can use pushed GitHub master plus pasted local evidence. ChatGPT
-chat cannot directly read local uncommitted files, local ChromaDB, local git
-status, local git diff, local-only branch files, or local-only generated graph
+chat cannot directly read local uncommitted files, local git status, local git
+diff, local-only branch files, or local-only generated graph
 changes. Anything not pushed or pasted does not exist to ChatGPT architect.
 
 For docs-only phases that only affect pushed files, GitHub remote reads may be
 enough. For source-heavy phases, local-only work, active branches, or any phase
-where ChromaDB or graph output matters, the user/controller must provide a Local
-Evidence Packet before ChatGPT scopes implementation.
+where graph output matters, the user/controller must provide a Local Evidence
+Packet before ChatGPT scopes implementation.
 
 Required for source-heavy or local-sensitive scoping:
 
     git status --short
     git log --oneline -5
     Get-Content STATE.json
-    python scripts/query_docs.py "<question about the current task>"
     npm run graph:codebase
     git diff --stat
 
@@ -76,8 +72,6 @@ These rules exist so lower-capability models cannot silently drift:
   FUTURE_PLANS In Progress or as the first Planned item. If that mismatch
   exists, STOP and flag roadmap drift before continuing. Next phase from
   STATE.json and next backlog item from FUTURE_PLANS remain separate concepts.
-- If ChromaDB is offline, say so explicitly and read files directly. Never
-  fabricate or paraphrase query results that were not actually returned.
 - Never state version, phase, or "what's next" from memory. Read the files
   fresh every session.
 - scripts/validate.ps1 enforces version consistency across all five
@@ -94,8 +88,8 @@ These rules exist so lower-capability models cannot silently drift:
 ## Graph Routing Summary
 
 Normal startup still reads only `STATE.json`, `codebase-graph.json` when present,
-`docs/FUTURE_PLANS.md`, and ChromaDB only if available. Do not add graph audit,
-graph drills, or broader graph proof work to normal startup.
+and `docs/FUTURE_PLANS.md`. Do not add graph audit, graph drills, or broader
+graph proof work to normal startup.
 
 Use `docs/CONTEXT_INDEX.md` during task scoping to choose the smallest correct
 document/source read set. It is routing-only and must not expand startup reads
@@ -163,7 +157,6 @@ Always output this exact structure at session start:
     Phase: [phaseTitle]
     Next phase (roadmap): [nextPhase from STATE.json]
     Next backlog item: [title of first item in the Planned section of docs/FUTURE_PLANS.md]
-    ChromaDB: [online | offline]
     [one of:]
     Proceeding to Codex prompts for [scope].
     Waiting for your go-ahead.
@@ -172,8 +165,7 @@ Always output this exact structure at session start:
 
 Use `docs/CONTEXT_INDEX.md` for task-based read routing. Startup remains
 strictly owned by the Session Start Protocol above and stays limited to
-`STATE.json`, `codebase-graph.json` when present, `docs/FUTURE_PLANS.md`, and
-ChromaDB when available.
+`STATE.json`, `codebase-graph.json` when present, and `docs/FUTURE_PLANS.md`.
 
 Do not read `docs/WORKFLOW.md` at startup. Read it only when writing or reviewing a Codex prompt format or the post-validation workflow.
 
