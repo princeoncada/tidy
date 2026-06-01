@@ -337,6 +337,38 @@ instructions.
 
 ---
 
+## Validation Intensity
+
+Full `.\scripts\validate.ps1` is the final confidence gate, not a command to
+request after every tiny edit. During active in-alpha work, prefer targeted
+checks that match the risk of the change.
+
+Targeted checks are acceptable while actively editing or confirming a narrow
+docs fix, including:
+- `Select-String` checks for required doc phrases
+- `git status --short`
+- `git diff --stat`
+- focused file inspection
+- `npm run graph:codebase` only when graph freshness needs to be restored before a full validation gate
+
+Recommend full `.\scripts\validate.ps1` at meaningful gates:
+- after an implementation or in-alpha fix batch is ready to prove
+- before alpha work is considered ready for merge
+- after merging the phase branch into master, before promotion
+- before final push only when the user wants final confidence or when source, scripts, product, tests, dependencies, or validation logic changed after the last full validation
+
+Do not request full `.\scripts\validate.ps1` after every one-line docs edit,
+after every `Select-String` check, after every individual commit, after every
+graph refresh while still actively editing, or immediately after `promote.ps1`
+when promote self-verify succeeds and only version/docs/graph metadata changed.
+`promote.ps1` already self-verifies version locations, roadmap closeout, and
+graph artifact consistency.
+
+If product source, tests, scripts, dependencies, or validation logic changed,
+treat full `.\scripts\validate.ps1` as required before closeout.
+
+---
+
 ## Post-Validation Workflow
 
 After the user/controller provides validation output or status evidence, Claude
