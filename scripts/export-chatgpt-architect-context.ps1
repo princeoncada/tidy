@@ -1,6 +1,5 @@
 param(
     [string]$Question = "",
-    [switch]$SkipChroma,
     [switch]$SkipDiff
 )
 
@@ -47,7 +46,7 @@ Write-Output "This packet contains pushed-state context plus local evidence that
 Write-Section "WHAT CHANGED IN 1.3.0"
 Write-Output "- ChatGPT Architect Mode was added."
 Write-Output "- Local Evidence Packet was added."
-Write-Output "- Local ChromaDB and local graph limitations were documented."
+Write-Output "- Local graph limitations were documented."
 Write-Output "- Codex prompts must state local evidence status."
 Write-Output "- Validation checks confirm ChatGPT architect docs exist."
 
@@ -71,7 +70,7 @@ if (Test-Path "STATE.json") {
 Write-Section "REMOTE VS LOCAL AUTHORITY"
 Write-Output "- ChatGPT architect sees pushed GitHub state plus pasted evidence only."
 Write-Output "- Remote master is authoritative only after push."
-Write-Output "- Local uncommitted work, branch-only files, ChromaDB output, validation output, and regenerated graph output are invisible to ChatGPT unless pasted."
+Write-Output "- Local uncommitted work, branch-only files, validation output, and regenerated graph output are invisible to ChatGPT unless pasted."
 Write-Output "- Anything not pushed or pasted does not exist to ChatGPT architect."
 
 Write-Section "LOCAL EVIDENCE PACKET"
@@ -87,16 +86,6 @@ if ($SkipDiff) {
 } else {
     Write-Output "git diff --stat"
     Write-IndentedLines (Invoke-Capture "git" @("diff", "--stat"))
-}
-
-Write-Section "CHROMADB CONTEXT"
-if ($SkipChroma) {
-    Write-Output "ChromaDB query skipped because -SkipChroma was provided."
-} elseif ([string]::IsNullOrWhiteSpace($Question)) {
-    Write-Output "ChromaDB query skipped because -Question was empty."
-} else {
-    Write-Output "python scripts/query_docs.py `"$Question`""
-    Write-IndentedLines (Invoke-Capture "python" @("scripts/query_docs.py", $Question))
 }
 
 Write-Section "GRAPH CONTEXT"
