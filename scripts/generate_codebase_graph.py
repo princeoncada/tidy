@@ -30,7 +30,6 @@ PROTECTED_PATHS = [
     ".next",
     ".git",
     "graphify-out",
-    "chroma-data",
     "coverage",
     "test-results",
     "playwright-report",
