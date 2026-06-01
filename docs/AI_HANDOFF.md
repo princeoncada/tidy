@@ -1,11 +1,11 @@
-<!-- Current Version: 1.4.17 -->
+<!-- Current Version: 1.4.18-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.17 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.17 - Session Log Folder Contract Correction
-**Next**: 1.4.18 - Custom View Reorder E2E Stabilization
+**Current Version**: 1.4.18-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.18 - Retire ChromaDB
+**Next**: 1.4.19 - Startup Contract Unification
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -165,13 +165,12 @@ Do not include nested fenced code blocks inside fenced master prompts. Generated
 
 ## Local Evidence Boundary
 
-ChatGPT architect sees pushed GitHub state plus pasted evidence only. It cannot read local uncommitted files, local ChromaDB, local git status/diff, local-only branches, or local graph changes unless the user/controller pastes that evidence or pushes it.
+ChatGPT architect sees pushed GitHub state plus pasted evidence only. It cannot read local uncommitted files, local git status/diff, local-only branches, or local graph changes unless the user/controller pastes that evidence or pushes it.
 
 For source-heavy or local-sensitive scoping, provide a Local Evidence Packet with:
 - `git status --short`
 - `git log --oneline -5`
 - `Get-Content STATE.json`
-- `python scripts/query_docs.py "<question about the current task>"`
 - `npm run graph:codebase`
 - `git diff --stat`
 
