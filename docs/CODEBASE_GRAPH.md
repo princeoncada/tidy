@@ -35,7 +35,6 @@ generated paths. Intentionally excluded paths include:
 - `.next/`
 - `.git/`
 - `graphify-out/`
-- `chroma-data/`
 - `coverage/`
 - `test-results/`
 - `playwright-report/`
