@@ -99,6 +99,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.13 - Codex Debugging Discipline Hardening~~ (stable 2026-05-31)
 
+- ~~1.4.14 - Phase Branch Commit Workflow Finalization~~ (stable 2026-05-31)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -108,17 +110,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.14 - Phase Branch Commit Workflow Finalization (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.14 - Phase Branch Commit Workflow Finalization
-- **Status:** In progress | Priority: P1 workflow reliability
-- **Files:** docs/WORKFLOW.md, docs/CODEX_RULES.md, AGENTS.md, scripts/* only if enforcement is explicitly needed
-- **Problem:** The workflow needs a finalized branch-based phase lifecycle that keeps master stable while preserving meaningful alpha/debugging commit history.
-- **Scope:** Finalize phase branch lifecycle, merge strategy, meaningful commit rules, and optional script guardrails after the draft has been reviewed.
-- **Acceptance:** master remains stable-only; phase branches preserve useful engineering history; fake activity commits are forbidden; workflow remains validation-gated and prompt-safe.
 
 ### 1.4.15 - Custom View Reorder E2E Stabilization
 - **Status:** Open | Priority: P1 reorder test stability
