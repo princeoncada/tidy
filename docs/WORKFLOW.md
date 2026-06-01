@@ -316,6 +316,14 @@ complete and valid.
 - Stage G - Promotion completed and stable files are modified: give stable promotion commit commands.
 - Stage H - Master is stable, committed, validated, and clean: the assistant may give the push command.
 
+When validation fails during alpha and the failed state represents meaningful
+engineering history, commit the failed alpha state first, then provide an
+in-alpha fix prompt and revalidation commands. This does not apply to junk
+changes, typo-only failed commands, or accidental local edits that should be
+corrected before committing. After committing the failed alpha checkpoint, the
+assistant must still provide only the next valid stage, usually an in-alpha fix
+prompt plus revalidation commands.
+
 If the user says "we won't be promoting because we have a problem" or equivalent
 during alpha, treat it as an in-alpha fix situation. Provide an in-alpha fix
 prompt plus revalidation commands, not commit, merge, promote, or push
