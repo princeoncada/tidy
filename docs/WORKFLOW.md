@@ -105,7 +105,7 @@ QUERY (ChromaDB) -> READ (STATE.json + codebase graph + minimal docs) -> CONFIRM
 
 Master must stay stable. Every new phase starts from stable master, then the
 user/controller creates a phase branch before opening or implementing the phase.
-Run `.\scripts\open-phase.ps1` on the phase branch, not master.
+Run open-phase.ps1 on the phase branch, not master.
 
 Implementation loops happen only on the phase branch. Commit meaningful alpha
 work one reviewable unit at a time. Meaningful failed validation states may be
