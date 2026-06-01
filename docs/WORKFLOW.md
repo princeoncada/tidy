@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.15 -->
+<!-- Current Version: 1.4.16-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -525,30 +525,32 @@ be copy-paste runnable as-is in PowerShell.
 
 ---
 
-## Session Checkpoint (Pausing Mid-Phase)
+## Session Checkpoint Output Contract
 
-Checkpoint proactively (see Session Continuity in AGENTS.md): Claude Code offers a
-session log - without being asked - when context may compact, after a promotion,
-before a large or risky operation, or when the user signals stopping. The user
-decides whether to write it.
+When the user says "session checkpoint", "let's do a session checkpoint", or
+equivalent, provide exactly two sections. The session checkpoint response is not itself implementation. It gives the user two copy-paste-safe prompts:
 
-When a session ends before a phase is complete, Claude Code provides a Codex prompt (plain text, no 2-section format) to write a session log:
+Section 1 - Session Log Master Prompt for Codex
+Section 2 - Next ChatGPT Handoff Prompt
 
-**Target file**: `docs/SESSION_LOG/YYYY-MM-DD-session-NN.md`
+Both Section 1 and Section 2 should be inside code blocks in the assistant response, with the section headings outside the code blocks.
+Do not include nested fenced code blocks inside fenced master prompts or handoff prompts.
 
-**Required sections**:
-1. **What Was Done** - commits made, files changed, tests updated
-2. **In Progress** - active checkpoint name, branch name, last stable state
-3. **Current Version State** - from STATE.json (version, state, phase)
-4. **Open Decisions** - unresolved questions or architectural choices
-5. **Known Issues** - bugs discovered but not yet fixed
-6. **Uncommitted Work** - staged or unstaged changes and their purpose
-7. **Next Recommended Action** - exact next step for the resuming session
+Section 1 must be a copy-paste-safe prompt for Codex to create or update
+`docs/SESSION_LOG.md`. It must tell Codex to read `STATE.json`,
+`docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md`, `docs/WORKFLOW.md`,
+`docs/VERSIONING.md`, `docs/CONTEXT_INDEX.md`, and `docs/SESSION_LOG.md` if it
+exists; create `docs/SESSION_LOG.md` if missing; append or update a session
+checkpoint entry; preserve source-of-truth boundaries; not use
+`docs/PHASE_LOG.md` as active guidance; not modify product source files; not run
+validation or git commands; and stop and summarize files changed.
 
-After writing the session log, do NOT embed state into docs/NEW_CHATHEAD_OPENER.md.
-The opener intentionally points to STATE.json + docs/FUTURE_PLANS.md (see the Doc
-Continuity Model in docs/VERSIONING.md). Only edit the opener if its instructions
-change - never to update a version/phase snapshot.
+Section 2 must be a copy-paste-safe prompt for the next ChatGPT chathead. It
+must include the repository name and URL, current confirmed stable version and
+phase, next planned phase, what was completed this session, key workflow rules
+now locked in, current local/remote caveats when any are known, startup
+requirements for the next chathead, instruction not to implement until the user
+confirms, and instruction to verify remote master first.
 
 ---
 

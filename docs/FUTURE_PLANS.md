@@ -112,11 +112,19 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.16 - Session Checkpoint Output Contract Hardening (active) - see Planned
 ---
 
 ## Planned
 
-### 1.4.16 - Custom View Reorder E2E Stabilization
+### 1.4.16 - Session Checkpoint Output Contract Hardening
+- **Status:** In progress | Priority: P1 workflow continuity
+- **Files:** docs/FUTURE_PLANS.md, docs/WORKFLOW.md, docs/SESSION_LOG.md, docs/CONTEXT_INDEX.md if needed, AGENTS.md if needed, docs/AI_HANDOFF.md if needed
+- **Problem:** Session checkpoint requests need a consistent two-section output contract. The assistant should not only summarize the session. It must provide a Codex prompt for updating the session log and a next-ChatGPT handoff prompt.
+- **Scope:** define the session checkpoint response contract, create the historical session log surface, and preserve source-of-truth boundaries so checkpoints do not become active implementation guidance.
+- **Acceptance:** A session checkpoint response must include Section 1 with a Codex session log master prompt and Section 2 with a next-ChatGPT handoff prompt, both copy-paste safe and aligned with the current workflow.
+
+### 1.4.17 - Custom View Reorder E2E Stabilization
 - **Status:** Open | Priority: P1 reorder test stability
 - **Files:** components/views/ViewsSidebarPreview.tsx, tests/e2e/drag-drop.spec.ts, tests/e2e/utils/app.ts, tests/e2e/utils/assertions.ts, tests/e2e/utils/drag.ts, tests/e2e/utils/seed.ts
 - **Problem:** Custom view reorder product code exists, but the authenticated E2E path was unstable and expanded 1.4.8 into helper/harness stabilization.
