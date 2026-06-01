@@ -116,11 +116,40 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.18 - Retire ChromaDB (active) - see Planned
 ---
 
 ## Planned
 
-### 1.4.18 - Custom View Reorder E2E Stabilization
+### 1.4.18 - Retire ChromaDB
+- **Status:** In progress | Priority: P1 workflow simplification
+- **Files:** scripts/validate.ps1, scripts/export-chatgpt-architect-context.ps1, scripts/query_docs.py, scripts/ingest_docs.py, package.json, requirements.txt, .gitignore, .graphifyignore, AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, docs/AI_HANDOFF.md, docs/COMPACT_STRATEGY.md, docs/CODEBASE_GRAPH.md
+- **Problem:** ChromaDB added standing overhead (server + re-ingest) but only helped via manual paste under the ChatGPT-architect model; Graphify already covers symbol/file orientation.
+- **Scope:** remove Chroma scripts, validate/export tooling hooks, config entries, and active-doc references; do not restructure startup ordering.
+- **Acceptance:** no Chroma references remain in active workflow files; validate.ps1 passes with no Chroma step.
+
+### 1.4.19 - Startup Contract Unification
+- **Status:** Open | Priority: P1 workflow correctness
+- **Files:** AGENTS.md, docs/WORKFLOW.md, docs/COMPACT_STRATEGY.md
+- **Problem:** Startup ordering is described inconsistently across AGENTS.md, WORKFLOW.md, and COMPACT_STRATEGY.md (e.g. WORKFLOW.md says read it at startup while AGENTS.md says do not).
+- **Scope:** define one canonical startup ordering and reconcile the three docs to it.
+- **Acceptance:** one startup rule, no conflicting startup instructions across the three docs.
+
+### 1.4.20 - Routing Consolidation and CODEX_RULES Trim
+- **Status:** Open | Priority: P2 workflow simplification
+- **Files:** docs/CONTEXT_INDEX.md, docs/COMPACT_STRATEGY.md, docs/CODEX_RULES.md
+- **Problem:** Routing guidance is duplicated across CONTEXT_INDEX, COMPACT_STRATEGY, and the CODEX_RULES task table; CODEX_RULES carries non-essential content.
+- **Scope:** consolidate routing into one home and trim CODEX_RULES to essentials without changing validation/commit/versioning rules.
+- **Acceptance:** routing lives in one place; CODEX_RULES is shorter with no rule lost.
+
+### 1.4.21 - ChatGPT and Codex Role Formalization
+- **Status:** Open | Priority: P2 workflow clarity
+- **Files:** docs/WORKFLOW.md, AGENTS.md, docs/CODEX_RULES.md
+- **Problem:** The architect/implementer split and prompt format are not formalized for the post-Chroma workflow.
+- **Scope:** formalize ChatGPT-architect vs Codex-implementer boundaries and a phase-typed prompt format (heavier for surgical edits, lighter for source phases).
+- **Acceptance:** role boundaries and prompt-format selection are documented in one authoritative place.
+
+### 1.4.22 - Custom View Reorder E2E Stabilization
 - **Status:** Open | Priority: P1 reorder test stability
 - **Files:** components/views/ViewsSidebarPreview.tsx, tests/e2e/drag-drop.spec.ts, tests/e2e/utils/app.ts, tests/e2e/utils/assertions.ts, tests/e2e/utils/drag.ts, tests/e2e/utils/seed.ts
 - **Problem:** Custom view reorder product code exists, but the authenticated E2E path was unstable and expanded 1.4.8 into helper/harness stabilization.

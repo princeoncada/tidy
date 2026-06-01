@@ -77,7 +77,6 @@ PROTECTED_PREFIXES = [
     "node_modules",
     ".next",
     "graphify-out",
-    "chroma-data",
     "coverage",
     "test-results",
     "playwright-report",

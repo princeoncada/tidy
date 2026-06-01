@@ -2,7 +2,6 @@ app/generated/prisma/
 node_modules/
 .next/
 .git/
-chroma-data/
 graphify-out/cache/
 graphify-out/
 coverage/

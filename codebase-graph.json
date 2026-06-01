@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.4.17",
-  "generatedAt": "2026-05-31",
+  "version": "1.4.18-alpha",
+  "generatedAt": "2026-06-01",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -14,7 +14,6 @@
     ".next",
     ".git",
     "graphify-out",
-    "chroma-data",
     "coverage",
     "test-results",
     "playwright-report",
@@ -2041,13 +2040,6 @@
       "imports": []
     },
     {
-      "path": "scripts/ingest_docs.py",
-      "kind": "script",
-      "extension": ".py",
-      "symbols": [],
-      "imports": []
-    },
-    {
       "path": "scripts/open-phase.ps1",
       "kind": "script",
       "extension": ".ps1",
@@ -2068,13 +2060,6 @@
         "Get",
         "Test"
       ],
-      "imports": []
-    },
-    {
-      "path": "scripts/query_docs.py",
-      "kind": "script",
-      "extension": ".py",
-      "symbols": [],
       "imports": []
     },
     {

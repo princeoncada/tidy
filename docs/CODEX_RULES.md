@@ -172,8 +172,8 @@ Good example:
 - For source-heavy prompts, include the Local Evidence Packet in the prompt
   context or require Codex to read local files directly before editing.
 - Codex must not assume remote GitHub state includes local working tree changes.
-- Codex must not claim ChromaDB or graph query results unless they are provided
-  in the prompt or generated locally by Codex within its allowed boundaries.
+- Codex must not claim graph query results unless they are provided in the
+  prompt or generated locally by Codex within its allowed boundaries.
 - If a prompt relies on local evidence, list the evidence under a "LOCAL
   EVIDENCE PROVIDED" section.
 - If no local evidence was provided, list "LOCAL EVIDENCE PROVIDED: none,
