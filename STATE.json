@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.12",
-    "state":  "stable",
-    "phase":  "1.4.12",
-    "phaseTitle":  "Validation-Gated Assistant Response Hardening",
-    "nextPhase":  "1.4.13 - Codex Debugging Discipline Hardening",
+    "version":  "1.4.13-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.13",
+    "phaseTitle":  "Codex Debugging Discipline Hardening",
+    "nextPhase":  "1.4.14 - Phase Branch Commit Workflow Finalization",
     "seriesComplete":  false,
     "lastUpdated":  "2026-05-31"
 }

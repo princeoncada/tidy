@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.12 -->
+<!-- Current Version: 1.4.13-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -301,20 +301,34 @@ Test-Path "STATE.json"
 
 ## Validation-Gated Assistant Responses
 
-Assistant command instructions are stage-gated by user-provided evidence. Provide
-only the next valid command stage for the evidence the user/controller has
-already supplied; do not provide commands that lead all the way to
-`git push origin master` until the user has confirmed each prior stage is
-complete and valid.
+Assistant command instructions are gated by user-provided evidence, but normal
+user-facing replies should not label the flow as Stage A, Stage B, Stage C, or
+similar. Use natural next-action wording.
 
-- Stage A - Implementation/in-alpha changes exist but validation not provided: give validation commands only.
-- Stage B - Validation failed: give failure classification and an in-alpha fix prompt. Do not give commit, merge, promote, or push commands.
-- Stage C - Validation passed and alpha branch has uncommitted changes: give alpha commit commands only.
-- Stage D - Alpha branch is clean and validation passed: the assistant may give the merge-to-master command.
-- Stage E - Master merge completed but master validation not provided: give master validation commands only.
-- Stage F - Master validation passed and promotion not done: give the promote command only.
-- Stage G - Promotion completed and stable files are modified: give stable promotion commit commands.
-- Stage H - Master is stable, committed, validated, and clean: the assistant may give the push command.
+During active alpha work, provide only the immediate next valid action:
+- If implementation or in-alpha changes exist and validation output has not been provided, give validation commands only.
+- If validation fails, give failure classification, an in-alpha fix prompt that follows `docs/CODEX_RULES.md` debugging attempt discipline, and revalidation commands.
+- If validation is green but the alpha branch still has uncommitted changes, give alpha commit commands only.
+- Do not normally label user-facing replies as Stage A, Stage B, Stage C, or similar.
+- Do not provide the full closeout command packet before alpha validation is green and the phase branch is clean.
+
+When validation fails during alpha and the failed state represents meaningful
+engineering history, commit the failed alpha state first, then provide an
+in-alpha fix prompt and revalidation commands. This does not apply to junk
+changes, typo-only failed commands, or accidental local edits that should be
+corrected before committing. After committing the failed alpha checkpoint, still
+provide only the next valid action, usually an in-alpha fix prompt plus
+revalidation commands.
+
+Once alpha validation is green and the phase branch is clean, the assistant may
+provide the full closeout command packet. The packet must include, in order:
+- merge into master using the inline `-m` merge message:
+  `git merge --no-ff phase/<version-slug> -m "merge: bring <version> <short phase name> into master"`
+- validate on master
+- promote
+- commit stable promotion files one by one
+- final validation
+- `git push origin master`
 
 If the user says "we won't be promoting because we have a problem" or equivalent
 during alpha, treat it as an in-alpha fix situation. Provide an in-alpha fix
@@ -323,24 +337,65 @@ instructions.
 
 ---
 
+## Validation Intensity
+
+Full `.\scripts\validate.ps1` is the final confidence gate, not a command to
+request after every tiny edit. Plainly: full validate.ps1 is not required after every tiny edit. During active in-alpha work, prefer targeted checks that match the risk of the change.
+
+Targeted checks are acceptable while actively editing or confirming a narrow
+docs fix, including:
+- `Select-String` checks for required doc phrases
+- `git status --short`
+- `git diff --stat`
+- focused file inspection
+- `npm run graph:codebase` only when graph freshness needs to be restored before a full validation gate
+
+Recommend full `.\scripts\validate.ps1` at meaningful gates:
+- after an implementation or in-alpha fix batch is ready to prove
+- before alpha work is considered ready for merge
+- after merging the phase branch into master, before promotion
+- before final push only when the user wants final confidence or when source, scripts, product, tests, dependencies, or validation logic changed after the last full validation
+
+Do not request full `.\scripts\validate.ps1` after every one-line docs edit,
+after every `Select-String` check, after every individual commit, after every
+graph refresh while still actively editing, or immediately after `promote.ps1`
+when promote self-verify succeeds and only version/docs/graph metadata changed.
+Plainly: promote.ps1 already self-verifies version locations, roadmap closeout,
+and graph artifact consistency.
+
+If product source, tests, scripts, dependencies, or validation logic changed,
+treat full `.\scripts\validate.ps1` as required before closeout.
+
+---
+
 ## Post-Validation Workflow
 
 After the user/controller provides validation output or status evidence, Claude
-Code first classifies the current stage from
+Code first classifies the next valid action from
 [Validation-Gated Assistant Responses](#validation-gated-assistant-responses).
-Provide exactly one next command stage. Do not provide commit, merge, promote,
-and push blocks together.
+During active alpha work, provide only that immediate next action. Once alpha
+validation is green and the phase branch is clean, provide the full closeout
+packet instead of drip-feeding merge, master validation, promotion, stable
+commits, final validation, and push one message at a time.
 
 1. Validation summary - pass counts, failures, and warnings from user-provided output only. If validation failed, provide an in-alpha fix prompt and revalidation commands only.
-2. Stage C alpha commit sequence - The alpha commit sequence must be one PowerShell code block containing all alpha commit commands, one command per line.
+2. Alpha commit sequence - When alpha validation is green but uncommitted alpha changes remain, provide one PowerShell code block containing all alpha commit commands, one command per line.
 
 ```powershell
 .\scripts\commit.ps1 -Files "path/to/file" -Message "type(scope): message"
 ```
 
-3. Stage F promote block - the promote command may be its own `powershell` code
-   block only after alpha commits are complete, the alpha branch is clean, master
-   merge is complete, and master validation has passed:
+3. Closeout packet - When alpha validation is green and the phase branch is
+   clean, provide command blocks that take the user from merge through final
+   push. The merge command must include the inline `-m` message:
+
+```powershell
+git switch master
+git merge --no-ff phase/<version-slug> -m "merge: bring <version> <short phase name> into master"
+.\scripts\validate.ps1
+```
+
+4. Promote block - after master validation passes, provide the promote command:
 
 ```powershell
 .\scripts\promote.ps1
@@ -359,7 +414,7 @@ and push blocks together.
    strings, roadmap state, and generated graph metadata. If promote reports
    success, proceed directly to the promotion commits.
 
-4. Stage G stable-promotion commit sequence - The stable promotion commit sequence must be one separate PowerShell code block containing all stable promotion commit commands, one command per line.
+5. Stable-promotion commit sequence - The stable promotion commit sequence must be one separate PowerShell code block containing all stable promotion commit commands, one command per line.
 
 ```powershell
 .\scripts\commit.ps1 -Files "STATE.json" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
@@ -373,10 +428,11 @@ and push blocks together.
 
 Include the `codebase-graph.json` commit only when `promote.ps1` changes it.
 
-5. Stage H push block - separate from commit command blocks; provide only when
-   master is stable, committed, validated, and clean:
+6. Final validation and push - provide final validation before the push, and
+   keep the push command separate from commit command blocks:
 
 ```powershell
+.\scripts\validate.ps1
 git push origin master
 ```
 
