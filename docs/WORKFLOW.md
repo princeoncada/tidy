@@ -1,8 +1,8 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.21 -->
+<!-- Current Version: 1.4.22-alpha -->
 
-This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
+This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
 ---
 
@@ -26,15 +26,9 @@ Codex does **not**: commit, push, run `npm run test:ci`, create branches, run va
 
 ## Session Start Protocol (Every Session)
 
-Run these steps at the start of every Claude Code session before asking for direction:
+Session startup is owned by the AGENTS.md Session Start Protocol - the single source of truth. Startup is limited to `git pull`, `STATE.json`, `codebase-graph.json` when present, and `docs/FUTURE_PLANS.md`, then the startup report. Do not read `docs/WORKFLOW.md`, `docs/COMPACT_STRATEGY.md`, `docs/AI_HANDOFF.md`, or `docs/CODEX_RULES.md` at startup; read them only when a task requires them.
 
-1. If operating in a local repo, run `git pull origin master` - sync latest. If local git is unavailable, report why and continue with remote/direct reads only.
-2. **Read `STATE.json`** - report: version, state, phase, phaseTitle, nextPhase, and any in-progress branch when present
-3. **Read `codebase-graph.json` if present** - use it only as an orientation map to choose the smallest direct-read source/doc set. If it is missing, stale, or invalid, state that and fall back to direct file reads.
-4. **Read `docs/FUTURE_PLANS.md` fresh** - report the first Planned backlog item separately from STATE.json `nextPhase`.
-5. **Report findings**. Wait for explicit user direction before scoping or implementing.
-
-See `docs/COMPACT_STRATEGY.md` for token budget targets and the full context-minimization protocol.
+Do not duplicate or diverge the startup steps here. See `docs/COMPACT_STRATEGY.md` for token budget targets and the active-work context-minimization protocol.
 
 ---
 
