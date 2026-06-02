@@ -128,12 +128,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.24 - Routing Consolidation and CODEX_RULES Trim (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.4.24 - Routing Consolidation and CODEX_RULES Trim
-- **Status:** Open | Priority: P2 workflow simplification
+- **Status:** In progress | Priority: P2 workflow simplification
 - **Files:** docs/CONTEXT_INDEX.md, docs/COMPACT_STRATEGY.md, docs/CODEX_RULES.md
 - **Problem:** Routing guidance is duplicated across CONTEXT_INDEX, COMPACT_STRATEGY, and the CODEX_RULES task table; CODEX_RULES carries non-essential content.
 - **Scope:** consolidate routing into one home and trim CODEX_RULES to essentials without changing validation/commit/versioning rules.
