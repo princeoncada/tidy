@@ -130,12 +130,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.25 - ChatGPT and Codex Role Formalization (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.4.25 - ChatGPT and Codex Role Formalization
-- **Status:** Open | Priority: P2 workflow clarity
+- **Status:** In progress | Priority: P2 workflow clarity
 - **Files:** docs/WORKFLOW.md, AGENTS.md, docs/CODEX_RULES.md
 - **Problem:** The architect/implementer split and prompt format are not formalized for the post-Chroma workflow.
 - **Scope:** formalize ChatGPT-architect vs Codex-implementer boundaries and a phase-typed prompt format (heavier for surgical edits, lighter for source phases).
