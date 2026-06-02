@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.24",
-    "state":  "stable",
-    "phase":  "1.4.24",
-    "phaseTitle":  "Routing Consolidation and CODEX_RULES Trim",
-    "nextPhase":  "1.4.25 - ChatGPT and Codex Role Formalization",
+    "version":  "1.4.25-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.25",
+    "phaseTitle":  "ChatGPT and Codex Role Formalization",
+    "nextPhase":  "1.4.26 - Custom View Reorder E2E Stabilization",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-01"
+    "lastUpdated":  "2026-06-02"
 }

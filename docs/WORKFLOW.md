@@ -1,12 +1,20 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.24 -->
+<!-- Current Version: 1.4.25-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
 ---
 
 ## Roles
+
+Three roles operate together: ChatGPT architects, Claude Code plans and validates, Codex implements. This section is the authoritative role-boundary definition; the ChatGPT Architect Mode subsection below adds only the evidence/scoping mechanics.
+
+### ChatGPT (Architecture and Scoping)
+
+ChatGPT is the **architecture and scoping layer**. It designs the approach, decides phase scope, and produces implementation direction from pushed GitHub state plus pasted local evidence; it has no direct local access. See ChatGPT Architect Mode below for the evidence-packet mechanics.
+
+ChatGPT does **not**: read the local working tree directly, run commands, edit files, or claim local/validation results that were not pasted to it.
 
 ### Claude Code (Planning, Validation, Commit Blocks)
 
@@ -166,8 +174,16 @@ Never re-scope a full phase for a fix when the current version is already alpha.
 
 ## Codex Prompt Format
 
-Every Codex prompt uses a two-section format. Section headings are markdown
-headers sitting above their code block - not inside it.
+Every Codex prompt uses a two-section format (Section 1 - Master Prompt, Section 2 - Validation). Section headings are markdown headers sitting above their code block - not inside it. The two-section structure is fixed; the depth of the Section 1 master prompt is chosen by task type (see Prompt Format Selection).
+
+### Prompt Format Selection
+
+Choose the Section 1 master-prompt style by task type. Both styles keep the same Section 2 validation block and the same Assistant Output Formatting Contract below.
+
+- **Surgical format** (default for docs, config, and precise/known edits): full structure with READ THESE FILES FIRST, IMPLEMENTATION REQUIREMENTS using exact OLD TEXT / NEW TEXT pairs, SAFETY CONSTRAINTS, and STOP AND SUMMARIZE. Use when the change locations are known and exact text can be specified; it minimizes Codex exploration tokens and drift.
+- **Exploratory format** (for source/feature work where exact edit points are not yet known): state Goal, Constraints (invariants that must not break), Expected outcome, and Codex instructions (read the routed files, locate the change, implement, run nothing, report changed files/tests/risks). Use exact OLD/NEW pairs only for the parts that are precisely known.
+
+Prefer the surgical format whenever feasible; use the exploratory format only when the edit points genuinely cannot be pinned down in advance.
 
 ### Assistant Output Formatting Contract
 
