@@ -210,10 +210,11 @@ Default pattern:
 One commit should represent one reviewable engineering unit. Do not batch
 unrelated changes.
 
-Meaningful failed validation states may be committed on phase branches when
-they document a real debugging checkpoint. Fake activity commits are forbidden.
-Do not hide meaningful failed attempts by silently rewriting history during
-alpha.
+Meaningful failed validation states must be committed on phase branches before
+any in-alpha fix - even when validation is red - so prior work is never folded
+into its fix commit. Fake activity commits remain forbidden: genuinely
+accidental, never-meaningful edits are corrected without a commit. Do not hide
+meaningful failed attempts by silently rewriting history during alpha.
 
 Closeout evidence sequencing belongs in `docs/WORKFLOW.md`. `git status --short`
 is cleanliness evidence; `git log --oneline -12` is audit evidence for commit

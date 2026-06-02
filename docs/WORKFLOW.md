@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.18 -->
+<!-- Current Version: 1.4.19-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -326,18 +326,19 @@ similar. Use natural next-action wording.
 
 During active alpha work, provide only the immediate next valid action:
 - If implementation or in-alpha changes exist and validation output has not been provided, give validation commands only.
-- If validation fails, give failure classification, an in-alpha fix prompt that follows `docs/CODEX_RULES.md` debugging attempt discipline, and revalidation commands.
+- If validation fails, commit any uncommitted prior work first, then give failure classification, an in-alpha fix prompt that follows `docs/CODEX_RULES.md` debugging attempt discipline, and revalidation commands.
 - If validation is green but the alpha branch still has uncommitted changes, give alpha commit commands only.
 - Do not normally label user-facing replies as Stage A, Stage B, Stage C, or similar.
 - Do not provide the full closeout command packet before alpha validation is green and the phase branch is clean.
 
-When validation fails during alpha and the failed state represents meaningful
-engineering history, commit the failed alpha state first, then provide an
-in-alpha fix prompt and revalidation commands. This does not apply to junk
-changes, typo-only failed commands, or accidental local edits that should be
-corrected before committing. After committing the failed alpha checkpoint, still
-provide only the next valid action, usually an in-alpha fix prompt plus
-revalidation commands.
+Commit-before-fix is mandatory. While any uncommitted implementation or fix
+work exists on the phase branch, the assistant must provide commit commands for
+that work first - committed as its own granular unit(s), even when validation is
+red - and must not issue an in-alpha fix prompt until that work is committed. A
+broken implementation is committed, never folded into its fix commit. The only
+exception is genuinely accidental, never-meaningful edits (a stray edit, a wrong
+paste, a typo'd command that changed no real files), which may be corrected
+without a commit because committing them would be a forbidden fake-activity commit.
 
 Once alpha validation is green and the phase branch is clean, the assistant may
 provide the full closeout command packet. The packet must include, in order:
@@ -430,7 +431,7 @@ validation is green and the phase branch is clean, provide the full closeout
 packet instead of drip-feeding merge, post-merge validation, promotion, stable
 commits, final targeted status check, and push one message at a time.
 
-1. Validation summary - pass counts, failures, and warnings from user-provided output only. If validation failed, provide an in-alpha fix prompt and revalidation commands only.
+1. Validation summary - pass counts, failures, and warnings from user-provided output only. If validation failed and uncommitted implementation or fix work exists, provide commit commands for that work first (committed even while red), then the in-alpha fix prompt and revalidation commands. If the failed work is already committed, provide the in-alpha fix prompt and revalidation commands only.
 2. Alpha commit sequence - When alpha validation is green but uncommitted alpha changes remain, provide one PowerShell code block containing all alpha commit commands, one command per line.
 
 ```powershell
