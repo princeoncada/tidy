@@ -75,15 +75,12 @@ Unless the task specifically changes these areas, never touch:
 
 ## Implementation Workflow
 
-1. Read `STATE.json`  -  current version, active phase, active branch
-2. Read `codebase-graph.json` when present to pick the smallest relevant source file set
-3. Read `docs/AI_HANDOFF.md`  -  product snapshot, invariants, known risks
-4. Use `docs/CONTEXT_INDEX.md` to pick the smallest relevant task-specific read set
-5. Identify required test coverage before coding (see Required Tests below)
-6. Read 2 - 3 source files directly relevant to the change
-7. Make the code change and matching test change in the same branch
-8. Identify the validation commands required after implementation and provide them for the user/controller to run
-9. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
+1. Select the task read set from `docs/CONTEXT_INDEX.md` - the single routing map (it covers STATE.json, the graph, AI_HANDOFF, and the per-task docs/source).
+2. Identify required test coverage before coding (see Required Tests below)
+3. Read 2 - 3 source files directly relevant to the change
+4. Make the code change and matching test change in the same branch
+5. Identify the validation commands required after implementation and provide them for the user/controller to run
+6. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
 
 ## Debugging Attempt Discipline
 
@@ -148,22 +145,11 @@ Good example:
 
 ## Graphify / Codebase Graph
 
-- Use `codebase-graph.json` to choose a small relevant direct-read set for implementation tasks.
-- Do not use the graph as a replacement for reading actual files before editing.
-- If modifying graph scripts or tooling, list `scripts/` first and avoid duplicate scripts.
-- Keep protected/generated paths excluded from graph output.
-- For Graphify or graph-routing changes, do not claim graph workflow quality
-  solely from freshness; use the audit harness to prove required graph nodes and
-  routing metadata exist.
-- Do not expand startup reads just to prove graph quality.
-- Use `codebase-graph.json` to keep direct file reads minimal, but do not broaden
-  reads just because the graph exists.
-- Do not treat the graph as source of truth; read graph-selected files directly
-  before editing.
-- Do not run graph audit unless explicitly asked by the user/controller.
-- Do not claim token savings were achieved from graph routing alone.
-- Say the graph was used for routing only if graph-selected files actually
-  guided the direct-read set.
+AGENTS.md owns the graph routing and audit rules. For Codex implementation:
+
+- Use `codebase-graph.json` to choose a small direct-read set; never treat it as source of truth - read graph-selected files directly before editing.
+- Do not run graph audit unless explicitly asked, and do not claim token savings from graph routing alone.
+- If modifying graph scripts/tooling, list `scripts/` first and keep protected/generated paths excluded.
 
 ## ChatGPT Architect Evidence Boundary
 
