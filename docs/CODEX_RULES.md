@@ -216,6 +216,8 @@ into its fix commit. Fake activity commits remain forbidden: genuinely
 accidental, never-meaningful edits are corrected without a commit. Do not hide
 meaningful failed attempts by silently rewriting history during alpha.
 
+- A generated file shown as modified by `git status` but with an empty `git diff` is a phantom no-op (no content change): discard it with `git restore`, never commit it. `.gitattributes` pins `codebase-graph.json` to prevent this churn.
+
 Closeout evidence sequencing belongs in `docs/WORKFLOW.md`. `git status --short`
 is cleanliness evidence; `git log --oneline -12` is audit evidence for commit
 history and should not be requested by default.
