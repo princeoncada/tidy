@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.24-alpha",
-    "state":  "alpha",
+    "version":  "1.4.24",
+    "state":  "stable",
     "phase":  "1.4.24",
     "phaseTitle":  "Routing Consolidation and CODEX_RULES Trim",
     "nextPhase":  "1.4.25 - ChatGPT and Codex Role Formalization",
