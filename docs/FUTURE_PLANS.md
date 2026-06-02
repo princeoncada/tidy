@@ -130,7 +130,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## Planned
 
 ### 1.4.22 - Startup Contract Unification
-- **Status:** Open | Priority: P1 workflow correctness
+- **Status:** In progress | Priority: P1 workflow correctness
 - **Files:** AGENTS.md, docs/WORKFLOW.md, docs/COMPACT_STRATEGY.md
 - **Problem:** Startup ordering is described inconsistently across AGENTS.md, WORKFLOW.md, and COMPACT_STRATEGY.md (e.g. WORKFLOW.md says read it at startup while AGENTS.md says do not).
 - **Scope:** define one canonical startup ordering and reconcile the three docs to it.
