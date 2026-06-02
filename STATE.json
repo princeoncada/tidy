@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.20-alpha",
-    "state":  "alpha",
+    "version":  "1.4.20",
+    "state":  "stable",
     "phase":  "1.4.20",
     "phaseTitle":  "Git Artifact Hygiene Hardening",
     "nextPhase":  "1.4.21 - Startup Contract Unification",
