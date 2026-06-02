@@ -6,14 +6,17 @@ Context is finite. This doc explains how Claude Code and Codex minimize session-
 
 ## Priority Reading Order
 
-Always read in this sequence  -  stop as soon as you have enough context:
+Session startup is NOT this list. Startup is owned by the AGENTS.md Session Start Protocol and is limited to `STATE.json`, `codebase-graph.json` when present, and `docs/FUTURE_PLANS.md`. The sequence below is the active-work reading order, used only once you have a task to scope or implement, after startup.
+
+For active work, read in this sequence  -  stop as soon as you have enough context:
 
 1. **`STATE.json`** (always first, ~20 lines)  -  version, phase, active branch, notes
-2. **`docs/AI_HANDOFF.md`**  -  product snapshot, invariants, known risks
-3. **`docs/CODEX_RULES.md`** task routing table  -  pick the smallest source file set for the task
-4. **`docs/FUTURE_PLANS.md`**  -  only when choosing or updating roadmap scope
-5. **`docs/DECISIONS.md`**  -  only when a durable architecture decision changes
-6. **Targeted source files/tests**  -  only the files directly affected by the change
+2. **`codebase-graph.json`** when present  -  orientation map to pick the smallest direct-read set
+3. **`docs/AI_HANDOFF.md`**  -  product snapshot, invariants, known risks
+4. **`docs/CODEX_RULES.md`** task routing table  -  pick the smallest source file set for the task
+5. **`docs/FUTURE_PLANS.md`**  -  only when choosing or updating roadmap scope
+6. **`docs/DECISIONS.md`**  -  only when a durable architecture decision changes
+7. **Targeted source files/tests**  -  only the files directly affected by the change
 
 Never scan the repo broadly. Never open files speculatively.
 
