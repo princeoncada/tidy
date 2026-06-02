@@ -1,0 +1,3 @@
+# Generated artifacts: pin line endings so regeneration under
+# core.autocrlf=true does not produce phantom "modified" status with no diff.
+codebase-graph.json text eol=lf

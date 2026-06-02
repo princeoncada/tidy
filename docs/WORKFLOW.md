@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.19 -->
+<!-- Current Version: 1.4.20-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Read it at session start after `STATE.json` and `codebase-graph.json` orientation. It is the authoritative protocol for all implementation phases.
 
@@ -402,6 +402,20 @@ not the default cleanliness check.
 Use `git log` when auditing meaningful alpha history, commit order, branch tip,
 merge history, troubleshooting, or when the user asks to review the commit
 story. Do not request `git log` after every commit or checkpoint by default.
+
+---
+
+## Generated Artifact Git Hygiene
+
+`codebase-graph.json` is a generated artifact. Under `core.autocrlf=true`, a
+regeneration can leave it flagged as modified in `git status` even when
+`git diff` shows no change. This is a phantom dirty flag, not real work.
+
+When a generated file shows as modified but `git diff` and
+`git diff --numstat` are empty, it is a no-op: run `git restore <file>` to
+clear it. Never commit a no-op change - committing one is a forbidden
+fake-activity commit. `.gitattributes` pins `codebase-graph.json` to
+`eol=lf` so this churn does not recur.
 
 ---
 
