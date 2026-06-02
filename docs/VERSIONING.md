@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.4.22-alpha
+- **Current version:** 1.4.22
 - **Current phase:** 1.4.22 - Startup Contract Unification
 - **Next phase:** 1.4.23 - Routing Consolidation and CODEX_RULES Trim
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.4.22 | alpha | 2026-06-01 | Startup Contract Unification | (in progress) |
+| 1.4.22 | stable | 2026-06-01 | Startup Contract Unification | (in progress) |
 | 1.4.21 | stable | 2026-06-01 | Commit Script Deletion Staging | (in progress) |
 | 1.4.20 | stable | 2026-06-01 | Git Artifact Hygiene Hardening | (in progress) |
 | 1.4.19 | stable | 2026-06-01 | In-Alpha Commit-Before-Fix Hardening | (in progress) |
