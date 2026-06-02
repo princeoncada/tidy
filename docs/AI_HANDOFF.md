@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.23-alpha -->
+<!-- Current Version: 1.4.23 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.23-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.23 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.23 - Open Phase Status Flip Fix
 **Next**: 1.4.24 - Routing Consolidation and CODEX_RULES Trim
 
