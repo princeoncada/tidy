@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.19-alpha",
-    "state":  "alpha",
+    "version":  "1.4.19",
+    "state":  "stable",
     "phase":  "1.4.19",
     "phaseTitle":  "In-Alpha Commit-Before-Fix Hardening",
     "nextPhase":  "1.4.20 - Startup Contract Unification",
