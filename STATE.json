@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.21",
-    "state":  "stable",
-    "phase":  "1.4.21",
-    "phaseTitle":  "Commit Script Deletion Staging",
-    "nextPhase":  "1.4.22 - Startup Contract Unification",
+    "version":  "1.4.22-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.22",
+    "phaseTitle":  "Startup Contract Unification",
+    "nextPhase":  "1.4.23 - Routing Consolidation and CODEX_RULES Trim",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-01"
 }
