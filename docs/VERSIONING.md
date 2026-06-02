@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.4.20-alpha
+- **Current version:** 1.4.20
 - **Current phase:** 1.4.20 - Git Artifact Hygiene Hardening
 - **Next phase:** 1.4.21 - Startup Contract Unification
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.4.20 | alpha | 2026-06-01 | Git Artifact Hygiene Hardening | (in progress) |
+| 1.4.20 | stable | 2026-06-01 | Git Artifact Hygiene Hardening | (in progress) |
 | 1.4.19 | stable | 2026-06-01 | In-Alpha Commit-Before-Fix Hardening | (in progress) |
 | 1.4.18 | stable | 2026-06-01 | Retire ChromaDB | (in progress) |
 | 1.4.17 | stable | 2026-05-31 | Session Log Folder Contract Correction | (in progress) |
