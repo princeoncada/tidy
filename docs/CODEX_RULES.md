@@ -242,6 +242,8 @@ Usage example:
 .\scripts\commit.ps1 -Files "path/to/file" -Message "type(scope): message"
 ```
 
+commit.ps1 stages additions, modifications, and deletions - pass a deleted file's path the same way to commit its removal; raw git rm is no longer needed.
+
 Avoid: `update stuff`, `local-first work`, `big sync changes`, `wip`
 
 Never do:
