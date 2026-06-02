@@ -3,6 +3,10 @@
 Routing-only map for choosing the smallest correct document and source read set
 for a task. This file is for scoping context; it is not an active rules surface.
 
+This is the single per-task routing map. AGENTS.md, `docs/WORKFLOW.md`,
+`docs/COMPACT_STRATEGY.md`, and `docs/CODEX_RULES.md` defer here for read-set
+selection instead of repeating it.
+
 This file does not define:
 
 - workflow rules
