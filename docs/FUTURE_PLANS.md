@@ -115,6 +115,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.21 - Commit Script Deletion Staging~~ (stable 2026-06-01)
 
+- ~~1.4.22 - Startup Contract Unification~~ (stable 2026-06-01)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -124,17 +126,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.22 - Startup Contract Unification (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.22 - Startup Contract Unification
-- **Status:** In progress | Priority: P1 workflow correctness
-- **Files:** AGENTS.md, docs/WORKFLOW.md, docs/COMPACT_STRATEGY.md
-- **Problem:** Startup ordering is described inconsistently across AGENTS.md, WORKFLOW.md, and COMPACT_STRATEGY.md (e.g. WORKFLOW.md says read it at startup while AGENTS.md says do not).
-- **Scope:** define one canonical startup ordering and reconcile the three docs to it.
-- **Acceptance:** one startup rule, no conflicting startup instructions across the three docs.
 
 ### 1.4.23 - Routing Consolidation and CODEX_RULES Trim
 - **Status:** Open | Priority: P2 workflow simplification
