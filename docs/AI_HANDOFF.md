@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.24-alpha -->
+<!-- Current Version: 1.4.24 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.24-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.24 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.24 - Routing Consolidation and CODEX_RULES Trim
 **Next**: 1.4.25 - ChatGPT and Codex Role Formalization
 
