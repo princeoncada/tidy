@@ -113,6 +113,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.20 - Git Artifact Hygiene Hardening~~ (stable 2026-06-01)
 
+- ~~1.4.21 - Commit Script Deletion Staging~~ (stable 2026-06-01)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -122,17 +124,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.21 - Commit Script Deletion Staging (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.21 - Commit Script Deletion Staging
-- **Status:** In progress | Priority: P1 workflow robustness
-- **Files:** scripts/commit.ps1, docs/CODEX_RULES.md
-- **Problem:** scripts/commit.ps1 errors on a path absent from the working tree, so it cannot stage a deletion; deletions had to use raw git rm, breaking the always-use-commit.ps1 discipline.
-- **Scope:** stage a tracked file's deletion via git add -A while still rejecting genuinely untracked bad paths; document that commit.ps1 now handles deletions.
-- **Acceptance:** commit.ps1 commits a tracked file's deletion without error; an untracked bad path still errors; raw git rm no longer needed.
 
 ### 1.4.22 - Startup Contract Unification
 - **Status:** Open | Priority: P1 workflow correctness
