@@ -144,7 +144,8 @@ function Set-PlannedPhaseStatusInProgress {
     }
 
     $phaseBody = $phaseMatch.Groups["body"].Value
-    $statusPattern = "(?m)^(?<prefix>\s*-\s+\*\*Status:\*\*\s+)(?<status>[^|\r\n]*?)(?<suffix>\s*(?:\|[^\r\n]*)?)$"
+    # \r? before $ so the anchor matches on CRLF working-tree files, not just LF
+    $statusPattern = "(?m)^(?<prefix>\s*-\s+\*\*Status:\*\*\s+)(?<status>[^|\r\n]*?)(?<suffix>\s*(?:\|[^\r\n]*)?)\r?$"
     $statusMatch = [regex]::Match($phaseBody, $statusPattern)
     if (-not $statusMatch.Success) {
         return [PSCustomObject]@{
