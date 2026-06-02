@@ -109,6 +109,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.18 - Retire ChromaDB~~ (stable 2026-06-01)
 
+- ~~1.4.19 - In-Alpha Commit-Before-Fix Hardening~~ (stable 2026-06-01)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -118,17 +120,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.19 - In-Alpha Commit-Before-Fix Hardening (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.19 - In-Alpha Commit-Before-Fix Hardening
-- **Status:** In progress | Priority: P1 workflow discipline
-- **Files:** docs/WORKFLOW.md, docs/CODEX_RULES.md, AGENTS.md
-- **Problem:** Commit-before-fix was only conditionally documented ("may" / "if meaningful"), letting prior implementation work fold into its fix commit and break granular git history.
-- **Scope:** make committing prior uncommitted implementation/fix work mandatory before any in-alpha fix prompt, even when validation is red; keep only a narrow exception for genuinely accidental, never-meaningful edits.
-- **Acceptance:** WORKFLOW.md and CODEX_RULES.md require commit-before-fix as a gate, not a judgment call; AGENTS.md reinforces it; no fix prompt is issued while real uncommitted work exists.
 
 ### 1.4.20 - Startup Contract Unification
 - **Status:** Open | Priority: P1 workflow correctness
