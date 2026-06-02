@@ -17,10 +17,16 @@ $dash = [char]0x2014
 
 foreach ($file in $Files) {
     if (-not (Test-Path -LiteralPath $file)) {
-        Write-Host "ERROR: $file $dash file not found in working tree"
-        exit 1
+        # Absent from the working tree: allow only if git already tracks it
+        # (a deletion to stage); otherwise it is a genuine bad path.
+        git ls-files --error-unmatch -- "$file" 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: $file $dash not found in working tree and not tracked by git"
+            exit 1
+        }
     }
-    git add "$file"
+    # -A stages additions, modifications, and deletions for this path.
+    git add -A -- "$file"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: $file $dash git add failed"
         exit 1
