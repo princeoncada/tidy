@@ -124,6 +124,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.22 - Startup Contract Unification (active) - see Planned
 ---
 
 ## Planned
