@@ -6,24 +6,9 @@ Context is finite. This doc explains how Claude Code and Codex minimize session-
 
 ## Priority Reading Order
 
-Session startup is NOT this list. Startup is owned by the AGENTS.md Session Start Protocol and is limited to `STATE.json`, `codebase-graph.json` when present, and `docs/FUTURE_PLANS.md`. The sequence below is the active-work reading order, used only once you have a task to scope or implement, after startup.
+Session startup is owned by the AGENTS.md Session Start Protocol (limited to `STATE.json`, `codebase-graph.json` when present, and `docs/FUTURE_PLANS.md`). For the per-task active-work read set, use the Task Routes in `docs/CONTEXT_INDEX.md` - the single routing map. Always start from `STATE.json` and the graph, then read only what the route names.
 
-For active work, read in this sequence  -  stop as soon as you have enough context:
-
-1. **`STATE.json`** (always first, ~20 lines)  -  version, phase, active branch, notes
-2. **`codebase-graph.json`** when present  -  orientation map to pick the smallest direct-read set
-3. **`docs/AI_HANDOFF.md`**  -  product snapshot, invariants, known risks
-4. **`docs/CODEX_RULES.md`** task routing table  -  pick the smallest source file set for the task
-5. **`docs/FUTURE_PLANS.md`**  -  only when choosing or updating roadmap scope
-6. **`docs/DECISIONS.md`**  -  only when a durable architecture decision changes
-7. **Targeted source files/tests**  -  only the files directly affected by the change
-
-Never scan the repo broadly. Never open files speculatively.
-
-Active product work uses `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md`,
-`docs/CODEX_RULES.md`, `docs/DECISIONS.md` only when architecture decisions
-change, and targeted source files/tests. `docs/PHASE_LOG.md` is historical and
-not part of the normal active read path.
+Never scan the repo broadly. Never open files speculatively. `docs/PHASE_LOG.md` is historical and not part of the normal active read path.
 
 ---
 

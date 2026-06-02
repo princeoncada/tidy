@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.4.23
-- **Current phase:** 1.4.23 - Open Phase Status Flip Fix
-- **Next phase:** 1.4.24 - Routing Consolidation and CODEX_RULES Trim
+- **Current version:** 1.4.24-alpha
+- **Current phase:** 1.4.24 - Routing Consolidation and CODEX_RULES Trim
+- **Next phase:** 1.4.25 - ChatGPT and Codex Role Formalization
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.4.24 | alpha | 2026-06-01 | Routing Consolidation and CODEX_RULES Trim | (in progress) |
 | 1.4.23 | stable | 2026-06-01 | Open Phase Status Flip Fix | (in progress) |
 | 1.4.22 | stable | 2026-06-01 | Startup Contract Unification | (in progress) |
 | 1.4.21 | stable | 2026-06-01 | Commit Script Deletion Staging | (in progress) |

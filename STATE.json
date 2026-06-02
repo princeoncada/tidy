@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.23",
-    "state":  "stable",
-    "phase":  "1.4.23",
-    "phaseTitle":  "Open Phase Status Flip Fix",
-    "nextPhase":  "1.4.24 - Routing Consolidation and CODEX_RULES Trim",
+    "version":  "1.4.24-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.24",
+    "phaseTitle":  "Routing Consolidation and CODEX_RULES Trim",
+    "nextPhase":  "1.4.25 - ChatGPT and Codex Role Formalization",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-01"
 }
