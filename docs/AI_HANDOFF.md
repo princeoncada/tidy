@@ -1,11 +1,11 @@
-<!-- Current Version: 1.4.22 -->
+<!-- Current Version: 1.4.23-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.22 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.22 - Startup Contract Unification
-**Next**: 1.4.23 - Routing Consolidation and CODEX_RULES Trim
+**Current Version**: 1.4.23-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.23 - Open Phase Status Flip Fix
+**Next**: 1.4.24 - Routing Consolidation and CODEX_RULES Trim
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
