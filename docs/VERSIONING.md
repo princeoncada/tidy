@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.4.25-alpha
+- **Current version:** 1.4.25
 - **Current phase:** 1.4.25 - ChatGPT and Codex Role Formalization
 - **Next phase:** 1.4.26 - Custom View Reorder E2E Stabilization
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.4.25 | alpha | 2026-06-02 | ChatGPT and Codex Role Formalization | (in progress) |
+| 1.4.25 | stable | 2026-06-02 | ChatGPT and Codex Role Formalization | (in progress) |
 | 1.4.24 | stable | 2026-06-01 | Routing Consolidation and CODEX_RULES Trim | (in progress) |
 | 1.4.23 | stable | 2026-06-01 | Open Phase Status Flip Fix | (in progress) |
 | 1.4.22 | stable | 2026-06-01 | Startup Contract Unification | (in progress) |
