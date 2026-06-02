@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.20",
-    "state":  "stable",
-    "phase":  "1.4.20",
-    "phaseTitle":  "Git Artifact Hygiene Hardening",
-    "nextPhase":  "1.4.21 - Startup Contract Unification",
+    "version":  "1.4.21-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.21",
+    "phaseTitle":  "Commit Script Deletion Staging",
+    "nextPhase":  "1.4.22 - Startup Contract Unification",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-01"
 }
