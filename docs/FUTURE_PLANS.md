@@ -122,32 +122,40 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.21 - Commit Script Deletion Staging (active) - see Planned
 ---
 
 ## Planned
 
-### 1.4.21 - Startup Contract Unification
+### 1.4.21 - Commit Script Deletion Staging
+- **Status:** In progress | Priority: P1 workflow robustness
+- **Files:** scripts/commit.ps1, docs/CODEX_RULES.md
+- **Problem:** scripts/commit.ps1 errors on a path absent from the working tree, so it cannot stage a deletion; deletions had to use raw git rm, breaking the always-use-commit.ps1 discipline.
+- **Scope:** stage a tracked file's deletion via git add -A while still rejecting genuinely untracked bad paths; document that commit.ps1 now handles deletions.
+- **Acceptance:** commit.ps1 commits a tracked file's deletion without error; an untracked bad path still errors; raw git rm no longer needed.
+
+### 1.4.22 - Startup Contract Unification
 - **Status:** Open | Priority: P1 workflow correctness
 - **Files:** AGENTS.md, docs/WORKFLOW.md, docs/COMPACT_STRATEGY.md
 - **Problem:** Startup ordering is described inconsistently across AGENTS.md, WORKFLOW.md, and COMPACT_STRATEGY.md (e.g. WORKFLOW.md says read it at startup while AGENTS.md says do not).
 - **Scope:** define one canonical startup ordering and reconcile the three docs to it.
 - **Acceptance:** one startup rule, no conflicting startup instructions across the three docs.
 
-### 1.4.22 - Routing Consolidation and CODEX_RULES Trim
+### 1.4.23 - Routing Consolidation and CODEX_RULES Trim
 - **Status:** Open | Priority: P2 workflow simplification
 - **Files:** docs/CONTEXT_INDEX.md, docs/COMPACT_STRATEGY.md, docs/CODEX_RULES.md
 - **Problem:** Routing guidance is duplicated across CONTEXT_INDEX, COMPACT_STRATEGY, and the CODEX_RULES task table; CODEX_RULES carries non-essential content.
 - **Scope:** consolidate routing into one home and trim CODEX_RULES to essentials without changing validation/commit/versioning rules.
 - **Acceptance:** routing lives in one place; CODEX_RULES is shorter with no rule lost.
 
-### 1.4.23 - ChatGPT and Codex Role Formalization
+### 1.4.24 - ChatGPT and Codex Role Formalization
 - **Status:** Open | Priority: P2 workflow clarity
 - **Files:** docs/WORKFLOW.md, AGENTS.md, docs/CODEX_RULES.md
 - **Problem:** The architect/implementer split and prompt format are not formalized for the post-Chroma workflow.
 - **Scope:** formalize ChatGPT-architect vs Codex-implementer boundaries and a phase-typed prompt format (heavier for surgical edits, lighter for source phases).
 - **Acceptance:** role boundaries and prompt-format selection are documented in one authoritative place.
 
-### 1.4.24 - Custom View Reorder E2E Stabilization
+### 1.4.25 - Custom View Reorder E2E Stabilization
 - **Status:** Open | Priority: P1 reorder test stability
 - **Files:** components/views/ViewsSidebarPreview.tsx, tests/e2e/drag-drop.spec.ts, tests/e2e/utils/app.ts, tests/e2e/utils/assertions.ts, tests/e2e/utils/drag.ts, tests/e2e/utils/seed.ts
 - **Problem:** Custom view reorder product code exists, but the authenticated E2E path was unstable and expanded 1.4.8 into helper/harness stabilization.
