@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.19-alpha -->
+<!-- Current Version: 1.4.19 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.19-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.19 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.19 - In-Alpha Commit-Before-Fix Hardening
 **Next**: 1.4.20 - Startup Contract Unification
 
