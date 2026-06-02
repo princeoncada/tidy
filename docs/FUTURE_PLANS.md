@@ -117,6 +117,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.22 - Startup Contract Unification~~ (stable 2026-06-01)
 
+- ~~1.4.23 - Open Phase Status Flip Fix~~ (stable 2026-06-01)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -126,17 +128,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.23 - Open Phase Status Flip Fix (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.23 - Open Phase Status Flip Fix
-- **Status:** In progress | Priority: P1 workflow robustness
-- **Files:** scripts/open-phase.ps1
-- **Problem:** open-phase.ps1 Set-PlannedPhaseStatusInProgress status regex anchors with $ and fails on a CRLF working-tree line, so a pre-planned entry's bold **Status:** Open is not flipped to In progress (hit when opening 1.4.22).
-- **Scope:** tolerate an optional carriage return before the line anchor so the flip works on CRLF files; no behavior change on LF.
-- **Acceptance:** opening a pre-planned phase flips its **Status:** Open to In progress with no manual correction.
 
 ### 1.4.24 - Routing Consolidation and CODEX_RULES Trim
 - **Status:** Open | Priority: P2 workflow simplification
