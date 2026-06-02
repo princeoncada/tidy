@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.23-alpha",
-    "state":  "alpha",
+    "version":  "1.4.23",
+    "state":  "stable",
     "phase":  "1.4.23",
     "phaseTitle":  "Open Phase Status Flip Fix",
     "nextPhase":  "1.4.24 - Routing Consolidation and CODEX_RULES Trim",
