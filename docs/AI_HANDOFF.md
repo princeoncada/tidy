@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.25-alpha -->
+<!-- Current Version: 1.4.25 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.25-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.25 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.25 - ChatGPT and Codex Role Formalization
 **Next**: 1.4.26 - Custom View Reorder E2E Stabilization
 
