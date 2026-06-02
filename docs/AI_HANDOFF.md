@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.22-alpha -->
+<!-- Current Version: 1.4.22 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.22-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.22 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.22 - Startup Contract Unification
 **Next**: 1.4.23 - Routing Consolidation and CODEX_RULES Trim
 
