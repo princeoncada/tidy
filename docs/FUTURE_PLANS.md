@@ -119,6 +119,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.23 - Open Phase Status Flip Fix~~ (stable 2026-06-01)
 
+- ~~1.4.24 - Routing Consolidation and CODEX_RULES Trim~~ (stable 2026-06-01)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -128,17 +130,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.24 - Routing Consolidation and CODEX_RULES Trim (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.24 - Routing Consolidation and CODEX_RULES Trim
-- **Status:** In progress | Priority: P2 workflow simplification
-- **Files:** docs/CONTEXT_INDEX.md, docs/COMPACT_STRATEGY.md, docs/CODEX_RULES.md
-- **Problem:** Routing guidance is duplicated across CONTEXT_INDEX, COMPACT_STRATEGY, and the CODEX_RULES task table; CODEX_RULES carries non-essential content.
-- **Scope:** consolidate routing into one home and trim CODEX_RULES to essentials without changing validation/commit/versioning rules.
-- **Acceptance:** routing lives in one place; CODEX_RULES is shorter with no rule lost.
 
 ### 1.4.25 - ChatGPT and Codex Role Formalization
 - **Status:** Open | Priority: P2 workflow clarity
