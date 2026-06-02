@@ -242,6 +242,7 @@ Use `docs/CODEX_RULES.md` (Required Tests section) as the source of truth for te
 - `docs/WORKFLOW.md` owns the finalized phase branch lifecycle. `docs/CODEX_RULES.md` owns Codex implementation and commit discipline.
 - Claude Code writes commit.ps1 call sequences; the user runs each call.
 - Do not batch multiple files into one commit.
+- Commit-before-fix is mandatory: a prior implementation (broken or not) must be committed before its in-alpha fix; never fold prior work into the fix commit. Only genuinely accidental, never-meaningful edits may be corrected without a commit.
 - Do not add Co-Authored-By or any AI co-author trailer to commit messages.
 
 ## Assistant Output Formatting
