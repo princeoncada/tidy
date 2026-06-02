@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.18",
-    "state":  "stable",
-    "phase":  "1.4.18",
-    "phaseTitle":  "Retire ChromaDB",
-    "nextPhase":  "1.4.19 - Startup Contract Unification",
+    "version":  "1.4.19-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.19",
+    "phaseTitle":  "In-Alpha Commit-Before-Fix Hardening",
+    "nextPhase":  "1.4.20 - Startup Contract Unification",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-01"
 }
