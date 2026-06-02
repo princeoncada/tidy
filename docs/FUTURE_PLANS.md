@@ -111,6 +111,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.19 - In-Alpha Commit-Before-Fix Hardening~~ (stable 2026-06-01)
 
+- ~~1.4.20 - Git Artifact Hygiene Hardening~~ (stable 2026-06-01)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -120,17 +122,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.20 - Git Artifact Hygiene Hardening (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.20 - Git Artifact Hygiene Hardening
-- **Status:** In progress | Priority: P1 workflow robustness
-- **Files:** .gitattributes, docs/WORKFLOW.md, docs/CODEX_RULES.md
-- **Problem:** Under core.autocrlf=true with no .gitattributes, codebase-graph.json shows as modified after regeneration even when git diff is empty, causing confusion and risk of no-op commits.
-- **Scope:** pin codebase-graph.json line endings via .gitattributes; document phantom-modified generated artifacts as no-ops to discard with git restore, never commit.
-- **Acceptance:** regenerating the graph no longer leaves a phantom dirty flag; WORKFLOW.md and CODEX_RULES.md document the recognize-and-discard rule.
 
 ### 1.4.21 - Startup Contract Unification
 - **Status:** Open | Priority: P1 workflow correctness
