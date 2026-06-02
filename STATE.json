@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.22-alpha",
-    "state":  "alpha",
+    "version":  "1.4.22",
+    "state":  "stable",
     "phase":  "1.4.22",
     "phaseTitle":  "Startup Contract Unification",
     "nextPhase":  "1.4.23 - Routing Consolidation and CODEX_RULES Trim",
