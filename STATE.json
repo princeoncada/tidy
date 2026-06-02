@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.22",
-    "state":  "stable",
-    "phase":  "1.4.22",
-    "phaseTitle":  "Startup Contract Unification",
-    "nextPhase":  "1.4.23 - Routing Consolidation and CODEX_RULES Trim",
+    "version":  "1.4.23-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.23",
+    "phaseTitle":  "Open Phase Status Flip Fix",
+    "nextPhase":  "1.4.24 - Routing Consolidation and CODEX_RULES Trim",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-01"
 }
