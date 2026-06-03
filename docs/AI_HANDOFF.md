@@ -1,10 +1,10 @@
-<!-- Current Version: 1.4.25 -->
+<!-- Current Version: 1.4.26-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.25 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.25 - ChatGPT and Codex Role Formalization
+**Current Version**: 1.4.26-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.26 - Custom View Reorder E2E Stabilization
 **Next**: 1.4.26 - Custom View Reorder E2E Stabilization
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
@@ -127,6 +127,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `listItem.renameListItem`, `deleteListItem`, and `setCompletionListItem` are protected but do not consistently verify parent list ownership.
 - `listItem.reorderListItems` verifies item ownership but not target list ownership.
 - `listItem.getListItems` filters by `listId` only and does not verify `parentList.userId`.
+- `listItem.reorderListItems` does not validate target listId ownership/existence before its raw SQL UPDATE; missing or foreign target lists can yield Postgres FK error 23503 -> 500. Tracked in 1.5.2; authenticated E2E now runs serially (`--workers=1`) with a pre-run `e2e-*` data purge to avoid triggering this through cross-worker interference.
 
 **Optimistic and race behavior:**
 - Most optimistic race behavior is not automatically proven yet.
@@ -135,6 +136,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Tag deletes or rapid tag toggles can affect custom view membership mid-operation.
 - Fast view switching depends on latest-selected-view guards to avoid stale repaints.
 - Immediate item creation after list creation is covered, but nearby optimistic list/tag/item races remain risk areas.
+- Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
+- Inline rename (`ListInlineEdit`) and item/list delete hold edit/delete state in component-local `useState` that a background refetch can drop; tracked in 1.4.27.
 
 **Local-first and sync:**
 - PWA/offline behavior is not implemented despite product goals.

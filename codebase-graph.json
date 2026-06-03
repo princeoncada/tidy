@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.4.25",
+  "version": "1.4.26-alpha",
   "generatedAt": "2026-06-02",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2126,22 +2126,43 @@
       ]
     },
     {
+      "path": "tests/e2e/data-reset.setup.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [
+        "e2eNameScope"
+      ],
+      "imports": [
+        "@playwright/test",
+        "dotenv",
+        "@/lib/db"
+      ]
+    },
+    {
       "path": "tests/e2e/drag-drop.spec.ts",
       "kind": "test",
       "extension": ".ts",
       "symbols": [
         "createPersistedList",
+        "createPersistedTag",
+        "attachExistingTag",
+        "getOrderedVisibleNames",
         "persisted",
-        "first",
-        "second",
-        "firstCard",
-        "secondCard",
-        "sourceList",
-        "targetList",
-        "itemName",
-        "item",
-        "targetCard",
-        "Page"
+        "card",
+        "visibleNames",
+        "orderedNames",
+        "matchingName",
+        "listName",
+        "firstTag",
+        "secondTag",
+        "firstView",
+        "secondView",
+        "initialOrder",
+        "sourceViewCard",
+        "targetViewCard",
+        "swappedOrder",
+        "firstList",
+        "secondList"
       ],
       "imports": [
         "@playwright/test",
@@ -2237,9 +2258,9 @@
         "deleteView",
         "escapeRegExp",
         "createListButton",
-        "card",
-        "persisted",
-        "allListsButton"
+        "dialog",
+        "nameInput",
+        "submitButton"
       ],
       "imports": [
         "@playwright/test",
@@ -2311,6 +2332,8 @@
         "authStoragePath",
         "runId",
         "suffix",
+        "locationUrl",
+        "isOptimisticViewCreate404",
         "matchingCards",
         "card",
         "Page"
@@ -3997,6 +4020,12 @@
       "to": "lib/supabase/proxy.ts",
       "type": "imports",
       "import": "@/lib/supabase/proxy"
+    },
+    {
+      "from": "tests/e2e/data-reset.setup.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
     },
     {
       "from": "tests/e2e/drag-drop.spec.ts",

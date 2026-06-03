@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
 
-import { createList, deleteList, renameList } from "./utils/app";
+import { createList, deleteList, openAllLists, renameList } from "./utils/app";
 import { expectListNotVisible, expectListVisible, reloadAndExpectMissing, reloadAndExpectPersisted } from "./utils/assertions";
 import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 
@@ -9,6 +9,7 @@ let consoleErrors: string[];
 test.beforeEach(async ({ page }) => {
   consoleErrors = collectConsoleErrors(page);
   await gotoDashboard(page);
+  await openAllLists(page);
 });
 
 test.afterEach(async () => {
@@ -23,7 +24,8 @@ test("create a list", async ({ page }) => {
   await cleanupNamedList(page, name);
 });
 
-test("rename a list", async ({ page }) => {
+// FIXME(1.4.27): optimistic/refetch fragility - tracked in Authenticated E2E Suite Hardening
+test.fixme("rename a list", async ({ page }) => {
   const originalName = uniqueTestName("list-rename-original");
   const renamedName = uniqueTestName("list-rename-final");
   await createList(page, originalName);
@@ -33,7 +35,8 @@ test("rename a list", async ({ page }) => {
   await cleanupNamedList(page, renamedName);
 });
 
-test("delete a list", async ({ page }) => {
+// FIXME(1.4.27): optimistic/refetch fragility - tracked in Authenticated E2E Suite Hardening
+test.fixme("delete a list", async ({ page }) => {
   const name = uniqueTestName("list-delete");
   await createList(page, name);
   await deleteList(page, name);

@@ -132,16 +132,24 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.26 - Custom View Reorder E2E Stabilization (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.4.26 - Custom View Reorder E2E Stabilization
-- **Status:** Open | Priority: P1 reorder test stability
+- **Status:** In progress | Priority: P1 reorder test stability
 - **Files:** components/views/ViewsSidebarPreview.tsx, tests/e2e/drag-drop.spec.ts, tests/e2e/utils/app.ts, tests/e2e/utils/assertions.ts, tests/e2e/utils/drag.ts, tests/e2e/utils/seed.ts
 - **Problem:** Custom view reorder product code exists, but the authenticated E2E path was unstable and expanded 1.4.8 into helper/harness stabilization.
 - **Scope:** stabilize custom view reorder setup, drag targeting, console-noise handling, and reload assertion without weakening the order expectation.
 - **Acceptance:** authenticated custom view reorder E2E reliably proves final order persists after drop and refresh.
+
+### 1.4.27 - Authenticated E2E Suite Hardening
+- **Status:** Open | Priority: P1 test reliability
+- **Files:** components/list/ListInlineEdit.tsx, components/list/ListItemComponent.tsx, tests/e2e/*
+- **Problem:** Inline rename and item/list delete rely on component-local state that can be dropped by a background cache refetch; the strict console gate also flags mutations aborted by reload. Seven authenticated E2E tests are quarantined (test.fixme): rename a list, rename item, delete a list, delete item, tagged All Lists entries appear in custom views after reload (views.spec, intermittently hidden view card), reorder lists inside a custom view persists after reload (drag-drop, tag-picker dropdown dismissal), latest selected view wins after fast switching (views).
+- **Scope:** investigate whether inline-edit/delete state must survive refetch (product) vs. test waits; decide whether aborted-on-reload mutations should be silenced or awaited; un-quarantine the four tests.
+- **Acceptance:** the four quarantined tests pass reliably, with any product fragility either fixed or explicitly documented as accepted.
 
 ### 1.5.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
@@ -160,8 +168,8 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ### 1.5.2 - Reorder Target List Ownership Fix
 - **Status:** Open | Priority: P0 security
 - **Files:** trpc/routers/listItemRouter.ts, tests/
-- **Problem:** reorderListItems validates item ownership but must also verify every target listId belongs to the user before raw SQL updates.
-- **Scope:** validate item ids and target list ids before reorder; preserve empty input behavior as success; preserve owned cross-list moves.
+- **Problem:** reorderListItems validates item ownership but must also verify every target listId belongs to the user before raw SQL updates; authenticated E2E reproduced a missing target listId as Postgres FK error 23503 at `trpc/routers/listItemRouter.ts:188-197`.
+- **Scope:** validate item ids and target list ids before reorder so missing or foreign target lists are rejected before the raw SQL UPDATE; preserve empty input behavior as success; preserve owned cross-list moves.
 - **Acceptance:** foreign target lists are rejected without mutation; owned cross-list reorder works; tests cover both.
 
 ### 1.5.3 - Ownership Regression Sweep

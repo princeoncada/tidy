@@ -13,6 +13,7 @@ export const testIds = {
   deleteListButton: "delete-list-button",
   viewCreateButton: "view-create-button",
   viewCard: "view-card",
+  viewDragHandle: "view-drag-handle",
   tagSelector: "tag-selector",
   saveViewButton: "save-view-button",
 } as const;

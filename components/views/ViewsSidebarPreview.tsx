@@ -178,6 +178,7 @@ function SortableViewRowComponent({
           "hover:bg-zinc-200/70 hover:text-zinc-700 active:cursor-grabbing"
         )}
         aria-label={`Reorder ${view.name}`}
+        data-testid="view-drag-handle"
       >
         <GripVertical className="size-3.5" />
       </button>

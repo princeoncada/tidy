@@ -24,10 +24,22 @@ function escapeRegExp(value: string) {
 export async function createList(page: Page, name: string) {
   const createListButton = await firstVisible(page.getByTestId(testIds.createListButton));
 
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await createListButton.click();
-  await page.getByPlaceholder("Enter your list name...").fill(name);
-  await page.getByRole("button", { name: "Create List" }).click();
+  const dialog = page.getByRole("dialog");
+  const nameInput = dialog.getByPlaceholder("Enter your list name...");
+  const submitButton = dialog.getByRole("button", { name: "Create List" });
+  const persisted = waitForSuccessfulTrpcMutation(page, "list.createList");
+
+  await expect(dialog).toBeVisible();
+  await expect(nameInput).toBeVisible();
+  await expect(nameInput).toBeEnabled();
+  await nameInput.fill(name);
+  await expect(submitButton).toBeEnabled();
+  await submitButton.click();
+  await persisted;
   await expect(await getVisibleListCard(page, name)).toBeVisible();
+  await expect(dialog).toBeHidden();
 }
 
 export async function createItemInVisibleList(
@@ -62,9 +74,12 @@ export async function createListAndImmediatelyAddItem(
 
 export async function renameList(page: Page, oldName: string, newName: string) {
   const card = await getVisibleListCard(page, oldName);
+  const input = card.getByTestId(testIds.listTitleInput);
+
   await card.getByTestId(testIds.listTitle).click();
-  await card.getByTestId(testIds.listTitleInput).fill(newName);
-  await card.getByTestId(testIds.listTitleInput).press("Enter");
+  await expect(input).toBeVisible();
+  await input.fill(newName);
+  await input.press("Enter");
   await expect(await getVisibleListCard(page, newName)).toBeVisible();
   await expectListNotVisible(page, oldName);
 }
@@ -86,18 +101,23 @@ export async function openAllLists(page: Page) {
 export async function openViewByName(page: Page, viewName: string) {
   const viewCard = await getVisibleViewCard(page, viewName);
 
-  await viewCard.getByRole("button", { name: viewName }).click();
+  await viewCard.getByRole("button", { name: viewName, exact: true }).click();
 }
 
 export async function createItem(page: Page, listName: string, itemName: string) {
-  await createItemInVisibleList(page, listName, itemName);
+  await createItemInVisibleList(page, listName, itemName, {
+    waitForPersistence: true,
+  });
 }
 
 export async function renameItem(page: Page, oldName: string, newName: string) {
   const item = await firstVisible(page.getByTestId(testIds.listItem).filter({ hasText: oldName }));
+  const input = item.getByTestId(testIds.listTitleInput);
+
   await item.getByTestId(testIds.listItemTitle).click();
-  await item.getByTestId(testIds.listTitleInput).fill(newName);
-  await item.getByTestId(testIds.listTitleInput).press("Enter");
+  await expect(input).toBeVisible();
+  await input.fill(newName);
+  await input.press("Enter");
   await expect(page.getByTestId(testIds.listItem).filter({ hasText: newName })).toBeVisible();
   await expectItemNotVisible(page, oldName);
 }
@@ -111,21 +131,63 @@ export async function deleteItem(page: Page, itemName: string) {
 
 export async function createTag(page: Page, listName: string, tagName: string) {
   const card = await getVisibleListCard(page, listName);
+  const tagSearchInput = page.getByPlaceholder("Search or create tag...");
+
   await card.getByTestId(testIds.tagSelector).click();
-  await page.getByPlaceholder("Search or create tag...").fill(tagName);
-  await page.getByText(`Create "${tagName}"`).click();
+  await tagSearchInput.fill(tagName);
+
+  const createOption = page
+    .locator('[data-slot="command-group"]')
+    .filter({ hasText: "Create new" })
+    .locator('[data-slot="command-item"]')
+    .filter({ hasText: `Create "${tagName}"` })
+    .first();
+  const existingOption = page
+    .locator('[data-slot="command-group"]')
+    .filter({ hasText: "Existing tags" })
+    .locator('[data-slot="command-item"]')
+    .filter({ hasText: tagName })
+    .first();
+
+  await expect
+    .poll(async () =>
+      (await createOption.isVisible()) || (await existingOption.isVisible())
+    )
+    .toBe(true);
+
+  const applied = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
+
+  if (await createOption.isVisible()) {
+    const created = waitForSuccessfulTrpcMutation(page, "tag.create");
+
+    await createOption.click();
+    await created;
+  } else {
+    await existingOption.click();
+  }
+
   await expect(card.getByText(tagName, { exact: true })).toBeVisible();
+  await applied;
+  if (await tagSearchInput.count() > 0) {
+    await card.getByTestId(testIds.tagSelector).click();
+  }
+  await expect(tagSearchInput).toHaveCount(0);
 }
 
 export async function removeTagFromList(page: Page, listName: string, tagName: string) {
   const card = await getVisibleListCard(page, listName);
+  const applied = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
+
   await card.getByRole("button", { name: `Remove ${tagName} tag` }).click();
   await expect(card.getByText(tagName, { exact: true })).toHaveCount(0);
+  await applied;
 }
 
 export async function createView(page: Page, viewName: string, tagName: string) {
   const createViewButton = await firstVisible(page.getByTestId(testIds.viewCreateButton));
 
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByPlaceholder("Search or create tag...")).toHaveCount(0);
   await expect(createViewButton).toBeVisible();
   await createViewButton.click();
   const dialog = page.getByRole("dialog");
