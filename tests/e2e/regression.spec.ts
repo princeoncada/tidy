@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
 
-import { createItem, createList } from "./utils/app";
+import { createItem, createList, openAllLists } from "./utils/app";
 import { expectNoDuplicateText, reloadAndExpectPersisted } from "./utils/assertions";
 import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 
@@ -9,6 +9,7 @@ let consoleErrors: string[];
 test.beforeEach(async ({ page }) => {
   consoleErrors = collectConsoleErrors(page);
   await gotoDashboard(page);
+  await openAllLists(page);
 });
 
 test.afterEach(async () => {
