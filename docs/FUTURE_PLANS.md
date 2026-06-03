@@ -144,6 +144,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Scope:** stabilize custom view reorder setup, drag targeting, console-noise handling, and reload assertion without weakening the order expectation.
 - **Acceptance:** authenticated custom view reorder E2E reliably proves final order persists after drop and refresh.
 
+### 1.4.27 - Authenticated E2E Suite Hardening
+- **Status:** Open | Priority: P1 test reliability
+- **Files:** components/list/ListInlineEdit.tsx, components/list/ListItemComponent.tsx, tests/e2e/*
+- **Problem:** Inline rename and item/list delete rely on component-local state that can be dropped by a background cache refetch; the strict console gate also flags mutations aborted by reload. Four authenticated E2E tests are quarantined (test.fixme): rename a list, rename item, delete a list, delete item.
+- **Scope:** investigate whether inline-edit/delete state must survive refetch (product) vs. test waits; decide whether aborted-on-reload mutations should be silenced or awaited; un-quarantine the four tests.
+- **Acceptance:** the four quarantined tests pass reliably, with any product fragility either fixed or explicitly documented as accepted.
+
 ### 1.5.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
 - **Files:** trpc/routers/listItemRouter.ts, trpc/routers/*.ts, tests/
