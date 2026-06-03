@@ -142,8 +142,22 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Status:** Open | Priority: P1 test reliability
 - **Files:** components/list/ListInlineEdit.tsx, components/list/ListItemComponent.tsx, tests/e2e/*
 - **Problem:** Inline rename and item/list delete rely on component-local state that can be dropped by a background cache refetch; the strict console gate also flags mutations aborted by reload. Seven authenticated E2E tests are quarantined (test.fixme): rename a list, rename item, delete a list, delete item, tagged All Lists entries appear in custom views after reload (views.spec, intermittently hidden view card), reorder lists inside a custom view persists after reload (drag-drop, tag-picker dropdown dismissal), latest selected view wins after fast switching (views).
-- **Scope:** investigate whether inline-edit/delete state must survive refetch (product) vs. test waits; decide whether aborted-on-reload mutations should be silenced or awaited; un-quarantine the four tests.
-- **Acceptance:** the four quarantined tests pass reliably, with any product fragility either fixed or explicitly documented as accepted.
+- **Scope:** investigate whether inline-edit/delete state must survive refetch (product) vs. test waits; decide whether aborted-on-reload mutations should be silenced or awaited; un-quarantine the seven tests.
+- **Acceptance:** the seven quarantined tests pass reliably, with any product fragility either fixed or explicitly documented as accepted.
+
+### 1.4.28 - Promote State-Doc Sync Automation
+- **Status:** Open | Priority: P1 workflow reliability
+- **Files:** scripts/promote.ps1, scripts/validate.ps1, docs/NEW_CHATHEAD_OPENER.md, docs/AI_HANDOFF.md, docs/WORKFLOW.md
+- **Problem:** promote.ps1 updates version strings but not the AI_HANDOFF state/next pointers, and docs/NEW_CHATHEAD_OPENER.md embeds a version snapshot that docs/VERSIONING.md forbids. New sessions can start from stale handoff text; the 1.4.26 promotion left exactly this drift.
+- **Scope:** make promote.ps1 sync the structured state pointers (current version/phase, next phase) in docs/AI_HANDOFF.md from STATE.json + FUTURE_PLANS; rewrite docs/NEW_CHATHEAD_OPENER.md to be pointer-only (instruct reading STATE.json + FUTURE_PLANS, no embedded snapshot); add a validate.ps1 check that the opener embeds no version snapshot and that AI_HANDOFF state pointers match STATE.json. Leave human prose (phase descriptions) to session checkpoints.
+- **Acceptance:** after promote, STATE.json, AI_HANDOFF state pointers, and the opener agree with no manual edits; validate.ps1 fails if they drift or if the opener embeds a snapshot.
+
+### 1.4.29 - Parallel Auth E2E Isolation
+- **Status:** Open | Priority: P2 test speed
+- **Files:** playwright.config.ts, tests/e2e/auth.setup.ts, tests/e2e/data-reset.setup.ts, tests/e2e/utils/seed.ts, package.json
+- **Problem:** authenticated E2E is forced serial (--workers=1) because all tests share one user and one data namespace; serial runs are slow. --workers=1 is a collision throttle, not real isolation.
+- **Scope:** give each parallel worker isolated identity/data (per-worker test user, or per-worker data namespace with owner-scoped cleanup) so authenticated tests cannot collide; re-enable parallel workers for the authenticated-dashboard project; keep the suite green. Land after 1.4.27 so parallelism is added to an already-green serial suite.
+- **Acceptance:** authenticated E2E runs in parallel with no cross-worker failures (no FK or sync collisions), is meaningfully faster than serial, and the suite stays green.
 
 ### 1.5.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
