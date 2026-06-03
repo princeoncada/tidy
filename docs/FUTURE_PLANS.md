@@ -123,6 +123,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.25 - ChatGPT and Codex Role Formalization~~ (stable 2026-06-02)
 
+- ~~1.4.26 - Custom View Reorder E2E Stabilization~~ (stable 2026-06-02)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -132,17 +134,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.26 - Custom View Reorder E2E Stabilization (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.26 - Custom View Reorder E2E Stabilization
-- **Status:** In progress | Priority: P1 reorder test stability
-- **Files:** components/views/ViewsSidebarPreview.tsx, tests/e2e/drag-drop.spec.ts, tests/e2e/utils/app.ts, tests/e2e/utils/assertions.ts, tests/e2e/utils/drag.ts, tests/e2e/utils/seed.ts
-- **Problem:** Custom view reorder product code exists, but the authenticated E2E path was unstable and expanded 1.4.8 into helper/harness stabilization.
-- **Scope:** stabilize custom view reorder setup, drag targeting, console-noise handling, and reload assertion without weakening the order expectation.
-- **Acceptance:** authenticated custom view reorder E2E reliably proves final order persists after drop and refresh.
 
 ### 1.4.27 - Authenticated E2E Suite Hardening
 - **Status:** Open | Priority: P1 test reliability
