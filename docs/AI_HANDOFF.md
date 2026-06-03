@@ -18,15 +18,7 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 
 ## Latest Completed Change
 
-**1.4.25 - ChatGPT and Codex Role Formalization** completed the workflow-hardening arc from 1.4.18 through 1.4.25. The arc retired ChromaDB, hardened commit-before-fix and generated-artifact hygiene, fixed deletion staging and CRLF status flipping in workflow scripts, unified startup and routing authority, and formalized ChatGPT/Claude Code/Codex role boundaries plus surgical vs exploratory Codex prompt selection.
-
-Locked-in workflow rules now point to their owners:
-- ChromaDB is retired; `codebase-graph.json` is the Graphify orientation map.
-- Commit-before-fix is mandatory in `docs/WORKFLOW.md` and `docs/CODEX_RULES.md`.
-- Phantom no-op generated files are restored, never committed; `.gitattributes` pins the graph artifact.
-- `commit.ps1` stages additions, modifications, and deletions.
-- AGENTS.md owns session startup; `docs/CONTEXT_INDEX.md` owns per-task routing.
-- `docs/WORKFLOW.md` owns task-typed prompt format selection.
+**1.4.26 - Custom View Reorder E2E Stabilization** stabilized the authenticated E2E baseline around custom view reorder by proving custom view card reorder and list reorder green, forcing authenticated E2E serial execution, adding a pre-run `e2e-*` data purge, hardening create/select/tag-picker test helpers, and allowing only the narrow benign view-create 404 console error; seven remaining authenticated E2E tests were quarantined with `test.fixme` and deferred to 1.4.27.
 
 ---
 
@@ -156,7 +148,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Workflow:**
 - Assistant responses can drift if they provide commit, merge, promote, or push commands before the user/controller has supplied validation and status evidence. `docs/WORKFLOW.md` owns the stage-gated response rule.
 - Codex debugging attempts can drift if failure classes and hypotheses are not stated before fixes. `docs/CODEX_RULES.md` owns the debugging attempt discipline.
-- Product work resumes with `1.4.26 - Custom View Reorder E2E Stabilization`; authenticated E2E requires real Supabase credentials and storage state.
+- Product work resumes with `1.4.27 - Authenticated E2E Suite Hardening`; authenticated E2E requires real Supabase credentials and storage state.
 
 ---
 
@@ -164,7 +156,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md` first.
 2. Use `docs/CONTEXT_INDEX.md` to choose any additional task-specific read set.
-3. Scope `1.4.26 - Custom View Reorder E2E Stabilization`.
+3. Scope `1.4.27 - Authenticated E2E Suite Hardening`.
 4. Keep `docs/PHASE_LOG.md` historical only. Do not use it as active phase guidance.
 5. Preserve the Codex validation boundary.
 
