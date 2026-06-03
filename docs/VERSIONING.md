@@ -95,7 +95,7 @@ Rules:
 
 - **Current version:** 1.4.26-alpha
 - **Current phase:** 1.4.26 - Custom View Reorder E2E Stabilization
-- **Next phase:** 1.4.26 - Custom View Reorder E2E Stabilization
+- **Next phase:** 1.4.27 - Authenticated E2E Suite Hardening
 
 ---
 
