@@ -137,6 +137,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Fast view switching depends on latest-selected-view guards to avoid stale repaints.
 - Immediate item creation after list creation is covered, but nearby optimistic list/tag/item races remain risk areas.
 - Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
+- Inline rename (`ListInlineEdit`) and item/list delete hold edit/delete state in component-local `useState` that a background refetch can drop; tracked in 1.4.27.
 
 **Local-first and sync:**
 - PWA/offline behavior is not implemented despite product goals.
