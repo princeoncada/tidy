@@ -161,8 +161,8 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ### 1.5.2 - Reorder Target List Ownership Fix
 - **Status:** Open | Priority: P0 security
 - **Files:** trpc/routers/listItemRouter.ts, tests/
-- **Problem:** reorderListItems validates item ownership but must also verify every target listId belongs to the user before raw SQL updates.
-- **Scope:** validate item ids and target list ids before reorder; preserve empty input behavior as success; preserve owned cross-list moves.
+- **Problem:** reorderListItems validates item ownership but must also verify every target listId belongs to the user before raw SQL updates; authenticated E2E reproduced a missing target listId as Postgres FK error 23503 at `trpc/routers/listItemRouter.ts:188-197`.
+- **Scope:** validate item ids and target list ids before reorder so missing or foreign target lists are rejected before the raw SQL UPDATE; preserve empty input behavior as success; preserve owned cross-list moves.
 - **Acceptance:** foreign target lists are rejected without mutation; owned cross-list reorder works; tests cover both.
 
 ### 1.5.3 - Ownership Regression Sweep
