@@ -1,8 +1,8 @@
 {
-    "version":  "1.4.25",
-    "state":  "stable",
-    "phase":  "1.4.25",
-    "phaseTitle":  "ChatGPT and Codex Role Formalization",
+    "version":  "1.4.26-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.26",
+    "phaseTitle":  "Custom View Reorder E2E Stabilization",
     "nextPhase":  "1.4.26 - Custom View Reorder E2E Stabilization",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-02"
