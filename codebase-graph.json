@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.4.25",
+  "version": "1.4.26-alpha",
   "generatedAt": "2026-06-02",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2131,17 +2131,25 @@
       "extension": ".ts",
       "symbols": [
         "createPersistedList",
+        "createPersistedTag",
+        "attachExistingTag",
+        "getOrderedVisibleNames",
         "persisted",
-        "first",
-        "second",
-        "firstCard",
-        "secondCard",
-        "sourceList",
-        "targetList",
-        "itemName",
-        "item",
-        "targetCard",
-        "Page"
+        "card",
+        "visibleNames",
+        "orderedNames",
+        "matchingName",
+        "listName",
+        "firstTag",
+        "secondTag",
+        "firstView",
+        "secondView",
+        "initialOrder",
+        "sourceViewCard",
+        "targetViewCard",
+        "swappedOrder",
+        "firstList",
+        "secondList"
       ],
       "imports": [
         "@playwright/test",
