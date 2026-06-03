@@ -2126,6 +2126,19 @@
       ]
     },
     {
+      "path": "tests/e2e/data-reset.setup.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [
+        "e2eNameScope"
+      ],
+      "imports": [
+        "@playwright/test",
+        "dotenv",
+        "@/lib/db"
+      ]
+    },
+    {
       "path": "tests/e2e/drag-drop.spec.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2319,6 +2332,8 @@
         "authStoragePath",
         "runId",
         "suffix",
+        "locationUrl",
+        "isOptimisticViewCreate404",
         "matchingCards",
         "card",
         "Page"
@@ -4005,6 +4020,12 @@
       "to": "lib/supabase/proxy.ts",
       "type": "imports",
       "import": "@/lib/supabase/proxy"
+    },
+    {
+      "from": "tests/e2e/data-reset.setup.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
     },
     {
       "from": "tests/e2e/drag-drop.spec.ts",
