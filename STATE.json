@@ -3,7 +3,7 @@
     "state":  "alpha",
     "phase":  "1.4.26",
     "phaseTitle":  "Custom View Reorder E2E Stabilization",
-    "nextPhase":  "1.4.26 - Custom View Reorder E2E Stabilization",
+    "nextPhase":  "1.4.27 - Authenticated E2E Suite Hardening",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-02"
 }
