@@ -5,7 +5,7 @@
 
 **Current Version**: 1.4.26-alpha - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.26 - Custom View Reorder E2E Stabilization
-**Next**: 1.4.26 - Custom View Reorder E2E Stabilization
+**Next**: 1.4.27 - Authenticated E2E Suite Hardening
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
