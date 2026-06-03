@@ -41,8 +41,14 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      name: "e2e-reset",
+      testMatch: /data-reset\.setup\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       name: "authenticated-dashboard",
-      testIgnore: [/smoke\.spec\.ts/, /dashboard-public\.spec\.ts/, /auth\.setup\.ts/],
+      testIgnore: [/smoke\.spec\.ts/, /dashboard-public\.spec\.ts/, /auth\.setup\.ts/, /data-reset\.setup\.ts/],
+      dependencies: ["e2e-reset"],
       use: {
         ...devices["Desktop Chrome"],
         storageState: authFile,
