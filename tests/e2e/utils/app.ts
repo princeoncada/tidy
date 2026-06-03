@@ -169,7 +169,7 @@ export async function createTag(page: Page, listName: string, tagName: string) {
   await expect(card.getByText(tagName, { exact: true })).toBeVisible();
   await applied;
   if (await tagSearchInput.count() > 0) {
-    await page.keyboard.press("Escape");
+    await card.getByTestId(testIds.tagSelector).click();
   }
   await expect(tagSearchInput).toHaveCount(0);
 }
@@ -199,11 +199,8 @@ export async function createView(page: Page, viewName: string, tagName: string) 
     .click();
   const persisted = waitForSuccessfulTrpcMutation(page, "view.create");
   await dialog.getByTestId(testIds.saveViewButton).click();
+  await expect(await getVisibleViewCard(page, viewName)).toBeVisible();
   await persisted;
-  const viewCard = page.getByTestId(testIds.viewCard).filter({ hasText: viewName }).first();
-
-  await viewCard.scrollIntoViewIfNeeded();
-  await expect(viewCard).toBeVisible();
 }
 
 export async function deleteView(page: Page, viewName: string) {
