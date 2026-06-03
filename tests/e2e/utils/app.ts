@@ -131,17 +131,46 @@ export async function deleteItem(page: Page, itemName: string) {
 
 export async function createTag(page: Page, listName: string, tagName: string) {
   const card = await getVisibleListCard(page, listName);
-  const created = waitForSuccessfulTrpcMutation(page, "tag.create");
-  const applied = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
   const tagSearchInput = page.getByPlaceholder("Search or create tag...");
 
   await card.getByTestId(testIds.tagSelector).click();
   await tagSearchInput.fill(tagName);
-  await page.getByText(`Create "${tagName}"`).click();
-  await created;
+
+  const createOption = page
+    .locator('[data-slot="command-group"]')
+    .filter({ hasText: "Create new" })
+    .locator('[data-slot="command-item"]')
+    .filter({ hasText: `Create "${tagName}"` })
+    .first();
+  const existingOption = page
+    .locator('[data-slot="command-group"]')
+    .filter({ hasText: "Existing tags" })
+    .locator('[data-slot="command-item"]')
+    .filter({ hasText: tagName })
+    .first();
+
+  await expect
+    .poll(async () =>
+      (await createOption.isVisible()) || (await existingOption.isVisible())
+    )
+    .toBe(true);
+
+  const applied = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
+
+  if (await createOption.isVisible()) {
+    const created = waitForSuccessfulTrpcMutation(page, "tag.create");
+
+    await createOption.click();
+    await created;
+  } else {
+    await existingOption.click();
+  }
+
   await expect(card.getByText(tagName, { exact: true })).toBeVisible();
   await applied;
-  await page.keyboard.press("Escape");
+  if (await tagSearchInput.count() > 0) {
+    await page.keyboard.press("Escape");
+  }
   await expect(tagSearchInput).toHaveCount(0);
 }
 
@@ -170,8 +199,11 @@ export async function createView(page: Page, viewName: string, tagName: string) 
     .click();
   const persisted = waitForSuccessfulTrpcMutation(page, "view.create");
   await dialog.getByTestId(testIds.saveViewButton).click();
-  await expect(await getVisibleViewCard(page, viewName)).toBeVisible();
   await persisted;
+  const viewCard = page.getByTestId(testIds.viewCard).filter({ hasText: viewName }).first();
+
+  await viewCard.scrollIntoViewIfNeeded();
+  await expect(viewCard).toBeVisible();
 }
 
 export async function deleteView(page: Page, viewName: string) {
