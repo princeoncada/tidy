@@ -86,7 +86,7 @@ export async function openAllLists(page: Page) {
 export async function openViewByName(page: Page, viewName: string) {
   const viewCard = await getVisibleViewCard(page, viewName);
 
-  await viewCard.getByRole("button", { name: viewName }).click();
+  await viewCard.getByRole("button", { name: viewName, exact: true }).click();
 }
 
 export async function createItem(page: Page, listName: string, itemName: string) {
@@ -126,6 +126,7 @@ export async function removeTagFromList(page: Page, listName: string, tagName: s
 export async function createView(page: Page, viewName: string, tagName: string) {
   const createViewButton = await firstVisible(page.getByTestId(testIds.viewCreateButton));
 
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(createViewButton).toBeVisible();
   await createViewButton.click();
   const dialog = page.getByRole("dialog");
