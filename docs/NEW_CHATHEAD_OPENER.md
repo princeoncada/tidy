@@ -11,8 +11,8 @@ You are continuing the Tidy repository.
 Repository:
 https://github.com/princeoncada/tidy
 
-Current confirmed stable version: 1.4.25 - ChatGPT and Codex Role Formalization.
-Next planned phase: 1.4.26 - Custom View Reorder E2E Stabilization.
+Current confirmed stable version: 1.4.26 - Custom View Reorder E2E Stabilization.
+Next planned phase: 1.4.27 - Authenticated E2E Suite Hardening.
 
 Before implementing anything:
 1. Verify remote master first.
