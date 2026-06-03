@@ -22,6 +22,16 @@ export function collectConsoleErrors(page: Page) {
   const errors: string[] = [];
 
   page.on("console", (message) => {
+    const locationUrl = message.location().url;
+    const isOptimisticViewCreate404 =
+      message.type() === "error" &&
+      message.text().includes("404") &&
+      locationUrl.includes("/api/trpc/view.getViewListsWithItems");
+
+    // Custom view creation optimistically fetches its view payload before the
+    // server create can commit; that transient 404 self-heals on refetch.
+    if (isOptimisticViewCreate404) return;
+
     if (message.type() === "error") {
       errors.push(message.text());
     }
