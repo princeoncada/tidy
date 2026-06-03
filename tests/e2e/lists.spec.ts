@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
 
-import { createList, deleteList, renameList } from "./utils/app";
+import { createList, deleteList, openAllLists, renameList } from "./utils/app";
 import { expectListNotVisible, expectListVisible, reloadAndExpectMissing, reloadAndExpectPersisted } from "./utils/assertions";
 import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 
@@ -9,6 +9,7 @@ let consoleErrors: string[];
 test.beforeEach(async ({ page }) => {
   consoleErrors = collectConsoleErrors(page);
   await gotoDashboard(page);
+  await openAllLists(page);
 });
 
 test.afterEach(async () => {
