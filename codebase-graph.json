@@ -2258,9 +2258,9 @@
         "deleteView",
         "escapeRegExp",
         "createListButton",
-        "card",
-        "persisted",
-        "allListsButton"
+        "dialog",
+        "nameInput",
+        "submitButton"
       ],
       "imports": [
         "@playwright/test",
