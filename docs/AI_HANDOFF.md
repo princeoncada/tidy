@@ -130,6 +130,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Tag deletes or rapid tag toggles can affect custom view membership mid-operation.
 - Fast view switching depends on latest-selected-view guards to avoid stale repaints.
 - Immediate item creation after list creation is covered, but nearby optimistic list/tag/item races remain risk areas.
+- Inline list/item rename uses component-local edit state; the row remounts when an optimistic row is swapped for its canonical server record, which can drop an in-progress manual rename. Authenticated E2E re-resolves the inline input after entering edit mode and awaits the rename mutation before reload; a product fix (stable row identity or lifted edit state) is a candidate follow-up.
 - Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
 
 **Local-first and sync:**
