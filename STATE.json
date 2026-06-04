@@ -1,8 +1,8 @@
 {
-    "version":  "1.4.28",
-    "state":  "stable",
-    "phase":  "1.4.28",
-    "phaseTitle":  "Promote State-Doc Sync Automation",
+    "version":  "1.4.29-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.29",
+    "phaseTitle":  "Parallel Auth E2E Isolation",
     "nextPhase":  "1.4.29 - Parallel Auth E2E Isolation",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-03"
