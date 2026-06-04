@@ -157,6 +157,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.6.1 - List Item Ownership Fixes~~ (stable 2026-06-04)
 
+- ~~1.6.2 - Reorder Target List Ownership Fix~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -166,17 +168,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.6.2 - Reorder Target List Ownership Fix (active) - see Planned
 ---
 
 ## Planned
-
-### 1.6.2 - Reorder Target List Ownership Fix
-- **Status:** In progress | Priority: P0 security
-- **Files:** trpc/routers/listItemRouter.ts, tests/
-- **Problem:** reorderListItems validates item ownership but must also verify every target listId belongs to the user before raw SQL updates; authenticated E2E reproduced a missing target listId as Postgres FK error 23503 at `trpc/routers/listItemRouter.ts:188-197`.
-- **Scope:** validate item ids and target list ids before reorder so missing or foreign target lists are rejected before the raw SQL UPDATE; preserve empty input behavior as success; preserve owned cross-list moves.
-- **Acceptance:** foreign target lists are rejected without mutation; owned cross-list reorder works; tests cover both.
 
 ### 1.6.3 - Ownership Regression Sweep
 - **Status:** Open | Priority: P1 security regression
