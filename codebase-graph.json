@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.5.2",
+  "version": "1.5.3-alpha",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -34,6 +34,57 @@
       "path": ".claude/settings.local.json",
       "kind": "file",
       "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-codex-prompt-builder/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-context-budget/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-debug-attempt/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [
+        "is"
+      ],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-minimal-handoff/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-session-clone/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-skill-evolution/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-validation-judge/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
       "symbols": [],
       "imports": []
     },
