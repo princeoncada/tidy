@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.5.6-alpha
+- **Current version:** 1.5.6
 - **Current phase:** 1.5.6 - Phase Eval Artifact Baseline
 - **Next phase:** 1.6.0 - Ownership Failure Test Baseline
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.5.6 | alpha | 2026-06-04 | Phase Eval Artifact Baseline | (in progress) |
+| 1.5.6 | stable | 2026-06-04 | Phase Eval Artifact Baseline | (in progress) |
 | 1.5.5 | stable | 2026-06-04 | Real Hook Guardrails | (in progress) |
 | 1.5.4 | stable | 2026-06-04 | Session Checkpoint Deprecation | (in progress) |
 | 1.5.3 | stable | 2026-06-04 | Operational Skill Re-Architecture | (in progress) |
