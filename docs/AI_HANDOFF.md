@@ -1,9 +1,9 @@
-<!-- Current Version: 1.5.2-alpha -->
+<!-- Current Version: 1.5.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.5.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.5.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.5.2 - AI Context Budget Audit
 **Next**: 1.5.3 - Phase Eval Artifact Baseline
 
