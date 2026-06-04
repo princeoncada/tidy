@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.5.4
-- **Current phase:** 1.5.4 - Session Checkpoint Deprecation
-- **Next phase:** 1.5.5 - Real Hook Guardrails
+- **Current version:** 1.5.5-alpha
+- **Current phase:** 1.5.5 - Real Hook Guardrails
+- **Next phase:** 1.5.6 - Phase Eval Artifact Baseline
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.5.5 | alpha | 2026-06-04 | Real Hook Guardrails | (in progress) |
 | 1.5.4 | stable | 2026-06-04 | Session Checkpoint Deprecation | (in progress) |
 | 1.5.3 | stable | 2026-06-04 | Operational Skill Re-Architecture | (in progress) |
 | 1.5.2 | stable | 2026-06-04 | AI Context Budget Audit | (in progress) |
