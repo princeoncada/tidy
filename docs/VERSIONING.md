@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.4.31
-- **Current phase:** 1.4.31 - Workflow Closeout and Open-Phase Fixes
-- **Next phase:** 1.5.0 - Tidy Harness Skills and Hook Contracts
+- **Current version:** 1.5.0-alpha
+- **Current phase:** 1.5.0 - Tidy Harness Skills and Hook Contracts
+- **Next phase:** 1.5.1 - Local Memory Persistence and Learning Queue
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.5.0 | alpha | 2026-06-04 | Tidy Harness Skills and Hook Contracts | (in progress) |
 | 1.4.31 | stable | 2026-06-04 | Workflow Closeout and Open-Phase Fixes | (in progress) |
 | 1.4.30 | stable | 2026-06-04 | Roadmap Rebaseline for 1.5.x Harness Series | (in progress) |
 | 1.4.29 | stable | 2026-06-03 | Parallel Auth E2E Isolation | (in progress) |

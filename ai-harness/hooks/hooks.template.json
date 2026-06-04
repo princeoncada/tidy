@@ -1,0 +1,23 @@
+{
+  "_template": true,
+  "_description": "Opt-in, profile-gated hook template for the Tidy AI harness. Inactive by default. Copy to an activated config and set enabled true plus a profile only when intentionally opting in. Hooks must never edit repo docs or source, never commit, and may write only to gitignored local memory introduced in 1.5.1.",
+  "enabled": false,
+  "activationProfile": null,
+  "hooks": {
+    "sessionStart": {
+      "enabled": false,
+      "script": "ai-harness/hooks/scripts/session-start.ps1",
+      "note": "Placeholder. Script is introduced opt-in in 1.5.1; absent by default."
+    },
+    "postToolUse": {
+      "enabled": false,
+      "script": "ai-harness/hooks/scripts/observe.ps1",
+      "note": "Placeholder. Writes only to gitignored local memory when activated."
+    },
+    "stop": {
+      "enabled": false,
+      "script": "ai-harness/hooks/scripts/session-checkpoint.ps1",
+      "note": "Placeholder. Proposes a checkpoint; never edits repo docs or source."
+    }
+  }
+}

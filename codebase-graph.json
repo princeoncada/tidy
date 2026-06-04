@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.4.31",
+  "version": "1.5.0-alpha",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -53,6 +53,55 @@
     },
     {
       "path": "ai-docs/testing-workflow.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/hooks.template.json",
+      "kind": "file",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/README.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/README.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-debug-attempt/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-phase-scope/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-session-start/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-validation-followup/SKILL.md",
       "kind": "file",
       "extension": ".md",
       "symbols": [],

@@ -144,12 +144,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.5.0 - Tidy Harness Skills and Hook Contracts (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.5.0 - Tidy Harness Skills and Hook Contracts
-- **Status:** Open | Priority: P2 AI workflow
+- **Status:** In progress | Priority: P2 AI workflow
 - **Files:** ai-harness/README.md, ai-harness/skills/*/SKILL.md, ai-harness/hooks/hooks.template.json, ai-harness/hooks/README.md, docs/CONTEXT_INDEX.md (only if routing must mention the harness surface), .gitignore (only if local harness state is introduced)
 - **Problem:** Tidy has no repo-native lightweight AI harness layer (skills as doc-routing wrappers, opt-in hook templates); workflow knowledge lives only in always-read docs.
 - **Scope:** add a repo-safe harness skeleton - skills that are thin wrappers routing to existing source-of-truth docs (session start, phase scope, validation followup, debug attempt) and opt-in, profile-gated hook templates inactive by default. No product behavior change, no startup read growth, no committed local memory.
