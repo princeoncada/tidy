@@ -149,6 +149,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.5.6 - Phase Eval Artifact Baseline~~ (stable 2026-06-04)
 
+- ~~1.5.7 - Consolidated Closeout Packet~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -158,17 +160,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.5.7 - Consolidated Closeout Packet (active) - see Planned
 ---
 
 ## Planned
-
-### 1.5.7 - Consolidated Closeout Packet
-- **Status:** In progress | Priority: P3 AI workflow
-- **Files:** docs/WORKFLOW.md, .claude/skills/tidy-validation-judge/SKILL.md, docs/FUTURE_PLANS.md
-- **Problem:** Validation-Gated Assistant Responses and the tidy-validation-judge skill require drip-feeding alpha commits and the closeout packet in separate messages even for low-risk phases, adding round-trips, and current practice has drifted from that rule.
-- **Scope:** allow the assistant to emit the alpha commit sequence and the full closeout packet together in one message for low-risk phases (docs/workflow/tooling only; no product source, tests, or dependency changes), with the closeout gated behind a clean git status --short; keep strict drip-feed for product/source/test/dependency phases. Update docs/WORKFLOW.md and the tidy-validation-judge skill so docs and practice agree.
-- **Acceptance:** WORKFLOW.md and tidy-validation-judge permit consolidated closeout for low-risk phases and require strict drip-feed otherwise; no versioning, validation-boundary, or product change.
 
 ### 1.6.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
