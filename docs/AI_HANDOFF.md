@@ -1,11 +1,11 @@
-<!-- Current Version: 1.4.27 -->
+<!-- Current Version: 1.4.28-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.27 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.27 - Authenticated E2E Suite Hardening
-**Next**: 1.4.28 - Promote State-Doc Sync Automation
+**Current Version**: 1.4.28-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.28 - Promote State-Doc Sync Automation
+**Next**: 1.4.29 - Parallel Auth E2E Isolation
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.

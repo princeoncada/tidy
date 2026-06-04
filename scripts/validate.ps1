@@ -228,6 +228,41 @@ if (Test-Path "STATE.json") {
     Add-Result "phase/roadmap consistency" $false "STATE.json missing"
 }
 
+# Doc state sync gate - the new-chathead opener must stay pointer-only (no embedded
+# version snapshot) and AI_HANDOFF's **Current Version** prose line must match STATE.json.
+# AI_HANDOFF Current Phase / Next pointers remain owned by the phase/roadmap gate above;
+# this gate adds the two invariants that gate does not cover.
+$docSyncErrors = @()
+$openerPath = "docs/NEW_CHATHEAD_OPENER.md"
+if (-not (Test-Path $openerPath)) {
+    $docSyncErrors += "docs/NEW_CHATHEAD_OPENER.md missing"
+} else {
+    $openerContent = Get-Content $openerPath -Raw -Encoding UTF8
+    $semverMatch = [regex]::Match($openerContent, "\b\d+\.\d+\.\d+\b")
+    if ($semverMatch.Success) {
+        $docSyncErrors += "docs/NEW_CHATHEAD_OPENER.md embeds a version snapshot ('$($semverMatch.Value)'); it must be pointer-only"
+    }
+    foreach ($snapshotPhrase in @("Current confirmed stable version", "Next planned phase")) {
+        if ($openerContent.Contains($snapshotPhrase)) {
+            $docSyncErrors += "docs/NEW_CHATHEAD_OPENER.md still contains snapshot phrase '$snapshotPhrase'"
+        }
+    }
+}
+if (Test-Path "STATE.json") {
+    $docSyncState  = Get-Content "STATE.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+    $handoffForSync = Get-Content "docs/AI_HANDOFF.md" -Raw -Encoding UTF8
+    if ($handoffForSync -notmatch ("(?m)^\*\*Current Version\*\*:\s*" + [regex]::Escape($docSyncState.version) + "(\s|$)")) {
+        $docSyncErrors += "docs/AI_HANDOFF.md **Current Version** line does not match STATE.json '$($docSyncState.version)'"
+    }
+} else {
+    $docSyncErrors += "STATE.json missing"
+}
+if ($docSyncErrors.Count -eq 0) {
+    Add-Result "doc state sync" $true "opener pointer-only; AI_HANDOFF version synced"
+} else {
+    Add-Result "doc state sync" $false ($docSyncErrors -join "; ")
+}
+
 # Codebase graph freshness and structure
 $graphErrors = @()
 $requiredGraphFiles = @(

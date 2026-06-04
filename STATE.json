@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.27",
-    "state":  "stable",
-    "phase":  "1.4.27",
-    "phaseTitle":  "Authenticated E2E Suite Hardening",
-    "nextPhase":  "1.4.28 - Promote State-Doc Sync Automation",
+    "version":  "1.4.28-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.28",
+    "phaseTitle":  "Promote State-Doc Sync Automation",
+    "nextPhase":  "1.4.29 - Parallel Auth E2E Isolation",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-03"
 }
