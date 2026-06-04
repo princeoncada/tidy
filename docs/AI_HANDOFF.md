@@ -1,11 +1,11 @@
-<!-- Current Version: 1.6.1 -->
+<!-- Current Version: 1.6.2-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.6.1 - List Item Ownership Fixes
-**Next**: 1.6.2 - Reorder Target List Ownership Fix
+**Current Version**: 1.6.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.6.2 - Reorder Target List Ownership Fix
+**Next**: 1.6.3 - Ownership Regression Sweep
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -119,9 +119,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 **Security (P0 before API expansion):**
 - `listItem.getListItems`, `renameListItem`, `deleteListItem`, and `setCompletionListItem` are owner-scoped through `parentList.userId` as of 1.6.1 and covered by `tests/unit/router-ownership-baseline.test.ts`.
-- `listItem.reorderListItems` verifies item ownership but not target list ownership.
-- `listItem.reorderListItems` does not validate target listId ownership/existence before its raw SQL UPDATE; missing or foreign target lists can yield Postgres FK error 23503 -> 500. Tracked in 1.6.2; authenticated E2E now achieves real per-worker isolation via a pre-provisioned Supabase user pool keyed by `parallelIndex` (`tests/.auth/user-<index>.json`), runs parallel by default (`--workers=2`), and the pool must have at least as many users as workers.
-- `tests/unit/router-ownership-baseline.test.ts` now pins the fixed 1.6.1 listItem ownership guards and intentionally leaves the `UNSAFE: target list not validated - 1.6.2` reorder test unchanged until target-list validation lands.
+- `listItem.reorderListItems` now verifies item ownership and target list ownership before the batched raw SQL update as of 1.6.2, closing the FK-23503 target-list gap.
+- All listItem ownership gaps captured by the 1.6.0 baseline are now closed in `tests/unit/router-ownership-baseline.test.ts`.
 
 **Optimistic and race behavior:**
 - Most optimistic race behavior is not automatically proven yet.
