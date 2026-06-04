@@ -131,6 +131,20 @@
       "imports": []
     },
     {
+      "path": "ai-harness/hooks/scripts/command-boundary-check.ps1",
+      "kind": "file",
+      "extension": ".ps1",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/scripts/edit-boundary-check.ps1",
+      "kind": "file",
+      "extension": ".ps1",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": "ai-harness/hooks/scripts/observe.ps1",
       "kind": "file",
       "extension": ".ps1",
