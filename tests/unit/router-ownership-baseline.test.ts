@@ -30,10 +30,11 @@ vi.mock("@/lib/db", () => ({
   db: dbMock,
 }));
 
-import { createCallerFactory } from "@/trpc/init";
+import { createCallerFactory, createTRPCContext } from "@/trpc/init";
 import { appRouter } from "@/trpc/routers/_app";
 
 const createCaller = createCallerFactory(appRouter);
+type TestTRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 
 const USER_A = "11111111-1111-4111-8111-111111111111";
 const USER_B = "22222222-2222-4222-8222-222222222222";
@@ -45,11 +46,17 @@ const TAG_A = "77777777-7777-4777-8777-777777777777";
 const VIEW_A = "88888888-8888-4888-8888-888888888888";
 
 function authedCaller(userId: string) {
-  return createCaller({ user: { id: userId } as any, supabase: {} as any });
+  return createCaller({
+    user: { id: userId },
+    supabase: {},
+  } as unknown as TestTRPCContext);
 }
 
 function anonCaller() {
-  return createCaller({ user: null, supabase: {} as any });
+  return createCaller({
+    user: null,
+    supabase: {},
+  } as unknown as TestTRPCContext);
 }
 
 function expectTrpcCode(error: unknown, code: string) {
