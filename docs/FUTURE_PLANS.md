@@ -127,6 +127,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.27 - Authenticated E2E Suite Hardening~~ (stable 2026-06-03)
 
+- ~~1.4.28 - Promote State-Doc Sync Automation~~ (stable 2026-06-03)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -136,17 +138,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.28 - Promote State-Doc Sync Automation (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.28 - Promote State-Doc Sync Automation
-- **Status:** In progress | Priority: P1 workflow reliability
-- **Files:** scripts/promote.ps1, scripts/validate.ps1, docs/NEW_CHATHEAD_OPENER.md, docs/AI_HANDOFF.md, docs/WORKFLOW.md
-- **Problem:** promote.ps1 updates version strings but not the AI_HANDOFF state/next pointers, and docs/NEW_CHATHEAD_OPENER.md embeds a version snapshot that docs/VERSIONING.md forbids. New sessions can start from stale handoff text; the 1.4.26 promotion left exactly this drift.
-- **Scope:** make promote.ps1 sync the structured state pointers (current version/phase, next phase) in docs/AI_HANDOFF.md from STATE.json + FUTURE_PLANS; rewrite docs/NEW_CHATHEAD_OPENER.md to be pointer-only (instruct reading STATE.json + FUTURE_PLANS, no embedded snapshot); add a validate.ps1 check that the opener embeds no version snapshot and that AI_HANDOFF state pointers match STATE.json. Leave human prose (phase descriptions) to session checkpoints.
-- **Acceptance:** after promote, STATE.json, AI_HANDOFF state pointers, and the opener agree with no manual edits; validate.ps1 fails if they drift or if the opener embeds a snapshot.
 
 ### 1.4.29 - Parallel Auth E2E Isolation
 - **Status:** Open | Priority: P2 test speed
