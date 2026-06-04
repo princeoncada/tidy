@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.4.29-alpha
+- **Current version:** 1.4.29
 - **Current phase:** 1.4.29 - Parallel Auth E2E Isolation
-- **Next phase:** 1.4.29 - Parallel Auth E2E Isolation
+- **Next phase:** 1.5.0 - Ownership Failure Test Baseline
 
 ---
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.4.29 | alpha | 2026-06-03 | Parallel Auth E2E Isolation | (in progress) |
+| 1.4.29 | stable | 2026-06-03 | Parallel Auth E2E Isolation | (in progress) |
 | 1.4.28 | stable | 2026-06-03 | Promote State-Doc Sync Automation | (in progress) |
 | 1.4.27 | stable | 2026-06-03 | Authenticated E2E Suite Hardening | (in progress) |
 | 1.4.26 | stable | 2026-06-02 | Custom View Reorder E2E Stabilization | (in progress) |
