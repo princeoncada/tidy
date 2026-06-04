@@ -141,6 +141,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.5.2 - AI Context Budget Audit~~ (stable 2026-06-04)
 
+- ~~1.5.3 - Operational Skill Re-Architecture~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -150,17 +152,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.5.3 - Operational Skill Re-Architecture (active) - see Planned
 ---
 
 ## Planned
-
-### 1.5.3 - Operational Skill Re-Architecture
-- **Status:** In progress | Priority: P2 AI workflow
-- **Files:** .claude/skills/tidy-*/SKILL.md (7 skill files), docs/WORKFLOW.md, docs/CONTEXT_INDEX.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md, ai-harness/skills/*/SKILL.md, ai-harness/README.md
-- **Problem:** The ai-harness skills are routing stubs in the wrong location with no frontmatter, so Claude Code cannot discover them as real skills and they duplicate docs/CONTEXT_INDEX.md routing.
-- **Scope:** create real `.claude/skills/` operational skills (tidy-session-clone, tidy-minimal-handoff, tidy-codex-prompt-builder, tidy-validation-judge, tidy-debug-attempt, tidy-skill-evolution, tidy-context-budget) with frontmatter and the operational section contract; add the Skill Surface (registry, docs-vs-skills split, evolution loop) to docs/WORKFLOW.md; add `.claude/skills/` to docs/CONTEXT_INDEX.md; fix stale narrative in docs/AI_HANDOFF.md; retire ai-harness/skills/ to one-line pointers; record the 1.5.3-1.5.6 sequence here. No hooks, no validate.ps1 change, no product source.
-- **Acceptance:** each skill loads as a real Claude Code skill with valid frontmatter and the required sections; skills reference doc anchors and do not restate doc policy; AI_HANDOFF reflects 1.5.2; the ChatGPT/Claude/Codex loop still runs; no product behavior change.
 
 ### 1.5.4 - Session Checkpoint Deprecation
 - **Status:** Open | Priority: P2 AI workflow
