@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "./utils/fixtures";
 
 import { createList, deleteList, openAllLists, renameList } from "./utils/app";
 import { expectListNotVisible, expectListVisible, reloadAndExpectMissing, reloadAndExpectPersisted } from "./utils/assertions";

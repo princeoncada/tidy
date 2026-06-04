@@ -138,12 +138,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.29 - Parallel Auth E2E Isolation (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.4.29 - Parallel Auth E2E Isolation
-- **Status:** Open | Priority: P2 test speed
+- **Status:** In progress | Priority: P2 test speed
 - **Files:** playwright.config.ts, tests/e2e/auth.setup.ts, tests/e2e/data-reset.setup.ts, tests/e2e/utils/seed.ts, package.json
 - **Problem:** authenticated E2E is forced serial (--workers=1) because all tests share one user and one data namespace; serial runs are slow. --workers=1 is a collision throttle, not real isolation.
 - **Scope:** give each parallel worker isolated identity/data (per-worker test user, or per-worker data namespace with owner-scoped cleanup) so authenticated tests cannot collide; re-enable parallel workers for the authenticated-dashboard project; keep the suite green. Land after 1.4.27 so parallelism is added to an already-green serial suite.

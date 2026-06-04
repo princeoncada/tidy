@@ -1,10 +1,10 @@
-<!-- Current Version: 1.4.28 -->
+<!-- Current Version: 1.4.29-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.28 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.28 - Promote State-Doc Sync Automation
+**Current Version**: 1.4.29-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.29 - Parallel Auth E2E Isolation
 **Next**: 1.4.29 - Parallel Auth E2E Isolation
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
@@ -121,7 +121,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `listItem.renameListItem`, `deleteListItem`, and `setCompletionListItem` are protected but do not consistently verify parent list ownership.
 - `listItem.reorderListItems` verifies item ownership but not target list ownership.
 - `listItem.getListItems` filters by `listId` only and does not verify `parentList.userId`.
-- `listItem.reorderListItems` does not validate target listId ownership/existence before its raw SQL UPDATE; missing or foreign target lists can yield Postgres FK error 23503 -> 500. Tracked in 1.5.2; authenticated E2E now runs serially (`--workers=1`) with a pre-run `e2e-*` data purge to avoid triggering this through cross-worker interference.
+- `listItem.reorderListItems` does not validate target listId ownership/existence before its raw SQL UPDATE; missing or foreign target lists can yield Postgres FK error 23503 -> 500. Tracked in 1.5.2; authenticated E2E now achieves real per-worker isolation via a pre-provisioned Supabase user pool keyed by `parallelIndex` (`tests/.auth/user-<index>.json`), runs parallel by default (`--workers=2`), and the pool must have at least as many users as workers.
 
 **Optimistic and race behavior:**
 - Most optimistic race behavior is not automatically proven yet.

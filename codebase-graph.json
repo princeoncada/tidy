@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.4.28",
-  "generatedAt": "2026-06-03",
+  "version": "1.4.29-alpha",
+  "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -1928,8 +1928,7 @@
       "extension": ".ts",
       "symbols": [
         "port",
-        "baseURL",
-        "authFile"
+        "baseURL"
       ],
       "imports": [
         "@playwright/test"
@@ -2084,6 +2083,20 @@
       "imports": []
     },
     {
+      "path": "tests/.auth/user-0.json",
+      "kind": "test",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "tests/.auth/user-1.json",
+      "kind": "test",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": "tests/.auth/user.json",
       "kind": "test",
       "extension": ".json",
@@ -2095,15 +2108,16 @@
       "kind": "test",
       "extension": ".ts",
       "symbols": [
-        "authFile",
-        "email",
-        "password"
+        "pool",
+        "page",
+        "file"
       ],
       "imports": [
         "@playwright/test",
         "node:fs",
         "node:path",
-        "dotenv"
+        "dotenv",
+        "./utils/seed"
       ]
     },
     {
@@ -2166,6 +2180,7 @@
         "firstList"
       ],
       "imports": [
+        "./utils/fixtures",
         "@playwright/test",
         "./utils/app",
         "./utils/assertions",
@@ -2185,7 +2200,7 @@
         "renamedItem"
       ],
       "imports": [
-        "@playwright/test",
+        "./utils/fixtures",
         "./utils/app",
         "./utils/assertions",
         "./utils/seed"
@@ -2202,7 +2217,7 @@
         "names"
       ],
       "imports": [
-        "@playwright/test",
+        "./utils/fixtures",
         "./utils/app",
         "./utils/assertions",
         "./utils/seed"
@@ -2218,7 +2233,7 @@
         "itemNames"
       ],
       "imports": [
-        "@playwright/test",
+        "./utils/fixtures",
         "./utils/app",
         "./utils/assertions",
         "./utils/seed"
@@ -2321,22 +2336,42 @@
       ]
     },
     {
+      "path": "tests/e2e/utils/fixtures.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [
+        "test",
+        "index",
+        "file"
+      ],
+      "imports": [
+        "@playwright/test",
+        "node:fs",
+        "./seed"
+      ]
+    },
+    {
       "path": "tests/e2e/utils/seed.ts",
       "kind": "test",
       "extension": ".ts",
       "symbols": [
+        "resolveE2eUserPool",
+        "authStoragePathForIndex",
         "uniqueTestName",
         "gotoDashboard",
         "collectConsoleErrors",
         "expectNoConsoleErrors",
         "cleanupNamedList",
-        "authStoragePath",
+        "parallelIndex",
         "runId",
+        "email",
+        "password",
         "suffix",
         "locationUrl",
         "isOptimisticViewCreate404",
         "matchingCards",
         "card",
+        "E2eUser",
         "Page"
       ],
       "imports": [
@@ -2370,7 +2405,7 @@
         "hiddenList"
       ],
       "imports": [
-        "@playwright/test",
+        "./utils/fixtures",
         "./utils/app",
         "./utils/assertions",
         "./utils/seed"
@@ -4023,6 +4058,12 @@
       "import": "@/lib/supabase/proxy"
     },
     {
+      "from": "tests/e2e/auth.setup.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
       "from": "tests/e2e/data-reset.setup.ts",
       "to": "lib/db.ts",
       "type": "imports",
@@ -4045,6 +4086,12 @@
       "to": "tests/e2e/utils/drag.ts",
       "type": "imports",
       "import": "./utils/drag"
+    },
+    {
+      "from": "tests/e2e/drag-drop.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
     },
     {
       "from": "tests/e2e/drag-drop.spec.ts",
@@ -4072,6 +4119,12 @@
     },
     {
       "from": "tests/e2e/list-items.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/list-items.spec.ts",
       "to": "tests/e2e/utils/seed.ts",
       "type": "imports",
       "import": "./utils/seed"
@@ -4090,6 +4143,12 @@
     },
     {
       "from": "tests/e2e/lists.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/lists.spec.ts",
       "to": "tests/e2e/utils/seed.ts",
       "type": "imports",
       "import": "./utils/seed"
@@ -4105,6 +4164,12 @@
       "to": "tests/e2e/utils/assertions.ts",
       "type": "imports",
       "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/regression.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
     },
     {
       "from": "tests/e2e/regression.spec.ts",
@@ -4137,6 +4202,12 @@
       "import": "./app"
     },
     {
+      "from": "tests/e2e/utils/fixtures.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./seed"
+    },
+    {
       "from": "tests/e2e/utils/seed.ts",
       "to": "tests/e2e/utils/assertions.ts",
       "type": "imports",
@@ -4159,6 +4230,12 @@
       "to": "tests/e2e/utils/assertions.ts",
       "type": "imports",
       "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/views.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
     },
     {
       "from": "tests/e2e/views.spec.ts",

@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "./utils/fixtures";
 
 import { createItem, createList, openAllLists } from "./utils/app";
 import { expectNoDuplicateText, reloadAndExpectPersisted } from "./utils/assertions";
