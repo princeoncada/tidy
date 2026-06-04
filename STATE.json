@@ -1,9 +1,9 @@
 {
-    "version":  "1.5.8",
-    "state":  "stable",
-    "phase":  "1.5.8",
-    "phaseTitle":  "Local Evidence Packet Code-Block Contract",
-    "nextPhase":  "1.6.0 - Ownership Failure Test Baseline",
+    "version":  "1.6.0-alpha",
+    "state":  "alpha",
+    "phase":  "1.6.0",
+    "phaseTitle":  "Ownership Failure Test Baseline",
+    "nextPhase":  "1.6.1 - List Item Ownership Fixes",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }

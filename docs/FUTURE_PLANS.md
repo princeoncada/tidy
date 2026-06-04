@@ -162,12 +162,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.6.0 - Ownership Failure Test Baseline (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.6.0 - Ownership Failure Test Baseline
-- **Status:** Open | Priority: P0 security test baseline
+- **Status:** In progress | Priority: P0 security test baseline
 - **Files:** trpc/routers/listItemRouter.ts, trpc/routers/*.ts, tests/
 - **Problem:** Ownership/security gaps need explicit tests before router fixes are made.
 - **Scope:** add tests for unauthenticated access, cross-user IDs, foreign list/item/tag/view IDs, and empty reorder input behavior.
