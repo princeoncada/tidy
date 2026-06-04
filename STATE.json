@@ -1,6 +1,6 @@
 {
-    "version":  "1.5.0-alpha",
-    "state":  "alpha",
+    "version":  "1.5.0",
+    "state":  "stable",
     "phase":  "1.5.0",
     "phaseTitle":  "Tidy Harness Skills and Hook Contracts",
     "nextPhase":  "1.5.1 - Local Memory Persistence and Learning Queue",
