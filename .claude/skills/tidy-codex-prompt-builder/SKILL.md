@@ -21,6 +21,7 @@ Allowed actions: scope the phase; emit Graph Routing Summary + Section 1 + Secti
 Prohibited actions: giving Codex git/commit/push/branch commands; telling Codex to run validation; emitting nested triple-backtick fences inside the master prompt; broad-scan instructions; scoping source edits outside the phase.
 
 Output contract - in this order:
+0. Local Evidence Packet gate (outside code blocks): if the phase is source-heavy or local-sensitive and the packet output has not already been provided, emit the Local Evidence Packet as one powershell code block (git status --short; git log --oneline -5; Get-Content STATE.json; npm run graph:codebase; git diff --stat) and wait for the pasted output before scoping. This is pre-scope evidence, distinct from the Section 2 graph refresh; skip only for docs-only phases scoped purely from remote state. Source of truth: AGENTS.md ChatGPT Architect Mode + docs/WORKFLOW.md.
 1. Graph Routing Summary (outside code blocks): task category, graph-selected files + why, intentionally skipped, whether direct reads are still required.
 2. Section 1 - Master Prompt heading, then ONE text code block: opening + version lines, READ THESE FILES FIRST, CURRENT PROJECT STATE, IMPLEMENTATION REQUIREMENTS (CREATE/MODIFY, exact OLD/NEW for known edits), SAFETY CONSTRAINTS, STOP AND SUMMARIZE.
 3. Section 2 - Validation heading, then ONE powershell code block with only validation commands.
