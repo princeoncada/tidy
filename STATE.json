@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.29-alpha",
-    "state":  "alpha",
+    "version":  "1.4.29",
+    "state":  "stable",
     "phase":  "1.4.29",
     "phaseTitle":  "Parallel Auth E2E Isolation",
-    "nextPhase":  "1.4.29 - Parallel Auth E2E Isolation",
+    "nextPhase":  "1.5.0 - Ownership Failure Test Baseline",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-03"
+    "lastUpdated":  "2026-06-04"
 }
