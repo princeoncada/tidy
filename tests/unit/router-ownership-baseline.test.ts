@@ -12,6 +12,7 @@ const dbMock = vi.hoisted(() => ({
     findMany: vi.fn(),
     findFirst: vi.fn(),
     update: vi.fn(),
+    updateManyAndReturn: vi.fn(),
     deleteMany: vi.fn(),
     create: vi.fn(),
   },
@@ -82,6 +83,14 @@ beforeEach(() => {
     listId: LIST_A,
     completed: false,
   });
+  dbMock.listItem.updateManyAndReturn.mockResolvedValue([
+    {
+      id: ITEM_A,
+      name: "Renamed item",
+      listId: LIST_A,
+      completed: false,
+    },
+  ]);
   dbMock.listItem.deleteMany.mockResolvedValue({ count: 1 });
   dbMock.listItem.create.mockResolvedValue({
     id: ITEM_B,
@@ -111,62 +120,96 @@ describe("router ownership baseline", () => {
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 
-  it("UNSAFE: no ownership scope - 1.6.1 getListItems returns items for a foreign list", async () => {
-    // UNSAFE: no ownership scope - 1.6.1
-    dbMock.listItem.findMany.mockResolvedValueOnce([{ id: ITEM_A, listId: LIST_A }]);
+  it("getListItems scopes reads to lists owned by the caller", async () => {
+    dbMock.listItem.findMany.mockResolvedValueOnce([]);
 
     await expect(
       authedCaller(USER_B).listItem.getListItems({ listId: LIST_A })
-    ).resolves.toEqual([{ id: ITEM_A, listId: LIST_A }]);
+    ).resolves.toEqual([]);
 
     const findManyArgs = dbMock.listItem.findMany.mock.calls[0][0];
-    expect(findManyArgs.where).toEqual({ listId: LIST_A });
-    expect(findManyArgs.where).not.toHaveProperty("userId");
-    expect(findManyArgs.where).not.toHaveProperty("parentList");
-  });
-
-  it("UNSAFE: no ownership scope - 1.6.1 renameListItem writes by id only", async () => {
-    // UNSAFE: no ownership scope - 1.6.1
-    await expect(
-      authedCaller(USER_B).listItem.renameListItem({ id: ITEM_A, name: "stolen" })
-    ).resolves.toMatchObject({ id: ITEM_A });
-
-    expect(dbMock.list.findFirst).not.toHaveBeenCalled();
-    expect(dbMock.listItem.findFirst).not.toHaveBeenCalled();
-    expect(dbMock.listItem.update).toHaveBeenCalledWith({
-      where: { id: ITEM_A },
-      data: { name: "stolen" },
+    expect(findManyArgs.where).toEqual({
+      listId: LIST_A,
+      parentList: { userId: USER_B },
     });
   });
 
-  it("UNSAFE: no ownership scope - 1.6.1 deleteListItem deletes by id only", async () => {
-    // UNSAFE: no ownership scope - 1.6.1
+  it("renameListItem rejects items the caller does not own", async () => {
+    dbMock.listItem.updateManyAndReturn.mockResolvedValueOnce([]);
+
+    try {
+      await authedCaller(USER_B).listItem.renameListItem({ id: ITEM_A, name: "stolen" });
+      throw new Error("Expected renameListItem to reject");
+    } catch (error) {
+      expectTrpcCode(error, "NOT_FOUND");
+    }
+
+    expect(dbMock.listItem.updateManyAndReturn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: ITEM_A,
+          parentList: { userId: USER_B },
+        }),
+        data: { name: "stolen" },
+      })
+    );
+  });
+
+  it("renameListItem updates items the caller owns", async () => {
+    await expect(
+      authedCaller(USER_A).listItem.renameListItem({ id: ITEM_A, name: "Renamed item" })
+    ).resolves.toMatchObject({ id: ITEM_A });
+  });
+
+  it("deleteListItem only deletes items the caller owns", async () => {
+    dbMock.listItem.deleteMany.mockResolvedValueOnce({ count: 0 });
+
     await expect(
       authedCaller(USER_B).listItem.deleteListItem({ id: ITEM_A })
-    ).resolves.toEqual({ deleted: true });
+    ).resolves.toEqual({ deleted: false });
 
-    expect(dbMock.list.findFirst).not.toHaveBeenCalled();
-    expect(dbMock.listItem.findFirst).not.toHaveBeenCalled();
     expect(dbMock.listItem.deleteMany).toHaveBeenCalledWith({
-      where: { id: ITEM_A },
+      where: {
+        id: ITEM_A,
+        parentList: { userId: USER_B },
+      },
     });
   });
 
-  it("UNSAFE: no ownership scope - 1.6.1 setCompletionListItem writes by id only", async () => {
-    // UNSAFE: no ownership scope - 1.6.1
+  it("deleteListItem deletes items the caller owns", async () => {
     await expect(
-      authedCaller(USER_B).listItem.setCompletionListItem({
+      authedCaller(USER_A).listItem.deleteListItem({ id: ITEM_A })
+    ).resolves.toEqual({ deleted: true });
+  });
+
+  it("setCompletionListItem rejects items the caller does not own", async () => {
+    dbMock.listItem.updateManyAndReturn.mockResolvedValueOnce([]);
+
+    try {
+      await authedCaller(USER_B).listItem.setCompletionListItem({
         id: ITEM_A,
         completed: true,
-      })
-    ).resolves.toMatchObject({ id: ITEM_A });
+      });
+      throw new Error("Expected setCompletionListItem to reject");
+    } catch (error) {
+      expectTrpcCode(error, "NOT_FOUND");
+    }
 
-    expect(dbMock.list.findFirst).not.toHaveBeenCalled();
-    expect(dbMock.listItem.findFirst).not.toHaveBeenCalled();
-    expect(dbMock.listItem.update).toHaveBeenCalledWith({
-      where: { id: ITEM_A },
-      data: { completed: true },
-    });
+    expect(dbMock.listItem.updateManyAndReturn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: ITEM_A,
+          parentList: { userId: USER_B },
+        }),
+        data: { completed: true },
+      })
+    );
+  });
+
+  it("setCompletionListItem updates items the caller owns", async () => {
+    await expect(
+      authedCaller(USER_A).listItem.setCompletionListItem({ id: ITEM_A, completed: true })
+    ).resolves.toMatchObject({ id: ITEM_A });
   });
 
   it("rejects createListItem for a foreign parent list", async () => {
