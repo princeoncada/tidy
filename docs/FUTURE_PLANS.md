@@ -129,6 +129,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.28 - Promote State-Doc Sync Automation~~ (stable 2026-06-03)
 
+- ~~1.4.29 - Parallel Auth E2E Isolation~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -138,17 +140,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.29 - Parallel Auth E2E Isolation (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.29 - Parallel Auth E2E Isolation
-- **Status:** In progress | Priority: P2 test speed
-- **Files:** playwright.config.ts, tests/e2e/auth.setup.ts, tests/e2e/data-reset.setup.ts, tests/e2e/utils/seed.ts, package.json
-- **Problem:** authenticated E2E is forced serial (--workers=1) because all tests share one user and one data namespace; serial runs are slow. --workers=1 is a collision throttle, not real isolation.
-- **Scope:** give each parallel worker isolated identity/data (per-worker test user, or per-worker data namespace with owner-scoped cleanup) so authenticated tests cannot collide; re-enable parallel workers for the authenticated-dashboard project; keep the suite green. Land after 1.4.27 so parallelism is added to an already-green serial suite.
-- **Acceptance:** authenticated E2E runs in parallel with no cross-worker failures (no FK or sync collisions), is meaningfully faster than serial, and the suite stays green.
 
 ### 1.5.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
