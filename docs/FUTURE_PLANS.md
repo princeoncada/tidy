@@ -165,6 +165,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
+### 1.5.8 - Local Evidence Packet Code-Block Contract
+- **Status:** In progress | Priority: P2 workflow clarity
+- **Files:** AGENTS.md, docs/WORKFLOW.md, .claude/skills/tidy-codex-prompt-builder/SKILL.md
+- **Problem:** The Local Evidence Packet is described as prose for ChatGPT scoping, but no contract requires Claude Code to emit it as a copy-paste code block before scoping a source-heavy or local-sensitive phase.
+- **Scope:** name the Local Evidence Packet in AGENTS.md and require Claude Code to emit it as one PowerShell code block before scoping such phases; mirror the contract in docs/WORKFLOW.md; add the gate step to the tidy-codex-prompt-builder skill; keep it distinct from the Section 2 graph refresh.
+- **Acceptance:** the packet is a named, code-block-emitted pre-scope step; the contract is consistent across AGENTS.md, docs/WORKFLOW.md, and the skill; no conflation with the validate-time graph refresh.
+
 ### 1.6.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
 - **Files:** trpc/routers/listItemRouter.ts, trpc/routers/*.ts, tests/
