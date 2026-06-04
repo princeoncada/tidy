@@ -1,9 +1,9 @@
-<!-- Current Version: 1.6.2-alpha -->
+<!-- Current Version: 1.6.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.6.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.6.2 - Reorder Target List Ownership Fix
 **Next**: 1.6.3 - Ownership Regression Sweep
 
