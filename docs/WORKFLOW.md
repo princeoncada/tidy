@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.4.30 -->
+<!-- Current Version: 1.4.31-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -145,6 +145,8 @@ Product behavior audits should become reproduction tests or roadmap acceptance c
 When `STATE.json` is stable, `STATE.json.nextPhase` must equal the first Planned heading in `docs/FUTURE_PLANS.md`.
 Plain assertion: STATE.json.nextPhase must equal the first Planned heading.
 
+Every `open-phase.ps1` invocation must declare the next phase explicitly: pass `-NextPhase "<version - title>"` matching the intended next Planned heading, or `-NoNextPhase` when no planned phase remains. The script errors if neither or both are given - there is no silent default - so a stale or self-referential nextPhase can never carry into promotion.
+
 When opening an alpha phase, `STATE.json.nextPhase` must exist as a Planned heading unless the phase is explicitly scoped to add or renumber `docs/FUTURE_PLANS.md` in the same patch.
 
 Use `open-phase.ps1 -AllowMissingNextPhase` only for explicitly scoped roadmap rewrite patches. No phase may be promoted stable while `STATE.json.nextPhase` and the first Planned roadmap item disagree. `docs/FUTURE_PLANS.md` remains roadmap state, not a sixth versioning location.
@@ -193,7 +195,7 @@ Prefer the surgical format whenever feasible; use the exploratory format only wh
 - The Codex prompt must be one text code block containing only the prompt intended for Codex.
 - The validation block must be one PowerShell code block containing only validation commands.
 - The alpha commit sequence must be one PowerShell code block containing all alpha commit commands, one command per line.
-- The stable promotion commit sequence must be one separate PowerShell code block containing all stable promotion commit commands, one command per line.
+- Do not re-emit the stable promotion commit or push commands; promote.ps1 prints the exact per-file stable commit commands (including the conditional codebase-graph.json commit) and the final push, so instruct the user to run promote.ps1's printed Next steps instead.
 - Never place `Section 1 - Master Prompt` or `Section 2 - Validation` inside
   copyable code blocks.
 - Do not wrap both sections in one code block.
@@ -358,9 +360,7 @@ provide the full closeout command packet. The packet must include, in order:
   `git merge --no-ff phase/<version-slug> -m "merge: bring <version> <short phase name> into master"`
 - run the documented post-merge validation path on master
 - promote
-- commit stable promotion files one by one
-- final targeted status check
-- `git push origin master`
+- run the per-file stable commit commands and the push that promote.ps1 prints in its Next steps; the assistant does not re-emit them
 
 If any closeout command fails, stop and paste the output before continuing.
 
@@ -505,42 +505,13 @@ git status --short
    not commit the promotion. Do NOT re-run the full validation suite after
    promote unless the user chooses to - app code did not change, only version
    strings, roadmap state, and generated graph metadata. If promote reports
-   success, proceed directly to the promotion commits.
+   success, the user runs the per-file commit and push commands promote.ps1 printed in its Next steps.
 
-5. Stable-promotion commit sequence - The stable promotion commit sequence must be one separate PowerShell code block containing all stable promotion commit commands, one command per line.
+5. Run promote.ps1's printed Next steps - promote.ps1 prints the exact per-file stable-promotion commit commands (including the conditional `codebase-graph.json` commit) and the final `git push origin master`. The assistant must NOT re-emit those commands; tell the user to run promote.ps1's printed Next steps in order. If `git push` reports that the repository moved, run `git remote set-url origin https://github.com/princeoncada/tidy.git` then retry the push.
 
-```powershell
-.\scripts\commit.ps1 -Files "STATE.json" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
-.\scripts\commit.ps1 -Files "docs/VERSIONING.md" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
-.\scripts\commit.ps1 -Files "docs/AI_HANDOFF.md" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
-.\scripts\commit.ps1 -Files "package.json" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
-.\scripts\commit.ps1 -Files "docs/WORKFLOW.md" -Message "chore(release): promote X.Y.Z-alpha to X.Y.Z-stable"
-.\scripts\commit.ps1 -Files "docs/FUTURE_PLANS.md" -Message "chore(release): close X.Y.Z roadmap item"
-.\scripts\commit.ps1 -Files "codebase-graph.json" -Message "chore(graph): refresh graph for X.Y.Z-stable"
-```
-
-Include the `codebase-graph.json` commit only when `promote.ps1` changes it.
-
-6. Final targeted status check and push - provide a targeted status check before
-   the push, and keep the push command separate from commit command blocks:
-
-```powershell
-git status --short
-git push origin master
-```
-
-If `git push` reports that the repository moved, run this local repo maintenance
-command and retry the push:
-
-```powershell
-git remote set-url origin https://github.com/princeoncada/tidy.git
-git push origin master
-```
-
-Do not emit each commit command as its own separate code block. Use one-by-one
-blocks only when the user explicitly asks for them. Do not combine alpha commits
-and stable promotion commits in the same code block. Commit command blocks must
-be copy-paste runnable as-is in PowerShell.
+Do not emit each alpha commit command as its own separate code block. Use
+one-by-one blocks only when the user explicitly asks for them. Commit command
+blocks must be copy-paste runnable as-is in PowerShell.
 
 ---
 

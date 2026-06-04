@@ -1,10 +1,10 @@
-<!-- Current Version: 1.4.30 -->
+<!-- Current Version: 1.4.31-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.30 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series
+**Current Version**: 1.4.31-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.31 - Workflow Closeout and Open-Phase Fixes
 **Next**: 1.5.0 - Tidy Harness Skills and Hook Contracts
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:

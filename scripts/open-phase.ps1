@@ -4,10 +4,14 @@
 # whose versioning locations are missing the -alpha suffix.
 #
 # Usage:
-#   .\scripts\open-phase.ps1 -Version "1.2.2" -PhaseTitle "Chroma Visibility Fix"
-#   .\scripts\open-phase.ps1 -Version "1.2.2" -PhaseTitle "Chroma Visibility Fix" -Repair
+#   .\scripts\open-phase.ps1 -Version "1.2.2" -PhaseTitle "Chroma Visibility Fix" -NextPhase "1.2.3 - Next Phase"
+#   .\scripts\open-phase.ps1 -Version "1.2.2" -PhaseTitle "Chroma Visibility Fix" -NextPhase "1.2.3 - Next Phase" -Repair
 #   .\scripts\open-phase.ps1 -Version "1.2.6" -PhaseTitle "Roadmap Rewrite" -NextPhase "1.3.0 - Next Phase" -AllowMissingNextPhase
+#   .\scripts\open-phase.ps1 -Version "1.9.9" -PhaseTitle "Final Cleanup" -NoNextPhase
 #
+# Every invocation must declare the next phase: pass -NextPhase "<version - title>"
+# or -NoNextPhase when no planned phase remains. The script errors if neither or
+# both are given.
 # Use -AllowMissingNextPhase only when the scoped patch explicitly adds or
 # renumbers docs/FUTURE_PLANS.md in the same phase.
 #
@@ -28,6 +32,7 @@ param(
     [string]$Version = "",
     [string]$PhaseTitle = "",
     [string]$NextPhase = "",
+    [switch]$NoNextPhase,
     [switch]$Repair,
     [switch]$AllowMissingNextPhase
 )
@@ -41,6 +46,16 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 
 if ([string]::IsNullOrWhiteSpace($PhaseTitle)) {
     Write-Error "-PhaseTitle is required."
+    exit 1
+}
+
+$hasNextPhase = -not [string]::IsNullOrWhiteSpace($NextPhase)
+if ($hasNextPhase -and $NoNextPhase) {
+    Write-Error "Specify either -NextPhase '<next>' or -NoNextPhase, not both."
+    exit 1
+}
+if (-not $hasNextPhase -and -not $NoNextPhase) {
+    Write-Error "You must declare the next phase: pass -NextPhase '<version - title matching a FUTURE_PLANS Planned heading>', or -NoNextPhase when no planned phase remains."
     exit 1
 }
 
@@ -72,7 +87,7 @@ if ($Repair) {
     exit 1
 }
 
-$nextPhaseValue = if ([string]::IsNullOrWhiteSpace($NextPhase)) { $currentNextPhase } else { $NextPhase }
+$nextPhaseValue = if ($NoNextPhase) { "" } else { $NextPhase }
 $today = Get-Date -Format "yyyy-MM-dd"
 $futurePlansChanged = $false
 $graphChanged = $false
