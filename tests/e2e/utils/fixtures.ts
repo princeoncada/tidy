@@ -18,6 +18,7 @@ export const test = base.extend({
       );
     }
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture callback param, not a React hook
     await use(file);
   },
 });
