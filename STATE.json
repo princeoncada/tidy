@@ -1,8 +1,8 @@
 {
-    "version":  "1.4.30",
-    "state":  "stable",
-    "phase":  "1.4.30",
-    "phaseTitle":  "Roadmap Rebaseline for 1.5.x Harness Series",
+    "version":  "1.4.31-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.31",
+    "phaseTitle":  "Workflow Closeout and Open-Phase Fixes",
     "nextPhase":  "1.5.0 - Tidy Harness Skills and Hook Contracts",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
