@@ -147,6 +147,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.5.5 - Real Hook Guardrails~~ (stable 2026-06-04)
 
+- ~~1.5.6 - Phase Eval Artifact Baseline~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -156,17 +158,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.5.6 - Phase Eval Artifact Baseline (active) - see Planned
 ---
 
 ## Planned
-
-### 1.5.6 - Phase Eval Artifact Baseline
-- **Status:** In progress | Priority: P3 AI workflow
-- **Files:** docs/evals/README.md, docs/evals/template.md, ai-harness/skills/tidy-eval-harness/SKILL.md, docs/WORKFLOW.md (only if eval artifacts must be referenced in phase planning), .gitignore (only if local eval run logs are introduced)
-- **Problem:** Phases have no lightweight committed eval/proof artifact format, while the user/controller-run validation boundary must stay intact.
-- **Scope:** add committed eval definition templates (capability checks, regression checks, required proof, human-review gates); keep raw eval run logs local (.tidy-ai/eval-runs/) unless intentionally summarized. Codex still cannot claim validation passed; validate.ps1 stays the final gate.
-- **Acceptance:** eval definitions are committed when useful; raw run logs stay local; Codex cannot claim validation passed; validate.ps1 remains the final gate.
 
 ### 1.6.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
