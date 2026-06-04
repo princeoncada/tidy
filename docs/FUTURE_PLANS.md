@@ -168,12 +168,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.6.3 - Ownership Regression Sweep (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.6.3 - Ownership Regression Sweep
-- **Status:** Open | Priority: P1 security regression
+- **Status:** In progress | Priority: P1 security regression
 - **Files:** trpc/routers/*.ts, tests/
 - **Problem:** After targeted ownership fixes, the router surface needs a final regression sweep.
 - **Scope:** add or update coverage for list, listItem, tag, and view ownership failures; document remaining intentional gaps only if unavoidable.
