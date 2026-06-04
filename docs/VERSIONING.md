@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.6.2-alpha
+- **Current version:** 1.6.2
 - **Current phase:** 1.6.2 - Reorder Target List Ownership Fix
 - **Next phase:** 1.6.3 - Ownership Regression Sweep
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.6.2 | alpha | 2026-06-04 | Reorder Target List Ownership Fix | (in progress) |
+| 1.6.2 | stable | 2026-06-04 | Reorder Target List Ownership Fix | (in progress) |
 | 1.6.1 | stable | 2026-06-04 | List Item Ownership Fixes | (in progress) |
 | 1.6.0 | stable | 2026-06-04 | Ownership Failure Test Baseline | (in progress) |
 | 1.5.8 | stable | 2026-06-04 | Local Evidence Packet Code-Block Contract | (in progress) |
