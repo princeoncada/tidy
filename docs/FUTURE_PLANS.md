@@ -160,6 +160,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.5.8 - Local Evidence Packet Code-Block Contract (active) - see Planned
 ---
 
 ## Planned
