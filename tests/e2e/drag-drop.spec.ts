@@ -51,7 +51,7 @@ async function attachExistingTag(page: Page, listName: string, tagName: string) 
   await expect(card.getByText(tagName, { exact: true })).toBeVisible();
   const tagSearchInput = page.getByPlaceholder("Search or create tag...");
   if (await tagSearchInput.count() > 0) {
-    await card.getByTestId(testIds.tagSelector).click();
+    await page.keyboard.press("Escape");
   }
   await expect(tagSearchInput).toHaveCount(0);
 }
