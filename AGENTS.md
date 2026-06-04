@@ -35,7 +35,7 @@ enough. For source-heavy phases, local-only work, active branches, or any phase
 where graph output matters, the user/controller must provide a Local Evidence
 Packet before ChatGPT scopes implementation.
 
-Required for source-heavy or local-sensitive scoping:
+Local Evidence Packet (required for source-heavy or local-sensitive scoping):
 
     git status --short
     git log --oneline -5
@@ -50,6 +50,12 @@ Optional when relevant:
     Select-String -Path "docs\AI_HANDOFF.md" -Pattern "<topic>"
 
 Rules:
+- Before Claude Code scopes any source-heavy or local-sensitive phase, it must
+  first emit the Local Evidence Packet above as a single copy-paste PowerShell
+  code block for the user to run, then wait for the pasted output before
+  writing the Codex prompt. This pre-scope evidence emission is separate from
+  the Section 2 `npm run graph:codebase` refresh that precedes validate.ps1;
+  do not conflate the two.
 - If local evidence is required but missing, ChatGPT architect must either ask
   for the packet or explicitly scope only from pushed remote state and state
   that limitation.
