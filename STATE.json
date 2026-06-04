@@ -1,9 +1,9 @@
 {
-    "version":  "1.5.1",
-    "state":  "stable",
-    "phase":  "1.5.1",
-    "phaseTitle":  "Local Memory Persistence and Learning Queue",
-    "nextPhase":  "1.5.2 - AI Context Budget Audit",
+    "version":  "1.5.2-alpha",
+    "state":  "alpha",
+    "phase":  "1.5.2",
+    "phaseTitle":  "AI Context Budget Audit",
+    "nextPhase":  "1.5.3 - Phase Eval Artifact Baseline",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }

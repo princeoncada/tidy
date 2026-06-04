@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.5.1",
+  "version": "1.5.2-alpha",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -95,6 +95,13 @@
     },
     {
       "path": "ai-harness/README.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-context-budget/SKILL.md",
       "kind": "file",
       "extension": ".md",
       "symbols": [],
@@ -2059,6 +2066,17 @@
       "extension": ".md",
       "symbols": [
         "safety"
+      ],
+      "imports": []
+    },
+    {
+      "path": "scripts/ai-context-budget.ps1",
+      "kind": "script",
+      "extension": ".ps1",
+      "symbols": [
+        "Get",
+        "Measure",
+        "Show"
       ],
       "imports": []
     },
