@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.5.6 -->
+<!-- Current Version: 1.5.7-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -339,9 +339,9 @@ similar. Use natural next-action wording.
 During active alpha work, provide only the immediate next valid action:
 - If implementation or in-alpha changes exist and validation output has not been provided, give validation commands only.
 - If validation fails, commit any uncommitted prior work first, then give failure classification, an in-alpha fix prompt that follows `docs/CODEX_RULES.md` debugging attempt discipline, and revalidation commands.
-- If validation is green but the alpha branch still has uncommitted changes, give alpha commit commands only.
+- If validation is green but the alpha branch still has uncommitted changes, give alpha commit commands only - except for a low-risk phase (docs, workflow, or tooling only; no product source, tests, or dependency changes), where you may give the alpha commit sequence and the full closeout packet together in one message, with the closeout gated behind a clean `git status --short`.
 - Do not normally label user-facing replies as Stage A, Stage B, Stage C, or similar.
-- Do not provide the full closeout command packet before alpha validation is green and the phase branch is clean.
+- Do not provide the full closeout command packet before alpha validation is green. After it is green, provide it once the branch is clean - or, for a low-risk docs/workflow/tooling phase, in the same message as the alpha commit sequence with the closeout gated behind a clean `git status --short`. Keep commits and closeout in separate messages for any phase that changes product source, tests, or dependencies.
 
 Commit-before-fix is mandatory. While any uncommitted implementation or fix
 work exists on the phase branch, the assistant must provide commit commands for
@@ -353,7 +353,10 @@ paste, a typo'd command that changed no real files), which may be corrected
 without a commit because committing them would be a forbidden fake-activity commit.
 
 Once alpha validation is green and the phase branch is clean, the assistant may
-provide the full closeout command packet. The packet must include, in order:
+provide the full closeout command packet. For a low-risk phase (docs, workflow,
+or tooling only; no product source, tests, or dependency changes) the assistant
+may include this packet in the same message as the alpha commit sequence, gated
+behind a clean `git status --short`. The packet must include, in order:
 - switch to master
 - pull master
 - merge into master using the inline `-m` merge message:
