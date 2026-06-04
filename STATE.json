@@ -1,9 +1,9 @@
 {
-    "version":  "1.5.5",
-    "state":  "stable",
-    "phase":  "1.5.5",
-    "phaseTitle":  "Real Hook Guardrails",
-    "nextPhase":  "1.5.6 - Phase Eval Artifact Baseline",
+    "version":  "1.5.6-alpha",
+    "state":  "alpha",
+    "phase":  "1.5.6",
+    "phaseTitle":  "Phase Eval Artifact Baseline",
+    "nextPhase":  "1.6.0 - Ownership Failure Test Baseline",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }
