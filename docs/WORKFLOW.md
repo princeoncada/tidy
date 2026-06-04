@@ -611,6 +611,7 @@ the source of truth. ChatGPT and Codex do not load skills; they read the docs.
 | tidy-debug-attempt | a check or test failed and a fix is considered | docs/CODEX_RULES.md Debugging Attempt Discipline |
 | tidy-skill-evolution | formalizing local learning candidates | this section + docs/FUTURE_PLANS.md |
 | tidy-context-budget | checking workflow/doc context overhead | docs/COMPACT_STRATEGY.md |
+| tidy-eval-harness | defining or running a phase eval/proof artifact | docs/evals/README.md + docs/evals/template.md |
 
 ### Docs vs Skills Split
 
