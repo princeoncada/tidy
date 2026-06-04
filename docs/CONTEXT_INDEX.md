@@ -36,6 +36,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/NEW_CHATHEAD_OPENER.md` = standard next-chat opener reference only, not active guidance
 - `docs/DECISIONS.md` = durable architecture decisions
 - `codebase-graph.json` = routing/orientation only, not source of truth
+- `ai-harness/README.md` = optional opt-in agent convenience layer (doc-routing skills + inactive hook templates); not a startup read, not source of truth
 
 ---
 
