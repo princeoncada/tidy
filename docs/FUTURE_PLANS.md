@@ -148,12 +148,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.5.2 - AI Context Budget Audit (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.5.2 - AI Context Budget Audit
-- **Status:** Open | Priority: P3 AI workflow
+- **Status:** In progress | Priority: P3 AI workflow
 - **Files:** scripts/ai-context-budget.ps1, ai-harness/skills/tidy-context-budget/SKILL.md, docs/COMPACT_STRATEGY.md, package.json (only if an npm script is appropriate)
 - **Problem:** There is no repeatable way to measure workflow/doc token overhead, so docs-led bloat can creep back undetected.
 - **Scope:** add a manually-run context budget audit estimating startup-required, task-routed, and optional/historical token costs across AGENTS.md, the core docs, and ai-harness/**, flagging top bloat sources and trims. No external services; not part of startup.
