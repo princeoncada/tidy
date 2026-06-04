@@ -1,11 +1,11 @@
-<!-- Current Version: 1.6.2 -->
+<!-- Current Version: 1.6.3-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.2 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.6.2 - Reorder Target List Ownership Fix
-**Next**: 1.6.3 - Ownership Regression Sweep
+**Current Version**: 1.6.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.6.3 - Ownership Regression Sweep
+**Next**: 1.7.0 - Optimistic Queue Race Test Baseline
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
