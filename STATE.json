@@ -1,6 +1,6 @@
 {
-    "version":  "1.5.5-alpha",
-    "state":  "alpha",
+    "version":  "1.5.5",
+    "state":  "stable",
     "phase":  "1.5.5",
     "phaseTitle":  "Real Hook Guardrails",
     "nextPhase":  "1.5.6 - Phase Eval Artifact Baseline",
