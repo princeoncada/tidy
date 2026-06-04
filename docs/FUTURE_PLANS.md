@@ -152,12 +152,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.5.4 - Session Checkpoint Deprecation (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.5.4 - Session Checkpoint Deprecation
-- **Status:** Open | Priority: P2 AI workflow
+- **Status:** In progress | Priority: P2 AI workflow
 - **Files:** docs/WORKFLOW.md, AGENTS.md, docs/CONTEXT_INDEX.md, docs/NEW_CHATHEAD_OPENER.md
 - **Problem:** Session checkpoints and SESSION_LOG are treated as the normal continuation mechanism, which is token-heavy and redundant now that STATE.json + FUTURE_PLANS + AI_HANDOFF + a minimal handoff can continue a session.
 - **Scope:** make minimal handoff (tidy-minimal-handoff) the normal continuation mechanism; demote SESSION_LOG to historical/audit-only; trim the WORKFLOW.md Session Checkpoint Output Contract to an optional audit mode; flip the AGENTS.md Session Continuity and command vocabulary to point at tidy-session-clone / tidy-minimal-handoff; strengthen CONTEXT_INDEX.md and NEW_CHATHEAD_OPENER.md accordingly.

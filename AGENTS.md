@@ -115,19 +115,24 @@ fall back to direct file reads.
 Context can be compacted or lost in long sessions. To survive compaction or a
 model handoff, Claude Code must protect continuity proactively:
 
-- Proactively OFFER a SESSION_LOG checkpoint (do not wait to be asked) when any of:
+- Normal continuation uses a minimal handoff, not a SESSION_LOG checkpoint.
+  Proactively OFFER a minimal handoff (the tidy-minimal-handoff procedure) when
+  any of:
   - the session has run long or context may be compacted soon
   - a phase was just promoted to stable
-  - before a large, risky, or many-file operation
   - the user signals stopping, switching tasks, or stepping away
-- The user decides whether to checkpoint; Claude Code only proposes it.
-- `docs/WORKFLOW.md` owns the session checkpoint output format. Session logs
-  live under `docs/SESSION_LOG/`; `docs/SESSION_LOG.md` is only an index. A
-  checkpoint response provides the Codex prompt for adding a session file, a
-  commit script, and the next-ChatGPT handoff prompt.
-- Continuity invariant: STATE.json + docs/FUTURE_PLANS.md + the latest SESSION_LOG
-  must together let a brand-new model resume with no prior conversation. If they
-  would not, say so and fix the docs before continuing.
+- Offer a SESSION_LOG checkpoint only for the rarer audit cases: a phase
+  retrospective, a durable record before or after a large, risky, or many-file
+  operation, or investigating why a past decision was made. SESSION_LOG is
+  historical audit only, not the normal continuation mechanism.
+- The user decides whether to hand off or checkpoint; Claude Code only proposes it.
+- `docs/WORKFLOW.md` owns both formats: the minimal handoff is the default
+  continuation path; the Session Checkpoint Output Contract is the optional audit
+  path. Session logs live under `docs/SESSION_LOG/`; `docs/SESSION_LOG.md` is
+  only an index.
+- Continuity invariant: STATE.json + docs/FUTURE_PLANS.md + docs/AI_HANDOFF.md +
+  a minimal handoff must together let a brand-new model resume with no prior
+  conversation. If they would not, say so and fix the docs before continuing.
 
 ## Working Posture (Strict Rails, Active Initiative)
 
@@ -144,7 +149,7 @@ Initiative (expected, not optional):
   do not smooth over (see Drift Guardrails).
 - After finishing a step, state what you verified and recommend the next action
   or phase; do not wait to be asked "what now".
-- Proactively offer a SESSION_LOG checkpoint per Session Continuity.
+- Proactively offer a minimal handoff (or, for audit cases only, a SESSION_LOG checkpoint) per Session Continuity.
 - On ambiguity, propose your best interpretation and proceed - flag it once, do
   not stall. Ask only when the answer is genuinely the user's to make.
 - If you notice an out-of-scope issue, name it and where - do not silently fix it.
@@ -176,7 +181,8 @@ Do not read `docs/WORKFLOW.md` at startup. Read it only when writing or reviewin
 | "scope it out" | Write the full Codex prompt + Section 2 validation block |
 | "what's next" | Read docs/FUTURE_PLANS.md fresh, report the next item in the Planned section and summarize it. This is the next planned item, not the roadmap "Next phase" (which comes from STATE.json nextPhase) - distinguish them if both are relevant |
 | "session start" / "continue" | Run Session Start Protocol and output Startup Report |
-| "session checkpoint" / "handoff" | Provide the session checkpoint output contract from docs/WORKFLOW.md: a Codex session log prompt, checkpoint commit script, and next-ChatGPT handoff prompt. Session files live under docs/SESSION_LOG/; docs/SESSION_LOG.md is only an index. |
+| "handoff" / "continue elsewhere" | Run the tidy-minimal-handoff procedure: emit the lowest-token handoff packet (repo, user intent, fresh state from STATE.json, smallest next read set, which Tidy skill to invoke next, do-not-read list). This is the normal continuation mechanism. |
+| "session checkpoint" | Optional audit mode only. Provide the Session Checkpoint Output Contract from docs/WORKFLOW.md (Codex session log prompt, checkpoint commit script, next-ChatGPT handoff prompt) for a retrospective or a risky-op record, not normal continuation. Session files live under docs/SESSION_LOG/; docs/SESSION_LOG.md is only an index. |
 | "I AUTHORIZE CLAUDE CODE TO IMPLEMENT - [reason]" | Fallback only  -  use when Codex hits its token limit mid-implementation. Claude Code never suggests this phrase; the user initiates it. |
 
 When validation checks fail after a Codex implementation, Claude Code must provide a fix master prompt immediately. Never ask the user to authorize direct implementation.

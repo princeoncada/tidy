@@ -30,4 +30,4 @@ Output contract - emit a single handoff block with these fields:
 
 Refusal rules: do not invent state; read STATE.json fresh. If local evidence is required but absent, say so in the packet.
 
-Source of truth: docs/WORKFLOW.md Session Checkpoint Output Contract remains available as the optional audit path; this skill is the lightweight continuation path.
+Source of truth: docs/WORKFLOW.md Session Continuation and Checkpoints (this skill is the normal continuation path; the checkpoint contract is the optional audit mode).

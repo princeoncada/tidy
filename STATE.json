@@ -1,9 +1,9 @@
 {
-    "version":  "1.5.3",
-    "state":  "stable",
-    "phase":  "1.5.3",
-    "phaseTitle":  "Operational Skill Re-Architecture",
-    "nextPhase":  "1.5.4 - Session Checkpoint Deprecation",
+    "version":  "1.5.4-alpha",
+    "state":  "alpha",
+    "phase":  "1.5.4",
+    "phaseTitle":  "Session Checkpoint Deprecation",
+    "nextPhase":  "1.5.5 - Real Hook Guardrails",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }

@@ -14,6 +14,11 @@ https://github.com/princeoncada/tidy
 This opener is intentionally pointer-only and embeds no version or phase
 snapshot. Read STATE.json and docs/FUTURE_PLANS.md fresh for current state.
 
+Normal cross-session continuation uses a minimal handoff plus the source-of-truth
+docs read fresh, not a SESSION_LOG checkpoint. SESSION_LOG is historical audit
+only. A Claude Code session can run the tidy-session-clone skill to perform the
+startup read set.
+
 Before implementing anything:
 1. Verify remote master first.
 2. Read STATE.json.
