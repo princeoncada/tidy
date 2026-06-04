@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.30-alpha -->
+<!-- Current Version: 1.4.30 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.30-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.30 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series
 **Next**: 1.5.0 - Tidy Harness Skills and Hook Contracts
 
