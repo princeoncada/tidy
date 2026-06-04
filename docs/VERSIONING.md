@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.4.26
-- **Current phase:** 1.4.26 - Custom View Reorder E2E Stabilization
-- **Next phase:** 1.4.27 - Authenticated E2E Suite Hardening
+- **Current version:** 1.4.27-alpha
+- **Current phase:** 1.4.27 - Authenticated E2E Suite Hardening
+- **Next phase:** 1.4.28 - Promote State-Doc Sync Automation
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.4.27 | alpha | 2026-06-03 | Authenticated E2E Suite Hardening | (in progress) |
 | 1.4.26 | stable | 2026-06-02 | Custom View Reorder E2E Stabilization | (in progress) |
 | 1.4.25 | stable | 2026-06-02 | ChatGPT and Codex Role Formalization | (in progress) |
 | 1.4.24 | stable | 2026-06-01 | Routing Consolidation and CODEX_RULES Trim | (in progress) |
