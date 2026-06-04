@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.27-alpha",
-    "state":  "alpha",
+    "version":  "1.4.27",
+    "state":  "stable",
     "phase":  "1.4.27",
     "phaseTitle":  "Authenticated E2E Suite Hardening",
     "nextPhase":  "1.4.28 - Promote State-Doc Sync Automation",
