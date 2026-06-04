@@ -55,8 +55,7 @@ test("create multiple items", async ({ page }) => {
   await cleanupNamedList(page, listName);
 });
 
-// FIXME(1.4.27): optimistic/refetch fragility - tracked in Authenticated E2E Suite Hardening
-test.fixme("rename item if supported", async ({ page }) => {
+test("rename item if supported", async ({ page }) => {
   const listName = uniqueTestName("rename-item-list");
   const itemName = uniqueTestName("item-original");
   const renamedItem = uniqueTestName("item-renamed");
@@ -68,8 +67,7 @@ test.fixme("rename item if supported", async ({ page }) => {
   await cleanupNamedList(page, listName);
 });
 
-// FIXME(1.4.27): optimistic/refetch fragility - tracked in Authenticated E2E Suite Hardening
-test.fixme("delete item if supported", async ({ page }) => {
+test("delete item if supported", async ({ page }) => {
   const listName = uniqueTestName("delete-item-list");
   const itemName = uniqueTestName("item-delete");
   await createList(page, listName);

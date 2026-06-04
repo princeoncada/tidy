@@ -1,11 +1,11 @@
-<!-- Current Version: 1.4.26 -->
+<!-- Current Version: 1.4.27-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.26 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.4.26 - Custom View Reorder E2E Stabilization
-**Next**: 1.4.27 - Authenticated E2E Suite Hardening
+**Current Version**: 1.4.27-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.4.27 - Authenticated E2E Suite Hardening
+**Next**: 1.4.28 - Promote State-Doc Sync Automation
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -18,7 +18,7 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 
 ## Latest Completed Change
 
-**1.4.26 - Custom View Reorder E2E Stabilization** stabilized the authenticated E2E baseline around custom view reorder by proving custom view card reorder and list reorder green, forcing authenticated E2E serial execution, adding a pre-run `e2e-*` data purge, hardening create/select/tag-picker test helpers, and allowing only the narrow benign view-create 404 console error; seven remaining authenticated E2E tests were quarantined with `test.fixme` and deferred to 1.4.27.
+**1.4.26 - Custom View Reorder E2E Stabilization** stabilized the authenticated E2E baseline around custom view reorder by proving custom view card reorder and list reorder green, forcing authenticated E2E serial execution, adding a pre-run `e2e-*` data purge, hardening create/select/tag-picker test helpers, and allowing only the narrow benign view-create 404 console error; remaining authenticated rename/delete/view timing cases were deferred to 1.4.27.
 
 ---
 
@@ -81,6 +81,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Actions that must all persist use `enqueue`.
 - Active optimistic scopes include `views`, `list-tags`, `list-order`, `item-order`, `view-selection`, `list-edits`, and `item-edits`.
 - Optimistic markers are `isOptimistic: true` on list/item shapes and `userId: "optimistic"` on view shapes.
+- 1.4.27 fixed inline rename display reconciliation by syncing `ListInlineEdit` display/edit state from authoritative props only while not editing; optimistic instant display on save remains intact.
+- 1.4.27 kept delete product behavior unchanged and hardened delete/reload E2E coverage by waiting for successful delete mutations instead of broadening the console gate.
 
 **Views and tags:**
 - Custom view membership is materialized in `ViewList`; it is not computed at read time.
@@ -128,8 +130,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Tag deletes or rapid tag toggles can affect custom view membership mid-operation.
 - Fast view switching depends on latest-selected-view guards to avoid stale repaints.
 - Immediate item creation after list creation is covered, but nearby optimistic list/tag/item races remain risk areas.
+- Inline list/item rename uses component-local edit state; the row remounts when an optimistic row is swapped for its canonical server record, which can drop an in-progress manual rename. Authenticated E2E re-resolves the inline input after entering edit mode and awaits the rename mutation before reload; a product fix (stable row identity or lifted edit state) is a candidate follow-up.
 - Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
-- Inline rename (`ListInlineEdit`) and item/list delete hold edit/delete state in component-local `useState` that a background refetch can drop; tracked in 1.4.27.
 
 **Local-first and sync:**
 - PWA/offline behavior is not implemented despite product goals.
@@ -148,7 +150,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Workflow:**
 - Assistant responses can drift if they provide commit, merge, promote, or push commands before the user/controller has supplied validation and status evidence. `docs/WORKFLOW.md` owns the stage-gated response rule.
 - Codex debugging attempts can drift if failure classes and hypotheses are not stated before fixes. `docs/CODEX_RULES.md` owns the debugging attempt discipline.
-- Product work resumes with `1.4.27 - Authenticated E2E Suite Hardening`; authenticated E2E requires real Supabase credentials and storage state.
+- Product work resumes with `1.4.27 - Authenticated E2E Suite Hardening` validation/closeout; authenticated E2E requires real Supabase credentials and storage state.
 
 ---
 

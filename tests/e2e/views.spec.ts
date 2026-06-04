@@ -23,8 +23,7 @@ test.afterEach(async () => {
   expectNoConsoleErrors(consoleErrors);
 });
 
-// FIXME(1.4.27): view card intermittently hidden after create - tracked in Authenticated E2E Suite Hardening
-test.fixme("tagged All Lists entries appear in custom views after reload", async ({ page }) => {
+test("tagged All Lists entries appear in custom views after reload", async ({ page }) => {
   const listName = uniqueTestName("all-lists-view-list");
   const tagName = uniqueTestName("all-lists-view-tag");
   const viewName = uniqueTestName("all-lists-view");
@@ -101,8 +100,7 @@ test("removed matching tags keep lists out of custom views after reload", async 
   await deleteList(page, listName);
 });
 
-// FIXME(1.4.27): intermittently hidden view card after create - tracked in Authenticated E2E Suite Hardening
-test.fixme("latest selected view wins after fast switching", async ({ page }) => {
+test("latest selected view wins after fast switching", async ({ page }) => {
   const matchingList = uniqueTestName("fast-switch-match-list");
   const hiddenList = uniqueTestName("fast-switch-hidden-list");
   const tagName = uniqueTestName("fast-switch-tag");
