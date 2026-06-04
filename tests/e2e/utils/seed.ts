@@ -3,13 +3,35 @@ import { expect, type Page } from "@playwright/test";
 import { getListCards, getVisibleListCard } from "./assertions";
 import { testIds } from "./test-ids";
 
-export const authStoragePath = "tests/.auth/user.json";
+const parallelIndex = process.env.TEST_PARALLEL_INDEX ?? "0";
 const runId = process.env.E2E_RUN_ID ?? new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 let sequence = 0;
 
+export type E2eUser = { email: string; password: string };
+
+export function resolveE2eUserPool(): E2eUser[] {
+  const pool: E2eUser[] = [];
+  for (let i = 1; ; i += 1) {
+    const email = process.env[`E2E_TEST_EMAIL_${i}`];
+    const password = process.env[`E2E_TEST_PASSWORD_${i}`];
+    if (!email || !password) break;
+    pool.push({ email, password });
+  }
+  if (pool.length === 0) {
+    const email = process.env.E2E_TEST_EMAIL;
+    const password = process.env.E2E_TEST_PASSWORD;
+    if (email && password) pool.push({ email, password });
+  }
+  return pool;
+}
+
+export function authStoragePathForIndex(index: number) {
+  return `tests/.auth/user-${index}.json`;
+}
+
 export function uniqueTestName(prefix: string) {
   sequence += 1;
-  const suffix = `${runId}-${String(sequence).padStart(3, "0")}`;
+  const suffix = `w${parallelIndex}-${runId}-${String(sequence).padStart(3, "0")}`;
   return `e2e-${prefix}-${suffix}`;
 }
 
