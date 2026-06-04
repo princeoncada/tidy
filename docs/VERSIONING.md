@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.5.2
-- **Current phase:** 1.5.2 - AI Context Budget Audit
-- **Next phase:** 1.5.3 - Phase Eval Artifact Baseline
+- **Current version:** 1.5.3-alpha
+- **Current phase:** 1.5.3 - Operational Skill Re-Architecture
+- **Next phase:** 1.5.4 - Session Checkpoint Deprecation
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.5.3 | alpha | 2026-06-04 | Operational Skill Re-Architecture | (in progress) |
 | 1.5.2 | stable | 2026-06-04 | AI Context Budget Audit | (in progress) |
 | 1.5.1 | stable | 2026-06-04 | Local Memory Persistence and Learning Queue | (in progress) |
 | 1.5.0 | stable | 2026-06-04 | Tidy Harness Skills and Hook Contracts | (in progress) |
