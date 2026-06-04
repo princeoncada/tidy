@@ -1,9 +1,9 @@
 {
-    "version":  "1.5.4",
-    "state":  "stable",
-    "phase":  "1.5.4",
-    "phaseTitle":  "Session Checkpoint Deprecation",
-    "nextPhase":  "1.5.5 - Real Hook Guardrails",
+    "version":  "1.5.5-alpha",
+    "state":  "alpha",
+    "phase":  "1.5.5",
+    "phaseTitle":  "Real Hook Guardrails",
+    "nextPhase":  "1.5.6 - Phase Eval Artifact Baseline",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }

@@ -1,37 +1,62 @@
 # Tidy AI Harness Hooks
 
-These hook templates are opt-in and inactive by default. Nothing here runs
-unless a user or controller intentionally activates it.
+Opt-in Claude Code hook guardrails for the Tidy repo. Inactive by default:
+nothing runs unless you copy a profile into your gitignored local settings.
 
-## Default state
+## What these are
 
-- hooks.template.json ships with "enabled": false and "activationProfile": null.
-  It is a template, not an active configuration.
-- Hook scripts exist under ai-harness/hooks/scripts/ as of 1.5.1, but the
-  template keeps every hook disabled, so nothing runs by default.
+Real Claude Code hooks (SessionStart / PreToolUse) expressed in
+hooks.template.json. Claude Code does NOT load hooks.template.json itself - it is
+a reference template. Activation means copying one profile's "hooks" object into
+.claude/settings.local.json, which is gitignored so activation is always personal
+and never committed.
+
+## Profiles
+
+- minimal: SessionStart only - writes .tidy-ai/session-state.json and prints a
+  reminder to use tidy-session-clone. No blocking.
+- standard: minimal + command-boundary (PreToolUse on Bash). Blocks the assistant
+  from running user/controller-owned commands: git commit/push/merge/add/rebase,
+  destructive reset, commit.ps1, promote.ps1, open-phase.ps1, validate.ps1, and
+  npm run test:ci. Read-only commands pass.
+- strict: standard + edit-boundary (PreToolUse on Edit/Write/NotebookEdit). Blocks
+  edits to product source (app, components, hooks, lib, trpc, prisma, tests) so a
+  planning session cannot edit product code. Docs, .claude, ai-harness, and
+  scripts remain editable.
 
 ## Activation (opt-in only)
 
-1. Copy hooks.template.json to your own activated config outside version control
-   or under a gitignored path.
-2. Set "enabled": true and choose an "activationProfile".
-3. The referenced scripts exist under ai-harness/hooks/scripts/; they run only
-   when you enable a hook in your activated config. Until enabled, activation is
-   a no-op.
+1. Open hooks.template.json and pick a profile under "_profiles".
+2. Copy that profile's "hooks" object into .claude/settings.local.json (create
+   the file if missing). The pasted file looks like: { "hooks": { ... } }
+3. Reload the Claude Code session so it reads settings.local.json.
+4. .claude/settings.local.json is gitignored; activation is never committed.
+
+## Blocking behavior
+
+The guardrail scripts read the Claude Code PreToolUse JSON from stdin and exit
+with code 2 to block, printing a short reason to stderr. They fail open (exit 0)
+on empty or unparseable input so a malformed payload cannot wedge a session.
+They block only the assistant's own tool calls; commands you run in your own
+terminal are unaffected.
 
 ## Hard rules for any hook
 
 - Never edit repo docs or source files.
 - Never commit, push, or create branches.
 - Never run validation or claim validation results.
-- Write only to gitignored local memory (introduced in 1.5.1); never commit raw
+- Write only to gitignored local memory (.tidy-ai/); never commit raw
   observations or transcripts.
 - Hooks are never part of the session startup read set.
 
 ## Manual verification (opt-in)
 
-These scripts have no app or CI test surface; verify them manually if desired:
-- Run ai-harness/hooks/scripts/observe.ps1 -Note "test" and confirm
-  .tidy-ai/learning-queue.md is created.
-- Run git status --short and git check-ignore .tidy-ai/ to confirm .tidy-ai/ is
-  gitignored and never staged.
+These scripts have no app or CI test surface; verify them manually:
+- A Bash payload that should block (expect exit code 2):
+  pipe {"tool_name":"Bash","tool_input":{"command":"git commit -m x"}} into
+  command-boundary-check.ps1.
+- A read-only command that should pass (expect exit code 0):
+  pipe {"tool_name":"Bash","tool_input":{"command":"git status"}} into
+  command-boundary-check.ps1.
+- Confirm .tidy-ai/ and .claude/settings.local.json stay gitignored:
+  git status --short and git check-ignore .tidy-ai/ .claude/settings.local.json.

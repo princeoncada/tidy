@@ -25,7 +25,7 @@ if (-not (Test-Path $queue)) {
         "",
         "Local scratch only. Entries are never auto-promoted and are never",
         "committed. They become committed docs only via a normal user-approved",
-        "phase. See ai-harness/skills/tidy-learning-review/SKILL.md.",
+        "phase. See .claude/skills/tidy-skill-evolution/SKILL.md.",
         "",
         "## Candidates",
         ""

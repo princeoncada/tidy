@@ -49,3 +49,6 @@ next-env.d.ts
 
 # tidy ai harness local memory (never commit raw observations or session scratch)
 /.tidy-ai/
+
+# activated Claude Code hook config is personal and never committed
+/.claude/settings.local.json

@@ -37,3 +37,5 @@ $sessionState = [ordered]@{
 $sessionState | ConvertTo-Json | Set-Content -Path (Join-Path $memDir "session-state.json") -Encoding utf8
 
 Write-Host "tidy-ai: session state written to .tidy-ai/session-state.json (local, gitignored)."
+Write-Host "tidy-ai: run the tidy-session-clone skill for the startup read set and report."
+Write-Host "tidy-ai: SESSION_LOG is historical audit only; normal continuation uses tidy-minimal-handoff."

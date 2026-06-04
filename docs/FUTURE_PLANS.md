@@ -154,12 +154,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.5.5 - Real Hook Guardrails (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.5.5 - Real Hook Guardrails
-- **Status:** Open | Priority: P3 AI workflow
+- **Status:** In progress | Priority: P3 AI workflow
 - **Files:** ai-harness/hooks/hooks.template.json, ai-harness/hooks/README.md, ai-harness/hooks/scripts/*, .gitignore, scripts/validate.ps1 (only if the skill-existence check is added)
 - **Problem:** The hook template is not the real Claude Code hooks schema, so nothing executes it; the highest-value guardrail (command-boundary) does not exist.
 - **Scope:** express hooks in the real Claude Code hook schema; add a command-boundary PreToolUse guardrail (block git commit/push/merge, npm run test:ci, validate.ps1, promote.ps1, open-phase.ps1) and an edit-boundary guardrail (strict profile); define minimal/standard/strict profiles; keep hooks opt-in and inactive by default; gitignore the activated local settings; optionally have validate.ps1 assert required skill files exist and carry a Source-of-truth pointer.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.5.4",
+  "version": "1.5.5-alpha",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -127,6 +127,20 @@
       "path": "ai-harness/hooks/README.md",
       "kind": "file",
       "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/scripts/command-boundary-check.ps1",
+      "kind": "file",
+      "extension": ".ps1",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/scripts/edit-boundary-check.ps1",
+      "kind": "file",
+      "extension": ".ps1",
       "symbols": [],
       "imports": []
     },
