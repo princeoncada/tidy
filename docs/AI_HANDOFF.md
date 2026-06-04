@@ -150,7 +150,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Workflow:**
 - Assistant responses can drift if they provide commit, merge, promote, or push commands before the user/controller has supplied validation and status evidence. `docs/WORKFLOW.md` owns the stage-gated response rule.
 - Codex debugging attempts can drift if failure classes and hypotheses are not stated before fixes. `docs/CODEX_RULES.md` owns the debugging attempt discipline.
-- Product work resumes with `1.4.27 - Authenticated E2E Suite Hardening` validation/closeout; authenticated E2E requires real Supabase credentials and storage state.
+- Product work resumes with `1.4.28 - Promote State-Doc Sync Automation`; authenticated E2E requires real Supabase credentials and storage state.
 
 ---
 
@@ -158,7 +158,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md` first.
 2. Use `docs/CONTEXT_INDEX.md` to choose any additional task-specific read set.
-3. Scope `1.4.27 - Authenticated E2E Suite Hardening`.
+3. Scope `1.4.28 - Promote State-Doc Sync Automation`.
 4. Keep `docs/PHASE_LOG.md` historical only. Do not use it as active phase guidance.
 5. Preserve the Codex validation boundary.
 
