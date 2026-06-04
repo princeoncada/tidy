@@ -1,9 +1,9 @@
 {
-    "version":  "1.4.26",
-    "state":  "stable",
-    "phase":  "1.4.26",
-    "phaseTitle":  "Custom View Reorder E2E Stabilization",
-    "nextPhase":  "1.4.27 - Authenticated E2E Suite Hardening",
+    "version":  "1.4.27-alpha",
+    "state":  "alpha",
+    "phase":  "1.4.27",
+    "phaseTitle":  "Authenticated E2E Suite Hardening",
+    "nextPhase":  "1.4.28 - Promote State-Doc Sync Automation",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-02"
+    "lastUpdated":  "2026-06-03"
 }
