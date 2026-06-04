@@ -131,6 +131,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.29 - Parallel Auth E2E Isolation~~ (stable 2026-06-04)
 
+- ~~1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -140,17 +142,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series
-- **Status:** In progress | Priority: P2 workflow roadmap
-- **Files:** docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, scripts/validate.ps1
-- **Problem:** A new AI harness workflow series should occupy 1.5.x, but 1.5.x-1.10.x are already assigned to product, security, maintainability, and polish phases.
-- **Scope:** insert the new 1.5.0-1.5.3 AI harness series, renumber all existing planned phases up one minor (1.5.x->1.6.x through 1.10.x->1.11.x) preserving status/priority/files/problem/scope/acceptance verbatim, repoint stale version cross-references, and advance nextPhase. Docs/roadmap only; no product behavior change.
-- **Acceptance:** monotonic version order preserved; renumbered phases keep their content; validate.ps1 passes; nextPhase resolves to the new 1.5.0 harness phase.
 
 ### 1.5.0 - Tidy Harness Skills and Hook Contracts
 - **Status:** Open | Priority: P2 AI workflow
