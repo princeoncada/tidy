@@ -143,6 +143,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.5.3 - Operational Skill Re-Architecture~~ (stable 2026-06-04)
 
+- ~~1.5.4 - Session Checkpoint Deprecation~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -152,17 +154,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.5.4 - Session Checkpoint Deprecation (active) - see Planned
 ---
 
 ## Planned
-
-### 1.5.4 - Session Checkpoint Deprecation
-- **Status:** In progress | Priority: P2 AI workflow
-- **Files:** docs/WORKFLOW.md, AGENTS.md, docs/CONTEXT_INDEX.md, docs/NEW_CHATHEAD_OPENER.md
-- **Problem:** Session checkpoints and SESSION_LOG are treated as the normal continuation mechanism, which is token-heavy and redundant now that STATE.json + FUTURE_PLANS + AI_HANDOFF + a minimal handoff can continue a session.
-- **Scope:** make minimal handoff (tidy-minimal-handoff) the normal continuation mechanism; demote SESSION_LOG to historical/audit-only; trim the WORKFLOW.md Session Checkpoint Output Contract to an optional audit mode; flip the AGENTS.md Session Continuity and command vocabulary to point at tidy-session-clone / tidy-minimal-handoff; strengthen CONTEXT_INDEX.md and NEW_CHATHEAD_OPENER.md accordingly.
-- **Acceptance:** normal continuation is documented as minimal handoff + source-of-truth docs; SESSION_LOG is explicitly audit-only; session checkpoint remains available as an optional mode; no versioning or validation boundary change.
 
 ### 1.5.5 - Real Hook Guardrails
 - **Status:** Open | Priority: P3 AI workflow
