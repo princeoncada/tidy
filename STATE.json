@@ -1,6 +1,6 @@
 {
-    "version":  "1.6.2-alpha",
-    "state":  "alpha",
+    "version":  "1.6.2",
+    "state":  "stable",
     "phase":  "1.6.2",
     "phaseTitle":  "Reorder Target List Ownership Fix",
     "nextPhase":  "1.6.3 - Ownership Regression Sweep",
