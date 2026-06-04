@@ -101,6 +101,13 @@
       "imports": []
     },
     {
+      "path": "ai-harness/skills/tidy-context-budget/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": "ai-harness/skills/tidy-debug-attempt/SKILL.md",
       "kind": "file",
       "extension": ".md",
@@ -2059,6 +2066,17 @@
       "extension": ".md",
       "symbols": [
         "safety"
+      ],
+      "imports": []
+    },
+    {
+      "path": "scripts/ai-context-budget.ps1",
+      "kind": "script",
+      "extension": ".ps1",
+      "symbols": [
+        "Get",
+        "Measure",
+        "Show"
       ],
       "imports": []
     },
