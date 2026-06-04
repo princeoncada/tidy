@@ -74,9 +74,9 @@ export async function createListAndImmediatelyAddItem(
 
 export async function renameList(page: Page, oldName: string, newName: string) {
   const card = await getVisibleListCard(page, oldName);
-  const input = card.getByTestId(testIds.listTitleInput);
 
   await card.getByTestId(testIds.listTitle).click();
+  const input = await firstVisible(page.getByTestId(testIds.listTitleInput));
   await expect(input).toBeVisible();
   await input.fill(newName);
   await input.press("Enter");
@@ -114,9 +114,9 @@ export async function createItem(page: Page, listName: string, itemName: string)
 
 export async function renameItem(page: Page, oldName: string, newName: string) {
   const item = await firstVisible(page.getByTestId(testIds.listItem).filter({ hasText: oldName }));
-  const input = item.getByTestId(testIds.listTitleInput);
 
   await item.getByTestId(testIds.listItemTitle).click();
+  const input = await firstVisible(page.getByTestId(testIds.listTitleInput));
   await expect(input).toBeVisible();
   await input.fill(newName);
   await input.press("Enter");
