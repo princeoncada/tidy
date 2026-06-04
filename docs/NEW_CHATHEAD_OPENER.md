@@ -11,8 +11,8 @@ You are continuing the Tidy repository.
 Repository:
 https://github.com/princeoncada/tidy
 
-Current confirmed stable version: 1.4.27 - Authenticated E2E Suite Hardening.
-Next planned phase: 1.4.28 - Promote State-Doc Sync Automation.
+This opener is intentionally pointer-only and embeds no version or phase
+snapshot. Read STATE.json and docs/FUTURE_PLANS.md fresh for current state.
 
 Before implementing anything:
 1. Verify remote master first.
