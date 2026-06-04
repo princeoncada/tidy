@@ -1,6 +1,6 @@
 {
-    "version":  "1.5.8-alpha",
-    "state":  "alpha",
+    "version":  "1.5.8",
+    "state":  "stable",
     "phase":  "1.5.8",
     "phaseTitle":  "Local Evidence Packet Code-Block Contract",
     "nextPhase":  "1.6.0 - Ownership Failure Test Baseline",
