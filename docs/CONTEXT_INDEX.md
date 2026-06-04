@@ -37,6 +37,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/DECISIONS.md` = durable architecture decisions
 - `codebase-graph.json` = routing/orientation only, not source of truth
 - `ai-harness/README.md` = optional opt-in agent convenience layer (doc-routing skills + inactive hook templates); not a startup read, not source of truth
+- `.tidy-ai/` = local-only, gitignored agent scratch and learning queue written by opt-in hooks; never committed, not a read target, not source of truth
 
 ---
 
