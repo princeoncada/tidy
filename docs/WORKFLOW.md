@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.5.7 -->
+<!-- Current Version: 1.5.8-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -70,6 +70,13 @@ OPTIONAL LOCAL EVIDENCE:
 
 Paste the packet into ChatGPT chat before scoping whenever local state can
 change the architecture decision or implementation prompt.
+
+When Claude Code is about to scope a source-heavy or local-sensitive phase, it
+must emit the Local Evidence Packet as a single copy-paste PowerShell code
+block before writing the Codex prompt, then wait for the user to paste the
+output. This pre-scope evidence emission is separate from, and must not be
+conflated with, the Section 2 `npm run graph:codebase` refresh that precedes
+`validate.ps1` when a phase adds, removes, or renames files.
 
 ---
 

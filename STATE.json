@@ -1,8 +1,8 @@
 {
-    "version":  "1.5.7",
-    "state":  "stable",
-    "phase":  "1.5.7",
-    "phaseTitle":  "Consolidated Closeout Packet",
+    "version":  "1.5.8-alpha",
+    "state":  "alpha",
+    "phase":  "1.5.8",
+    "phaseTitle":  "Local Evidence Packet Code-Block Contract",
     "nextPhase":  "1.6.0 - Ownership Failure Test Baseline",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
