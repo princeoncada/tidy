@@ -2751,6 +2751,7 @@
         "USER_B",
         "LIST_A",
         "LIST_FOREIGN",
+        "LIST_B",
         "ITEM_A",
         "ITEM_B",
         "TAG_A",
@@ -2932,7 +2933,9 @@
         "result",
         "updatedListItems",
         "itemIds",
-        "ownedItems"
+        "ownedItems",
+        "targetListIds",
+        "ownedTargetLists"
       ],
       "imports": [
         "zod",
