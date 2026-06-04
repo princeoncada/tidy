@@ -1,9 +1,9 @@
 {
-    "version":  "1.5.2",
-    "state":  "stable",
-    "phase":  "1.5.2",
-    "phaseTitle":  "AI Context Budget Audit",
-    "nextPhase":  "1.5.3 - Phase Eval Artifact Baseline",
+    "version":  "1.5.3-alpha",
+    "state":  "alpha",
+    "phase":  "1.5.3",
+    "phaseTitle":  "Operational Skill Re-Architecture",
+    "nextPhase":  "1.5.4 - Session Checkpoint Deprecation",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }
