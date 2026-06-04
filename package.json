@@ -5,6 +5,7 @@
   "scripts": {
     "graph:codebase": "powershell -ExecutionPolicy Bypass -File scripts/generate-codebase-graph.ps1",
     "graph:audit": "powershell -ExecutionPolicy Bypass -File scripts/audit-codebase-graph.ps1",
+    "budget:context": "powershell -ExecutionPolicy Bypass -File scripts/ai-context-budget.ps1",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
