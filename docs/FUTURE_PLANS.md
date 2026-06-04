@@ -134,12 +134,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.27 - Authenticated E2E Suite Hardening (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.4.27 - Authenticated E2E Suite Hardening
-- **Status:** Open | Priority: P1 test reliability
+- **Status:** In progress | Priority: P1 test reliability
 - **Files:** components/list/ListInlineEdit.tsx, components/list/ListItemComponent.tsx, tests/e2e/*
 - **Problem:** Inline rename and item/list delete rely on component-local state that can be dropped by a background cache refetch; the strict console gate also flags mutations aborted by reload. Seven authenticated E2E tests are quarantined (test.fixme): rename a list, rename item, delete a list, delete item, tagged All Lists entries appear in custom views after reload (views.spec, intermittently hidden view card), reorder lists inside a custom view persists after reload (drag-drop, tag-picker dropdown dismissal), latest selected view wins after fast switching (views).
 - **Scope:** investigate whether inline-edit/delete state must survive refetch (product) vs. test waits; decide whether aborted-on-reload mutations should be silenced or awaited; un-quarantine the seven tests.
