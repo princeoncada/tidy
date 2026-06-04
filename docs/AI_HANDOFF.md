@@ -1,11 +1,11 @@
-<!-- Current Version: 1.5.5 -->
+<!-- Current Version: 1.5.6-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.5.5 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.5.5 - Real Hook Guardrails
-**Next**: 1.5.6 - Phase Eval Artifact Baseline
+**Current Version**: 1.5.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.5.6 - Phase Eval Artifact Baseline
+**Next**: 1.6.0 - Ownership Failure Test Baseline
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.

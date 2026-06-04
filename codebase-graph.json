@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.5.5",
+  "version": "1.5.6-alpha",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -58,6 +58,13 @@
       "symbols": [
         "is"
       ],
+      "imports": []
+    },
+    {
+      "path": ".claude/skills/tidy-eval-harness/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
       "imports": []
     },
     {
@@ -1479,6 +1486,20 @@
     },
     {
       "path": "docs/deprecated/testing.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/evals/README.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/evals/template.md",
       "kind": "documentation",
       "extension": ".md",
       "symbols": [],

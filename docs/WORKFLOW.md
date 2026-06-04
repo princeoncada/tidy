@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.5.5 -->
+<!-- Current Version: 1.5.6-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -611,6 +611,7 @@ the source of truth. ChatGPT and Codex do not load skills; they read the docs.
 | tidy-debug-attempt | a check or test failed and a fix is considered | docs/CODEX_RULES.md Debugging Attempt Discipline |
 | tidy-skill-evolution | formalizing local learning candidates | this section + docs/FUTURE_PLANS.md |
 | tidy-context-budget | checking workflow/doc context overhead | docs/COMPACT_STRATEGY.md |
+| tidy-eval-harness | defining or running a phase eval/proof artifact | docs/evals/README.md + docs/evals/template.md |
 
 ### Docs vs Skills Split
 
