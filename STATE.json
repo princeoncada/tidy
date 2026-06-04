@@ -1,6 +1,6 @@
 {
-    "version":  "1.6.1-alpha",
-    "state":  "alpha",
+    "version":  "1.6.1",
+    "state":  "stable",
     "phase":  "1.6.1",
     "phaseTitle":  "List Item Ownership Fixes",
     "nextPhase":  "1.6.2 - Reorder Target List Ownership Fix",
