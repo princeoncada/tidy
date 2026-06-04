@@ -53,6 +53,25 @@ Before this strategy: opening entrypoint + all feature docs + phase logs at sess
 
 ---
 
+## Context Budget Audit
+
+Run `npm run budget:context` (or `scripts/ai-context-budget.ps1`) on demand to
+estimate the token cost of the AI workflow surface and catch docs-led bloat
+before it creeps back. The audit is never part of session startup and calls no
+external service.
+
+It groups files by how often they load:
+- Startup docs (STATE.json, docs/FUTURE_PLANS.md, AGENTS.md, CLAUDE.md), measured
+  against the session-start budget above.
+- codebase-graph.json, reported separately as an orientation artifact read
+  selectively, so its full size overstates real startup cost.
+- Task-routed docs loaded during scoping or implementation.
+- Optional/historical files (phase log, session logs, ai-harness/**) that cost
+  nothing until read.
+
+Estimates use a characters/4 heuristic, so treat them as relative signal, not an
+exact tokenizer. Use the top bloat sources to decide what to trim.
+
 ## Graphify Code Navigation
 
 tidy's graph is the committed `codebase-graph.json` (a normalized symbol/import
