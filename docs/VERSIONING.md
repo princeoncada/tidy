@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.6.0-alpha
+- **Current version:** 1.6.0
 - **Current phase:** 1.6.0 - Ownership Failure Test Baseline
 - **Next phase:** 1.6.1 - List Item Ownership Fixes
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.6.0 | alpha | 2026-06-04 | Ownership Failure Test Baseline | (in progress) |
+| 1.6.0 | stable | 2026-06-04 | Ownership Failure Test Baseline | (in progress) |
 | 1.5.8 | stable | 2026-06-04 | Local Evidence Packet Code-Block Contract | (in progress) |
 | 1.5.7 | stable | 2026-06-04 | Consolidated Closeout Packet | (in progress) |
 | 1.5.6 | stable | 2026-06-04 | Phase Eval Artifact Baseline | (in progress) |
