@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.5.3-alpha",
+  "version": "1.5.3",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -83,6 +83,13 @@
     },
     {
       "path": ".claude/skills/tidy-validation-judge/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".tidy-ai/learning-queue.md",
       "kind": "file",
       "extension": ".md",
       "symbols": [],
