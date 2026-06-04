@@ -16,3 +16,4 @@ Session logs are historical context only and do not replace source-of-truth docs
   1.4.9 through the 1.4.17 session log folder contract correction.
 - `docs/SESSION_LOG/2026-06-03-session-02.md` - 1.4.27 authenticated E2E suite hardening closeout checkpoint.
 - `docs/SESSION_LOG/2026-06-03-session-03.md` - 1.4.28 state-doc sync automation closeout checkpoint.
+- `docs/SESSION_LOG/2026-06-04-session-01.md` - 1.4.29 parallel auth E2E, promote-drift recovery, 1.4.30 1.5.x harness roadmap rebaseline, and 1.4.31 workflow closeout/open-phase fixes.
