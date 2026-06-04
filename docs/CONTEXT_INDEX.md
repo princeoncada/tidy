@@ -31,7 +31,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/WORKFLOW.md` = process and phase workflow
 - `docs/VERSIONING.md` = versioning rules and history table
 - `docs/PHASE_LOG.md` = historical traceability only, not active guidance
-- `docs/SESSION_LOG/` = historical session continuity logs only, not active guidance
+- `docs/SESSION_LOG/` = historical audit only (retrospectives, risky-op records); not the continuation mechanism and not active guidance. Normal continuation uses the minimal handoff (`tidy-minimal-handoff`).
 - `docs/SESSION_LOG.md` = session log index/pointer only, not active guidance
 - `docs/NEW_CHATHEAD_OPENER.md` = standard next-chat opener reference only, not active guidance
 - `docs/DECISIONS.md` = durable architecture decisions
