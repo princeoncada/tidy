@@ -1,6 +1,6 @@
 {
-    "version":  "1.6.0-alpha",
-    "state":  "alpha",
+    "version":  "1.6.0",
+    "state":  "stable",
     "phase":  "1.6.0",
     "phaseTitle":  "Ownership Failure Test Baseline",
     "nextPhase":  "1.6.1 - List Item Ownership Fixes",
