@@ -37,6 +37,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/DECISIONS.md` = durable architecture decisions
 - `codebase-graph.json` = routing/orientation only, not source of truth
 - `.claude/skills/` = operational Claude Code procedures (real skills); execution layer, not source of truth; loaded by Claude Code only, not by ChatGPT/Codex
+- `docs/evals/` = committed eval definition templates (capability/regression proof); raw run logs stay local in `.tidy-ai/eval-runs/`; not source of truth
 - `ai-harness/README.md` = optional opt-in hook reference (inactive hook templates); skills now live in `.claude/skills/`; not a startup read, not source of truth
 - `.tidy-ai/` = local-only, gitignored agent scratch and learning queue written by opt-in hooks; never committed, not a read target, not source of truth
 
