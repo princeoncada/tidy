@@ -1,6 +1,6 @@
 {
-    "version":  "1.4.28-alpha",
-    "state":  "alpha",
+    "version":  "1.4.28",
+    "state":  "stable",
     "phase":  "1.4.28",
     "phaseTitle":  "Promote State-Doc Sync Automation",
     "nextPhase":  "1.4.29 - Parallel Auth E2E Isolation",
