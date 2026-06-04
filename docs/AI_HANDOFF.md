@@ -18,7 +18,7 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 
 ## Latest Completed Change
 
-**1.4.26 - Custom View Reorder E2E Stabilization** stabilized the authenticated E2E baseline around custom view reorder by proving custom view card reorder and list reorder green, forcing authenticated E2E serial execution, adding a pre-run `e2e-*` data purge, hardening create/select/tag-picker test helpers, and allowing only the narrow benign view-create 404 console error; remaining authenticated rename/delete/view timing cases were deferred to 1.4.27.
+**1.4.28 - Promote State-Doc Sync Automation** promoted the state-doc sync workflow to stable: `promote.ps1` now force-syncs AI_HANDOFF Current Phase and Next pointers from `STATE.json`, extends self-verify across the AI_HANDOFF Current Version / Current Phase / Next lines, `docs/NEW_CHATHEAD_OPENER.md` is pointer-only with no embedded version snapshot, and `validate.ps1` now gates opener snapshots plus AI_HANDOFF Current Version drift.
 
 ---
 
@@ -150,7 +150,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Workflow:**
 - Assistant responses can drift if they provide commit, merge, promote, or push commands before the user/controller has supplied validation and status evidence. `docs/WORKFLOW.md` owns the stage-gated response rule.
 - Codex debugging attempts can drift if failure classes and hypotheses are not stated before fixes. `docs/CODEX_RULES.md` owns the debugging attempt discipline.
-- Product work resumes with `1.4.28 - Promote State-Doc Sync Automation`; authenticated E2E requires real Supabase credentials and storage state.
+- Never run `git restore <file>` on a file whose intended edit is still uncommitted; commit the file first, or strip only the injected negative-proof line.
+- Product work resumes with `1.4.29 - Parallel Auth E2E Isolation`; authenticated E2E requires real Supabase credentials and storage state.
 
 ---
 
@@ -158,7 +159,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md` first.
 2. Use `docs/CONTEXT_INDEX.md` to choose any additional task-specific read set.
-3. Scope `1.4.28 - Promote State-Doc Sync Automation`.
+3. Scope `1.4.29 - Parallel Auth E2E Isolation`.
 4. Keep `docs/PHASE_LOG.md` historical only. Do not use it as active phase guidance.
 5. Preserve the Codex validation boundary.
 
