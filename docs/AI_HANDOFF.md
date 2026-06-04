@@ -1,9 +1,9 @@
-<!-- Current Version: 1.6.0-alpha -->
+<!-- Current Version: 1.6.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.6.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.6.0 - Ownership Failure Test Baseline
 **Next**: 1.6.1 - List Item Ownership Fixes
 
