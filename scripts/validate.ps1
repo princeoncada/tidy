@@ -602,7 +602,8 @@ $requiredSkills = @(
     "tidy-validation-judge",
     "tidy-debug-attempt",
     "tidy-skill-evolution",
-    "tidy-context-budget"
+    "tidy-context-budget",
+    "tidy-eval-harness"
 )
 $skillErrors = @()
 foreach ($skill in $requiredSkills) {
@@ -620,7 +621,7 @@ foreach ($skill in $requiredSkills) {
     }
 }
 if ($skillErrors.Count -eq 0) {
-    Add-Result "skill surface" $true "7 operational skills present with source-of-truth pointers"
+    Add-Result "skill surface" $true "8 operational skills present with source-of-truth pointers"
 } else {
     Add-Result "skill surface" $false ($skillErrors -join "; ")
 }
