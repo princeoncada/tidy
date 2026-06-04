@@ -140,165 +140,201 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series (active) - see Planned
 ---
 
 ## Planned
 
-### 1.5.0 - Ownership Failure Test Baseline
+### 1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series
+- **Status:** In progress | Priority: P2 workflow roadmap
+- **Files:** docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, scripts/validate.ps1
+- **Problem:** A new AI harness workflow series should occupy 1.5.x, but 1.5.x-1.10.x are already assigned to product, security, maintainability, and polish phases.
+- **Scope:** insert the new 1.5.0-1.5.3 AI harness series, renumber all existing planned phases up one minor (1.5.x->1.6.x through 1.10.x->1.11.x) preserving status/priority/files/problem/scope/acceptance verbatim, repoint stale version cross-references, and advance nextPhase. Docs/roadmap only; no product behavior change.
+- **Acceptance:** monotonic version order preserved; renumbered phases keep their content; validate.ps1 passes; nextPhase resolves to the new 1.5.0 harness phase.
+
+### 1.5.0 - Tidy Harness Skills and Hook Contracts
+- **Status:** Open | Priority: P2 AI workflow
+- **Files:** ai-harness/README.md, ai-harness/skills/*/SKILL.md, ai-harness/hooks/hooks.template.json, ai-harness/hooks/README.md, docs/CONTEXT_INDEX.md (only if routing must mention the harness surface), .gitignore (only if local harness state is introduced)
+- **Problem:** Tidy has no repo-native lightweight AI harness layer (skills as doc-routing wrappers, opt-in hook templates); workflow knowledge lives only in always-read docs.
+- **Scope:** add a repo-safe harness skeleton - skills that are thin wrappers routing to existing source-of-truth docs (session start, phase scope, validation followup, debug attempt) and opt-in, profile-gated hook templates inactive by default. No product behavior change, no startup read growth, no committed local memory.
+- **Acceptance:** skills route to existing docs without duplicating them; hook templates are opt-in and inactive by default; startup read set does not grow; validate.ps1 still passes; no product behavior change.
+
+### 1.5.1 - Local Memory Persistence and Learning Queue
+- **Status:** Open | Priority: P2 AI workflow
+- **Files:** .gitignore, ai-harness/hooks/scripts/*.ps1, ai-harness/skills/tidy-learning-review/SKILL.md, docs/WORKFLOW.md (only if the session checkpoint contract needs a small note), docs/CONTEXT_INDEX.md (only if routing must mention learning review)
+- **Problem:** Session continuity relies entirely on committed SESSION_LOG docs; there is no local-only scratch memory or learning-candidate queue, and raw observations must never be committed.
+- **Scope:** add a gitignored local memory path (.tidy-ai/) for session state, observations, and learning candidates, written only by opt-in hooks; learning candidates are review-only and become committed docs only via a normal user-approved phase. Hooks must not edit repo docs or source.
+- **Acceptance:** .tidy-ai/ is gitignored; hooks write local files only; no automatic promotion to workflow docs; existing SESSION_LOG process stays valid; no raw transcripts committed.
+
+### 1.5.2 - AI Context Budget Audit
+- **Status:** Open | Priority: P3 AI workflow
+- **Files:** scripts/ai-context-budget.ps1, ai-harness/skills/tidy-context-budget/SKILL.md, docs/COMPACT_STRATEGY.md, package.json (only if an npm script is appropriate)
+- **Problem:** There is no repeatable way to measure workflow/doc token overhead, so docs-led bloat can creep back undetected.
+- **Scope:** add a manually-run context budget audit estimating startup-required, task-routed, and optional/historical token costs across AGENTS.md, the core docs, and ai-harness/**, flagging top bloat sources and trims. No external services; not part of startup.
+- **Acceptance:** produces a clear context budget report; runs on demand only; requires no ChromaDB/vector DB/external service; preserves existing startup budget goals.
+
+### 1.5.3 - Phase Eval Artifact Baseline
+- **Status:** Open | Priority: P3 AI workflow
+- **Files:** docs/evals/README.md, docs/evals/template.md, ai-harness/skills/tidy-eval-harness/SKILL.md, docs/WORKFLOW.md (only if eval artifacts must be referenced in phase planning), .gitignore (only if local eval run logs are introduced)
+- **Problem:** Phases have no lightweight committed eval/proof artifact format, while the user/controller-run validation boundary must stay intact.
+- **Scope:** add committed eval definition templates (capability checks, regression checks, required proof, human-review gates); keep raw eval run logs local (.tidy-ai/eval-runs/) unless intentionally summarized. Codex still cannot claim validation passed; validate.ps1 stays the final gate.
+- **Acceptance:** eval definitions are committed when useful; raw run logs stay local; Codex cannot claim validation passed; validate.ps1 remains the final gate.
+
+### 1.6.0 - Ownership Failure Test Baseline
 - **Status:** Open | Priority: P0 security test baseline
 - **Files:** trpc/routers/listItemRouter.ts, trpc/routers/*.ts, tests/
 - **Problem:** Ownership/security gaps need explicit tests before router fixes are made.
 - **Scope:** add tests for unauthenticated access, cross-user IDs, foreign list/item/tag/view IDs, and empty reorder input behavior.
 - **Acceptance:** tests identify current ownership expectations; failures are explicit if current code is unsafe.
 
-### 1.5.1 - List Item Ownership Fixes
+### 1.6.1 - List Item Ownership Fixes
 - **Status:** Open | Priority: P0 security
 - **Files:** trpc/routers/listItemRouter.ts, tests/
 - **Problem:** listItem getListItems, renameListItem, deleteListItem, and setCompletionListItem are protected but do not consistently verify parentList.userId.
 - **Scope:** verify parent list ownership before reading or mutating list items; preserve optimistic response shapes.
 - **Acceptance:** foreign IDs cannot mutate or read another user's data; owned flows still work; tests pass.
 
-### 1.5.2 - Reorder Target List Ownership Fix
+### 1.6.2 - Reorder Target List Ownership Fix
 - **Status:** Open | Priority: P0 security
 - **Files:** trpc/routers/listItemRouter.ts, tests/
 - **Problem:** reorderListItems validates item ownership but must also verify every target listId belongs to the user before raw SQL updates; authenticated E2E reproduced a missing target listId as Postgres FK error 23503 at `trpc/routers/listItemRouter.ts:188-197`.
 - **Scope:** validate item ids and target list ids before reorder so missing or foreign target lists are rejected before the raw SQL UPDATE; preserve empty input behavior as success; preserve owned cross-list moves.
 - **Acceptance:** foreign target lists are rejected without mutation; owned cross-list reorder works; tests cover both.
 
-### 1.5.3 - Ownership Regression Sweep
+### 1.6.3 - Ownership Regression Sweep
 - **Status:** Open | Priority: P1 security regression
 - **Files:** trpc/routers/*.ts, tests/
 - **Problem:** After targeted ownership fixes, the router surface needs a final regression sweep.
 - **Scope:** add or update coverage for list, listItem, tag, and view ownership failures; document remaining intentional gaps only if unavoidable.
 - **Acceptance:** ownership behavior is repeatable, tested, and safe enough before expanding API surface.
 
-### 1.6.0 - Optimistic Queue Race Test Baseline
+### 1.7.0 - Optimistic Queue Race Test Baseline
 - **Status:** Open | Priority: P0 optimistic stability
 - **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/
 - **Problem:** Most optimistic race behavior is not automatically proven, even though the app depends on optimistic-first UX.
 - **Scope:** add tests or test harnesses for enqueue, replacePending, rollback, cancellation, and independent mutation scopes.
 - **Acceptance:** test baseline captures current queue behavior and known race risks.
 
-### 1.6.1 - Scope Rollback Rules
+### 1.7.1 - Scope Rollback Rules
 - **Status:** Open | Priority: P0 optimistic stability
 - **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/
 - **Problem:** Rollbacks must not wipe unrelated newer optimistic work or repaint stale cache snapshots.
 - **Scope:** define and implement safer rollback rules per optimistic scope; add regression tests.
 - **Acceptance:** failed mutations only rollback their own intended changes; newer visible user actions are preserved.
 
-### 1.6.2 - Pending Mutation Cancellation Rules
+### 1.7.2 - Pending Mutation Cancellation Rules
 - **Status:** Open | Priority: P1 optimistic stability
 - **Files:** hooks/useOptimisticSync.ts, components/list/*, components/views/*, tests/
 - **Problem:** replacePending is correct for newest-state-wins flows, but unsafe if applied to actions where every mutation must persist.
 - **Scope:** review and test replacePending usage for reorder and view selection; keep enqueue for actions that must persist.
 - **Acceptance:** only newest-state-wins flows cancel earlier work; required user actions are not dropped.
 
-### 1.6.3 - Refresh/Crash Pending Work Decision
+### 1.7.3 - Refresh/Crash Pending Work Decision
 - **Status:** Open | Priority: P1 local-first decision
 - **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, docs/DECISIONS.md, docs/FUTURE_PLANS.md
 - **Problem:** In-memory queues can lose pending writes on refresh or crash.
 - **Scope:** decide whether to keep in-memory queues temporarily or begin Dexie-backed pending writes; record durable decision in DECISIONS.md if architecture changes.
 - **Acceptance:** future direction is explicit; no accidental half-offline rewrite.
 
-### 1.7.0 - Local DB Role Audit Through Tests
+### 1.8.0 - Local DB Role Audit Through Tests
 - **Status:** Open | Priority: P1 local-first clarity
 - **Files:** lib/local-db/*, hooks/use-local-db-health-check.ts, tests/unit/*
 - **Problem:** Dexie/local DB exists as foundation but is not the dashboard source of truth.
 - **Scope:** prove what local DB currently does and does not do through tests; clarify that runtime behavior remains server/TanStack-driven unless later changed.
 - **Acceptance:** local DB role is tested and understood before offline integration work.
 
-### 1.7.1 - Outbox Replay Integration Test Plan
+### 1.8.1 - Outbox Replay Integration Test Plan
 - **Status:** Open | Priority: P2 offline architecture
 - **Files:** lib/local-db/sync-replay-client.ts, lib/sync/sync-endpoint-contract.ts, tests/
 - **Problem:** Outbox replay helpers exist but are not connected to real app mutations.
 - **Scope:** plan and test the integration contract before wiring replay into runtime behavior.
 - **Acceptance:** replay integration risks are covered by tests or explicit follow-up phases.
 
-### 1.7.2 - Offline Write Path Prototype
+### 1.8.2 - Offline Write Path Prototype
 - **Status:** Open | Priority: P2 offline prototype
 - **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, lib/sync/*, tests/
 - **Problem:** Offline/PWA goals require a proven write path, but a broad source-of-truth rewrite is risky.
 - **Scope:** prototype the smallest safe offline write path; keep feature flags or isolation if needed.
 - **Acceptance:** prototype is tested, scoped, and does not silently replace dashboard source of truth.
 
-### 1.8.0 - Dashboard Component Responsibility Audit
+### 1.9.0 - Dashboard Component Responsibility Audit
 - **Status:** Open | Priority: P1 maintainability planning
 - **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, lib/dashboard-cache.ts
 - **Problem:** Large dashboard components increase risk for focused changes.
 - **Scope:** identify extraction targets and invariants without changing behavior.
 - **Acceptance:** extraction sequence is clear and test-backed; no extra product audit doc is added.
 
-### 1.8.1 - Extract Dashboard Query Key Helper
+### 1.9.1 - Extract Dashboard Query Key Helper
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts or new small helper, components/list/*, components/views/ViewsSidebarPreview.tsx, tests/
 - **Problem:** Query key construction is duplicated across components.
 - **Scope:** extract shared helper without changing key shapes.
 - **Acceptance:** query keys remain identical; tests or assertions prove no key-shape change.
 
-### 1.8.2 - Extract List Mutation Cache Helpers
+### 1.9.2 - Extract List Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListsContainer.tsx, tests/
 - **Problem:** List mutations duplicate cache logic.
 - **Scope:** move list mutation cache behavior into named helpers while preserving optimistic behavior.
 - **Acceptance:** existing behavior and tests remain stable; new or updated tests cover helper behavior.
 
-### 1.8.3 - Extract View Mutation Cache Helpers
+### 1.9.3 - Extract View Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/views/ViewsSidebarPreview.tsx, tests/
 - **Problem:** View mutation logic is concentrated in a large component.
 - **Scope:** extract view create/update/delete/select cache helpers.
 - **Acceptance:** view behavior, query keys, and rollback behavior do not change; tests cover extracted helpers.
 
-### 1.8.4 - Extract Tag Mutation Cache Helpers
+### 1.9.4 - Extract Tag Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListTagPicker.tsx, tests/
 - **Problem:** Tag mutation cache behavior is complex and easy to regress.
 - **Scope:** extract tag mutation cache helpers after projection behavior is stable.
 - **Acceptance:** affected custom views update correctly; tests cover helper behavior.
 
-### 1.9.0 - Deploy Env Documentation
+### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness
 - **Files:** README.md, .env.example
 - **Problem:** Deployment environment expectations must be clear before production use.
 - **Scope:** document DATABASE_URL, Supabase env vars, site URL, and local/prod differences.
 - **Acceptance:** new setup can follow docs without guessing.
 
-### 1.9.1 - Build/Migration Readiness
+### 1.10.1 - Build/Migration Readiness
 - **Status:** Open | Priority: P2 production readiness
 - **Files:** README.md, prisma/*, package.json only if needed
 - **Problem:** Build and migration expectations need a repeatable release path.
 - **Scope:** document Prisma generate, migration, and build steps.
 - **Acceptance:** production build/migration flow is clear and repeatable.
 
-### 1.9.2 - Production Smoke Checklist
+### 1.10.2 - Production Smoke Checklist
 - **Status:** Open | Priority: P2 production readiness
 - **Files:** README.md, docs/FUTURE_PLANS.md
 - **Problem:** Production changes need a small smoke checklist after deploy.
 - **Scope:** document login, dashboard load, create list, create item, tag view, reorder, and refresh smoke checks.
 - **Acceptance:** smoke checklist exists and does not duplicate full test docs.
 
-### 1.10.0 - Copy and Metadata Hygiene
+### 1.11.0 - Copy and Metadata Hygiene
 - **Status:** Open | Priority: P3 late polish
 - **Files:** app/layout.tsx, public/*, README.md if needed
 - **Problem:** Metadata and public assets need cleanup, but this should happen after core behavior is trustworthy.
 - **Scope:** fix missing asset references and metadata consistency.
 - **Acceptance:** metadata references existing assets; no behavior change.
 
-### 1.10.1 - Auth Flow Copy Polish
+### 1.11.1 - Auth Flow Copy Polish
 - **Status:** Open | Priority: P3 late polish
 - **Files:** components/auth/Register.tsx, auth components if needed
 - **Problem:** Auth copy should be clearer after core behavior is stable.
 - **Scope:** fix misleading copy such as Register submit language.
 - **Acceptance:** copy is clear; auth behavior unchanged.
 
-### 1.10.2 - Landing Page Branding Polish
+### 1.11.2 - Landing Page Branding Polish
 - **Status:** Open | Priority: P3 late polish
 - **Files:** app/page.tsx
 - **Problem:** Landing copy and generic branding can be improved after product correctness.
 - **Scope:** fix typo and improve lightweight Tidy positioning.
 - **Acceptance:** copy improves without changing app behavior.
 
-### 1.10.3 - Visual Review Pass
+### 1.11.3 - Visual Review Pass
 - **Status:** Open | Priority: P3 late UI/UX
 - **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, app/page.tsx
 - **Problem:** Subjective UI/UX polish should be last because correctness matters first.
@@ -334,6 +370,6 @@ Assigned a version only when scoped.
 - PWA/offline is not implemented despite product goals.
 - In-memory queues can lose pending writes on refresh or crash.
 - Large components increase risk for focused changes.
-- API ownership gaps should land in 1.5.x before expanding API surface area.
+- API ownership gaps should land in 1.6.x before expanding API surface area.
 - Frontend projection and backend refresh must agree before UI/UX polish.
 
