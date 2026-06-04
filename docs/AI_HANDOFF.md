@@ -1,9 +1,9 @@
-<!-- Current Version: 1.5.0-alpha -->
+<!-- Current Version: 1.5.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.5.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.5.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.5.0 - Tidy Harness Skills and Hook Contracts
 **Next**: 1.5.1 - Local Memory Persistence and Learning Queue
 
