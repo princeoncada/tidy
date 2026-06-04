@@ -22,7 +22,7 @@ Output contract - classify into exactly one, then emit only its next action:
     1. Validation not provided -> give the validation commands only.
     2. RED + uncommitted work -> commit-before-fix: commit prior work (even while red) as its own unit(s), then the in-alpha fix prompt + revalidation.
     3. RED + work already committed -> in-alpha fix prompt + revalidation only.
-    4. GREEN + uncommitted alpha changes -> one PowerShell block of alpha commit commands only.
+    4. GREEN + uncommitted alpha changes -> alpha commit commands. For a low-risk phase (docs/workflow/tooling only; no product source, tests, or dependency changes) you may also include the full closeout packet in the same message, gated behind a clean git status --short. For product/source/test/dependency phases, give commit commands only.
     5. GREEN + branch clean -> full closeout packet (switch/pull/merge --no-ff with inline -m, post-merge validation path, promote.ps1, then run promote.ps1's printed Next steps).
 
 Refusal rules: never assume green without pasted evidence; if evidence is ambiguous, ask for git status --short or the validate output before classifying.
