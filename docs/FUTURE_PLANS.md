@@ -155,6 +155,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.6.0 - Ownership Failure Test Baseline~~ (stable 2026-06-04)
 
+- ~~1.6.1 - List Item Ownership Fixes~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -164,17 +166,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.6.1 - List Item Ownership Fixes (active) - see Planned
 ---
 
 ## Planned
-
-### 1.6.1 - List Item Ownership Fixes
-- **Status:** In progress | Priority: P0 security
-- **Files:** trpc/routers/listItemRouter.ts, tests/
-- **Problem:** listItem getListItems, renameListItem, deleteListItem, and setCompletionListItem are protected but do not consistently verify parentList.userId.
-- **Scope:** verify parent list ownership before reading or mutating list items; preserve optimistic response shapes.
-- **Acceptance:** foreign IDs cannot mutate or read another user's data; owned flows still work; tests pass.
 
 ### 1.6.2 - Reorder Target List Ownership Fix
 - **Status:** Open | Priority: P0 security
