@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.5.8",
+  "version": "1.6.0-alpha",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2734,6 +2734,34 @@
       ]
     },
     {
+      "path": "tests/unit/router-ownership-baseline.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [
+        "authedCaller",
+        "anonCaller",
+        "expectTrpcCode",
+        "dbMock",
+        "createCaller",
+        "USER_A",
+        "USER_B",
+        "LIST_A",
+        "LIST_FOREIGN",
+        "ITEM_A",
+        "ITEM_B",
+        "TAG_A",
+        "VIEW_A",
+        "findManyArgs",
+        "TestTRPCContext"
+      ],
+      "imports": [
+        "@trpc/server",
+        "vitest",
+        "@/trpc/init",
+        "@/trpc/routers/_app"
+      ]
+    },
+    {
       "path": "tests/unit/sync-endpoint-contract.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -4502,6 +4530,18 @@
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/router-ownership-baseline.test.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "@/trpc/init"
+    },
+    {
+      "from": "tests/unit/router-ownership-baseline.test.ts",
+      "to": "trpc/routers/_app.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/_app"
     },
     {
       "from": "tests/unit/sync-endpoint-contract.test.ts",
