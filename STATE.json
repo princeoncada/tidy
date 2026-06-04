@@ -1,6 +1,6 @@
 {
-    "version":  "1.5.3-alpha",
-    "state":  "alpha",
+    "version":  "1.5.3",
+    "state":  "stable",
     "phase":  "1.5.3",
     "phaseTitle":  "Operational Skill Re-Architecture",
     "nextPhase":  "1.5.4 - Session Checkpoint Deprecation",
