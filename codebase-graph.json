@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.5.0",
+  "version": "1.5.1-alpha",
   "generatedAt": "2026-06-04",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -73,6 +73,27 @@
       "imports": []
     },
     {
+      "path": "ai-harness/hooks/scripts/observe.ps1",
+      "kind": "file",
+      "extension": ".ps1",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/scripts/session-checkpoint.ps1",
+      "kind": "file",
+      "extension": ".ps1",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/scripts/session-start.ps1",
+      "kind": "file",
+      "extension": ".ps1",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": "ai-harness/README.md",
       "kind": "file",
       "extension": ".md",
@@ -81,6 +102,13 @@
     },
     {
       "path": "ai-harness/skills/tidy-debug-attempt/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-learning-review/SKILL.md",
       "kind": "file",
       "extension": ".md",
       "symbols": [],

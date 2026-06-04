@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.5.0 -->
+<!-- Current Version: 1.5.1-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -565,6 +565,16 @@ now locked in, current local/remote caveats when any are known, startup
 requirements for the next chathead, instruction not to implement until the user
 confirms, instruction to verify remote master first, and a pointer to
 `docs/NEW_CHATHEAD_OPENER.md` instead of embedding the full opener inline.
+
+### Local Memory Boundary (Opt-In)
+
+The opt-in ai-harness hooks may write local scratch and a learning queue under
+the gitignored .tidy-ai/ path. This local memory never replaces the committed
+SESSION_LOG checkpoint above: raw observations and session scratch stay local
+and are never committed, and learning candidates become committed docs only
+through a normal user-approved phase. session-checkpoint.ps1 produces a local
+draft only; the committed checkpoint still follows the Session Checkpoint Output
+Contract.
 
 ---
 

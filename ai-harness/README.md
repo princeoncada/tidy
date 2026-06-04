@@ -18,8 +18,8 @@ read set.
   codebase-graph.json, and docs/FUTURE_PLANS.md per the AGENTS.md Session Start
   Protocol.
 - No product behavior change.
-- No committed local memory. Local agent memory is introduced later (1.5.1) and
-  stays gitignored.
+- No committed local memory. The .tidy-ai/ local agent memory added in 1.5.1 is
+  gitignored, written only by opt-in hooks, and is never committed.
 - The Codex validation boundary is unchanged: validation is user/controller-run.
 
 ## Source-of-truth pointers
