@@ -6,9 +6,9 @@ read set.
 
 ## What this is
 
-- skills/ - thin doc-routing wrappers. Each SKILL.md points an agent at the
-  existing source-of-truth doc(s) for a task. Skills never duplicate doc
-  content; they route to it.
+- skills/ - RETIRED. Operational skills now live as real Claude Code skills
+  under `.claude/skills/`. Each file here is a one-line pointer to its
+  replacement. See docs/WORKFLOW.md "Skill Surface" for the registry.
 - hooks/ - opt-in, profile-gated hook templates that are inactive by default.
 
 ## Hard rules
