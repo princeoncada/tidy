@@ -133,6 +133,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.4.30 - Roadmap Rebaseline for 1.5.x Harness Series~~ (stable 2026-06-04)
 
+- ~~1.4.31 - Workflow Closeout and Open-Phase Fixes~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -142,17 +144,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.4.31 - Workflow Closeout and Open-Phase Fixes (active) - see Planned
 ---
 
 ## Planned
-
-### 1.4.31 - Workflow Closeout and Open-Phase Fixes
-- **Status:** In progress | Priority: P3 workflow efficiency
-- **Files:** docs/WORKFLOW.md, AGENTS.md, scripts/open-phase.ps1, docs/FUTURE_PLANS.md
-- **Problem:** The assistant closeout re-emits stable-promotion commit/push commands that promote.ps1 already prints (wasted tokens), and open-phase.ps1 silently defaults nextPhase to the current value, which can be stale or self-referential and repeatedly causes post-promotion roadmap drift.
-- **Scope:** stop the assistant re-emitting stable-promotion commit/push commands (route to promote.ps1's printed Next steps); require every open-phase.ps1 invocation to declare the next phase explicitly via -NextPhase or a new -NoNextPhase switch (error if neither or both), removing the silent default; document the mandatory tag in the workflow.
-- **Acceptance:** closeout contract no longer mandates re-emitting stable commit/push blocks; open-phase requires an explicit next-phase tag and cannot carry a stale default; workflow documents the rule; validate.ps1 passes.
 
 ### 1.5.0 - Tidy Harness Skills and Hook Contracts
 - **Status:** Open | Priority: P2 AI workflow
