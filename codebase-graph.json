@@ -59,6 +59,55 @@
       "imports": []
     },
     {
+      "path": "ai-harness/hooks/hooks.template.json",
+      "kind": "file",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/hooks/README.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/README.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-debug-attempt/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-phase-scope/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-session-start/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "ai-harness/skills/tidy-validation-followup/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": "app/api/auth/confirm/route.ts",
       "kind": "api_route",
       "extension": ".ts",
