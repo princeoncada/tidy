@@ -24,8 +24,7 @@ test("create a list", async ({ page }) => {
   await cleanupNamedList(page, name);
 });
 
-// FIXME(1.4.27): optimistic/refetch fragility - tracked in Authenticated E2E Suite Hardening
-test.fixme("rename a list", async ({ page }) => {
+test("rename a list", async ({ page }) => {
   const originalName = uniqueTestName("list-rename-original");
   const renamedName = uniqueTestName("list-rename-final");
   await createList(page, originalName);
@@ -35,8 +34,7 @@ test.fixme("rename a list", async ({ page }) => {
   await cleanupNamedList(page, renamedName);
 });
 
-// FIXME(1.4.27): optimistic/refetch fragility - tracked in Authenticated E2E Suite Hardening
-test.fixme("delete a list", async ({ page }) => {
+test("delete a list", async ({ page }) => {
   const name = uniqueTestName("list-delete");
   await createList(page, name);
   await deleteList(page, name);
