@@ -202,6 +202,23 @@ export const listItemRouter = createTRPCRouter({
       });
     }
 
+    const targetListIds = [...new Set(input.items.map((item) => item.listId))];
+
+    const ownedTargetLists = await db.list.findMany({
+      where: {
+        id: { in: targetListIds },
+        userId,
+      },
+      select: { id: true },
+    });
+
+    if (ownedTargetLists.length !== targetListIds.length) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Some target lists do not belong to this user.",
+      });
+    }
+
     // Save the whole order in one statement. Many small updates can expire the transaction.
     await db.$executeRaw`
       UPDATE "ListItem" AS item
