@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.31-alpha -->
+<!-- Current Version: 1.4.31 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.31-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.31 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.31 - Workflow Closeout and Open-Phase Fixes
 **Next**: 1.5.0 - Tidy Harness Skills and Hook Contracts
 
