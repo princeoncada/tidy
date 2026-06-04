@@ -1,9 +1,9 @@
-<!-- Current Version: 1.4.28-alpha -->
+<!-- Current Version: 1.4.28 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.4.28-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.4.28 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.4.28 - Promote State-Doc Sync Automation
 **Next**: 1.4.29 - Parallel Auth E2E Isolation
 
