@@ -1,10 +1,10 @@
-<!-- Current Version: 1.5.6 -->
+<!-- Current Version: 1.5.7-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.5.6 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.5.6 - Phase Eval Artifact Baseline
+**Current Version**: 1.5.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.5.7 - Consolidated Closeout Packet
 **Next**: 1.6.0 - Ownership Failure Test Baseline
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
