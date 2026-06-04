@@ -28,6 +28,7 @@ export default function ListInlineEdit({
   const [editValue, setEditValue] = useState(value);
   const [displayValue, setDisplayValue] = useState(value);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const lastSyncedValueRef = useRef(value);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -35,6 +36,15 @@ export default function ListInlineEdit({
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    if (isEditing) return;
+    if (lastSyncedValueRef.current === value) return;
+
+    lastSyncedValueRef.current = value;
+    setEditValue(value);
+    setDisplayValue(value);
+  }, [isEditing, value]);
 
   const startEditing = () => {
     setEditValue(value);
