@@ -61,6 +61,13 @@
       "imports": []
     },
     {
+      "path": ".claude/skills/tidy-eval-harness/SKILL.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": ".claude/skills/tidy-minimal-handoff/SKILL.md",
       "kind": "file",
       "extension": ".md",
@@ -1479,6 +1486,20 @@
     },
     {
       "path": "docs/deprecated/testing.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/evals/README.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/evals/template.md",
       "kind": "documentation",
       "extension": ".md",
       "symbols": [],
