@@ -18,7 +18,7 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 
 ## Latest Completed Change
 
-**1.4.28 - Promote State-Doc Sync Automation** promoted the state-doc sync workflow to stable: `promote.ps1` now force-syncs AI_HANDOFF Current Phase and Next pointers from `STATE.json`, extends self-verify across the AI_HANDOFF Current Version / Current Phase / Next lines, `docs/NEW_CHATHEAD_OPENER.md` is pointer-only with no embedded version snapshot, and `validate.ps1` now gates opener snapshots plus AI_HANDOFF Current Version drift.
+**1.4.31 - Workflow Closeout and Open-Phase Fixes** promoted the closeout workflow cleanup to stable: assistant closeout now routes users to the stable-promotion commit/push commands printed by `promote.ps1` instead of re-emitting them, and `open-phase.ps1` now requires every invocation to declare `-NextPhase "<version - title>"` or `-NoNextPhase` so stale or self-referential nextPhase values cannot silently carry forward.
 
 ---
 
@@ -140,7 +140,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 **Testing and polish:**
 - No API-level ownership tests yet.
-- Authenticated E2E requires Supabase credentials (`tests/.auth/user.json` plus real env vars).
+- Authenticated E2E requires a Supabase user pool with at least as many users as Playwright workers (`tests/.auth/user-<index>.json` plus real env vars), with a legacy single-user fallback only for serial runs.
 - No keyboard drag accessibility validation.
 - UI/UX polish is intentionally late, after projection correctness, ownership, optimistic behavior, and test baselines.
 - Register submit button says "Login".
@@ -151,7 +151,9 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Assistant responses can drift if they provide commit, merge, promote, or push commands before the user/controller has supplied validation and status evidence. `docs/WORKFLOW.md` owns the stage-gated response rule.
 - Codex debugging attempts can drift if failure classes and hypotheses are not stated before fixes. `docs/CODEX_RULES.md` owns the debugging attempt discipline.
 - Never run `git restore <file>` on a file whose intended edit is still uncommitted; commit the file first, or strip only the injected negative-proof line.
-- Product work resumes with `1.4.29 - Parallel Auth E2E Isolation`; authenticated E2E requires real Supabase credentials and storage state.
+- Stable-promotion closeout routes users to the per-file commit commands and final push printed by `promote.ps1`; the assistant should not re-emit those stable promotion commands.
+- `open-phase.ps1` requires an explicit `-NextPhase "<version - title>"` or `-NoNextPhase` on every invocation; there is no silent default from the previous STATE.json nextPhase.
+- Product work resumes with `1.5.0 - Tidy Harness Skills and Hook Contracts`; authenticated E2E requires real Supabase credentials and per-worker storage state.
 
 ---
 
@@ -159,7 +161,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md` first.
 2. Use `docs/CONTEXT_INDEX.md` to choose any additional task-specific read set.
-3. Scope `1.4.29 - Parallel Auth E2E Isolation`.
+3. Scope `1.5.0 - Tidy Harness Skills and Hook Contracts`.
 4. Keep `docs/PHASE_LOG.md` historical only. Do not use it as active phase guidance.
 5. Preserve the Codex validation boundary.
 
