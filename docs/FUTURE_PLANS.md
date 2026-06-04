@@ -153,6 +153,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.5.8 - Local Evidence Packet Code-Block Contract~~ (stable 2026-06-04)
 
+- ~~1.6.0 - Ownership Failure Test Baseline~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -162,17 +164,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.6.0 - Ownership Failure Test Baseline (active) - see Planned
 ---
 
 ## Planned
-
-### 1.6.0 - Ownership Failure Test Baseline
-- **Status:** In progress | Priority: P0 security test baseline
-- **Files:** trpc/routers/listItemRouter.ts, trpc/routers/*.ts, tests/
-- **Problem:** Ownership/security gaps need explicit tests before router fixes are made.
-- **Scope:** add tests for unauthenticated access, cross-user IDs, foreign list/item/tag/view IDs, and empty reorder input behavior.
-- **Acceptance:** tests identify current ownership expectations; failures are explicit if current code is unsafe.
 
 ### 1.6.1 - List Item Ownership Fixes
 - **Status:** Open | Priority: P0 security
