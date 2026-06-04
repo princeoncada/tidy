@@ -3,29 +3,40 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { config } from "dotenv";
 
-const authFile = path.join("tests", ".auth", "user.json");
+import { authStoragePathForIndex, resolveE2eUserPool } from "./utils/seed";
 
 config({ path: ".env.local", quiet: true });
 config({ path: ".env", quiet: true });
 
-test("authenticate dashboard user", async ({ page }) => {
-  const email = process.env.E2E_TEST_EMAIL;
-  const password = process.env.E2E_TEST_PASSWORD;
+test("authenticate dashboard user pool", async ({ browser }) => {
+  const pool = resolveE2eUserPool();
 
-  if (!email || !password) {
+  if (pool.length === 0) {
     throw new Error(
-      "Authenticated E2E requires E2E_TEST_EMAIL and E2E_TEST_PASSWORD. " +
-      "Copy .env.example to .env.local, set local test credentials, then run npm run test:e2e:auth:setup."
+      "Authenticated E2E requires a user pool. Set E2E_TEST_EMAIL_1/E2E_TEST_PASSWORD_1 " +
+      "(and _2.. for more parallel workers), or the legacy single E2E_TEST_EMAIL/E2E_TEST_PASSWORD " +
+      "for serial runs. Copy .env.example to .env.local, set local test credentials, then run " +
+      "npm run test:e2e:auth:setup."
     );
   }
 
-  await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Login" }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
-  await expect(page.getByTestId("app-shell")).toBeVisible();
+  for (let index = 0; index < pool.length; index += 1) {
+    const { email, password } = pool[index];
+    const page = await browser.newPage();
 
-  mkdirSync(path.dirname(authFile), { recursive: true });
-  await page.context().storageState({ path: authFile });
+    try {
+      await page.goto("/login");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: "Login" }).click();
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+      await expect(page.getByTestId("app-shell")).toBeVisible();
+
+      const file = authStoragePathForIndex(index);
+      mkdirSync(path.dirname(file), { recursive: true });
+      await page.context().storageState({ path: file });
+    } finally {
+      await page.close();
+    }
+  }
 });
