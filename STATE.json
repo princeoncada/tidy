@@ -1,6 +1,6 @@
 {
-    "version":  "1.5.1-alpha",
-    "state":  "alpha",
+    "version":  "1.5.1",
+    "state":  "stable",
     "phase":  "1.5.1",
     "phaseTitle":  "Local Memory Persistence and Learning Queue",
     "nextPhase":  "1.5.2 - AI Context Budget Audit",
