@@ -150,11 +150,33 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.5.3 - Operational Skill Re-Architecture (active) - see Planned
 ---
 
 ## Planned
 
-### 1.5.3 - Phase Eval Artifact Baseline
+### 1.5.3 - Operational Skill Re-Architecture
+- **Status:** In progress | Priority: P2 AI workflow
+- **Files:** .claude/skills/tidy-*/SKILL.md (7 skill files), docs/WORKFLOW.md, docs/CONTEXT_INDEX.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md, ai-harness/skills/*/SKILL.md, ai-harness/README.md
+- **Problem:** The ai-harness skills are routing stubs in the wrong location with no frontmatter, so Claude Code cannot discover them as real skills and they duplicate docs/CONTEXT_INDEX.md routing.
+- **Scope:** create real `.claude/skills/` operational skills (tidy-session-clone, tidy-minimal-handoff, tidy-codex-prompt-builder, tidy-validation-judge, tidy-debug-attempt, tidy-skill-evolution, tidy-context-budget) with frontmatter and the operational section contract; add the Skill Surface (registry, docs-vs-skills split, evolution loop) to docs/WORKFLOW.md; add `.claude/skills/` to docs/CONTEXT_INDEX.md; fix stale narrative in docs/AI_HANDOFF.md; retire ai-harness/skills/ to one-line pointers; record the 1.5.3-1.5.6 sequence here. No hooks, no validate.ps1 change, no product source.
+- **Acceptance:** each skill loads as a real Claude Code skill with valid frontmatter and the required sections; skills reference doc anchors and do not restate doc policy; AI_HANDOFF reflects 1.5.2; the ChatGPT/Claude/Codex loop still runs; no product behavior change.
+
+### 1.5.4 - Session Checkpoint Deprecation
+- **Status:** Open | Priority: P2 AI workflow
+- **Files:** docs/WORKFLOW.md, AGENTS.md, docs/CONTEXT_INDEX.md, docs/NEW_CHATHEAD_OPENER.md
+- **Problem:** Session checkpoints and SESSION_LOG are treated as the normal continuation mechanism, which is token-heavy and redundant now that STATE.json + FUTURE_PLANS + AI_HANDOFF + a minimal handoff can continue a session.
+- **Scope:** make minimal handoff (tidy-minimal-handoff) the normal continuation mechanism; demote SESSION_LOG to historical/audit-only; trim the WORKFLOW.md Session Checkpoint Output Contract to an optional audit mode; flip the AGENTS.md Session Continuity and command vocabulary to point at tidy-session-clone / tidy-minimal-handoff; strengthen CONTEXT_INDEX.md and NEW_CHATHEAD_OPENER.md accordingly.
+- **Acceptance:** normal continuation is documented as minimal handoff + source-of-truth docs; SESSION_LOG is explicitly audit-only; session checkpoint remains available as an optional mode; no versioning or validation boundary change.
+
+### 1.5.5 - Real Hook Guardrails
+- **Status:** Open | Priority: P3 AI workflow
+- **Files:** ai-harness/hooks/hooks.template.json, ai-harness/hooks/README.md, ai-harness/hooks/scripts/*, .gitignore, scripts/validate.ps1 (only if the skill-existence check is added)
+- **Problem:** The hook template is not the real Claude Code hooks schema, so nothing executes it; the highest-value guardrail (command-boundary) does not exist.
+- **Scope:** express hooks in the real Claude Code hook schema; add a command-boundary PreToolUse guardrail (block git commit/push/merge, npm run test:ci, validate.ps1, promote.ps1, open-phase.ps1) and an edit-boundary guardrail (strict profile); define minimal/standard/strict profiles; keep hooks opt-in and inactive by default; gitignore the activated local settings; optionally have validate.ps1 assert required skill files exist and carry a Source-of-truth pointer.
+- **Acceptance:** hooks are real Claude Code hooks, inactive by default; command-boundary blocks owned commands when activated; activation is documented; no product behavior change.
+
+### 1.5.6 - Phase Eval Artifact Baseline
 - **Status:** Open | Priority: P3 AI workflow
 - **Files:** docs/evals/README.md, docs/evals/template.md, ai-harness/skills/tidy-eval-harness/SKILL.md, docs/WORKFLOW.md (only if eval artifacts must be referenced in phase planning), .gitignore (only if local eval run logs are introduced)
 - **Problem:** Phases have no lightweight committed eval/proof artifact format, while the user/controller-run validation boundary must stay intact.
