@@ -136,6 +136,18 @@ Update-FileText "docs/AI_HANDOFF.md" `
     "**Current Version**: $alphaVer" `
     "**Current Version**: $stableVer"
 
+# 3b. docs/AI_HANDOFF.md structured state pointers - force-sync from STATE.json so
+# the handoff cannot drift from the oracle at promotion time. Phase/Title/Next come
+# from STATE.json; human prose (phase descriptions) stays owned by session checkpoints.
+$handoffSyncPath  = (Resolve-Path "docs/AI_HANDOFF.md").Path
+$handoffSync      = Get-Content $handoffSyncPath -Raw -Encoding UTF8
+$handoffPhaseLine = "**Current Phase**: $($state.phase) - $($state.phaseTitle)"
+$handoffNextLine  = "**Next**: $($state.nextPhase)"
+$handoffSync = [regex]::Replace($handoffSync, "(?m)^\*\*Current Phase\*\*:[^\r\n]*", { param($m) $handoffPhaseLine })
+$handoffSync = [regex]::Replace($handoffSync, "(?m)^\*\*Next\*\*:[^\r\n]*",          { param($m) $handoffNextLine })
+[System.IO.File]::WriteAllText($handoffSyncPath, $handoffSync, $utf8NoBom)
+Write-Host "  Updated: docs/AI_HANDOFF.md (state pointers synced from STATE.json)" -ForegroundColor Green
+
 # 4. package.json
 $pkgPath    = Resolve-Path "package.json"
 $pkgContent = Get-Content $pkgPath -Raw -Encoding UTF8
@@ -285,6 +297,9 @@ $postPkg = (Get-Content "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json).v
 if ($postPkg -ne $stableVer) { $verifyErrors += "package.json=$postPkg" }
 $postHandoff = Get-Content "docs/AI_HANDOFF.md" -Raw -Encoding UTF8
 if ($postHandoff -notmatch ("<!-- Current Version: " + [regex]::Escape($stableVer) + " -->")) { $verifyErrors += "AI_HANDOFF.md comment" }
+if ($postHandoff -notmatch ("(?m)^\*\*Current Version\*\*:\s*" + [regex]::Escape($stableVer) + "(\s|$)")) { $verifyErrors += "AI_HANDOFF.md Current Version line" }
+if ($postHandoff -notmatch ("(?m)^\*\*Current Phase\*\*:\s*" + [regex]::Escape("$($state.phase) - $($state.phaseTitle)") + "\s*$")) { $verifyErrors += "AI_HANDOFF.md Current Phase line" }
+if ($postHandoff -notmatch ("(?m)^\*\*Next\*\*:\s*" + [regex]::Escape($state.nextPhase) + "\s*$")) { $verifyErrors += "AI_HANDOFF.md Next line" }
 $postWorkflow = Get-Content "docs/WORKFLOW.md" -Raw -Encoding UTF8
 if ($postWorkflow -notmatch ("<!-- Current Version: " + [regex]::Escape($stableVer) + " -->")) { $verifyErrors += "WORKFLOW.md comment" }
 $postVersioning = Get-Content "docs/VERSIONING.md" -Raw -Encoding UTF8
