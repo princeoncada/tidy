@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.5.2 -->
+<!-- Current Version: 1.5.3-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -575,6 +575,47 @@ and are never committed, and learning candidates become committed docs only
 through a normal user-approved phase. session-checkpoint.ps1 produces a local
 draft only; the committed checkpoint still follows the Session Checkpoint Output
 Contract.
+
+---
+
+## Skill Surface
+
+Operational Claude Code procedures live as real skills under `.claude/skills/`.
+Skills are the execution layer for repeatable Claude Code loops; the docs remain
+the source of truth. ChatGPT and Codex do not load skills; they read the docs.
+
+### Skill Registry
+
+| Skill | Use when | Source of truth it executes |
+|-------|----------|------------------------------|
+| tidy-session-clone | starting or resuming a session | AGENTS.md Session Start Protocol |
+| tidy-minimal-handoff | handing off / stopping / switching tasks | docs/WORKFLOW.md Session Checkpoint Output Contract (audit path) |
+| tidy-codex-prompt-builder | scoping a phase / writing a Codex prompt | Codex Prompt Format (this file) + docs/CODEX_RULES.md |
+| tidy-validation-judge | validation or status evidence was pasted | Validation-Gated Assistant Responses (this file) |
+| tidy-debug-attempt | a check or test failed and a fix is considered | docs/CODEX_RULES.md Debugging Attempt Discipline |
+| tidy-skill-evolution | formalizing local learning candidates | this section + docs/FUTURE_PLANS.md |
+| tidy-context-budget | checking workflow/doc context overhead | docs/COMPACT_STRATEGY.md |
+
+### Docs vs Skills Split
+
+- Docs own policy, rules, boundaries, state, roadmap, and product truth (the why and the invariant).
+- Skills own the ordered procedure and the smallest executable template (what to do, step by step).
+- A skill must carry a "Source of truth:" pointer to the governing doc section and must not restate doc policy prose. Where a full rule matters, the skill links the doc, it does not copy it.
+- If a skill and a doc disagree, the doc wins; fix the skill.
+
+### Skill Evolution Loop
+
+Skills improve over time but never self-mutate automatically:
+
+1. User or an opt-in hook records a local observation in `.tidy-ai/learning-queue.md` (gitignored, never committed).
+2. tidy-skill-evolution reviews candidates only when explicitly asked.
+3. Claude proposes a skill/doc improvement.
+4. User approves.
+5. A normal phase updates the skill/doc.
+6. Validation runs (user/controller).
+7. The change is committed as versioned workflow evolution.
+
+Committed skill changes follow the same versioning discipline as docs: while STATE.json state = alpha, skill tweaks are in-alpha corrections; while stable, a skill change opens a new Z patch. tidy-skill-evolution never auto-promotes a candidate; it proposes a roadmap phase.
 
 ---
 
