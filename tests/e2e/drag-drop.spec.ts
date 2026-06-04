@@ -49,6 +49,11 @@ async function attachExistingTag(page: Page, listName: string, tagName: string) 
   await page.locator('[data-slot="command-item"]').filter({ hasText: tagName }).first().click();
   await persisted;
   await expect(card.getByText(tagName, { exact: true })).toBeVisible();
+  const tagSearchInput = page.getByPlaceholder("Search or create tag...");
+  if (await tagSearchInput.count() > 0) {
+    await card.getByTestId(testIds.tagSelector).click();
+  }
+  await expect(tagSearchInput).toHaveCount(0);
 }
 
 async function getOrderedVisibleNames(
@@ -120,8 +125,7 @@ test("reorder custom view cards persists after reload", async ({ page }) => {
   await cleanupNamedList(page, listName);
 });
 
-// FIXME(1.4.27): tag-picker dropdown dismissal in setup - reorder itself is proven by drag-drop:84/165
-test.fixme("reorder lists inside a custom view persists after reload", async ({ page }) => {
+test("reorder lists inside a custom view persists after reload", async ({ page }) => {
   const firstList = uniqueTestName("view-list-first");
   const secondList = uniqueTestName("view-list-second");
   const sharedTag = uniqueTestName("view-list-tag");
