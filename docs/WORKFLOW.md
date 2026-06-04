@@ -515,11 +515,27 @@ blocks must be copy-paste runnable as-is in PowerShell.
 
 ---
 
-## Session Checkpoint Output Contract
+## Session Continuation and Checkpoints
 
-When the user says "session checkpoint", "create a session checkpoint", "let's
-do a session checkpoint", or equivalent, the response is not itself
-implementation. It must provide, in order:
+Normal continuation uses a minimal handoff, not a committed SESSION_LOG
+checkpoint. When the user signals stopping, switching, stepping away, or that
+context may compact, run the tidy-minimal-handoff procedure: emit a single
+low-token handoff packet (repo and URL, user intent, fresh state from STATE.json,
+whether local evidence is required, the smallest next read set, which Tidy skill
+to invoke next, and an explicit do-not-read list). The minimal handoff plus
+STATE.json + docs/FUTURE_PLANS.md + docs/AI_HANDOFF.md is the continuity
+mechanism; a brand-new model must be able to resume from those alone.
+
+SESSION_LOG is historical audit only, not the normal continuation path. Write a
+committed checkpoint only for the rarer audit cases: a phase retrospective, a
+durable record of a large, risky, or many-file operation, or investigating why a
+past decision was made.
+
+### Session Checkpoint Output Contract (Optional Audit Mode)
+
+When the user explicitly says "session checkpoint", "create a session
+checkpoint", "let's do a session checkpoint", or equivalent, the response is not
+itself implementation. It must provide, in order:
 
 Section 1 - Session Log Master Prompt for Codex
 Session checkpoint commit script
@@ -589,7 +605,7 @@ the source of truth. ChatGPT and Codex do not load skills; they read the docs.
 | Skill | Use when | Source of truth it executes |
 |-------|----------|------------------------------|
 | tidy-session-clone | starting or resuming a session | AGENTS.md Session Start Protocol |
-| tidy-minimal-handoff | handing off / stopping / switching tasks | docs/WORKFLOW.md Session Checkpoint Output Contract (audit path) |
+| tidy-minimal-handoff | handing off / stopping / switching tasks | docs/WORKFLOW.md Session Continuation and Checkpoints |
 | tidy-codex-prompt-builder | scoping a phase / writing a Codex prompt | Codex Prompt Format (this file) + docs/CODEX_RULES.md |
 | tidy-validation-judge | validation or status evidence was pasted | Validation-Gated Assistant Responses (this file) |
 | tidy-debug-attempt | a check or test failed and a fix is considered | docs/CODEX_RULES.md Debugging Attempt Discipline |
