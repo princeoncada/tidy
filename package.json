@@ -1,6 +1,6 @@
 {
   "name": "todo-app",
-  "version": "1.4.29",
+  "version": "1.4.30-alpha",
   "private": true,
   "scripts": {
     "graph:codebase": "powershell -ExecutionPolicy Bypass -File scripts/generate-codebase-graph.ps1",

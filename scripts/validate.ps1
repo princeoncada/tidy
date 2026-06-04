@@ -574,7 +574,7 @@ $docsSurfacePresentChecks = @(
     },
     @{
         Path = "docs/FUTURE_PLANS.md"
-        Phrase = "1.10.3 - Visual Review Pass"
+        Phrase = "1.11.3 - Visual Review Pass"
     }
 )
 foreach ($check in $docsSurfacePresentChecks) {
