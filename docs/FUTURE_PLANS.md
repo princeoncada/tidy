@@ -137,6 +137,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.5.0 - Tidy Harness Skills and Hook Contracts~~ (stable 2026-06-04)
 
+- ~~1.5.1 - Local Memory Persistence and Learning Queue~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -146,17 +148,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.5.1 - Local Memory Persistence and Learning Queue (active) - see Planned
 ---
 
 ## Planned
-
-### 1.5.1 - Local Memory Persistence and Learning Queue
-- **Status:** In progress | Priority: P2 AI workflow
-- **Files:** .gitignore, ai-harness/hooks/scripts/*.ps1, ai-harness/skills/tidy-learning-review/SKILL.md, docs/WORKFLOW.md (only if the session checkpoint contract needs a small note), docs/CONTEXT_INDEX.md (only if routing must mention learning review)
-- **Problem:** Session continuity relies entirely on committed SESSION_LOG docs; there is no local-only scratch memory or learning-candidate queue, and raw observations must never be committed.
-- **Scope:** add a gitignored local memory path (.tidy-ai/) for session state, observations, and learning candidates, written only by opt-in hooks; learning candidates are review-only and become committed docs only via a normal user-approved phase. Hooks must not edit repo docs or source.
-- **Acceptance:** .tidy-ai/ is gitignored; hooks write local files only; no automatic promotion to workflow docs; existing SESSION_LOG process stays valid; no raw transcripts committed.
 
 ### 1.5.2 - AI Context Budget Audit
 - **Status:** Open | Priority: P3 AI workflow
