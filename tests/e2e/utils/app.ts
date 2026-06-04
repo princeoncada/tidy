@@ -79,7 +79,9 @@ export async function renameList(page: Page, oldName: string, newName: string) {
   const input = await firstVisible(page.getByTestId(testIds.listTitleInput));
   await expect(input).toBeVisible();
   await input.fill(newName);
+  const persisted = waitForSuccessfulTrpcMutation(page, "list.renameList");
   await input.press("Enter");
+  await persisted;
   await expect(await getVisibleListCard(page, newName)).toBeVisible();
   await expectListNotVisible(page, oldName);
 }
@@ -119,7 +121,9 @@ export async function renameItem(page: Page, oldName: string, newName: string) {
   const input = await firstVisible(page.getByTestId(testIds.listTitleInput));
   await expect(input).toBeVisible();
   await input.fill(newName);
+  const persisted = waitForSuccessfulTrpcMutation(page, "listItem.renameListItem");
   await input.press("Enter");
+  await persisted;
   await expect(page.getByTestId(testIds.listItem).filter({ hasText: newName })).toBeVisible();
   await expectItemNotVisible(page, oldName);
 }
