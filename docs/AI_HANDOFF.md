@@ -1,9 +1,9 @@
-<!-- Current Version: 1.5.5-alpha -->
+<!-- Current Version: 1.5.5 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.5.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.5.5 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.5.5 - Real Hook Guardrails
 **Next**: 1.5.6 - Phase Eval Artifact Baseline
 
