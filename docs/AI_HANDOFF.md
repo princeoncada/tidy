@@ -1,11 +1,11 @@
-<!-- Current Version: 1.5.1 -->
+<!-- Current Version: 1.5.2-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.5.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.5.1 - Local Memory Persistence and Learning Queue
-**Next**: 1.5.2 - AI Context Budget Audit
+**Current Version**: 1.5.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.5.2 - AI Context Budget Audit
+**Next**: 1.5.3 - Phase Eval Artifact Baseline
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
