@@ -164,12 +164,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.6.1 - List Item Ownership Fixes (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.6.1 - List Item Ownership Fixes
-- **Status:** Open | Priority: P0 security
+- **Status:** In progress | Priority: P0 security
 - **Files:** trpc/routers/listItemRouter.ts, tests/
 - **Problem:** listItem getListItems, renameListItem, deleteListItem, and setCompletionListItem are protected but do not consistently verify parentList.userId.
 - **Scope:** verify parent list ownership before reading or mutating list items; preserve optimistic response shapes.

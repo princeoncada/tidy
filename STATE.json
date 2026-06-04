@@ -1,9 +1,9 @@
 {
-    "version":  "1.6.0",
-    "state":  "stable",
-    "phase":  "1.6.0",
-    "phaseTitle":  "Ownership Failure Test Baseline",
-    "nextPhase":  "1.6.1 - List Item Ownership Fixes",
+    "version":  "1.6.1-alpha",
+    "state":  "alpha",
+    "phase":  "1.6.1",
+    "phaseTitle":  "List Item Ownership Fixes",
+    "nextPhase":  "1.6.2 - Reorder Target List Ownership Fix",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }

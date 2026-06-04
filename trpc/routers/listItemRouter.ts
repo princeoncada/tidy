@@ -32,10 +32,13 @@ export const listItemRouter = createTRPCRouter({
    */
   getListItems: protectedProcedure.input(z.object({
     listId: z.uuid()
-  })).query(async ({ input: { listId } }) => {
+  })).query(async ({ ctx: { userId }, input: { listId } }) => {
     const listItems = await db.listItem.findMany({
       where: {
-        listId
+        listId,
+        parentList: {
+          userId,
+        },
       },
       orderBy: {
         order: 'asc'
@@ -106,21 +109,24 @@ export const listItemRouter = createTRPCRouter({
   renameListItem: protectedProcedure.input(z.object({
     name: z.string().trim().max(255),
     id: z.uuid()
-  })).mutation(async ({ input: { id, name } }) => {
-    const renamedListItem = await db.listItem.update({
+  })).mutation(async ({ ctx: { userId }, input: { id, name } }) => {
+    const renamedListItems = await db.listItem.updateManyAndReturn({
       where: {
-        id
+        id,
+        parentList: {
+          userId,
+        },
       },
       data: {
         name
       }
     })
 
-    if (!renamedListItem) {
+    if (renamedListItems.length === 0) {
       throw new TRPCError({ code: "NOT_FOUND" })
     }
 
-    return renamedListItem
+    return renamedListItems[0]
   }),
 
   /**
@@ -128,9 +134,14 @@ export const listItemRouter = createTRPCRouter({
    */
   deleteListItem: protectedProcedure.input(z.object({
     id: z.uuid()
-  })).mutation(async ({ input: { id } }) => {
+  })).mutation(async ({ ctx: { userId }, input: { id } }) => {
     const result = await db.listItem.deleteMany({
-      where: { id },
+      where: {
+        id,
+        parentList: {
+          userId,
+        },
+      },
     });
 
     return {
@@ -140,17 +151,24 @@ export const listItemRouter = createTRPCRouter({
   setCompletionListItem: protectedProcedure.input(z.object({
     id: z.uuid(),
     completed: z.boolean()
-  })).mutation(async ({ input: { id, completed } }) => {
-    const listItem = await db.listItem.update({
+  })).mutation(async ({ ctx: { userId }, input: { id, completed } }) => {
+    const updatedListItems = await db.listItem.updateManyAndReturn({
       where: {
-        id
+        id,
+        parentList: {
+          userId,
+        },
       },
       data: {
         completed
       }
     })
 
-    return listItem
+    if (updatedListItems.length === 0) {
+      throw new TRPCError({ code: "NOT_FOUND" })
+    }
+
+    return updatedListItems[0]
   }),
   reorderListItems: protectedProcedure.input(z.object({
     items: z.array(
