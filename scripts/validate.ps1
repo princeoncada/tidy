@@ -594,6 +594,37 @@ if ($docsSurfaceErrors.Count -eq 0) {
     Add-Result "docs surface rebaseline" $false ($docsSurfaceErrors -join "; ")
 }
 
+# Skill surface guard - required operational skills must exist with frontmatter and a source-of-truth pointer
+$requiredSkills = @(
+    "tidy-session-clone",
+    "tidy-minimal-handoff",
+    "tidy-codex-prompt-builder",
+    "tidy-validation-judge",
+    "tidy-debug-attempt",
+    "tidy-skill-evolution",
+    "tidy-context-budget"
+)
+$skillErrors = @()
+foreach ($skill in $requiredSkills) {
+    $skillPath = ".claude/skills/$skill/SKILL.md"
+    if (-not (Test-Path $skillPath)) {
+        $skillErrors += "$skillPath missing"
+        continue
+    }
+    $skillContent = Get-Content $skillPath -Raw -Encoding UTF8
+    if ($skillContent -notmatch ("(?im)^name:\s*" + [regex]::Escape($skill) + "\s*$")) {
+        $skillErrors += "$skillPath missing frontmatter name '$skill'"
+    }
+    if (-not $skillContent.Contains("Source of truth")) {
+        $skillErrors += "$skillPath missing 'Source of truth' pointer"
+    }
+}
+if ($skillErrors.Count -eq 0) {
+    Add-Result "skill surface" $true "7 operational skills present with source-of-truth pointers"
+} else {
+    Add-Result "skill surface" $false ($skillErrors -join "; ")
+}
+
 # Typecheck
 Run-Step "typecheck" @("npm", "run", "typecheck")
 
