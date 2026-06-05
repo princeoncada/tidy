@@ -1,11 +1,11 @@
-<!-- Current Version: 1.8.5 -->
+<!-- Current Version: 1.8.6-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.5 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.8.5 - Outbox Replay Integration Test Plan
-**Next**: 1.8.6 - Offline Write Path Prototype
+**Current Version**: 1.8.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.8.6 - Offline Write Path Prototype
+**Next**: 1.9.0 - Dashboard Component Responsibility Audit
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -140,7 +140,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - PWA/offline behavior is not implemented despite product goals.
 - No conflict policy exists for offline replay.
 - Outbox replay helpers exist but are not connected to runtime dashboard mutations.
-- The replay-to-endpoint integration CONTRACT (transport request shape, syncing-status acceptance, idempotency-key threading, coalesced-survivor validity, endpoint-rejection-as-failure without queue blocking, and user-scope authority) is characterized by `tests/unit/sync-replay-endpoint-integration.test.ts` (1.8.5). Real HTTP/runtime wiring of replay into dashboard mutations, plus conflict policy, remain deferred to 1.8.6.
+- The replay-to-endpoint integration CONTRACT (transport request shape, syncing-status acceptance, idempotency-key threading, coalesced-survivor validity, endpoint-rejection-as-failure without queue blocking, and user-scope authority) is characterized by `tests/unit/sync-replay-endpoint-integration.test.ts` (1.8.5).
+- 1.8.6 adds an ISOLATED, feature-flagged offline write-path prototype (`lib/sync/offline-write-prototype.ts`): `captureOfflineWrite` builds + enqueues an outbox operation, and `flushOfflineWrites` replays it via `replayOutboxOperations` through a real HTTP transport (`createHttpSyncReplayTransport`). It is proven end-to-end by `tests/unit/offline-write-prototype.test.ts` and is NOT imported by `hooks/useOptimisticSync.ts`, `lib/dashboard-cache.ts`, or `trpc/client.tsx`; the dashboard source of truth is unchanged. A live `/api/sync` route, runtime mounting, and an offline conflict policy remain deferred.
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
