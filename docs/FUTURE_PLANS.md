@@ -177,6 +177,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.8.0 - Local DB Role Audit Through Tests~~ (stable 2026-06-05)
 
+- ~~1.8.1 - Scope-Output Opening-Sequence Template~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -186,17 +188,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.8.1 - Scope-Output Opening-Sequence Template (active) - see Planned
 ---
 
 ## Planned
-
-### 1.8.1 - Scope-Output Opening-Sequence Template
-- **Status:** In progress | Priority: P1 workflow hardening
-- **Files:** .claude/skills/tidy-codex-prompt-builder/SKILL.md, docs/FUTURE_PLANS.md
-- **Problem:** The pre-Codex opening sequence is described only in prose across two homes, so scope outputs can drift in flag order, quoting, and step count.
-- **Scope:** encode one fixed, byte-identical opening-sequence template inline in tidy-codex-prompt-builder so every "scope it out" emits identical opener structure.
-- **Acceptance:** the skill carries the literal two-line opener template; scope outputs reproduce it verbatim with only placeholders substituted; no product source changes.
 
 ### 1.8.2 - Post-Validation Closeout Enforcement
 - **Status:** Open | Priority: P1 workflow hardening
