@@ -1,9 +1,9 @@
 {
-    "version":  "1.8.4",
-    "state":  "stable",
-    "phase":  "1.8.4",
-    "phaseTitle":  "Workflow Source-of-Truth Migration Into Skills",
-    "nextPhase":  "1.8.5 - Outbox Replay Integration Test Plan",
+    "version":  "1.8.5-alpha",
+    "state":  "alpha",
+    "phase":  "1.8.5",
+    "phaseTitle":  "Outbox Replay Integration Test Plan",
+    "nextPhase":  "1.8.6 - Offline Write Path Prototype",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
