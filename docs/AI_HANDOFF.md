@@ -1,9 +1,9 @@
-<!-- Current Version: 1.7.1-alpha -->
+<!-- Current Version: 1.7.1 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.7.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.7.1 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.7.1 - Scope Rollback Rules
 **Next**: 1.7.2 - Pending Mutation Cancellation Rules
 
