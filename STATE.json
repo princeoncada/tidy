@@ -1,6 +1,6 @@
 {
-    "version":  "1.8.6-alpha",
-    "state":  "alpha",
+    "version":  "1.8.6",
+    "state":  "stable",
     "phase":  "1.8.6",
     "phaseTitle":  "Offline Write Path Prototype",
     "nextPhase":  "1.9.0 - Dashboard Component Responsibility Audit",
