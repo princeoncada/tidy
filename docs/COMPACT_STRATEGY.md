@@ -12,6 +12,28 @@ Never scan the repo broadly. Never open files speculatively. `docs/PHASE_LOG.md`
 
 ---
 
+## Context Discipline (Hard Rules)
+
+Context is the scarcest session resource. These rules are non-negotiable:
+
+- One phase per session. Scope and run a single phase, then at promotion STOP,
+  emit a `tidy-minimal-handoff`, and start the next phase in a fresh session.
+  Never chain phases (open, promote, then immediately scope the next) in one
+  session - chaining balloons context and forces an expensive full-transcript
+  reload on the next start.
+- A minimal handoff at promote is mandatory, not optional. The fresh session
+  resumes from STATE.json + docs/FUTURE_PLANS.md + docs/AI_HANDOFF.md + the
+  handoff packet, not the whole transcript.
+- Prefer targeted reads (Grep, or offset+limit on the needed block) over
+  full-file reads of large docs (validate.ps1, WORKFLOW.md, FUTURE_PLANS.md).
+  Never re-read a file already read in the session.
+- Never re-emit a full master prompt to change part of it; emit only the changed
+  items as a labeled delta or route through the in-alpha correction path.
+- Run `npm run budget:context` on demand if workflow/doc overhead seems to be
+  creeping back.
+
+---
+
 ## STATE.json Is the Oracle
 
 Read `STATE.json` at session start. It contains everything needed to orient before reading anything else:
