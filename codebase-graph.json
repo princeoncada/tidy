@@ -2204,6 +2204,18 @@
       ]
     },
     {
+      "path": "tests/unit/sync-replay-endpoint-integration.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/local-db/sync-replay-client",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/sync-endpoint-contract"
+      ]
+    },
+    {
       "path": "tests/unit/sync-status-surface.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3942,6 +3954,24 @@
       "to": "lib/local-db/sync-replay-client.ts",
       "type": "imports",
       "import": "@/lib/local-db/sync-replay-client"
+    },
+    {
+      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
+      "to": "lib/local-db/sync-replay-client.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/sync-replay-client"
+    },
+    {
+      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
+      "to": "lib/sync/sync-endpoint-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-endpoint-contract"
     },
     {
       "from": "tests/unit/sync-status-surface.test.ts",
