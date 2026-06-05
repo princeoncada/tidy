@@ -175,6 +175,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.7.3 - Refresh/Crash Pending Work Decision~~ (stable 2026-06-05)
 
+- ~~1.8.0 - Local DB Role Audit Through Tests~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -184,17 +186,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.8.0 - Local DB Role Audit Through Tests (active) - see Planned
 ---
 
 ## Planned
-
-### 1.8.0 - Local DB Role Audit Through Tests
-- **Status:** In progress | Priority: P1 local-first clarity
-- **Files:** lib/local-db/*, hooks/use-local-db-health-check.ts, tests/unit/*
-- **Problem:** Dexie/local DB exists as foundation but is not the dashboard source of truth.
-- **Scope:** prove what local DB currently does and does not do through tests; clarify that runtime behavior remains server/TanStack-driven unless later changed.
-- **Acceptance:** local DB role is tested and understood before offline integration work.
 
 ### 1.8.1 - Outbox Replay Integration Test Plan
 - **Status:** Open | Priority: P2 offline architecture
