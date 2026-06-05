@@ -173,6 +173,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.7.2 - Pending Mutation Cancellation Rules~~ (stable 2026-06-05)
 
+- ~~1.7.3 - Refresh/Crash Pending Work Decision~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -182,17 +184,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.7.3 - Refresh/Crash Pending Work Decision (active) - see Planned
 ---
 
 ## Planned
-
-### 1.7.3 - Refresh/Crash Pending Work Decision
-- **Status:** In progress | Priority: P1 local-first decision
-- **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, docs/DECISIONS.md, docs/FUTURE_PLANS.md
-- **Problem:** In-memory queues can lose pending writes on refresh or crash.
-- **Scope:** decide whether to keep in-memory queues temporarily or begin Dexie-backed pending writes; record durable decision in DECISIONS.md if architecture changes.
-- **Acceptance:** future direction is explicit; no accidental half-offline rewrite.
 
 ### 1.8.0 - Local DB Role Audit Through Tests
 - **Status:** Open | Priority: P1 local-first clarity
