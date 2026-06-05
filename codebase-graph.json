@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.6.4",
-  "generatedAt": "2026-06-04",
+  "version": "1.6.5-alpha",
+  "generatedAt": "2026-06-05",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -99,12 +99,8 @@
       "path": ".tidy-ai/learning-queue.md",
       "kind": "file",
       "extension": ".md",
-      "symbols": [
-        "the"
-      ],
-      "imports": [
-        "adds/removes/renames\n  files"
-      ]
+      "symbols": [],
+      "imports": []
     },
     {
       "path": ".vscode/settings.json",
