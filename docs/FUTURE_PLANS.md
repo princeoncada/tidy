@@ -161,6 +161,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.6.3 - Ownership Regression Sweep~~ (stable 2026-06-04)
 
+- ~~1.6.4 - Workflow Skill Evolution Sweep~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -170,17 +172,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.6.4 - Workflow Skill Evolution Sweep (active) - see Planned
 ---
 
 ## Planned
-
-### 1.6.4 - Workflow Skill Evolution Sweep
-- **Status:** In progress | Priority: P2 workflow hardening
-- **Files:** AGENTS.md, docs/WORKFLOW.md, .claude/skills/tidy-codex-prompt-builder/SKILL.md, .claude/skills/tidy-validation-judge/SKILL.md, .claude/skills/tidy-session-clone/SKILL.md
-- **Problem:** Several settled learning-queue candidates (graph-refresh trigger, opener-commit post-validation self-check, local-evidence self-gather, commits-vs-closeout rationale, AllowMissingNextPhase preamble, handoff-not-authorization) are practiced but not yet written into the docs/skills.
-- **Scope:** formalize those candidates as prose edits to AGENTS.md, docs/WORKFLOW.md, and the three named skills. Docs/skills only; no product source, tests, or dependencies.
-- **Acceptance:** the six behaviors are documented; validate.ps1 passes; no product behavior change.
 
 ### 1.7.0 - Optimistic Queue Race Test Baseline
 - **Status:** Open | Priority: P0 optimistic stability
