@@ -167,6 +167,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.6.6 - Phase Scoping and Opening Workflow Hardening~~ (stable 2026-06-05)
 
+- ~~1.7.0 - Optimistic Queue Race Test Baseline~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -176,17 +178,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.7.0 - Optimistic Queue Race Test Baseline (active) - see Planned
 ---
 
 ## Planned
-
-### 1.7.0 - Optimistic Queue Race Test Baseline
-- **Status:** In progress | Priority: P0 optimistic stability
-- **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/
-- **Problem:** Most optimistic race behavior is not automatically proven, even though the app depends on optimistic-first UX.
-- **Scope:** add tests or test harnesses for enqueue, replacePending, rollback, cancellation, and independent mutation scopes.
-- **Acceptance:** test baseline captures current queue behavior and known race risks.
 
 ### 1.7.1 - Scope Rollback Rules
 - **Status:** Open | Priority: P0 optimistic stability
