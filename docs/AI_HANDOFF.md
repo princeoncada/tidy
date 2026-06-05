@@ -1,9 +1,9 @@
-<!-- Current Version: 1.6.5-alpha -->
+<!-- Current Version: 1.6.5 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.6.5 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.6.5 - Codebase Graph Generator Stability Fix
 **Next**: 1.6.6 - Phase Scoping and Opening Workflow Hardening
 
