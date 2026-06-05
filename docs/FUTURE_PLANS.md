@@ -182,12 +182,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.7.3 - Refresh/Crash Pending Work Decision (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.7.3 - Refresh/Crash Pending Work Decision
-- **Status:** Open | Priority: P1 local-first decision
+- **Status:** In progress | Priority: P1 local-first decision
 - **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, docs/DECISIONS.md, docs/FUTURE_PLANS.md
 - **Problem:** In-memory queues can lose pending writes on refresh or crash.
 - **Scope:** decide whether to keep in-memory queues temporarily or begin Dexie-backed pending writes; record durable decision in DECISIONS.md if architecture changes.
@@ -326,7 +327,7 @@ Assigned a version only when scoped.
 
 - Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
 - PWA/offline is not implemented despite product goals.
-- In-memory queues can lose pending writes on refresh or crash.
+- In-memory queues can lose pending writes on refresh or crash. Accepted as temporary per `docs/DECISIONS.md` (2026-06-05); durable pending-write persistence deferred to the 1.8.x local-first series.
 - Large components increase risk for focused changes.
 - API ownership gaps should land in 1.6.x before expanding API surface area.
 - Frontend projection and backend refresh must agree before UI/UX polish.
