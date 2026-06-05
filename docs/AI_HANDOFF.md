@@ -1,9 +1,9 @@
-<!-- Current Version: 1.8.0-alpha -->
+<!-- Current Version: 1.8.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.8.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.8.0 - Local DB Role Audit Through Tests
 **Next**: 1.8.1 - Outbox Replay Integration Test Plan
 
