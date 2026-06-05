@@ -185,6 +185,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.8.4 - Workflow Source-of-Truth Migration Into Skills~~ (stable 2026-06-05)
 
+- ~~1.8.5 - Outbox Replay Integration Test Plan~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -194,17 +196,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.8.5 - Outbox Replay Integration Test Plan (active) - see Planned
 ---
 
 ## Planned
-
-### 1.8.5 - Outbox Replay Integration Test Plan
-- **Status:** In progress | Priority: P2 offline architecture
-- **Files:** lib/local-db/sync-replay-client.ts, lib/sync/sync-endpoint-contract.ts, tests/
-- **Problem:** Outbox replay helpers exist but are not connected to real app mutations.
-- **Scope:** plan and test the integration contract before wiring replay into runtime behavior.
-- **Acceptance:** replay integration risks are covered by tests or explicit follow-up phases.
 
 ### 1.8.6 - Offline Write Path Prototype
 - **Status:** Open | Priority: P2 offline prototype
