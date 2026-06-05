@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
 
 import {
@@ -14,7 +14,9 @@ import {
   listMatchesView,
   projectView,
   reconcileCreatedListInSnapshot,
+  removeListFromDashboardCaches,
   selectedViewFromCache,
+  updateListInDashboardCaches,
   type ViewsCache,
 } from "@/lib/dashboard-cache";
 
@@ -561,5 +563,150 @@ describe("dashboard cache projection", () => {
       { id: "saved-second", order: 0 },
       { id: "saved-first", order: 1 },
     ]);
+  });
+});
+
+describe("dashboard mutation chokepoint (characterization)", () => {
+  it("applies list updates consistently across all dashboard snapshot keys", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({
+      id: "custom",
+      viewTags: [{ viewId: "custom", tagId: "a", tag: tag("a") }],
+    });
+    const keys = {
+      views: ["views"],
+      allLists: ["all-lists"],
+      currentView: ["current-view"],
+      selectedView: ["selected-view"],
+    };
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("target", ["a"], 0), list("other", [], 1)],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [list("target", ["a"], 0)],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [list("target", ["a"], 0)],
+    });
+
+    updateListInDashboardCaches(queryClient, keys, "target", (currentList) => ({
+      ...currentList,
+      name: "Updated target",
+    }));
+
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.allLists)
+        ?.lists.find((entry) => entry.id === "target")
+        ?.name
+    ).toBe("Updated target");
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.currentView)
+        ?.lists.find((entry) => entry.id === "target")
+        ?.name
+    ).toBe("Updated target");
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.selectedView)
+        ?.lists.find((entry) => entry.id === "target")
+        ?.name
+    ).toBe("Updated target");
+  });
+
+  it("removes a list from all dashboard snapshot keys in one helper call", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({
+      id: "custom",
+      viewTags: [{ viewId: "custom", tagId: "a", tag: tag("a") }],
+    });
+    const keys = {
+      views: ["views"],
+      allLists: ["all-lists"],
+      currentView: ["current-view"],
+      selectedView: ["selected-view"],
+    };
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("target", ["a"], 0), list("other", [], 1)],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [list("target", ["a"], 0), list("member", ["a"], 1)],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [list("target", ["a"], 0), list("member", ["a"], 1)],
+    });
+
+    removeListFromDashboardCaches(queryClient, keys, "target");
+
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.allLists)
+        ?.lists.some((entry) => entry.id === "target")
+    ).toBe(false);
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.currentView)
+        ?.lists.some((entry) => entry.id === "target")
+    ).toBe(false);
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.selectedView)
+        ?.lists.some((entry) => entry.id === "target")
+    ).toBe(false);
+  });
+
+  it("fans one logical mutation out to exactly the dashboard snapshot keys", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({
+      id: "custom",
+      viewTags: [{ viewId: "custom", tagId: "a", tag: tag("a") }],
+    });
+    const keys = {
+      views: ["views"],
+      allLists: ["all-lists"],
+      currentView: ["current-view"],
+      selectedView: ["selected-view"],
+    };
+    const unrelatedKey = ["unrelated"];
+    const unrelatedSnapshot = { value: "untouched" };
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("target", ["a"], 0), list("other", [], 1)],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [list("target", ["a"], 0)],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [list("target", ["a"], 0)],
+    });
+    queryClient.setQueryData(unrelatedKey, unrelatedSnapshot);
+
+    const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+
+    updateListInDashboardCaches(queryClient, keys, "target", (currentList) => ({
+      ...currentList,
+      name: "Single fan-out",
+    }));
+
+    expect(setQueryDataSpy.mock.calls.map(([queryKey]) => queryKey)).toEqual([
+      keys.allLists,
+      keys.currentView,
+      keys.selectedView,
+    ]);
+    expect(queryClient.getQueryData(unrelatedKey)).toBe(unrelatedSnapshot);
   });
 });
