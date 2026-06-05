@@ -1,9 +1,9 @@
 {
-    "version":  "1.7.2",
-    "state":  "stable",
-    "phase":  "1.7.2",
-    "phaseTitle":  "Pending Mutation Cancellation Rules",
-    "nextPhase":  "1.7.3 - Refresh/Crash Pending Work Decision",
+    "version":  "1.7.3-alpha",
+    "state":  "alpha",
+    "phase":  "1.7.3",
+    "phaseTitle":  "Refresh/Crash Pending Work Decision",
+    "nextPhase":  "1.8.0 - Local DB Role Audit Through Tests",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
