@@ -1,9 +1,9 @@
-<!-- Current Version: 1.8.1-alpha -->
+<!-- Current Version: 1.8.1 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.8.1 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.8.1 - Scope-Output Opening-Sequence Template
 **Next**: 1.8.2 - Post-Validation Closeout Enforcement
 
