@@ -1,9 +1,9 @@
 {
-    "version":  "1.7.0",
-    "state":  "stable",
-    "phase":  "1.7.0",
-    "phaseTitle":  "Optimistic Queue Race Test Baseline",
-    "nextPhase":  "1.7.1 - Scope Rollback Rules",
+    "version":  "1.7.1-alpha",
+    "state":  "alpha",
+    "phase":  "1.7.1",
+    "phaseTitle":  "Scope Rollback Rules",
+    "nextPhase":  "1.7.2 - Pending Mutation Cancellation Rules",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
