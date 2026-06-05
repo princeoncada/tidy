@@ -127,7 +127,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Optimistic and race behavior:**
 - Optimistic queue mechanics (enqueue FIFO ordering, independent-scope isolation, replacePending cancellation, failure rollback without whole-scope cancel, CancelledError handling) are baselined in `tests/unit/optimistic-sync-baseline.test.ts` as of 1.7.2; replacePending-vs-enqueue scope isolation is test-locked, but broader cross-component optimistic race behavior is still not fully proven.
 - Rollback containment now prevents superseded failed tasks from repainting over newer started same-scope work. Residual risk: blind snapshot rollbacks can still leave or repaint stale state when newer same-scope optimistic work is queued but has not started and does not overwrite the failed field.
-- In-memory optimistic queues can lose pending writes on refresh or crash.
+- In-memory optimistic queues can lose pending writes on refresh or crash. Accepted as temporary by design per the 2026-06-05 decision in `docs/DECISIONS.md` (keep in-memory queues; durable pending writes deferred to the 1.8.x local-first series); not a defect to patch in 1.7.x.
 - Reorders involving optimistic-only rows must keep filtering optimistic-only IDs before server writes.
 - Tag deletes or rapid tag toggles can affect custom view membership mid-operation.
 - Fast view switching depends on latest-selected-view guards to avoid stale repaints.
