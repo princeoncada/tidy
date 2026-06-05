@@ -1,9 +1,9 @@
-<!-- Current Version: 1.6.3-alpha -->
+<!-- Current Version: 1.6.3 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.6.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.6.3 - Ownership Regression Sweep
 **Next**: 1.7.0 - Optimistic Queue Race Test Baseline
 
