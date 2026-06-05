@@ -101,3 +101,35 @@ until the offline series addresses it deliberately.
 accepted as temporary by design, not a defect to patch in 1.7.x. The
 `hooks/useOptimisticSync.ts` module-level queue state remains volatile-by-design until the
 1.8.x series. No source or test behavior changes in 1.7.3.
+
+**Update (2026-06-05, recorded in 1.8.7):** The 1.8.x series referenced above shipped as
+scaffolding only - 1.8.0 local DB role audit, 1.8.5 outbox replay-endpoint integration test
+plan, and 1.8.6 isolated offline write-path prototype (the original "1.8.1/1.8.2" numbers were
+renumbered to 1.8.5/1.8.6). It did NOT introduce durable pending-write persistence or wire
+Dexie/outbox into the runtime dashboard. Durable pending writes and the full offline write path
+are rescheduled to the 1.9.5-1.9.10 integration series; see the decision below.
+
+---
+
+## 2026-06-05: Reschedule real Dexie/offline integration to a chokepoint-first 1.9.x series
+
+Recorded during 1.8.7. The 1.8.x local-first series completed without wiring Dexie/outbox into
+the live dashboard: no dashboard mutation creates an outbox operation, nothing reads Dexie at
+runtime, no replay worker runs, and `lib/sync/offline-write-prototype.ts` ships behind
+`OFFLINE_WRITE_PROTOTYPE_ENABLED = false`, imported only by its test. The deferral promise in the
+2026-06-05 in-memory-queue decision was therefore left undischarged.
+
+**Decision**: Do real integration chokepoint-first. Keep 1.9.0-1.9.4 (dashboard
+component/responsibility audit + mutation cache helper extraction) but treat them as the enabling
+refactor that creates a single dashboard-mutation chokepoint in `lib/dashboard-cache.ts`. Then run
+a dedicated integration series 1.9.5-1.9.10: Dashboard Mutation to Outbox Wiring, Durable
+Pending-Write Integration, Automatic Replay Worker (plus a real `/api/sync` route), Sync Status UI
+Surface, Offline Conflict Resolution Rules, and a Local DB Source-of-Truth Decision.
+
+**Reason**: Wiring outbox capture into today's scattered mutation sites (`ListAdder`,
+`ListComponent`, `ListsContainer`, `ViewsSidebarPreview`, `ListTagPicker`) is the high-risk
+write-path change the earlier decision warned against. Establishing one mutation chokepoint first
+makes the capture wiring a single-seam change instead of a cross-component rewrite.
+
+**Impact**: 1.9.x is reframed from pure maintainability to the on-ramp for offline. The "in-memory
+queues lose pending writes on refresh/crash" risk remains accepted-temporary until 1.9.6.
