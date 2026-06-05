@@ -1,6 +1,6 @@
 {
-    "version":  "1.8.5-alpha",
-    "state":  "alpha",
+    "version":  "1.8.5",
+    "state":  "stable",
     "phase":  "1.8.5",
     "phaseTitle":  "Outbox Replay Integration Test Plan",
     "nextPhase":  "1.8.6 - Offline Write Path Prototype",
