@@ -1,9 +1,9 @@
 {
-    "version":  "1.6.2",
-    "state":  "stable",
-    "phase":  "1.6.2",
-    "phaseTitle":  "Reorder Target List Ownership Fix",
-    "nextPhase":  "1.6.3 - Ownership Regression Sweep",
+    "version":  "1.6.3-alpha",
+    "state":  "alpha",
+    "phase":  "1.6.3",
+    "phaseTitle":  "Ownership Regression Sweep",
+    "nextPhase":  "1.7.0 - Optimistic Queue Race Test Baseline",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"
 }
