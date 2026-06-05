@@ -1,6 +1,6 @@
 {
-    "version":  "1.6.6-alpha",
-    "state":  "alpha",
+    "version":  "1.6.6",
+    "state":  "stable",
     "phase":  "1.6.6",
     "phaseTitle":  "Phase Scoping and Opening Workflow Hardening",
     "nextPhase":  "1.7.0 - Optimistic Queue Race Test Baseline",
