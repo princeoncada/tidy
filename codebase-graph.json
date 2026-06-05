@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.6.4",
-  "generatedAt": "2026-06-04",
+  "version": "1.6.5-alpha",
+  "generatedAt": "2026-06-05",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -55,9 +55,7 @@
       "path": ".claude/skills/tidy-debug-attempt/SKILL.md",
       "kind": "file",
       "extension": ".md",
-      "symbols": [
-        "is"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -99,12 +97,8 @@
       "path": ".tidy-ai/learning-queue.md",
       "kind": "file",
       "extension": ".md",
-      "symbols": [
-        "the"
-      ],
-      "imports": [
-        "adds/removes/renames\n  files"
-      ]
+      "symbols": [],
+      "imports": []
     },
     {
       "path": ".vscode/settings.json",
@@ -241,9 +235,7 @@
       "path": "app/api/trpc/[trpc]/route.ts",
       "kind": "api_route",
       "extension": ".ts",
-      "symbols": [
-        "handler"
-      ],
+      "symbols": [],
       "imports": [
         "@trpc/server/adapters/fetch",
         "@/trpc/init",
@@ -266,9 +258,7 @@
       "path": "app/dashboard/page.tsx",
       "kind": "page_route",
       "extension": ".tsx",
-      "symbols": [
-        "Page"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/Dashboard"
       ]
@@ -277,13 +267,7 @@
       "path": "app/forgot-password/page.tsx",
       "kind": "page_route",
       "extension": ".tsx",
-      "symbols": [
-        "supabase",
-        "formSchema",
-        "Page",
-        "form",
-        "onSubmit"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/MaxWidthWrapper",
         "@/components/ui/button",
@@ -306,12 +290,7 @@
       "kind": "file",
       "extension": ".tsx",
       "symbols": [
-        "RootLayout",
-        "appName",
-        "appDescription",
-        "siteUrl",
-        "geistSans",
-        "geistMono"
+        "RootLayout"
       ],
       "imports": [
         "@/components/ui/sonner",
@@ -325,9 +304,7 @@
       "path": "app/login/page.tsx",
       "kind": "page_route",
       "extension": ".tsx",
-      "symbols": [
-        "Page"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/auth/Login"
       ]
@@ -350,9 +327,7 @@
       "path": "app/register/page.tsx",
       "kind": "page_route",
       "extension": ".tsx",
-      "symbols": [
-        "Page"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/auth/Register",
         "react"
@@ -362,9 +337,7 @@
       "path": "app/reset-password/page.tsx",
       "kind": "page_route",
       "extension": ".tsx",
-      "symbols": [
-        "Page"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/auth/ResetPassword",
         "react"
@@ -388,13 +361,7 @@
       "path": "components/auth/Login.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "supabase",
-        "formSchema",
-        "Login",
-        "form",
-        "onSubmit"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/ui/button",
         "@/components/ui/card",
@@ -416,13 +383,7 @@
       "path": "components/auth/Register.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "supabase",
-        "formSchema",
-        "Register",
-        "form",
-        "onSubmit"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/MaxWidthWrapper",
         "@/components/ui/button",
@@ -444,13 +405,7 @@
       "path": "components/auth/ResetPassword.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "supabase",
-        "formSchema",
-        "ResetPassword",
-        "form",
-        "onSubmit"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/MaxWidthWrapper",
         "@/components/ui/button",
@@ -473,9 +428,7 @@
       "kind": "component",
       "extension": ".tsx",
       "symbols": [
-        "AuthSync",
-        "supabase",
-        "queryClient"
+        "AuthSync"
       ],
       "imports": [
         "@/lib/supabase/client",
@@ -487,13 +440,7 @@
       "path": "components/Dashboard.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "handleLogout",
-        "supabase",
-        "Dashboard",
-        "queryClient",
-        "router"
-      ],
+      "symbols": [],
       "imports": [
         "@/components/MaxWidthWrapper",
         "@/lib/supabase/client",
@@ -512,28 +459,7 @@
       "path": "components/list/ListAdder.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "ListAdder",
-        "trpc",
-        "queryClient",
-        "viewsQueryKey",
-        "currentViewQueryKey",
-        "allListsView",
-        "allListsQueryKey",
-        "selectedView",
-        "selectedViewId",
-        "selectedViewQueryKey",
-        "dashboardKeys",
-        "previousAllLists",
-        "previousCurrentView",
-        "previousSelectedView",
-        "activeView",
-        "selectedViewTags",
-        "optimisticListTags",
-        "insertOptimisticList",
-        "insertIntoSelectedView",
-        "replaceOptimisticList"
-      ],
+      "symbols": [],
       "imports": [
         "@/trpc/client",
         "../ui/button",
@@ -553,28 +479,7 @@
       "path": "components/list/ListComponent.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "listIsOptimistic",
-        "itemIsAlreadyInCache",
-        "removeItemFromCache",
-        "waitForSavedListInDashboardCaches",
-        "handleViewListItemAdder",
-        "handleDeleteList",
-        "ListComponent",
-        "listIsOnlyInBrowser",
-        "timeout",
-        "trpc",
-        "queryClient",
-        "previousAllLists",
-        "previousCurrentView",
-        "previousSelectedView",
-        "deleteListMutation",
-        "deleteList",
-        "deletedList",
-        "alreadyRestored",
-        "alreadyInCache",
-        "handleCreateItem"
-      ],
+      "symbols": [],
       "imports": [
         "@/lib/utils",
         "@/lib/dashboard-cache",
@@ -603,9 +508,7 @@
       "path": "components/list/ListEmpty.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "ListEmpty"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "../ui/empty",
@@ -618,15 +521,7 @@
       "kind": "component",
       "extension": ".tsx",
       "symbols": [
-        "ListInlineEdit",
-        "inputRef",
-        "lastSyncedValueRef",
-        "startEditing",
-        "handleSave",
-        "trimmed",
-        "handleCancel",
-        "handleKeyDown",
-        "ListInlineEditProps"
+        "ListInlineEdit"
       ],
       "imports": [
         "react",
@@ -637,24 +532,7 @@
       "path": "components/list/ListItemComponent.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "ListItemComponent",
-        "itemIsOnlyInBrowser",
-        "timeout",
-        "trpc",
-        "queryClient",
-        "previousAllLists",
-        "previousCurrentView",
-        "previousSelectedView",
-        "deleteItemMutation",
-        "deleteItem",
-        "parentList",
-        "deletedItem",
-        "deletedItemIndex",
-        "alreadyRestored",
-        "restoredItems",
-        "ListItemComponentProps"
-      ],
+      "symbols": [],
       "imports": [
         "@/trpc/client",
         "@dnd-kit/react/sortable",
@@ -675,10 +553,7 @@
       "path": "components/list/ListMenu.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "ListMenu",
-        "ListMenuProps"
-      ],
+      "symbols": [],
       "imports": [
         "../ui/dropdown-menu",
         "../ui/button",
@@ -689,28 +564,7 @@
       "path": "components/list/ListsContainer.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "reorderListsForDrag",
-        "reorderItemsForDrag",
-        "listOrderMatches",
-        "itemPlacementMatches",
-        "sourceIndex",
-        "targetIndex",
-        "nextLists",
-        "sourceListIndex",
-        "sourceItemIndex",
-        "targetItemId",
-        "targetListId",
-        "ListsContainer",
-        "trpc",
-        "queryClient",
-        "viewsQueryKey",
-        "currentViewQueryKey",
-        "allListsView",
-        "selectedView",
-        "selectedViewId",
-        "allListsQueryKey"
-      ],
+      "symbols": [],
       "imports": [
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
@@ -730,9 +584,7 @@
       "path": "components/list/ListSkeleton.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "ListSkeleton"
-      ],
+      "symbols": [],
       "imports": [
         "../ui/card",
         "../ui/separator",
@@ -743,9 +595,7 @@
       "path": "components/list/ListTag.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "ListBadge"
-      ],
+      "symbols": [],
       "imports": [
         "../ui/badge"
       ]
@@ -755,26 +605,7 @@
       "kind": "component",
       "extension": ".tsx",
       "symbols": [
-        "listIsStillOptimistic",
-        "ListTagPicker",
-        "list",
-        "trpc",
-        "queryClient",
-        "tagsQueryKey",
-        "queryKey",
-        "pendingTagOperationsRef",
-        "tagFlushTimeoutRef",
-        "tagSaveChainRef",
-        "tagOptimisticVersionRef",
-        "tagRollbackSnapshotRef",
-        "selectedTagIds",
-        "selectedTags",
-        "filteredTags",
-        "exactTagExists",
-        "setTagInListsCache",
-        "updateTag",
-        "addTagToListCache",
-        "removeTagFromListCache"
+        "ListTagPicker"
       ],
       "imports": [
         "react",
@@ -798,12 +629,12 @@
       "kind": "component",
       "extension": ".ts",
       "symbols": [
-        "CurrentView",
         "AllListsView",
-        "Lists",
+        "CurrentView",
         "List",
-        "ListItems",
         "ListItem",
+        "ListItems",
+        "Lists",
         "OptimisticList",
         "OptimisticListItem"
       ],
@@ -815,9 +646,7 @@
       "path": "components/MaxWidthWrapper.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "MaxWidthWrapper"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "@/lib/utils"
@@ -827,14 +656,7 @@
       "path": "components/ui/avatar.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Avatar",
-        "AvatarImage",
-        "AvatarFallback",
-        "AvatarBadge",
-        "AvatarGroup",
-        "AvatarGroupCount"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "radix-ui",
@@ -845,12 +667,7 @@
       "path": "components/ui/badge.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Badge",
-        "badgeVariants",
-        "Comp",
-        "VariantProps"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "class-variance-authority",
@@ -862,12 +679,7 @@
       "path": "components/ui/button.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Button",
-        "buttonVariants",
-        "Comp",
-        "VariantProps"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "class-variance-authority",
@@ -879,15 +691,7 @@
       "path": "components/ui/card.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Card",
-        "CardHeader",
-        "CardTitle",
-        "CardDescription",
-        "CardAction",
-        "CardContent",
-        "CardFooter"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "@/lib/utils"
@@ -897,9 +701,7 @@
       "path": "components/ui/checkbox.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Checkbox"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "radix-ui",
@@ -911,17 +713,7 @@
       "path": "components/ui/command.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Command",
-        "CommandDialog",
-        "CommandInput",
-        "CommandList",
-        "CommandEmpty",
-        "CommandGroup",
-        "CommandSeparator",
-        "CommandItem",
-        "CommandShortcut"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "cmdk",
@@ -935,18 +727,7 @@
       "path": "components/ui/dialog.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Dialog",
-        "DialogTrigger",
-        "DialogPortal",
-        "DialogClose",
-        "DialogOverlay",
-        "DialogContent",
-        "DialogHeader",
-        "DialogFooter",
-        "DialogTitle",
-        "DialogDescription"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "radix-ui",
@@ -959,23 +740,7 @@
       "path": "components/ui/dropdown-menu.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "DropdownMenu",
-        "DropdownMenuPortal",
-        "DropdownMenuTrigger",
-        "DropdownMenuContent",
-        "DropdownMenuGroup",
-        "DropdownMenuItem",
-        "DropdownMenuCheckboxItem",
-        "DropdownMenuRadioGroup",
-        "DropdownMenuRadioItem",
-        "DropdownMenuLabel",
-        "DropdownMenuSeparator",
-        "DropdownMenuShortcut",
-        "DropdownMenuSub",
-        "DropdownMenuSubTrigger",
-        "DropdownMenuSubContent"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "radix-ui",
@@ -987,16 +752,7 @@
       "path": "components/ui/empty.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Empty",
-        "EmptyHeader",
-        "EmptyMedia",
-        "EmptyTitle",
-        "EmptyDescription",
-        "EmptyContent",
-        "emptyMediaVariants",
-        "VariantProps"
-      ],
+      "symbols": [],
       "imports": [
         "class-variance-authority",
         "@/lib/utils"
@@ -1006,22 +762,7 @@
       "path": "components/ui/field.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "FieldSet",
-        "FieldLegend",
-        "FieldGroup",
-        "Field",
-        "FieldContent",
-        "FieldLabel",
-        "FieldTitle",
-        "FieldDescription",
-        "FieldSeparator",
-        "FieldError",
-        "fieldVariants",
-        "content",
-        "uniqueErrors",
-        "VariantProps"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "class-variance-authority",
@@ -1034,17 +775,7 @@
       "path": "components/ui/input-group.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "InputGroup",
-        "InputGroupAddon",
-        "InputGroupButton",
-        "InputGroupText",
-        "InputGroupInput",
-        "InputGroupTextarea",
-        "inputGroupAddonVariants",
-        "inputGroupButtonVariants",
-        "VariantProps"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "class-variance-authority",
@@ -1058,13 +789,7 @@
       "path": "components/ui/input-otp.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "InputOTP",
-        "InputOTPGroup",
-        "InputOTPSlot",
-        "InputOTPSeparator",
-        "inputOTPContext"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "input-otp",
@@ -1076,9 +801,7 @@
       "path": "components/ui/input.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Input"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "@/lib/utils"
@@ -1088,9 +811,7 @@
       "path": "components/ui/label.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Label"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "radix-ui",
@@ -1101,10 +822,7 @@
       "path": "components/ui/scroll-area.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "ScrollArea",
-        "ScrollBar"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "radix-ui",
@@ -1115,9 +833,7 @@
       "path": "components/ui/separator.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Separator"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "radix-ui",
@@ -1128,9 +844,7 @@
       "path": "components/ui/skeleton.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Skeleton"
-      ],
+      "symbols": [],
       "imports": [
         "@/lib/utils"
       ]
@@ -1139,10 +853,7 @@
       "path": "components/ui/sonner.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Toaster",
-        "ToasterProps"
-      ],
+      "symbols": [],
       "imports": [
         "next-themes",
         "sonner",
@@ -1153,9 +864,7 @@
       "path": "components/ui/textarea.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "Textarea"
-      ],
+      "symbols": [],
       "imports": [
         "react",
         "@/lib/utils"
@@ -1165,12 +874,7 @@
       "path": "components/UserAccountNav.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "UserAccountNav",
-        "trpc",
-        "user",
-        "name"
-      ],
+      "symbols": [],
       "imports": [
         "@/trpc/client",
         "@tanstack/react-query",
@@ -1184,13 +888,7 @@
       "path": "components/UserDetails.tsx",
       "kind": "component",
       "extension": ".tsx",
-      "symbols": [
-        "handleSignOut",
-        "supabase",
-        "UserDetails",
-        "trpc",
-        "user"
-      ],
+      "symbols": [],
       "imports": [
         "@/lib/supabase/client",
         "@/trpc/client",
@@ -1208,26 +906,7 @@
       "kind": "component",
       "extension": ".tsx",
       "symbols": [
-        "buildOptimisticView",
-        "moveCustomView",
-        "SortableViewRowComponent",
-        "ViewsSidebarSkeleton",
-        "ViewDialog",
-        "ViewsSidebarPreview",
-        "selectView",
-        "createView",
-        "updateView",
-        "deleteView",
-        "openCreateView",
-        "openEditView",
-        "closeDialog",
-        "selectedTags",
-        "sourceIndex",
-        "targetIndex",
-        "nextViews",
-        "SortableViewRow",
-        "view",
-        "toggleTag"
+        "ViewsSidebarPreview"
       ],
       "imports": [
         "@dnd-kit/react",
@@ -1315,10 +994,7 @@
       "path": "docs/deprecated/02-repo-map.md",
       "kind": "documentation",
       "extension": ".md",
-      "symbols": [
-        "for",
-        "merging"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -1430,9 +1106,7 @@
       "path": "docs/deprecated/backlog.md",
       "kind": "documentation",
       "extension": ".md",
-      "symbols": [
-        "are"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -1453,18 +1127,14 @@
       "path": "docs/deprecated/phase-1-dexie-foundation.md",
       "kind": "documentation",
       "extension": ".md",
-      "symbols": [
-        "guards"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
       "path": "docs/deprecated/phase-2-outbox-sync-queue.md",
       "kind": "documentation",
       "extension": ".md",
-      "symbols": [
-        "guards"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -1527,9 +1197,7 @@
       "path": "docs/PHASE_LOG.md",
       "kind": "documentation",
       "extension": ".md",
-      "symbols": [
-        "guards"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -1557,9 +1225,7 @@
       "path": "eslint.config.mjs",
       "kind": "file",
       "extension": ".mjs",
-      "symbols": [
-        "eslintConfig"
-      ],
+      "symbols": [],
       "imports": [
         "eslint/config",
         "eslint-config-next/core-web-vitals",
@@ -1583,17 +1249,9 @@
       "kind": "hook",
       "extension": ".ts",
       "symbols": [
-        "useOptimisticSync",
-        "describeError",
-        "isCancelledError",
-        "cancelScope",
-        "enqueue",
-        "replacePending",
-        "OptimisticScope",
         "EnqueueOptions",
-        "QueueEntry",
-        "OptimisticTask",
-        "OptimisticSyncApi"
+        "OptimisticScope",
+        "useOptimisticSync"
       ],
       "imports": [
         "react"
@@ -1604,9 +1262,7 @@
       "kind": "hook",
       "extension": ".ts",
       "symbols": [
-        "useUser",
-        "supabase",
-        "query"
+        "useUser"
       ],
       "imports": [
         "@/lib/supabase/client",
@@ -1618,26 +1274,26 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "queryKeysEqual",
-        "getAllListsSnapshot",
-        "listMatchesView",
-        "projectView",
-        "selectedViewFromCache",
-        "isLatestSelectedView",
-        "canApplySelectedViewPayload",
-        "canRollbackViewSelection",
-        "reconcileCreatedListInSnapshot",
-        "hasSavedListInDashboardSnapshots",
-        "buildPersistedListOrderPayload",
-        "buildPersistedItemOrderPayload",
-        "buildPersistedViewOrderPayload",
-        "applyViewSelectionToViews",
-        "applyViewSelection",
-        "updateListInDashboardCaches",
-        "removeListFromDashboardCaches",
-        "invalidateViewPayloadQueries",
+        "AffectedTagView",
+        "CurrentViewSnapshot",
+        "DashboardKeys",
+        "DashboardList",
+        "DashboardSnapshot",
+        "DashboardTag",
+        "PersistedItemOrderPayload",
+        "PersistedOrderPayload",
+        "SavedListTags",
+        "ViewCacheItem",
+        "ViewsCache",
+        "applyDeletedTagToDashboardCaches",
         "applyTagChangeToCaches",
-        "applyDeletedTagToDashboardCaches"
+        "applyViewSelection",
+        "applyViewSelectionToViews",
+        "buildPersistedItemOrderPayload",
+        "buildPersistedListOrderPayload",
+        "buildPersistedViewOrderPayload",
+        "canApplySelectedViewPayload",
+        "canRollbackViewSelection"
       ],
       "imports": [
         "@tanstack/react-query",
@@ -1649,8 +1305,7 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "db",
-        "adapter"
+        "db"
       ],
       "imports": [
         "@/app/generated/prisma/client",
@@ -1662,10 +1317,7 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "useMutationQueue",
-        "enqueue",
-        "queueRef",
-        "pendingCountRef"
+        "useMutationQueue"
       ],
       "imports": [
         "react"
@@ -1676,18 +1328,14 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "getLocalDbStoreNames",
-        "getLocalDbSchemaSummary",
-        "assertLocalDbAvailable",
-        "readLocalDbHealthForDiagnostics",
-        "unavailableSchemaSummary",
         "EXPECTED_LOCAL_DB_STORE_NAMES",
-        "storeNames",
-        "missingExpectedStores",
-        "LocalDbStoreName",
         "LocalDbDiagnosticsDatabase",
         "LocalDbSchemaSummary",
-        "LocalDbHealthSnapshot"
+        "LocalDbStoreName",
+        "assertLocalDbAvailable",
+        "getLocalDbSchemaSummary",
+        "getLocalDbStoreNames",
+        "readLocalDbHealthForDiagnostics"
       ],
       "imports": [
         "./metadata-repository",
@@ -1699,22 +1347,17 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "createLocalTimestamp",
         "createLocalEntityBase",
-        "markEntityPending",
-        "markEntitySynced",
-        "markEntityFailed",
+        "createLocalTimestamp",
         "createOutboxOperation",
         "getLocalDbOrThrow",
-        "putLocalView",
+        "markEntityFailed",
+        "markEntityPending",
+        "markEntitySynced",
         "putLocalList",
         "putLocalListItem",
-        "putOutboxOperation",
-        "createdAt",
-        "operationId",
-        "TidyLocalDatabase",
-        "CreateLocalEntityBaseArgs",
-        "CreateOutboxOperationArgs"
+        "putLocalView",
+        "putOutboxOperation"
       ],
       "imports": [
         "./tidy-db",
@@ -1727,19 +1370,19 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "LocalSyncStatus",
-        "LocalViewType",
-        "LocalViewMatchMode",
-        "LocalTagColor",
+        "LocalDbMetadata",
         "LocalEntityBase",
-        "LocalView",
         "LocalList",
         "LocalListItem",
-        "LocalTag",
-        "LocalViewTag",
         "LocalListTag",
+        "LocalSyncStatus",
+        "LocalTag",
+        "LocalTagColor",
+        "LocalView",
         "LocalViewList",
-        "LocalDbMetadata"
+        "LocalViewMatchMode",
+        "LocalViewTag",
+        "LocalViewType"
       ],
       "imports": []
     },
@@ -1748,17 +1391,13 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "getLocalMetadata",
-        "setLocalMetadata",
-        "getLocalDbHealthSnapshot",
-        "initializeLocalDbHealthMetadata",
-        "unavailableSnapshot",
-        "LOCAL_DB_SCHEMA_VERSION",
         "LOCAL_DB_METADATA_KEYS",
-        "metadata",
-        "initializedAt",
+        "LOCAL_DB_SCHEMA_VERSION",
         "LocalDbHealthSnapshot",
-        "LocalMetadataDatabase"
+        "getLocalDbHealthSnapshot",
+        "getLocalMetadata",
+        "initializeLocalDbHealthMetadata",
+        "setLocalMetadata"
       ],
       "imports": [
         "./local-repositories",
@@ -1771,19 +1410,8 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "coalesceOutboxOperations",
-        "getEntityKey",
-        "isPendingOperation",
-        "isSupersededByDelete",
-        "isLatestOnlyOperation",
-        "isUnsyncedCreateDeletePair",
-        "shouldReplaceExistingOperation",
-        "discardedOperationIds",
-        "latestPendingIndexByEntity",
-        "entityKey",
-        "existingIndex",
-        "existingOperation",
-        "CoalescedOutboxOperations"
+        "CoalescedOutboxOperations",
+        "coalesceOutboxOperations"
       ],
       "imports": [
         "./outbox-schema"
@@ -1794,25 +1422,15 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "LocalOutboxRepositoryDatabase",
         "enqueueOutboxOperation",
         "getOutboxOperationById",
         "getPendingOutboxOperations",
-        "markOutboxOperationSyncing",
-        "markOutboxOperationSynced",
-        "markOutboxOperationFailed",
-        "markOutboxOperationDiscarded",
         "incrementRetryCount",
-        "getOutboxRepositoryDb",
-        "updateOutboxOperation",
-        "db",
-        "operation",
-        "updatedOperation",
-        "operations",
-        "LocalOutboxRepositoryDatabase",
-        "LocalOutboxOperation",
-        "TimestampedUpdateArgs",
-        "FailedUpdateArgs",
-        "PendingQueryArgs"
+        "markOutboxOperationDiscarded",
+        "markOutboxOperationFailed",
+        "markOutboxOperationSynced",
+        "markOutboxOperationSyncing"
       ],
       "imports": [
         "./local-repositories",
@@ -1825,23 +1443,17 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "isLocalOutboxEntityType",
-        "isLocalOutboxOperationType",
-        "isLocalJsonValue",
-        "isLocalOutboxOperation",
-        "includesOutboxValue",
-        "isPlainJsonObject",
-        "isNullableString",
-        "isNonNegativeInteger",
         "LOCAL_OUTBOX_ENTITY_TYPES",
         "LOCAL_OUTBOX_OPERATION_TYPES",
-        "prototype",
-        "operation",
         "LocalJsonValue",
-        "LocalOutboxOperationStatus",
         "LocalOutboxEntityType",
+        "LocalOutboxOperation",
+        "LocalOutboxOperationStatus",
         "LocalOutboxOperationType",
-        "LocalOutboxOperation"
+        "isLocalJsonValue",
+        "isLocalOutboxEntityType",
+        "isLocalOutboxOperation",
+        "isLocalOutboxOperationType"
       ],
       "imports": [
         "./sync-status"
@@ -1852,22 +1464,13 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "replayOutboxOperations",
-        "getErrorMessage",
-        "createDefaultSyncReplayRepository",
-        "summarizeReplayResults",
-        "pendingOperations",
-        "discardedOperation",
-        "syncingOperation",
-        "syncedOperation",
-        "errorMessage",
-        "SyncReplayTransportRequest",
-        "SyncReplayTransport",
-        "SyncReplayOperationResult",
-        "SyncReplayResult",
-        "SyncReplayRepository",
         "ReplayOutboxOperationsArgs",
-        "LocalOutboxRepositoryDatabase"
+        "SyncReplayOperationResult",
+        "SyncReplayRepository",
+        "SyncReplayResult",
+        "SyncReplayTransport",
+        "SyncReplayTransportRequest",
+        "replayOutboxOperations"
       ],
       "imports": [
         "./outbox-coalescing",
@@ -1880,17 +1483,13 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "isLocalSyncStatus",
-        "isOutboxOperationStatus",
-        "isTerminalLocalSyncStatus",
-        "isTerminalOutboxOperationStatus",
-        "isRetryableOutboxOperationStatus",
-        "includesStatus",
         "LOCAL_SYNC_STATUSES",
         "OUTBOX_OPERATION_STATUSES",
-        "TERMINAL_LOCAL_SYNC_STATUSES",
-        "TERMINAL_OUTBOX_OPERATION_STATUSES",
-        "RETRYABLE_OUTBOX_OPERATION_STATUSES"
+        "isLocalSyncStatus",
+        "isOutboxOperationStatus",
+        "isRetryableOutboxOperationStatus",
+        "isTerminalLocalSyncStatus",
+        "isTerminalOutboxOperationStatus"
       ],
       "imports": [
         "./local-schema",
@@ -1903,9 +1502,7 @@
       "extension": ".ts",
       "symbols": [
         "TIDY_LOCAL_DB_NAME",
-        "TidyLocalDatabase",
-        "Table",
-        "TidyLocalDb"
+        "TidyLocalDatabase"
       ],
       "imports": [
         "dexie",
@@ -1918,17 +1515,11 @@
       "kind": "library",
       "extension": ".tsx",
       "symbols": [
-        "measureOptimisticEvent",
-        "measureCacheWrite",
-        "measureRequest",
-        "useRenderMeasure",
         "OptimisticProfiler",
-        "payloadSize",
-        "isDev",
-        "rendersRef",
-        "ProfilerOnRenderCallback",
-        "ReactNode",
-        "MeasureDetails"
+        "measureCacheWrite",
+        "measureOptimisticEvent",
+        "measureRequest",
+        "useRenderMeasure"
       ],
       "imports": [
         "react"
@@ -1939,13 +1530,7 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "handleAuthConfirmRequest",
-        "getSafeNext",
-        "next",
-        "code",
-        "token_hash",
-        "type",
-        "supabase"
+        "handleAuthConfirmRequest"
       ],
       "imports": [
         "@/lib/supabase/server",
@@ -1969,12 +1554,7 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "updateSession",
-        "supabase",
-        "user",
-        "url",
-        "myNewResponse",
-        "NextRequest"
+        "updateSession"
       ],
       "imports": [
         "@supabase/ssr",
@@ -1986,8 +1566,7 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "createClient",
-        "cookieStore"
+        "createClient"
       ],
       "imports": [
         "@supabase/ssr",
@@ -1999,26 +1578,11 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "validateSyncEndpointRequest",
-        "isRecord",
-        "getPayloadByteSize",
-        "isAllowedEntityOperation",
-        "validateOperationPayload",
         "SYNC_ENDPOINT_MAX_PAYLOAD_BYTES",
-        "ENTITY_OPERATION_MATRIX",
-        "hasTarget",
-        "orderedIds",
-        "candidate",
-        "operation",
-        "idempotencyKey",
-        "maxPayloadBytes",
-        "payloadByteSize",
         "SyncEndpointRequest",
         "SyncEndpointValidationContext",
         "SyncEndpointValidationResult",
-        "LocalJsonValue",
-        "LocalOutboxEntityType",
-        "LocalOutboxOperation"
+        "validateSyncEndpointRequest"
       ],
       "imports": [
         "@/lib/local-db/outbox-schema"
@@ -2029,16 +1593,10 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "createSyncStatusSurface",
-        "createEmptyCounts",
-        "getVisibleCount",
-        "getSurfaceCopy",
-        "counts",
-        "copy",
-        "totalCount",
-        "SyncStatusSurfaceState",
+        "SyncStatusSurface",
         "SyncStatusSurfaceCounts",
-        "SyncStatusSurface"
+        "SyncStatusSurfaceState",
+        "createSyncStatusSurface"
       ],
       "imports": [
         "@/lib/local-db/outbox-schema"
@@ -2049,8 +1607,8 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "RouterOutputs",
-        "RouterInputs"
+        "RouterInputs",
+        "RouterOutputs"
       ],
       "imports": [
         "@/trpc/routers/_app",
@@ -2062,9 +1620,8 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
-        "cn",
         "absoluteUrl",
-        "ClassValue"
+        "cn"
       ],
       "imports": [
         "clsx",
@@ -2107,10 +1664,7 @@
       "path": "playwright.config.ts",
       "kind": "file",
       "extension": ".ts",
-      "symbols": [
-        "port",
-        "baseURL"
-      ],
+      "symbols": [],
       "imports": [
         "@playwright/test"
       ]
@@ -2119,9 +1673,7 @@
       "path": "postcss.config.mjs",
       "kind": "file",
       "extension": ".mjs",
-      "symbols": [
-        "config"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -2138,9 +1690,7 @@
       "path": "prisma/schema.prisma",
       "kind": "prisma",
       "extension": ".prisma",
-      "symbols": [
-        "ViewType"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -2148,9 +1698,8 @@
       "kind": "file",
       "extension": ".ts",
       "symbols": [
-        "proxy",
         "config",
-        "NextRequest"
+        "proxy"
       ],
       "imports": [
         "next/server",
@@ -2161,20 +1710,14 @@
       "path": "README.md",
       "kind": "root_doc",
       "extension": ".md",
-      "symbols": [
-        "safety"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
       "path": "scripts/ai-context-budget.ps1",
       "kind": "script",
       "extension": ".ps1",
-      "symbols": [
-        "Get",
-        "Measure",
-        "Show"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -2188,9 +1731,7 @@
       "path": "scripts/audit_codebase_graph.py",
       "kind": "script",
       "extension": ".py",
-      "symbols": [
-        "expected"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -2204,10 +1745,7 @@
       "path": "scripts/export-chatgpt-architect-context.ps1",
       "kind": "script",
       "extension": ".ps1",
-      "symbols": [
-        "Write",
-        "Invoke"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -2235,36 +1773,21 @@
       "path": "scripts/open-phase.ps1",
       "kind": "script",
       "extension": ".ps1",
-      "symbols": [
-        "Update",
-        "Get",
-        "Test",
-        "Set"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
       "path": "scripts/promote.ps1",
       "kind": "script",
       "extension": ".ps1",
-      "symbols": [
-        "Update",
-        "Get",
-        "Test"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
       "path": "scripts/validate.ps1",
       "kind": "script",
       "extension": ".ps1",
-      "symbols": [
-        "Add",
-        "Run",
-        "Get",
-        "Test",
-        "Normalize"
-      ],
+      "symbols": [],
       "imports": []
     },
     {
@@ -2299,11 +1822,7 @@
       "path": "tests/e2e/auth.setup.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "pool",
-        "page",
-        "file"
-      ],
+      "symbols": [],
       "imports": [
         "@playwright/test",
         "node:fs",
@@ -2316,9 +1835,7 @@
       "path": "tests/e2e/check-auth-state.mjs",
       "kind": "test",
       "extension": ".mjs",
-      "symbols": [
-        "authFile"
-      ],
+      "symbols": [],
       "imports": [
         "node:fs"
       ]
@@ -2336,9 +1853,7 @@
       "path": "tests/e2e/data-reset.setup.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "e2eNameScope"
-      ],
+      "symbols": [],
       "imports": [
         "@playwright/test",
         "dotenv",
@@ -2349,28 +1864,7 @@
       "path": "tests/e2e/drag-drop.spec.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "createPersistedList",
-        "createPersistedTag",
-        "attachExistingTag",
-        "getOrderedVisibleNames",
-        "persisted",
-        "card",
-        "tagSearchInput",
-        "visibleNames",
-        "orderedNames",
-        "matchingName",
-        "listName",
-        "firstTag",
-        "secondTag",
-        "firstView",
-        "secondView",
-        "initialOrder",
-        "sourceViewCard",
-        "targetViewCard",
-        "swappedOrder",
-        "firstList"
-      ],
+      "symbols": [],
       "imports": [
         "./utils/fixtures",
         "@playwright/test",
@@ -2385,12 +1879,7 @@
       "path": "tests/e2e/list-items.spec.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "listName",
-        "itemName",
-        "items",
-        "renamedItem"
-      ],
+      "symbols": [],
       "imports": [
         "./utils/fixtures",
         "./utils/app",
@@ -2402,12 +1891,7 @@
       "path": "tests/e2e/lists.spec.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "name",
-        "originalName",
-        "renamedName",
-        "names"
-      ],
+      "symbols": [],
       "imports": [
         "./utils/fixtures",
         "./utils/app",
@@ -2419,11 +1903,7 @@
       "path": "tests/e2e/regression.spec.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "names",
-        "listName",
-        "itemNames"
-      ],
+      "symbols": [],
       "imports": [
         "./utils/fixtures",
         "./utils/app",
@@ -2435,11 +1915,7 @@
       "path": "tests/e2e/smoke.spec.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "ignoredConsoleErrors",
-        "text",
-        "isIgnored"
-      ],
+      "symbols": [],
       "imports": [
         "@playwright/test"
       ]
@@ -2449,26 +1925,21 @@
       "kind": "test",
       "extension": ".ts",
       "symbols": [
-        "waitForSuccessfulTrpcMutation",
-        "createList",
+        "createItem",
         "createItemInVisibleList",
+        "createList",
         "createListAndImmediatelyAddItem",
-        "renameList",
+        "createTag",
+        "createView",
+        "deleteItem",
         "deleteList",
+        "deleteView",
         "openAllLists",
         "openViewByName",
-        "createItem",
-        "renameItem",
-        "deleteItem",
-        "createTag",
         "removeTagFromList",
-        "createView",
-        "deleteView",
-        "escapeRegExp",
-        "createListButton",
-        "dialog",
-        "nameInput",
-        "submitButton"
+        "renameItem",
+        "renameList",
+        "waitForSuccessfulTrpcMutation"
       ],
       "imports": [
         "@playwright/test",
@@ -2481,26 +1952,24 @@
       "kind": "test",
       "extension": ".ts",
       "symbols": [
+        "expectItemInList",
+        "expectItemNotInList",
+        "expectItemNotVisible",
+        "expectItemVisible",
+        "expectListNotVisible",
+        "expectListOrder",
+        "expectListVisible",
+        "expectNoDuplicateText",
+        "expectViewOrder",
         "firstVisible",
         "getListCards",
         "getViewCards",
         "getVisibleListCard",
-        "getVisibleViewCard",
-        "expectListVisible",
-        "expectListNotVisible",
-        "expectItemVisible",
-        "expectItemNotVisible",
-        "reloadAndExpectPersisted",
-        "reloadAndExpectMissing",
-        "expectNoDuplicateText",
         "getVisibleListNames",
-        "expectListOrder",
-        "expectItemInList",
-        "expectItemNotInList",
+        "getVisibleViewCard",
         "getVisibleViewNames",
-        "expectViewOrder",
-        "count",
-        "candidate"
+        "reloadAndExpectMissing",
+        "reloadAndExpectPersisted"
       ],
       "imports": [
         "@playwright/test",
@@ -2513,14 +1982,7 @@
       "extension": ".ts",
       "symbols": [
         "dragByMouse",
-        "dragByMouseAndWaitForMutation",
-        "center",
-        "box",
-        "from",
-        "to",
-        "persisted",
-        "Locator",
-        "Page"
+        "dragByMouseAndWaitForMutation"
       ],
       "imports": [
         "@playwright/test",
@@ -2532,9 +1994,7 @@
       "kind": "test",
       "extension": ".ts",
       "symbols": [
-        "test",
-        "index",
-        "file"
+        "test"
       ],
       "imports": [
         "@playwright/test",
@@ -2547,24 +2007,14 @@
       "kind": "test",
       "extension": ".ts",
       "symbols": [
-        "resolveE2eUserPool",
+        "E2eUser",
         "authStoragePathForIndex",
-        "uniqueTestName",
-        "gotoDashboard",
+        "cleanupNamedList",
         "collectConsoleErrors",
         "expectNoConsoleErrors",
-        "cleanupNamedList",
-        "parallelIndex",
-        "runId",
-        "email",
-        "password",
-        "suffix",
-        "locationUrl",
-        "isOptimisticViewCreate404",
-        "matchingCards",
-        "card",
-        "E2eUser",
-        "Page"
+        "gotoDashboard",
+        "resolveE2eUserPool",
+        "uniqueTestName"
       ],
       "imports": [
         "@playwright/test",
@@ -2577,8 +2027,8 @@
       "kind": "test",
       "extension": ".ts",
       "symbols": [
-        "testIds",
-        "TestId"
+        "TestId",
+        "testIds"
       ],
       "imports": []
     },
@@ -2586,16 +2036,7 @@
       "path": "tests/e2e/views.spec.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "listName",
-        "tagName",
-        "viewName",
-        "seedListName",
-        "createdInViewListName",
-        "createdListCard",
-        "matchingList",
-        "hiddenList"
-      ],
+      "symbols": [],
       "imports": [
         "./utils/fixtures",
         "./utils/app",
@@ -2616,28 +2057,7 @@
       "path": "tests/unit/dashboard-cache.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "tag",
-        "item",
-        "list",
-        "view",
-        "customView",
-        "untaggedView",
-        "allListsView",
-        "snapshot",
-        "queryClient",
-        "keys",
-        "defaultView",
-        "olderPayload",
-        "latestPayload",
-        "optimisticItem",
-        "savedList",
-        "reconciled",
-        "allListsSnapshot",
-        "currentViewSnapshot",
-        "selectedViewSnapshot",
-        "DashboardSnapshot"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@tanstack/react-query",
@@ -2648,9 +2068,7 @@
       "path": "tests/unit/local-db-diagnostics.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "dbWithStores"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/local-db/local-db-diagnostics",
@@ -2661,11 +2079,7 @@
       "path": "tests/unit/local-db-metadata.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "createMetadataDb",
-        "store",
-        "db"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/local-db/metadata-repository",
@@ -2676,12 +2090,7 @@
       "path": "tests/unit/local-repositories.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "baseEntity",
-        "entity",
-        "pending",
-        "operation"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/local-db/local-repositories",
@@ -2692,14 +2101,7 @@
       "path": "tests/unit/outbox-coalescing.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "createOperation",
-        "operationIds",
-        "result",
-        "first",
-        "second",
-        "input"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/local-db/outbox-coalescing",
@@ -2710,14 +2112,7 @@
       "path": "tests/unit/outbox-repository.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "createOperation",
-        "createFakeOutboxDb",
-        "operations",
-        "operation",
-        "invalidOperation",
-        "LocalOutboxRepositoryDatabase"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/local-db/outbox-repository",
@@ -2728,10 +2123,7 @@
       "path": "tests/unit/outbox-schema.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "validOperation",
-        "LocalOutboxOperation"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/local-db/outbox-schema"
@@ -2741,24 +2133,7 @@
       "path": "tests/unit/router-ownership-baseline.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "authedCaller",
-        "anonCaller",
-        "expectTrpcCode",
-        "dbMock",
-        "createCaller",
-        "USER_A",
-        "USER_B",
-        "LIST_A",
-        "LIST_FOREIGN",
-        "LIST_B",
-        "ITEM_A",
-        "ITEM_B",
-        "TAG_A",
-        "VIEW_A",
-        "findManyArgs",
-        "TestTRPCContext"
-      ],
+      "symbols": [],
       "imports": [
         "@trpc/server",
         "vitest",
@@ -2770,22 +2145,7 @@
       "path": "tests/unit/router-ownership-sweep.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "authedCaller",
-        "expectTrpcCode",
-        "dbMock",
-        "createCaller",
-        "USER_B",
-        "LIST_FOREIGN",
-        "LIST_OWNED",
-        "TAG_FOREIGN",
-        "TAG_OWNED",
-        "VIEW_FOREIGN",
-        "NEW_LIST",
-        "NEW_VIEW",
-        "helpers",
-        "TestTRPCContext"
-      ],
+      "symbols": [],
       "imports": [
         "@trpc/server",
         "vitest",
@@ -2798,12 +2158,7 @@
       "path": "tests/unit/sync-endpoint-contract.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "createOperation",
-        "createRequest",
-        "result",
-        "is"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/sync/sync-endpoint-contract",
@@ -2814,23 +2169,7 @@
       "path": "tests/unit/sync-replay-client.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "createOperation",
-        "createReplayRepository",
-        "operation",
-        "repository",
-        "transport",
-        "first",
-        "second",
-        "result",
-        "firstRename",
-        "finalRename",
-        "failingOperation",
-        "succeedingOperation",
-        "create",
-        "remove",
-        "SyncReplayRepository"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/local-db/sync-replay-client",
@@ -2841,9 +2180,7 @@
       "path": "tests/unit/sync-status-surface.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "operation"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/lib/sync/sync-status-surface",
@@ -2864,9 +2201,7 @@
       "path": "tests/unit/view-helpers.test.ts",
       "kind": "test",
       "extension": ".ts",
-      "symbols": [
-        "rows"
-      ],
+      "symbols": [],
       "imports": [
         "vitest",
         "@/app/generated/prisma/client",
@@ -2878,10 +2213,7 @@
       "kind": "trpc",
       "extension": ".tsx",
       "symbols": [
-        "TRPCReactProvider",
-        "getQueryClient",
-        "getUrl",
-        "queryClient"
+        "TRPCReactProvider"
       ],
       "imports": [
         "@tanstack/react-query",
@@ -2901,15 +2233,11 @@
       "kind": "trpc",
       "extension": ".ts",
       "symbols": [
+        "baseProcedure",
+        "createCallerFactory",
         "createTRPCContext",
         "createTRPCRouter",
-        "createCallerFactory",
-        "baseProcedure",
-        "protectedProcedure",
-        "supabase",
-        "t",
-        "isAuth",
-        "user"
+        "protectedProcedure"
       ],
       "imports": [
         "@/lib/supabase/server",
@@ -2934,9 +2262,8 @@
       "kind": "trpc_router",
       "extension": ".ts",
       "symbols": [
-        "appRouter",
-        "definition",
-        "AppRouter"
+        "AppRouter",
+        "appRouter"
       ],
       "imports": [
         "../init",
@@ -2953,17 +2280,7 @@
       "kind": "trpc_router",
       "extension": ".ts",
       "symbols": [
-        "listItemRouter",
-        "listItems",
-        "parentList",
-        "topItem",
-        "renamedListItems",
-        "result",
-        "updatedListItems",
-        "itemIds",
-        "ownedItems",
-        "targetListIds",
-        "ownedTargetLists"
+        "listItemRouter"
       ],
       "imports": [
         "zod",
@@ -2978,19 +2295,7 @@
       "kind": "trpc_router",
       "extension": ".ts",
       "symbols": [
-        "listRouter",
-        "existingList",
-        "allListsView",
-        "selectedDefaultView",
-        "selectedViewId",
-        "selectedView",
-        "topAllViewList",
-        "viewTagIds",
-        "matchingCustomViews",
-        "createdList",
-        "customViewIds",
-        "lists",
-        "renamedList"
+        "listRouter"
       ],
       "imports": [
         "@/lib/db",
@@ -3006,21 +2311,8 @@
       "kind": "trpc_router",
       "extension": ".ts",
       "symbols": [
-        "getListTagsForList",
         "tagColorSchema",
-        "tagRouter",
-        "listTagChangeSchema",
-        "updatedTags",
-        "affectedViewIds",
-        "result",
-        "affectedViews",
-        "listTag",
-        "compactedOperations",
-        "listTags",
-        "tagIds",
-        "addTagIds",
-        "adds",
-        "removes"
+        "tagRouter"
       ],
       "imports": [
         "zod",
@@ -3058,26 +2350,22 @@
       "kind": "trpc_router",
       "extension": ".ts",
       "symbols": [
-        "listMatchesViewTags",
+        "backfillAllListsView",
+        "buildCustomViewListRows",
         "customViewMembershipWhere",
         "customViewsAffectedByTagsWhere",
-        "buildCustomViewListRows",
         "ensureAllListsView",
         "ensureDefaultView",
-        "setSelectedView",
-        "backfillAllListsView",
+        "getAffectedCustomViewIdsForTags",
+        "getAffectedCustomViewsByIds",
+        "getAffectedCustomViewsForTags",
+        "listMatchesViewTags",
         "recomputeCustomView",
-        "recomputeCustomViewsForUser",
         "recomputeCustomViewsForIds",
         "recomputeCustomViewsForTags",
-        "getAffectedCustomViewIdsForTags",
-        "getAffectedCustomViewsForTags",
-        "getAffectedCustomViewsByIds",
-        "viewProjectionPayloadInclude",
-        "ALL_LISTS_NAME",
-        "listTagIdSet",
-        "uniqueTagIds",
-        "assignedOrders"
+        "recomputeCustomViewsForUser",
+        "setSelectedView",
+        "viewProjectionPayloadInclude"
       ],
       "imports": [
         "@/app/generated/prisma/client",
@@ -3089,22 +2377,7 @@
       "kind": "trpc_router",
       "extension": ".ts",
       "symbols": [
-        "isPrismaKnownError",
-        "viewRouter",
-        "viewTagIdsInput",
-        "view",
-        "viewLists",
-        "selectedDefaultView",
-        "selectedView",
-        "uniqueTagIds",
-        "ownedTags",
-        "topView",
-        "renamedViews",
-        "allListsView",
-        "viewIds",
-        "ownedViews",
-        "listIds",
-        "ownedViewLists"
+        "viewRouter"
       ],
       "imports": [
         "@/app/generated/prisma/client",
@@ -3121,10 +2394,9 @@
       "extension": ".tsx",
       "symbols": [
         "HydrateClient",
-        "prefetch",
         "getQueryClient",
-        "trpc",
-        "queryClient"
+        "prefetch",
+        "trpc"
       ],
       "imports": [
         "server-only",

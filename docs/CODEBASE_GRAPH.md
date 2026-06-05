@@ -1,8 +1,10 @@
 # Codebase Graph
 
 `codebase-graph.json` is Tidy's committed orientation map. It summarizes source
-files, simple symbols, and internal import edges so future agents can choose a
-small direct-read set before opening deeper docs or source files.
+files, each file's top-level exported symbols, and internal import edges so future
+agents can choose a small direct-read set before opening deeper docs or source
+files. Symbols are intentionally limited to the exported surface (not in-body
+locals) and sorted, so body-only edits do not churn the graph or force a refresh.
 
 Agents should read `STATE.json` first, then `codebase-graph.json` when it exists,
 then the workflow docs required for the task. The graph is navigation support
