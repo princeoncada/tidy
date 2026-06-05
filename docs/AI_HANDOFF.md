@@ -1,11 +1,11 @@
-<!-- Current Version: 1.6.6 -->
+<!-- Current Version: 1.7.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.6 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.6.6 - Phase Scoping and Opening Workflow Hardening
-**Next**: 1.7.0 - Optimistic Queue Race Test Baseline
+**Current Version**: 1.7.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.7.0 - Optimistic Queue Race Test Baseline
+**Next**: 1.7.1 - Scope Rollback Rules
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -124,7 +124,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - The 1.6.x P0 ownership series is complete: 1.6.3 adds `tests/unit/router-ownership-sweep.test.ts` to prove list/tag/view transactional procedures reject foreign input, while owned-flow happy paths remain covered by authenticated E2E to avoid brittle deep-transaction unit mocks.
 
 **Optimistic and race behavior:**
-- Most optimistic race behavior is not automatically proven yet.
+- Optimistic queue mechanics (enqueue FIFO ordering, independent-scope isolation, replacePending cancellation, rollback-on-failure with scope cancel, CancelledError handling) are baselined in `tests/unit/optimistic-sync-baseline.test.ts` as of 1.7.0; broader cross-component optimistic race behavior is still not fully proven.
 - In-memory optimistic queues can lose pending writes on refresh or crash.
 - Reorders involving optimistic-only rows must keep filtering optimistic-only IDs before server writes.
 - Tag deletes or rapid tag toggles can affect custom view membership mid-operation.

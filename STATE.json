@@ -1,9 +1,9 @@
 {
-    "version":  "1.6.6",
-    "state":  "stable",
-    "phase":  "1.6.6",
-    "phaseTitle":  "Phase Scoping and Opening Workflow Hardening",
-    "nextPhase":  "1.7.0 - Optimistic Queue Race Test Baseline",
+    "version":  "1.7.0-alpha",
+    "state":  "alpha",
+    "phase":  "1.7.0",
+    "phaseTitle":  "Optimistic Queue Race Test Baseline",
+    "nextPhase":  "1.7.1 - Scope Rollback Rules",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
