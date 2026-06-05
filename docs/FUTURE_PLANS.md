@@ -187,6 +187,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.8.5 - Outbox Replay Integration Test Plan~~ (stable 2026-06-05)
 
+- ~~1.8.6 - Offline Write Path Prototype~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -196,17 +198,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.8.6 - Offline Write Path Prototype (active) - see Planned
 ---
 
 ## Planned
-
-### 1.8.6 - Offline Write Path Prototype
-- **Status:** In progress | Priority: P2 offline prototype
-- **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, lib/sync/*, tests/
-- **Problem:** Offline/PWA goals require a proven write path, but a broad source-of-truth rewrite is risky.
-- **Scope:** prototype the smallest safe offline write path; keep feature flags or isolation if needed.
-- **Acceptance:** prototype is tested, scoped, and does not silently replace dashboard source of truth.
 
 ### 1.9.0 - Dashboard Component Responsibility Audit
 - **Status:** Open | Priority: P1 maintainability planning
