@@ -79,6 +79,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Reorder payload builders exclude optimistic-only list/item/view rows and compact saved-row order before persistence.
 - Reorders and view selection use `replacePending` because only the newest final state matters.
 - Actions that must all persist use `enqueue`.
+- Failed non-CancelledError queue tasks no longer cancel their whole optimistic scope as of 1.7.1. A failed task runs its rollback only when it has not been explicitly canceled or superseded by later started same-scope work, then the same-scope chain continues.
 - Active optimistic scopes include `views`, `list-tags`, `list-order`, `item-order`, `view-selection`, `list-edits`, and `item-edits`.
 - Optimistic markers are `isOptimistic: true` on list/item shapes and `userId: "optimistic"` on view shapes.
 - 1.4.27 fixed inline rename display reconciliation by syncing `ListInlineEdit` display/edit state from authoritative props only while not editing; optimistic instant display on save remains intact.
@@ -124,7 +125,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - The 1.6.x P0 ownership series is complete: 1.6.3 adds `tests/unit/router-ownership-sweep.test.ts` to prove list/tag/view transactional procedures reject foreign input, while owned-flow happy paths remain covered by authenticated E2E to avoid brittle deep-transaction unit mocks.
 
 **Optimistic and race behavior:**
-- Optimistic queue mechanics (enqueue FIFO ordering, independent-scope isolation, replacePending cancellation, rollback-on-failure with scope cancel, CancelledError handling) are baselined in `tests/unit/optimistic-sync-baseline.test.ts` as of 1.7.0; broader cross-component optimistic race behavior is still not fully proven.
+- Optimistic queue mechanics (enqueue FIFO ordering, independent-scope isolation, replacePending cancellation, failure rollback without whole-scope cancel, CancelledError handling) are baselined in `tests/unit/optimistic-sync-baseline.test.ts` as of 1.7.1; broader cross-component optimistic race behavior is still not fully proven.
+- Rollback containment now prevents superseded failed tasks from repainting over newer started same-scope work. Residual risk: blind snapshot rollbacks can still leave or repaint stale state when newer same-scope optimistic work is queued but has not started and does not overwrite the failed field.
 - In-memory optimistic queues can lose pending writes on refresh or crash.
 - Reorders involving optimistic-only rows must keep filtering optimistic-only IDs before server writes.
 - Tag deletes or rapid tag toggles can affect custom view membership mid-operation.
