@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.7.1-alpha
+- **Current version:** 1.7.1
 - **Current phase:** 1.7.1 - Scope Rollback Rules
 - **Next phase:** 1.7.2 - Pending Mutation Cancellation Rules
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.7.1 | alpha | 2026-06-05 | Scope Rollback Rules | (in progress) |
+| 1.7.1 | stable | 2026-06-05 | Scope Rollback Rules | (in progress) |
 | 1.7.0 | stable | 2026-06-05 | Optimistic Queue Race Test Baseline | (in progress) |
 | 1.6.6 | stable | 2026-06-05 | Phase Scoping and Opening Workflow Hardening | (in progress) |
 | 1.6.5 | stable | 2026-06-05 | Codebase Graph Generator Stability Fix | (in progress) |
