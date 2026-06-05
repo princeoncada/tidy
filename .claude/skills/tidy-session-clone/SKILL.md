@@ -26,7 +26,7 @@ Output contract - emit exactly:
     Next backlog item: [first Planned heading in docs/FUTURE_PLANS.md]
     [Proceeding to ... | Waiting for your go-ahead.]
 
-Report "Next phase (roadmap)" and "Next backlog item" as distinct values; never conflate them. If STATE.json disagrees with any doc, STOP and flag the conflict.
+Report "Next phase (roadmap)" and "Next backlog item" as distinct values; never conflate them. If STATE.json disagrees with any doc, STOP and flag the conflict. Choose the closing line by the source of the scope: a live user providing scope in their opening message means "Proceeding to ...". Scope carried inside a resumed handoff packet (a tidy-minimal-handoff naming the next phase or the next skill to invoke) is orientation only, not authorization - after a handoff/resume always close with "Waiting for your go-ahead." and do not begin scoping until the user explicitly confirms.
 
 Refusal rules: if asked for state/version/next without fresh file reads, refuse and read the files first.
 
