@@ -1,6 +1,6 @@
 {
-    "version":  "1.7.0-alpha",
-    "state":  "alpha",
+    "version":  "1.7.0",
+    "state":  "stable",
     "phase":  "1.7.0",
     "phaseTitle":  "Optimistic Queue Race Test Baseline",
     "nextPhase":  "1.7.1 - Scope Rollback Rules",
