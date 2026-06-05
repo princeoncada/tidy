@@ -159,6 +159,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.6.2 - Reorder Target List Ownership Fix~~ (stable 2026-06-04)
 
+- ~~1.6.3 - Ownership Regression Sweep~~ (stable 2026-06-04)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -168,17 +170,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.6.3 - Ownership Regression Sweep (active) - see Planned
 ---
 
 ## Planned
-
-### 1.6.3 - Ownership Regression Sweep
-- **Status:** In progress | Priority: P1 security regression
-- **Files:** trpc/routers/*.ts, tests/
-- **Problem:** After targeted ownership fixes, the router surface needs a final regression sweep.
-- **Scope:** add or update coverage for list, listItem, tag, and view ownership failures; document remaining intentional gaps only if unavoidable.
-- **Acceptance:** ownership behavior is repeatable, tested, and safe enough before expanding API surface.
 
 ### 1.7.0 - Optimistic Queue Race Test Baseline
 - **Status:** Open | Priority: P0 optimistic stability
