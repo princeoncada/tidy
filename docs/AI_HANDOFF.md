@@ -1,10 +1,10 @@
-<!-- Current Version: 1.6.3 -->
+<!-- Current Version: 1.6.4-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.6.3 - Ownership Regression Sweep
+**Current Version**: 1.6.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.6.4 - Workflow Skill Evolution Sweep
 **Next**: 1.7.0 - Optimistic Queue Race Test Baseline
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:

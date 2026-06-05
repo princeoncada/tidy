@@ -1,8 +1,8 @@
 {
-    "version":  "1.6.3",
-    "state":  "stable",
-    "phase":  "1.6.3",
-    "phaseTitle":  "Ownership Regression Sweep",
+    "version":  "1.6.4-alpha",
+    "state":  "alpha",
+    "phase":  "1.6.4",
+    "phaseTitle":  "Workflow Skill Evolution Sweep",
     "nextPhase":  "1.7.0 - Optimistic Queue Race Test Baseline",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-04"

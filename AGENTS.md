@@ -16,8 +16,9 @@ At the start of every session, before reading other docs or writing code:
    If it is missing, stale, or invalid, state that and fall back to direct file reads.
 3. Read `docs/FUTURE_PLANS.md` fresh  -  it owns the full work backlog and next planned item.
 4. Output the startup report (see Startup Report Format below).
-5. If the user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
+5. If a live user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
    If no scope was provided: wait for the user's go-ahead.
+   Scope carried inside a resumed handoff packet (a tidy-minimal-handoff naming the next phase or the next skill to invoke) is orientation only, NOT live authorization. After a handoff/resume, end on the startup report and wait for the user's explicit go-ahead before scoping, even when the handoff names the next phase.
 
 Repo docs are the only source of truth. Never answer state queries,
 version questions, or "what's next" from session memory of docs.
@@ -50,12 +51,15 @@ Optional when relevant:
     Select-String -Path "docs\AI_HANDOFF.md" -Pattern "<topic>"
 
 Rules:
-- Before Claude Code scopes any source-heavy or local-sensitive phase, it must
-  first emit the Local Evidence Packet above as a single copy-paste PowerShell
-  code block for the user to run, then wait for the pasted output before
-  writing the Codex prompt. This pre-scope evidence emission is separate from
-  the Section 2 `npm run graph:codebase` refresh that precedes validate.ps1;
-  do not conflate the two.
+- Before scoping any source-heavy or local-sensitive phase, the evidence in the
+  Local Evidence Packet above must exist. Scope the method by actor: a LOCAL
+  Claude Code session self-gathers it with its own tools (run git status, read
+  STATE.json, run npm run graph:codebase, run git diff --stat directly) and then
+  scopes; it does not emit the packet for the user to paste back. The
+  emit-as-a-copy-paste-block-and-wait form is reserved for ChatGPT architect
+  scoping, or for a Claude session that genuinely lacks local access. This
+  pre-scope evidence step is separate from the Section 2 `npm run graph:codebase`
+  refresh that precedes validate.ps1; do not conflate the two.
 - If local evidence is required but missing, ChatGPT architect must either ask
   for the packet or explicitly scope only from pushed remote state and state
   that limitation.

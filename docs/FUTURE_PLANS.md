@@ -170,9 +170,17 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.6.4 - Workflow Skill Evolution Sweep (active) - see Planned
 ---
 
 ## Planned
+
+### 1.6.4 - Workflow Skill Evolution Sweep
+- **Status:** In progress | Priority: P2 workflow hardening
+- **Files:** AGENTS.md, docs/WORKFLOW.md, .claude/skills/tidy-codex-prompt-builder/SKILL.md, .claude/skills/tidy-validation-judge/SKILL.md, .claude/skills/tidy-session-clone/SKILL.md
+- **Problem:** Several settled learning-queue candidates (graph-refresh trigger, opener-commit post-validation self-check, local-evidence self-gather, commits-vs-closeout rationale, AllowMissingNextPhase preamble, handoff-not-authorization) are practiced but not yet written into the docs/skills.
+- **Scope:** formalize those candidates as prose edits to AGENTS.md, docs/WORKFLOW.md, and the three named skills. Docs/skills only; no product source, tests, or dependencies.
+- **Acceptance:** the six behaviors are documented; validate.ps1 passes; no product behavior change.
 
 ### 1.7.0 - Optimistic Queue Race Test Baseline
 - **Status:** Open | Priority: P0 optimistic stability
@@ -312,6 +320,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## Potential Next Directions (unversioned)
 
 Assigned a version only when scoped.
+- Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
 - Rate limiting and abuse controls
 - Observability
 - Scale/performance profiling

@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.6.3 -->
+<!-- Current Version: 1.6.4-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -71,12 +71,14 @@ OPTIONAL LOCAL EVIDENCE:
 Paste the packet into ChatGPT chat before scoping whenever local state can
 change the architecture decision or implementation prompt.
 
-When Claude Code is about to scope a source-heavy or local-sensitive phase, it
-must emit the Local Evidence Packet as a single copy-paste PowerShell code
-block before writing the Codex prompt, then wait for the user to paste the
-output. This pre-scope evidence emission is separate from, and must not be
-conflated with, the Section 2 `npm run graph:codebase` refresh that precedes
-`validate.ps1` when a phase adds, removes, or renames files.
+When Claude Code is about to scope a source-heavy or local-sensitive phase, the
+Local Evidence Packet's evidence must exist first, scoped by actor: a LOCAL
+Claude Code session self-gathers it with its own tools and then scopes, rather
+than emitting the packet for the user to paste back; the emit-and-wait form is
+reserved for ChatGPT architect scoping or a Claude session without local access.
+This pre-scope evidence step is separate from, and must not be conflated with,
+the Section 2 `npm run graph:codebase` refresh that precedes `validate.ps1` for
+any phase that edits tracked files.
 
 ---
 
@@ -248,7 +250,10 @@ Graph Routing Summary:
 - Intentionally skipped: app source, tRPC routers, Prisma output
 - Direct reads still required: yes, read selected docs before editing
 
-Refresh the graph after graphable source, docs, or script changes:
+Refresh the graph after any change to tracked files. Because the committed graph
+can read as stale against the validate gate's regeneration even for body-only
+edits, Section 2 of every phase that edits tracked files must lead with this
+refresh; only a no-file-change interaction may skip it:
 
 ```powershell
 npm run graph:codebase
@@ -348,7 +353,7 @@ During active alpha work, provide only the immediate next valid action:
 - If validation fails, commit any uncommitted prior work first, then give failure classification, an in-alpha fix prompt that follows `docs/CODEX_RULES.md` debugging attempt discipline, and revalidation commands.
 - If validation is green but the alpha branch still has uncommitted changes, give alpha commit commands only - except for a low-risk phase (docs, workflow, or tooling only; no product source, tests, or dependency changes), where you may give the alpha commit sequence and the full closeout packet together in one message, with the closeout gated behind a clean `git status --short`.
 - Do not normally label user-facing replies as Stage A, Stage B, Stage C, or similar.
-- Do not provide the full closeout command packet before alpha validation is green. After it is green, provide it once the branch is clean - or, for a low-risk docs/workflow/tooling phase, in the same message as the alpha commit sequence with the closeout gated behind a clean `git status --short`. Keep commits and closeout in separate messages for any phase that changes product source, tests, or dependencies.
+- Do not provide the full closeout command packet before alpha validation is green. After it is green, provide it once the branch is clean - or, for a low-risk docs/workflow/tooling phase, in the same message as the alpha commit sequence with the closeout gated behind a clean `git status --short`. Keep commits and closeout in separate messages for any phase that changes product source, tests, or dependencies. This separation is a deliberate safety guard, not ceremony: a closeout packet is written against the branch as it looks at that instant, and source/test/dependency phases routinely need several more commit rounds (broken baseline, lint fix, graph refresh, opener files), so a co-emitted closeout goes stale immediately and tempts merging, promoting, or pushing before validation is truly green and `git status` is truly clean - risking incomplete or broken work on master. Separate messages force a fresh clean-and-green reality check at the irreversible step. Do not widen the low-risk consolidation exception to source/test/dependency phases to save a round-trip.
 
 Commit-before-fix is mandatory. While any uncommitted implementation or fix
 work exists on the phase branch, the assistant must provide commit commands for
@@ -458,7 +463,15 @@ validation for final confidence.
 ## Post-Validation Workflow
 
 After the user/controller provides validation output or status evidence, Claude
-Code first classifies the next valid action from
+Code first runs its own `git status --short` to check whether the five opener
+files (STATE.json, package.json, docs/VERSIONING.md, docs/WORKFLOW.md,
+docs/FUTURE_PLANS.md) from open-phase.ps1 are still uncommitted. If they are,
+Claude Code front-loads an opener-commit section at the very top of its response
+(above the normal continuation) so the opener lands before later work; if they
+are already committed, it simply confirms the tree looks right and continues.
+Opener-commit commands are never inlined into the original scope; this catch-up
+is a post-validation safety check the assistant owns. Claude Code then classifies
+the next valid action from
 [Validation-Gated Assistant Responses](#validation-gated-assistant-responses).
 During active alpha work, provide only that immediate next action. Once alpha
 validation is green and the phase branch is clean, provide the full closeout
