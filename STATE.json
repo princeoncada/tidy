@@ -1,9 +1,9 @@
 {
-    "version":  "1.8.7",
-    "state":  "stable",
-    "phase":  "1.8.7",
-    "phaseTitle":  "Local-First Status Alignment and Roadmap Correction",
-    "nextPhase":  "1.9.0 - Dashboard Component Responsibility Audit",
+    "version":  "1.9.0-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.0",
+    "phaseTitle":  "Dashboard Component Responsibility Audit",
+    "nextPhase":  "1.9.1 - Extract Dashboard Query Key Helper",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
