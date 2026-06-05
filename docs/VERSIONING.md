@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.6.4
-- **Current phase:** 1.6.4 - Workflow Skill Evolution Sweep
-- **Next phase:** 1.7.0 - Optimistic Queue Race Test Baseline
+- **Current version:** 1.6.5-alpha
+- **Current phase:** 1.6.5 - Codebase Graph Generator Stability Fix
+- **Next phase:** 1.6.6 - Phase Scoping and Opening Workflow Hardening
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.6.5 | alpha | 2026-06-05 | Codebase Graph Generator Stability Fix | (in progress) |
 | 1.6.4 | stable | 2026-06-04 | Workflow Skill Evolution Sweep | (in progress) |
 | 1.6.3 | stable | 2026-06-04 | Ownership Regression Sweep | (in progress) |
 | 1.6.2 | stable | 2026-06-04 | Reorder Target List Ownership Fix | (in progress) |
