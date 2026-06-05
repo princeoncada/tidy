@@ -198,6 +198,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.8.7 - Local-First Status Alignment and Roadmap Correction (active) - see Planned
 ---
 
 ## Planned
