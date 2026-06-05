@@ -93,8 +93,8 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.6.3
-- **Current phase:** 1.6.3 - Ownership Regression Sweep
+- **Current version:** 1.6.4-alpha
+- **Current phase:** 1.6.4 - Workflow Skill Evolution Sweep
 - **Next phase:** 1.7.0 - Optimistic Queue Race Test Baseline
 
 ---
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.6.4 | alpha | 2026-06-04 | Workflow Skill Evolution Sweep | (in progress) |
 | 1.6.3 | stable | 2026-06-04 | Ownership Regression Sweep | (in progress) |
 | 1.6.2 | stable | 2026-06-04 | Reorder Target List Ownership Fix | (in progress) |
 | 1.6.1 | stable | 2026-06-04 | List Item Ownership Fixes | (in progress) |
