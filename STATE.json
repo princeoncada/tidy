@@ -1,6 +1,6 @@
 {
-    "version":  "1.8.0-alpha",
-    "state":  "alpha",
+    "version":  "1.8.0",
+    "state":  "stable",
     "phase":  "1.8.0",
     "phaseTitle":  "Local DB Role Audit Through Tests",
     "nextPhase":  "1.8.1 - Outbox Replay Integration Test Plan",
