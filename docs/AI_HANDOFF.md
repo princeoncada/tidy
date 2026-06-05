@@ -1,11 +1,11 @@
-<!-- Current Version: 1.8.4 -->
+<!-- Current Version: 1.8.5-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.4 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.8.4 - Workflow Source-of-Truth Migration Into Skills
-**Next**: 1.8.5 - Outbox Replay Integration Test Plan
+**Current Version**: 1.8.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.8.5 - Outbox Replay Integration Test Plan
+**Next**: 1.8.6 - Offline Write Path Prototype
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -140,6 +140,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - PWA/offline behavior is not implemented despite product goals.
 - No conflict policy exists for offline replay.
 - Outbox replay helpers exist but are not connected to runtime dashboard mutations.
+- The replay-to-endpoint integration CONTRACT (transport request shape, syncing-status acceptance, idempotency-key threading, coalesced-survivor validity, endpoint-rejection-as-failure without queue blocking, and user-scope authority) is characterized by `tests/unit/sync-replay-endpoint-integration.test.ts` (1.8.5). Real HTTP/runtime wiring of replay into dashboard mutations, plus conflict policy, remain deferred to 1.8.6.
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.

@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.8.4
-- **Current phase:** 1.8.4 - Workflow Source-of-Truth Migration Into Skills
-- **Next phase:** 1.8.5 - Outbox Replay Integration Test Plan
+- **Current version:** 1.8.5-alpha
+- **Current phase:** 1.8.5 - Outbox Replay Integration Test Plan
+- **Next phase:** 1.8.6 - Offline Write Path Prototype
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.8.5 | alpha | 2026-06-05 | Outbox Replay Integration Test Plan | (in progress) |
 | 1.8.4 | stable | 2026-06-05 | Workflow Source-of-Truth Migration Into Skills | (in progress) |
 | 1.8.3 | stable | 2026-06-05 | Post-Validation Closeout Enforcement | (in progress) |
 | 1.8.2 | stable | 2026-06-05 | Script-Printed Command Re-Emit Hardening | (in progress) |
