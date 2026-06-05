@@ -214,31 +214,31 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ### 1.9.1 - Extract Dashboard Query Key Helper
 - **Status:** Open | Priority: P1 maintainability
-- **Files:** lib/dashboard-cache.ts or new small helper, components/list/*, components/views/ViewsSidebarPreview.tsx, tests/
-- **Problem:** Query key construction is duplicated across components.
-- **Scope:** extract shared helper without changing key shapes (read-path maintainability; not itself the mutation chokepoint).
-- **Acceptance:** query keys remain identical; tests or assertions prove no key-shape change.
+- **Files:** lib/dashboard-cache.ts or new small helper, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListItemComponent.tsx, components/list/ListsContainer.tsx, components/views/ViewsSidebarPreview.tsx, tests/unit/dashboard-cache.test.ts
+- **Problem:** `DashboardKeys` construction is rebuilt inline across `ListsContainer`, `ListAdder`, `ListComponent`, `ListItemComponent`, and `ViewsSidebarPreview`, increasing the risk of key-shape drift before writes are routed through one seam.
+- **Scope:** centralize the existing `views`/`allLists`/`currentView`/`selectedView` key construction into one helper without changing query key shapes or runtime behavior; this is read-path maintainability, not the mutation chokepoint itself.
+- **Acceptance:** behavior is preserved, query keys remain identical, and `tests/unit/dashboard-cache.test.ts` is extended to prove no key-shape change.
 
 ### 1.9.2 - Extract List Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListsContainer.tsx, tests/
-- **Problem:** List mutations duplicate cache logic.
-- **Scope:** move list mutation cache behavior into named helpers while preserving optimistic behavior; these helpers become the list-mutation chokepoint for later outbox capture (1.9.5).
-- **Acceptance:** existing behavior and tests remain stable; new or updated tests cover helper behavior.
+- **Problem:** `ListAdder` create-list optimistic insert/reconcile/rollback and `ListComponent` create-item optimistic/onSuccess/rollback still contain raw component cache writes around the existing `lib/dashboard-cache.ts` trio-write seam.
+- **Scope:** route create-list and create-item cache behavior through named `lib/dashboard-cache.ts` helpers that use the existing chokepoint seam, while preserving optimistic behavior, rollback snapshots, projection behavior, and query key shapes.
+- **Acceptance:** behavior is preserved, the list mutation helpers are backed by extending `tests/unit/dashboard-cache.test.ts`, and no optimistic/rollback behavior changes.
 
 ### 1.9.3 - Extract View Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/views/ViewsSidebarPreview.tsx, tests/
-- **Problem:** View mutation logic is concentrated in a large component.
-- **Scope:** extract view create/update/delete/select cache helpers; these become the view-mutation chokepoint for later outbox capture (1.9.5).
-- **Acceptance:** view behavior, query keys, and rollback behavior do not change; tests cover extracted helpers.
+- **Problem:** `ViewsSidebarPreview` owns raw cache writes for view create, rename, updateFilter, delete, reorder, and select follow-up payload handling, so view mutation behavior is concentrated in one large component instead of the dashboard cache seam.
+- **Scope:** route view create/rename/updateFilter/delete/reorder/select cache writes through named `lib/dashboard-cache.ts` helpers that preserve latest-selection guards, view ordering, rollback behavior, and query key shapes.
+- **Acceptance:** behavior is preserved, view query keys and rollback behavior do not change, and `tests/unit/dashboard-cache.test.ts` is extended to cover the extracted helpers.
 
 ### 1.9.4 - Extract Tag Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListTagPicker.tsx, tests/
-- **Problem:** Tag mutation cache behavior is complex and easy to regress.
-- **Scope:** extract tag mutation cache helpers after projection behavior is stable; these become the tag-mutation chokepoint for later outbox capture (1.9.5).
-- **Acceptance:** affected custom views update correctly; tests cover helper behavior.
+- **Problem:** Tag add/remove/delete projection helpers already route through `applyTagChangeToCaches`, `applyDeletedTagToDashboardCaches`, `reconcileSavedListTags`, and `reconcileAffectedViewLists`, but `ListTagPicker` still owns residual raw writes for tag metadata/color reconciliation, batching rollback snapshots, and affected cache restoration.
+- **Scope:** consolidate remaining tag write paths so all tag-driven dashboard cache writes go through the `lib/dashboard-cache.ts` trio-write seam, folding `ListTagPicker` batching reconciliation and rollback restoration into named helpers without changing batch timing or server write behavior.
+- **Acceptance:** behavior is preserved, affected custom views update correctly, and `tests/unit/dashboard-cache.test.ts` is extended to cover the extracted helpers.
 
 ### 1.9.5 - Dashboard Mutation to Outbox Wiring
 - **Status:** Open | Priority: P1 offline integration
