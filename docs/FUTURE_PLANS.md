@@ -176,12 +176,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.7.0 - Optimistic Queue Race Test Baseline (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.7.0 - Optimistic Queue Race Test Baseline
-- **Status:** Open | Priority: P0 optimistic stability
+- **Status:** In progress | Priority: P0 optimistic stability
 - **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/
 - **Problem:** Most optimistic race behavior is not automatically proven, even though the app depends on optimistic-first UX.
 - **Scope:** add tests or test harnesses for enqueue, replacePending, rollback, cancellation, and independent mutation scopes.
