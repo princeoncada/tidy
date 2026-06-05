@@ -198,44 +198,94 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.8.7 - Local-First Status Alignment and Roadmap Correction (active) - see Planned
 ---
 
 ## Planned
 
+### 1.8.7 - Local-First Status Alignment and Roadmap Correction
+- **Status:** In progress | Priority: P1 docs/roadmap correction
+- **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
+- **Problem:** The 1.8.x series shipped only audit/test/prototype scaffolding, but DECISIONS.md and AI_HANDOFF implied durable Dexie/offline integration; the deferral promise is undischarged and the roadmap does not schedule real integration.
+- **Scope:** correct the local-first status in DECISIONS.md and AI_HANDOFF, re-charter 1.9.0-1.9.4 as the mutation-chokepoint enabler, and insert the 1.9.5-1.9.10 integration series.
+- **Acceptance:** docs state Dexie's real (unwired) status; the roadmap contains a chokepoint-first integration series; no source or test behavior changes.
+
 ### 1.9.0 - Dashboard Component Responsibility Audit
-- **Status:** Open | Priority: P1 maintainability planning
+- **Status:** Open | Priority: P1 maintainability + offline on-ramp
 - **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, lib/dashboard-cache.ts
-- **Problem:** Large dashboard components increase risk for focused changes.
-- **Scope:** identify extraction targets and invariants without changing behavior.
-- **Acceptance:** extraction sequence is clear and test-backed; no extra product audit doc is added.
+- **Problem:** Large dashboard components increase risk for focused changes, and dashboard mutations are scattered across components, so there is no single seam to later attach outbox capture.
+- **Scope:** identify extraction targets, invariants, and the single dashboard-mutation chokepoint (in lib/dashboard-cache.ts) that the 1.9.5 outbox wiring will hook, without changing behavior.
+- **Acceptance:** extraction sequence is clear and test-backed, the future mutation chokepoint is named, and no extra product audit doc is added.
 
 ### 1.9.1 - Extract Dashboard Query Key Helper
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts or new small helper, components/list/*, components/views/ViewsSidebarPreview.tsx, tests/
 - **Problem:** Query key construction is duplicated across components.
-- **Scope:** extract shared helper without changing key shapes.
+- **Scope:** extract shared helper without changing key shapes (read-path maintainability; not itself the mutation chokepoint).
 - **Acceptance:** query keys remain identical; tests or assertions prove no key-shape change.
 
 ### 1.9.2 - Extract List Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListsContainer.tsx, tests/
 - **Problem:** List mutations duplicate cache logic.
-- **Scope:** move list mutation cache behavior into named helpers while preserving optimistic behavior.
+- **Scope:** move list mutation cache behavior into named helpers while preserving optimistic behavior; these helpers become the list-mutation chokepoint for later outbox capture (1.9.5).
 - **Acceptance:** existing behavior and tests remain stable; new or updated tests cover helper behavior.
 
 ### 1.9.3 - Extract View Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/views/ViewsSidebarPreview.tsx, tests/
 - **Problem:** View mutation logic is concentrated in a large component.
-- **Scope:** extract view create/update/delete/select cache helpers.
+- **Scope:** extract view create/update/delete/select cache helpers; these become the view-mutation chokepoint for later outbox capture (1.9.5).
 - **Acceptance:** view behavior, query keys, and rollback behavior do not change; tests cover extracted helpers.
 
 ### 1.9.4 - Extract Tag Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListTagPicker.tsx, tests/
 - **Problem:** Tag mutation cache behavior is complex and easy to regress.
-- **Scope:** extract tag mutation cache helpers after projection behavior is stable.
+- **Scope:** extract tag mutation cache helpers after projection behavior is stable; these become the tag-mutation chokepoint for later outbox capture (1.9.5).
 - **Acceptance:** affected custom views update correctly; tests cover helper behavior.
+
+### 1.9.5 - Dashboard Mutation to Outbox Wiring
+- **Status:** Open | Priority: P1 offline integration
+- **Files:** lib/dashboard-cache.ts, lib/sync/offline-write-prototype.ts, components/list/*, components/views/ViewsSidebarPreview.tsx, tests/
+- **Problem:** No dashboard mutation creates an outbox operation; offline replay has nothing to replay.
+- **Scope:** route committed dashboard mutations through the 1.9.2-1.9.4 chokepoint to also capture an outbox operation, behind a runtime feature flag (promote OFFLINE_WRITE_PROTOTYPE_ENABLED to a real gate); keep server/TanStack as source of truth.
+- **Acceptance:** with the flag on, committed mutations enqueue valid outbox operations; with it off, behavior is unchanged; optimistic/rollback and query keys preserved; tests cover capture-on-commit.
+
+### 1.9.6 - Durable Pending-Write Integration
+- **Status:** Open | Priority: P1 offline integration
+- **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, lib/dashboard-cache.ts, tests/
+- **Problem:** In-memory optimistic queues lose pending writes on refresh or crash (accepted-temporary since 1.7.3).
+- **Scope:** back pending writes with the durable outbox so unsynced work survives reload, without changing optimistic UX; reconcile on load.
+- **Acceptance:** a pending write survives a simulated reload and replays; no regression to optimistic/rollback behavior; tests cover persistence and reload reconciliation.
+
+### 1.9.7 - Automatic Replay Worker
+- **Status:** Open | Priority: P1 offline integration
+- **Files:** new app/api/sync route, lib/sync/*, lib/local-db/sync-replay-client.ts, a mounted client hook, tests/
+- **Problem:** replayOutboxOperations exists but nothing runs it, and there is no server endpoint.
+- **Scope:** add a real protected /api/sync route that uses validateSyncEndpointRequest, and mount a replay trigger (on load plus online event) using createHttpSyncReplayTransport; respect user scoping.
+- **Acceptance:** queued operations replay automatically when online and are marked synced/failed; failures do not block the queue; tests cover the route contract and the trigger.
+
+### 1.9.8 - Sync Status UI Surface
+- **Status:** Open | Priority: P2 offline integration
+- **Files:** components/* (new small status component), lib/sync/sync-status-surface.ts, tests/
+- **Problem:** createSyncStatusSurface is built and tested but rendered nowhere; users have no sync feedback.
+- **Scope:** surface pending/syncing/failed counts in the dashboard using the existing sync-status-surface helper.
+- **Acceptance:** status reflects real outbox state; failed operations are visible/actionable; no change to data behavior; tests cover the rendered states.
+
+### 1.9.9 - Offline Conflict Resolution Rules
+- **Status:** Open | Priority: P1 offline integration
+- **Files:** lib/sync/*, lib/local-db/*, docs/DECISIONS.md, tests/
+- **Problem:** No conflict policy exists for offline replay when server state diverged.
+- **Scope:** define and implement a conflict policy (for example last-write-wins versus server-wins per entity) for replayed operations; record the decision.
+- **Acceptance:** conflicting replays resolve deterministically per the recorded policy; tests cover the conflict cases.
+
+### 1.9.10 - Local DB Source-of-Truth Decision
+- **Status:** Open | Priority: P1 offline integration
+- **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, lib/dashboard-cache.ts if adopted, tests/
+- **Problem:** After durable writes plus replay, whether the dashboard reads from Dexie or server must be decided explicitly.
+- **Scope:** decide and document read-from-Dexie versus read-from-server (or hybrid); implement only if the decision adopts a change.
+- **Acceptance:** the source-of-truth decision is recorded with rationale; any adopted read change preserves projection/query-key/optimistic invariants and is test-backed.
 
 ### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness

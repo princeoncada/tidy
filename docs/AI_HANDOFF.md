@@ -1,10 +1,10 @@
-<!-- Current Version: 1.8.6 -->
+<!-- Current Version: 1.8.7-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.6 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.8.6 - Offline Write Path Prototype
+**Current Version**: 1.8.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.8.7 - Local-First Status Alignment and Roadmap Correction
 **Next**: 1.9.0 - Dashboard Component Responsibility Audit
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
@@ -109,11 +109,12 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Performance and local-first boundary:**
 - Reorder endpoints use batch raw SQL (`UPDATE ... FROM (VALUES ...)`) because individual Prisma updates timed out.
 - Heavy custom view recompute should stay outside short Prisma interactive transactions unless proven safe.
-- Dexie/local DB is foundation only. It is not the dashboard source of truth.
+- Dexie/local DB is a tested local layer plus an isolated prototype - NOT the dashboard source of truth and NOT wired into runtime writes/reads. The only runtime Dexie touchpoint is a health-metadata heartbeat (`hooks/use-local-db-health-check.ts` -> `metadata-repository`, mounted in `trpc/client.tsx`); no list/item/tag/view is read from or written to Dexie at runtime.
 - No auto-running sync worker is mounted.
 - No outbox replay is wired to dashboard mutations yet.
 - Dashboard data still flows through server/TanStack/tRPC.
 - The local DB's non-source-of-truth role is now characterized by `tests/unit/local-db-role-audit.test.ts` (1.8.0): runtime startup persists only health metadata, the dashboard write path does not import `lib/local-db`, and no sync worker or outbox replay is wired into runtime.
+- Status as of 1.8.7: the 1.8.x series delivered scaffolding only (1.8.0 role audit, 1.8.5 replay-endpoint integration test plan, 1.8.6 isolated offline write-path prototype). Real Dexie/outbox integration into the live dashboard has NOT started; it is scheduled as the 1.9.5-1.9.10 integration series after the 1.9.0-1.9.4 mutation-chokepoint extraction.
 
 ---
 
@@ -128,7 +129,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Optimistic and race behavior:**
 - Optimistic queue mechanics (enqueue FIFO ordering, independent-scope isolation, replacePending cancellation, failure rollback without whole-scope cancel, CancelledError handling) are baselined in `tests/unit/optimistic-sync-baseline.test.ts` as of 1.7.2; replacePending-vs-enqueue scope isolation is test-locked, but broader cross-component optimistic race behavior is still not fully proven.
 - Rollback containment now prevents superseded failed tasks from repainting over newer started same-scope work. Residual risk: blind snapshot rollbacks can still leave or repaint stale state when newer same-scope optimistic work is queued but has not started and does not overwrite the failed field.
-- In-memory optimistic queues can lose pending writes on refresh or crash. Accepted as temporary by design per the 2026-06-05 decision in `docs/DECISIONS.md` (keep in-memory queues; durable pending writes deferred to the 1.8.x local-first series); not a defect to patch in 1.7.x.
+- In-memory optimistic queues can lose pending writes on refresh or crash. Accepted as temporary by design per the 2026-06-05 decision in `docs/DECISIONS.md` (keep in-memory queues); durable pending-write integration was NOT delivered by the 1.8.x scaffolding series and is rescheduled to the 1.9.5-1.9.10 integration series.
 - Reorders involving optimistic-only rows must keep filtering optimistic-only IDs before server writes.
 - Tag deletes or rapid tag toggles can affect custom view membership mid-operation.
 - Fast view switching depends on latest-selected-view guards to avoid stale repaints.
@@ -139,7 +140,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Local-first and sync:**
 - PWA/offline behavior is not implemented despite product goals.
 - No conflict policy exists for offline replay.
-- Outbox replay helpers exist but are not connected to runtime dashboard mutations.
+- Outbox replay helpers exist but are not connected to runtime dashboard mutations. No dashboard mutation creates an outbox operation, nothing reads Dexie, and no replay worker runs; `lib/sync/offline-write-prototype.ts` exports `OFFLINE_WRITE_PROTOTYPE_ENABLED = false` and is imported only by its test.
 - The replay-to-endpoint integration CONTRACT (transport request shape, syncing-status acceptance, idempotency-key threading, coalesced-survivor validity, endpoint-rejection-as-failure without queue blocking, and user-scope authority) is characterized by `tests/unit/sync-replay-endpoint-integration.test.ts` (1.8.5).
 - 1.8.6 adds an ISOLATED, feature-flagged offline write-path prototype (`lib/sync/offline-write-prototype.ts`): `captureOfflineWrite` builds + enqueues an outbox operation, and `flushOfflineWrites` replays it via `replayOutboxOperations` through a real HTTP transport (`createHttpSyncReplayTransport`). It is proven end-to-end by `tests/unit/offline-write-prototype.test.ts` and is NOT imported by `hooks/useOptimisticSync.ts`, `lib/dashboard-cache.ts`, or `trpc/client.tsx`; the dashboard source of truth is unchanged. A live `/api/sync` route, runtime mounting, and an offline conflict policy remain deferred.
 
