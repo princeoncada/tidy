@@ -186,18 +186,40 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.8.1 - Scope-Output Opening-Sequence Template (active) - see Planned
 ---
 
 ## Planned
 
-### 1.8.1 - Outbox Replay Integration Test Plan
+### 1.8.1 - Scope-Output Opening-Sequence Template
+- **Status:** In progress | Priority: P1 workflow hardening
+- **Files:** .claude/skills/tidy-codex-prompt-builder/SKILL.md, docs/FUTURE_PLANS.md
+- **Problem:** The pre-Codex opening sequence is described only in prose across two homes, so scope outputs can drift in flag order, quoting, and step count.
+- **Scope:** encode one fixed, byte-identical opening-sequence template inline in tidy-codex-prompt-builder so every "scope it out" emits identical opener structure.
+- **Acceptance:** the skill carries the literal two-line opener template; scope outputs reproduce it verbatim with only placeholders substituted; no product source changes.
+
+### 1.8.2 - Post-Validation Closeout Enforcement
+- **Status:** Open | Priority: P1 workflow hardening
+- **Files:** .claude/skills/tidy-validation-judge/SKILL.md, scripts/validate.ps1, docs/WORKFLOW.md
+- **Problem:** After GREEN alpha validation the single next action (full closeout packet on master) is not enforced, so sessions can drift into promoting on the phase branch.
+- **Scope:** make the full closeout packet the explicit single next action after green validation (a skill owns the byte-identical template) and reword validate.ps1's final "ready for promote.ps1" line accordingly.
+- **Acceptance:** validation-green guidance routes to the closeout packet (switch -> pull -> merge --no-ff -> validate -> promote -> printed per-file commits/push); no promote-on-phase-branch path remains.
+
+### 1.8.3 - Workflow Source-of-Truth Migration Into Skills
+- **Status:** Open | Priority: P1 workflow hardening
+- **Files:** .claude/skills/*, docs/WORKFLOW.md
+- **Problem:** Response-shaping rules (opening sequence, closeout lifecycle, output formatting) live in docs-only homes that duplicate skill guidance and invite drift.
+- **Scope:** move the response-shaping rules into skills with inline templates and demote the doc copies to rationale/reference only.
+- **Acceptance:** each response-shaping rule has one skill owner with an inline template; WORKFLOW.md points to the owner instead of restating it; no behavior or versioning-location change.
+
+### 1.8.4 - Outbox Replay Integration Test Plan
 - **Status:** Open | Priority: P2 offline architecture
 - **Files:** lib/local-db/sync-replay-client.ts, lib/sync/sync-endpoint-contract.ts, tests/
 - **Problem:** Outbox replay helpers exist but are not connected to real app mutations.
 - **Scope:** plan and test the integration contract before wiring replay into runtime behavior.
 - **Acceptance:** replay integration risks are covered by tests or explicit follow-up phases.
 
-### 1.8.2 - Offline Write Path Prototype
+### 1.8.5 - Offline Write Path Prototype
 - **Status:** Open | Priority: P2 offline prototype
 - **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, lib/sync/*, tests/
 - **Problem:** Offline/PWA goals require a proven write path, but a broad source-of-truth rewrite is risky.
