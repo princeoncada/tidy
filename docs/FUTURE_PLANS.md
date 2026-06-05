@@ -186,6 +186,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.8.1 - Scope-Output Opening-Sequence Template (active) - see Planned
 ---
 
 ## Planned
