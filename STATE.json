@@ -1,6 +1,6 @@
 {
-    "version":  "1.6.3-alpha",
-    "state":  "alpha",
+    "version":  "1.6.3",
+    "state":  "stable",
     "phase":  "1.6.3",
     "phaseTitle":  "Ownership Regression Sweep",
     "nextPhase":  "1.7.0 - Optimistic Queue Race Test Baseline",
