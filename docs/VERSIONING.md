@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.8.3-alpha
+- **Current version:** 1.8.3
 - **Current phase:** 1.8.3 - Post-Validation Closeout Enforcement
 - **Next phase:** 1.8.4 - Workflow Source-of-Truth Migration Into Skills
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.8.3 | alpha | 2026-06-05 | Post-Validation Closeout Enforcement | (in progress) |
+| 1.8.3 | stable | 2026-06-05 | Post-Validation Closeout Enforcement | (in progress) |
 | 1.8.2 | stable | 2026-06-05 | Script-Printed Command Re-Emit Hardening | (in progress) |
 | 1.8.1 | stable | 2026-06-05 | Scope-Output Opening-Sequence Template | (in progress) |
 | 1.8.0 | stable | 2026-06-05 | Local DB Role Audit Through Tests | (in progress) |
