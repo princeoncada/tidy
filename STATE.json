@@ -1,6 +1,6 @@
 {
-    "version":  "1.8.4-alpha",
-    "state":  "alpha",
+    "version":  "1.8.4",
+    "state":  "stable",
     "phase":  "1.8.4",
     "phaseTitle":  "Workflow Source-of-Truth Migration Into Skills",
     "nextPhase":  "1.8.5 - Outbox Replay Integration Test Plan",
