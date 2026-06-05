@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.8.1-alpha
+- **Current version:** 1.8.1
 - **Current phase:** 1.8.1 - Scope-Output Opening-Sequence Template
 - **Next phase:** 1.8.2 - Post-Validation Closeout Enforcement
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.8.1 | alpha | 2026-06-05 | Scope-Output Opening-Sequence Template | (in progress) |
+| 1.8.1 | stable | 2026-06-05 | Scope-Output Opening-Sequence Template | (in progress) |
 | 1.8.0 | stable | 2026-06-05 | Local DB Role Audit Through Tests | (in progress) |
 | 1.7.3 | stable | 2026-06-05 | Refresh/Crash Pending Work Decision | (in progress) |
 | 1.7.2 | stable | 2026-06-05 | Pending Mutation Cancellation Rules | (in progress) |
