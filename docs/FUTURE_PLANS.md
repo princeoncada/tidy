@@ -169,6 +169,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.7.0 - Optimistic Queue Race Test Baseline~~ (stable 2026-06-05)
 
+- ~~1.7.1 - Scope Rollback Rules~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -178,19 +180,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.7.1 - Scope Rollback Rules (active) - see Planned
 ---
 
 ## Planned
-
-### 1.7.1 - Scope Rollback Rules
-- **Status:** In progress | Priority: P0 optimistic stability
-- **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/
-- **Problem:** Rollbacks must not wipe unrelated newer optimistic work or repaint stale cache snapshots.
-- **Scope:** define and implement safer rollback rules per optimistic scope; add regression tests.
-- **Acceptance:** failed mutations only rollback their own intended changes; newer visible user actions are preserved.
-- **Implementation note:** failed non-CancelledError queue tasks no longer cancel later same-scope entries; rollback is skipped for canceled or superseded entries once newer same-scope work has started.
-- **Follow-up:** blind snapshot rollback can still leave or repaint stale state when newer same-scope optimistic work is queued but has not started and does not overwrite the failed field.
 
 ### 1.7.2 - Pending Mutation Cancellation Rules
 - **Status:** Open | Priority: P1 optimistic stability
