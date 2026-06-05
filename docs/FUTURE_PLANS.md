@@ -163,6 +163,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.6.4 - Workflow Skill Evolution Sweep~~ (stable 2026-06-04)
 
+- ~~1.6.5 - Codebase Graph Generator Stability Fix~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -172,17 +174,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.6.5 - Codebase Graph Generator Stability Fix (active) - see Planned
 ---
 
 ## Planned
-
-### 1.6.5 - Codebase Graph Generator Stability Fix
-- **Status:** In progress | Priority: P2 tooling reliability
-- **Files:** scripts/generate_codebase_graph.py, codebase-graph.json, docs/CODEBASE_GRAPH.md
-- **Problem:** The generator captured in-body/local symbols via unanchored regexes, so body-only edits churned the committed graph and forced a `npm run graph:codebase` refresh every phase to pass validate's freshness gate.
-- **Scope:** restrict symbol extraction to top-level exported declarations (sorted, deterministic); regenerate the committed graph; update docs/CODEBASE_GRAPH.md. Full and fallback generator paths are identical in tidy (no graphify CLI), so generator selection is unchanged.
-- **Acceptance:** body-only edits no longer make the committed graph stale; validate's codebase-graph freshness + audit gates pass; the graph reflects each file's exported surface.
 
 ### 1.6.6 - Phase Scoping and Opening Workflow Hardening
 - **Status:** Open | Priority: P2 workflow hardening
