@@ -189,6 +189,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.8.6 - Offline Write Path Prototype~~ (stable 2026-06-05)
 
+- ~~1.8.7 - Local-First Status Alignment and Roadmap Correction~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -198,17 +200,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.8.7 - Local-First Status Alignment and Roadmap Correction (active) - see Planned
 ---
 
 ## Planned
-
-### 1.8.7 - Local-First Status Alignment and Roadmap Correction
-- **Status:** In progress | Priority: P1 docs/roadmap correction
-- **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
-- **Problem:** The 1.8.x series shipped only audit/test/prototype scaffolding, but DECISIONS.md and AI_HANDOFF implied durable Dexie/offline integration; the deferral promise is undischarged and the roadmap does not schedule real integration.
-- **Scope:** correct the local-first status in DECISIONS.md and AI_HANDOFF, re-charter 1.9.0-1.9.4 as the mutation-chokepoint enabler, and insert the 1.9.5-1.9.10 integration series.
-- **Acceptance:** docs state Dexie's real (unwired) status; the roadmap contains a chokepoint-first integration series; no source or test behavior changes.
 
 ### 1.9.0 - Dashboard Component Responsibility Audit
 - **Status:** Open | Priority: P1 maintainability + offline on-ramp
