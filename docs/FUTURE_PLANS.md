@@ -178,12 +178,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.7.1 - Scope Rollback Rules (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.7.1 - Scope Rollback Rules
-- **Status:** Open | Priority: P0 optimistic stability
+- **Status:** In progress | Priority: P0 optimistic stability
 - **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/
 - **Problem:** Rollbacks must not wipe unrelated newer optimistic work or repaint stale cache snapshots.
 - **Scope:** define and implement safer rollback rules per optimistic scope; add regression tests.
