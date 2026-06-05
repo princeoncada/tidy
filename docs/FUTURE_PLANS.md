@@ -191,6 +191,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.8.7 - Local-First Status Alignment and Roadmap Correction~~ (stable 2026-06-05)
 
+- ~~1.9.0 - Dashboard Component Responsibility Audit~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -200,17 +202,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.0 - Dashboard Component Responsibility Audit (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.0 - Dashboard Component Responsibility Audit
-- **Status:** In progress | Priority: P1 maintainability + offline on-ramp
-- **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, lib/dashboard-cache.ts
-- **Problem:** Large dashboard components increase risk for focused changes, and dashboard mutations are scattered across components, so there is no single seam to later attach outbox capture.
-- **Scope:** identify extraction targets, invariants, and the single dashboard-mutation chokepoint (in lib/dashboard-cache.ts) that the 1.9.5 outbox wiring will hook, without changing behavior.
-- **Acceptance:** extraction sequence is clear and test-backed, the future mutation chokepoint is named, and no extra product audit doc is added.
 
 ### 1.9.1 - Extract Dashboard Query Key Helper
 - **Status:** Open | Priority: P1 maintainability
