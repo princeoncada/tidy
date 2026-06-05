@@ -121,6 +121,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `listItem.getListItems`, `renameListItem`, `deleteListItem`, and `setCompletionListItem` are owner-scoped through `parentList.userId` as of 1.6.1 and covered by `tests/unit/router-ownership-baseline.test.ts`.
 - `listItem.reorderListItems` now verifies item ownership and target list ownership before the batched raw SQL update as of 1.6.2, closing the FK-23503 target-list gap.
 - All listItem ownership gaps captured by the 1.6.0 baseline are now closed in `tests/unit/router-ownership-baseline.test.ts`.
+- The 1.6.x P0 ownership series is complete: 1.6.3 adds `tests/unit/router-ownership-sweep.test.ts` to prove list/tag/view transactional procedures reject foreign input, while owned-flow happy paths remain covered by authenticated E2E to avoid brittle deep-transaction unit mocks.
 
 **Optimistic and race behavior:**
 - Most optimistic race behavior is not automatically proven yet.
@@ -138,7 +139,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Outbox replay helpers exist but are not connected to runtime dashboard mutations.
 
 **Testing and polish:**
-- No API-level ownership tests yet.
+- API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
 - Authenticated E2E requires a Supabase user pool with at least as many users as Playwright workers (`tests/.auth/user-<index>.json` plus real env vars), with a legacy single-user fallback only for serial runs.
 - No keyboard drag accessibility validation.
 - UI/UX polish is intentionally late, after projection correctness, ownership, optimistic behavior, and test baselines.
