@@ -2098,6 +2098,18 @@
       ]
     },
     {
+      "path": "tests/unit/optimistic-sync-baseline.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "react",
+        "vitest",
+        "@/hooks/useOptimisticSync"
+      ]
+    },
+    {
       "path": "tests/unit/outbox-coalescing.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3807,6 +3819,12 @@
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/optimistic-sync-baseline.test.ts",
+      "to": "hooks/useOptimisticSync.ts",
+      "type": "imports",
+      "import": "@/hooks/useOptimisticSync"
     },
     {
       "from": "tests/unit/outbox-coalescing.test.ts",
