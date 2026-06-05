@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.7.3-alpha
+- **Current version:** 1.7.3
 - **Current phase:** 1.7.3 - Refresh/Crash Pending Work Decision
 - **Next phase:** 1.8.0 - Local DB Role Audit Through Tests
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.7.3 | alpha | 2026-06-05 | Refresh/Crash Pending Work Decision | (in progress) |
+| 1.7.3 | stable | 2026-06-05 | Refresh/Crash Pending Work Decision | (in progress) |
 | 1.7.2 | stable | 2026-06-05 | Pending Mutation Cancellation Rules | (in progress) |
 | 1.7.1 | stable | 2026-06-05 | Scope Rollback Rules | (in progress) |
 | 1.7.0 | stable | 2026-06-05 | Optimistic Queue Race Test Baseline | (in progress) |
