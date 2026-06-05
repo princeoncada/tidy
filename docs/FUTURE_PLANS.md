@@ -200,12 +200,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.0 - Dashboard Component Responsibility Audit (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.0 - Dashboard Component Responsibility Audit
-- **Status:** Open | Priority: P1 maintainability + offline on-ramp
+- **Status:** In progress | Priority: P1 maintainability + offline on-ramp
 - **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, lib/dashboard-cache.ts
 - **Problem:** Large dashboard components increase risk for focused changes, and dashboard mutations are scattered across components, so there is no single seam to later attach outbox capture.
 - **Scope:** identify extraction targets, invariants, and the single dashboard-mutation chokepoint (in lib/dashboard-cache.ts) that the 1.9.5 outbox wiring will hook, without changing behavior.
