@@ -140,6 +140,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - PWA/offline behavior is not implemented despite product goals.
 - No conflict policy exists for offline replay.
 - Outbox replay helpers exist but are not connected to runtime dashboard mutations.
+- The replay-to-endpoint integration CONTRACT (transport request shape, syncing-status acceptance, idempotency-key threading, coalesced-survivor validity, endpoint-rejection-as-failure without queue blocking, and user-scope authority) is characterized by `tests/unit/sync-replay-endpoint-integration.test.ts` (1.8.5). Real HTTP/runtime wiring of replay into dashboard mutations, plus conflict policy, remain deferred to 1.8.6.
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
