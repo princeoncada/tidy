@@ -278,7 +278,7 @@ When writing Codex prompts or command instructions for the user:
   the copyable code block.
 - Never house Codex prompt text and PowerShell validation commands in the same code block.
 - Provide alpha commit commands as one PowerShell code block.
-- Do not re-emit stable promotion commit or push commands; promote.ps1 prints them in its Next steps - point the user to run promote.ps1's printed Next steps.
+- Never re-emit commands a script already prints in its Next steps - this covers both open-phase.ps1 (opener commits) and promote.ps1 (stable commits and push). Point the user to run the script's printed Next steps. Single owner: the Script-printed command rule in .claude/skills/tidy-codex-prompt-builder/SKILL.md.
 - Provide push commands separately.
 - Prefer fewer, larger runnable command blocks over many one-line code blocks
   when commands belong to the same execution phase.
