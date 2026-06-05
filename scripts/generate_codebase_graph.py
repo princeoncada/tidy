@@ -82,13 +82,15 @@ IMPORT_PATTERNS = [
     re.compile(r"""import\(\s*['"]([^'"]+)['"]\s*\)"""),
 ]
 
+# Capture only top-level EXPORTED declarations. In-body/local declarations were
+# previously matched by unanchored patterns, which made each node's symbol list
+# churn on body-only edits and forced a graph refresh every phase. Anchoring to
+# line-start `export ...` keeps the graph an orientation map of each file's public
+# surface and stable across internal edits. (1.6.5)
 SYMBOL_PATTERNS = [
-    re.compile(r"\bexport\s+(?:async\s+)?function\s+([A-Za-z_$][\w$]*)"),
-    re.compile(r"\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)"),
-    re.compile(r"\bexport\s+const\s+([A-Za-z_$][\w$]*)\s*="),
-    re.compile(r"\bconst\s+([A-Za-z_$][\w$]*)\s*="),
-    re.compile(r"\bexport\s+(?:interface|type|class)\s+([A-Za-z_$][\w$]*)"),
-    re.compile(r"\b(?:interface|type|class)\s+([A-Za-z_$][\w$]*)"),
+    re.compile(r"(?m)^\s*export\s+(?:default\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)"),
+    re.compile(r"(?m)^\s*export\s+const\s+([A-Za-z_$][\w$]*)\s*="),
+    re.compile(r"(?m)^\s*export\s+(?:interface|type|class|enum)\s+([A-Za-z_$][\w$]*)"),
 ]
 
 
@@ -179,17 +181,11 @@ def extract_imports(text: str) -> list[str]:
 
 
 def extract_symbols(text: str) -> list[str]:
-    symbols: list[str] = []
-    seen: set[str] = set()
+    symbols: set[str] = set()
     for pattern in SYMBOL_PATTERNS:
         for match in pattern.finditer(text):
-            symbol = match.group(1)
-            if symbol not in seen:
-                seen.add(symbol)
-                symbols.append(symbol)
-                if len(symbols) >= SYMBOL_LIMIT:
-                    return symbols
-    return symbols
+            symbols.add(match.group(1))
+    return sorted(symbols)[:SYMBOL_LIMIT]
 
 
 def candidate_paths(base: Path) -> list[Path]:
