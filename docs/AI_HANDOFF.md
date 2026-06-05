@@ -71,6 +71,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Projected views apply per-view `ViewList.order` with list order fallback and deterministic tie-breaking.
 - Latest-selected-view guards prevent stale view fetches or rollbacks from repainting `currentView`.
 - Created-list reconciliation preserves optimistic child items, tags, and order when the saved list replaces an optimistic list.
+- The single dashboard-mutation chokepoint for future outbox capture is the trio-write seam in `lib/dashboard-cache.ts`: the private `setDashboardQueryDataOnce` currently used by `updateListInDashboardCaches`, `removeListFromDashboardCaches`, and the other snapshot helpers to fan one logical mutation across `allLists`, `currentView`, and `selectedView`. 1.9.5 outbox capture will attach here, and the single-fan-out contract is characterized in `tests/unit/dashboard-cache.test.ts`.
+- Routed dashboard writes already go through `lib/dashboard-cache.ts` for list rename, list delete removal, list/item rename and completion, most item create paths, tag add/remove/delete affected-view reconciliation, and view selection. Scattered raw `queryClient.setQueryData` writes still live in components for `ListAdder` create-list optimistic insert/reconcile/rollback, `ListComponent` create-item rollback and list-delete rollback, `ListItemComponent` delete-item rollback, `ListsContainer` list/item reorder, `ViewsSidebarPreview` view create/rename/updateFilter/delete/reorder/select follow-up writes, and `ListTagPicker` tag metadata/color reconciliation and rollbacks. Routing these through the seam is the 1.9.2-1.9.4 work and a precondition for 1.9.5.
 
 **Optimistic updates:**
 - Dashboard writes cache first and queues server saves second.
@@ -114,7 +116,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - No outbox replay is wired to dashboard mutations yet.
 - Dashboard data still flows through server/TanStack/tRPC.
 - The local DB's non-source-of-truth role is now characterized by `tests/unit/local-db-role-audit.test.ts` (1.8.0): runtime startup persists only health metadata, the dashboard write path does not import `lib/local-db`, and no sync worker or outbox replay is wired into runtime.
-- Status as of 1.8.7: the 1.8.x series delivered scaffolding only (1.8.0 role audit, 1.8.5 replay-endpoint integration test plan, 1.8.6 isolated offline write-path prototype). Real Dexie/outbox integration into the live dashboard has NOT started; it is scheduled as the 1.9.5-1.9.10 integration series after the 1.9.0-1.9.4 mutation-chokepoint extraction.
+- Status as of 1.9.0: the 1.8.x series delivered scaffolding only; 1.9.0 audited the dashboard mutation surface, named the single chokepoint (the `lib/dashboard-cache.ts` trio-write seam), and characterized its single-fan-out contract. Real Dexie/outbox integration into the live dashboard has NOT started; it is scheduled as the 1.9.5-1.9.10 integration series after the 1.9.1-1.9.4 mutation-chokepoint extraction routes the remaining scattered component writes through that seam.
 
 ---
 
