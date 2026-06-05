@@ -1,9 +1,9 @@
-<!-- Current Version: 1.7.2-alpha -->
+<!-- Current Version: 1.7.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.7.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.7.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.7.2 - Pending Mutation Cancellation Rules
 **Next**: 1.7.3 - Refresh/Crash Pending Work Decision
 
