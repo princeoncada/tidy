@@ -113,6 +113,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - No auto-running sync worker is mounted.
 - No outbox replay is wired to dashboard mutations yet.
 - Dashboard data still flows through server/TanStack/tRPC.
+- The local DB's non-source-of-truth role is now characterized by `tests/unit/local-db-role-audit.test.ts` (1.8.0): runtime startup persists only health metadata, the dashboard write path does not import `lib/local-db`, and no sync worker or outbox replay is wired into runtime.
 
 ---
 
