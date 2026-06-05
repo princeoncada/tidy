@@ -177,6 +177,20 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
+### 1.6.5 - Codebase Graph Generator Stability Fix
+- **Status:** In progress | Priority: P2 tooling reliability
+- **Files:** scripts/generate_codebase_graph.py, codebase-graph.json, docs/CODEBASE_GRAPH.md
+- **Problem:** The generator captured in-body/local symbols via unanchored regexes, so body-only edits churned the committed graph and forced a `npm run graph:codebase` refresh every phase to pass validate's freshness gate.
+- **Scope:** restrict symbol extraction to top-level exported declarations (sorted, deterministic); regenerate the committed graph; update docs/CODEBASE_GRAPH.md. Full and fallback generator paths are identical in tidy (no graphify CLI), so generator selection is unchanged.
+- **Acceptance:** body-only edits no longer make the committed graph stale; validate's codebase-graph freshness + audit gates pass; the graph reflects each file's exported surface.
+
+### 1.6.6 - Phase Scoping and Opening Workflow Hardening
+- **Status:** Open | Priority: P2 workflow hardening
+- **Files:** .claude/skills/tidy-codex-prompt-builder/SKILL.md, .claude/skills/tidy-validation-judge/SKILL.md, .claude/skills/tidy-session-clone/SKILL.md, AGENTS.md, docs/WORKFLOW.md
+- **Problem:** Four reviewed learning-queue candidates remain unformalized: Codex should own roadmap edits (not manual); the opening sequence must always include branch creation + a master-prompt PRECONDITION block; never re-emit a full prompt for a small change; and reconcile intent-vs-docs before scoping when a referenced phase is absent from FUTURE_PLANS.
+- **Scope:** formalize those four candidates as prose edits to the named skills + docs; also relax the 1.6.4 graph-refresh rule to fire only when the file set, exports, or imports change, now that 1.6.5 makes the generator stable.
+- **Acceptance:** the four behaviors are documented; validate passes; no product behavior change.
+
 ### 1.7.0 - Optimistic Queue Race Test Baseline
 - **Status:** Open | Priority: P0 optimistic stability
 - **Files:** hooks/useOptimisticSync.ts, lib/dashboard-cache.ts, tests/
