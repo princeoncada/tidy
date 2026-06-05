@@ -1,9 +1,9 @@
 {
-    "version":  "1.7.1",
-    "state":  "stable",
-    "phase":  "1.7.1",
-    "phaseTitle":  "Scope Rollback Rules",
-    "nextPhase":  "1.7.2 - Pending Mutation Cancellation Rules",
+    "version":  "1.7.2-alpha",
+    "state":  "alpha",
+    "phase":  "1.7.2",
+    "phaseTitle":  "Pending Mutation Cancellation Rules",
+    "nextPhase":  "1.7.3 - Refresh/Crash Pending Work Decision",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }

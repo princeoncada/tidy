@@ -180,12 +180,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.7.2 - Pending Mutation Cancellation Rules (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.7.2 - Pending Mutation Cancellation Rules
-- **Status:** Open | Priority: P1 optimistic stability
+- **Status:** In progress | Priority: P1 optimistic stability
 - **Files:** hooks/useOptimisticSync.ts, components/list/*, components/views/*, tests/
 - **Problem:** replacePending is correct for newest-state-wins flows, but unsafe if applied to actions where every mutation must persist.
 - **Scope:** review and test replacePending usage for reorder and view selection; keep enqueue for actions that must persist.

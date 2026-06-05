@@ -129,6 +129,81 @@ describe("optimistic sync queue baseline", () => {
     expect(events).toEqual(["active-start", "newest", "active-end"]);
   });
 
+  it("replacePending does not cancel pending work in a different scope", async () => {
+    const { result } = await renderIsolatedOptimisticSync();
+    const mustPersistBlocker = deferred();
+    const events: string[] = [];
+
+    const blockerPromise = result.current.enqueue("list-edits", async () => {
+      events.push("must-persist-blocker-start");
+      await mustPersistBlocker.promise;
+      events.push("must-persist-blocker-end");
+    });
+    const pendingMustPersistPromise = result.current.enqueue("list-edits", async () => {
+      events.push("must-persist-pending");
+    });
+
+    await flushMicrotasks();
+
+    const replacedPromise = result.current.replacePending("views", async () => {
+      events.push("newest-view-order");
+    });
+
+    await replacedPromise;
+
+    expect(events).toEqual([
+      "must-persist-blocker-start",
+      "newest-view-order",
+    ]);
+
+    mustPersistBlocker.resolve();
+    await blockerPromise;
+    await pendingMustPersistPromise;
+
+    expect(events).toEqual([
+      "must-persist-blocker-start",
+      "newest-view-order",
+      "must-persist-blocker-end",
+      "must-persist-pending",
+    ]);
+  });
+
+  it("enqueue preserves all must-persist work while unrelated replacePending runs concurrently", async () => {
+    const { result } = await renderIsolatedOptimisticSync();
+    const firstMustPersist = deferred();
+    const events: string[] = [];
+
+    const firstPromise = result.current.enqueue("item-edits", async () => {
+      events.push("first-must-persist-start");
+      await firstMustPersist.promise;
+      events.push("first-must-persist-end");
+    });
+    const secondPromise = result.current.enqueue("item-edits", async () => {
+      events.push("second-must-persist");
+    });
+    const reorderPromise = result.current.replacePending("item-order", async () => {
+      events.push("newest-item-order");
+    });
+
+    await reorderPromise;
+
+    expect(events).toEqual([
+      "first-must-persist-start",
+      "newest-item-order",
+    ]);
+
+    firstMustPersist.resolve();
+    await firstPromise;
+    await secondPromise;
+
+    expect(events).toEqual([
+      "first-must-persist-start",
+      "newest-item-order",
+      "first-must-persist-end",
+      "second-must-persist",
+    ]);
+  });
+
   it("rolls back failed tasks once, preserves the scope chain, and logs the failure", async () => {
     const { result } = await renderIsolatedOptimisticSync();
     const rollback = vi.fn();
