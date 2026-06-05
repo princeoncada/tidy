@@ -1,9 +1,9 @@
-<!-- Current Version: 1.8.6-alpha -->
+<!-- Current Version: 1.8.6 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.8.6 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.8.6 - Offline Write Path Prototype
 **Next**: 1.9.0 - Dashboard Component Responsibility Audit
 
