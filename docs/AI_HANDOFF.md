@@ -1,9 +1,9 @@
-<!-- Current Version: 1.6.4-alpha -->
+<!-- Current Version: 1.6.4 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.6.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.6.4 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.6.4 - Workflow Skill Evolution Sweep
 **Next**: 1.7.0 - Optimistic Queue Race Test Baseline
 
