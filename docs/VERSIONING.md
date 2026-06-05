@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.8.7-alpha
+- **Current version:** 1.8.7
 - **Current phase:** 1.8.7 - Local-First Status Alignment and Roadmap Correction
 - **Next phase:** 1.9.0 - Dashboard Component Responsibility Audit
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.8.7 | alpha | 2026-06-05 | Local-First Status Alignment and Roadmap Correction | (in progress) |
+| 1.8.7 | stable | 2026-06-05 | Local-First Status Alignment and Roadmap Correction | (in progress) |
 | 1.8.6 | stable | 2026-06-05 | Offline Write Path Prototype | (in progress) |
 | 1.8.5 | stable | 2026-06-05 | Outbox Replay Integration Test Plan | (in progress) |
 | 1.8.4 | stable | 2026-06-05 | Workflow Source-of-Truth Migration Into Skills | (in progress) |
