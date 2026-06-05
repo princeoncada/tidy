@@ -77,3 +77,27 @@ Several flows recompute custom views after short write transactions rather than 
 Lists, items, tags, and views accept client-generated IDs.
 
 **Reason**: UI can render optimistic objects immediately and reconcile them with server responses.
+
+---
+
+## 2026-06-05: Keep in-memory optimistic queues; defer durable pending writes to 1.8.x
+
+The module-level optimistic queue state in `hooks/useOptimisticSync.ts` (`chains`,
+`entries`, `latestStartedSequence`, `nextSequence`) is intentionally kept in memory for
+the 1.7.x series. We are NOT introducing Dexie-backed or otherwise durable pending-write
+persistence now. Durable pending-write persistence is deferred to the 1.8.x local-first
+series (1.8.0 local DB role audit, 1.8.1 outbox replay integration plan, 1.8.2 offline
+write path prototype).
+
+**Reason**: 1.7.x is a contract- and test-hardening series for optimistic queue
+behavior, not an offline rewrite. Durable pending writes would change the dashboard write
+path and interact with the existing Dexie/outbox foundation (`lib/local-db/*`), which is
+high-risk and belongs behind the planned 1.8.x audit/prototype gates. Starting it inside
+1.7.3 would be an accidental half-offline implementation. The known failure mode (pending
+writes lost on refresh or crash) is bounded, already documented as a risk, and acceptable
+until the offline series addresses it deliberately.
+
+**Impact**: The "in-memory queues can lose pending writes on refresh or crash" risk is
+accepted as temporary by design, not a defect to patch in 1.7.x. The
+`hooks/useOptimisticSync.ts` module-level queue state remains volatile-by-design until the
+1.8.x series. No source or test behavior changes in 1.7.3.
