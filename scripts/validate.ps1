@@ -676,9 +676,9 @@ foreach ($r in $results) {
 
 Write-Host ""
 if ($failCount -gt 0) {
-    Write-Host "VALIDATION FAILED: $passCount passed, $failCount failed - not ready for promote.ps1." -ForegroundColor Red
+    Write-Host "VALIDATION FAILED: $passCount passed, $failCount failed - fix before closeout." -ForegroundColor Red
     exit 1
 } else {
-    Write-Host "$passCount passed - ready for promote.ps1." -ForegroundColor Green
+    Write-Host "$passCount passed. On a phase branch this is the alpha gate; next is the closeout packet (git switch master -> git pull -> git merge --no-ff -> .\scripts\validate.ps1 -> .\scripts\promote.ps1 -> run promote.ps1's printed per-file commits/push). If this was the post-merge run on master, run .\scripts\promote.ps1 next." -ForegroundColor Green
     exit 0
 }

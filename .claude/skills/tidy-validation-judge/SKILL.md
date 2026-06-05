@@ -25,7 +25,21 @@ Output contract - classify into exactly one, then emit only its next action:
     2. RED + uncommitted work -> commit-before-fix: commit prior work (even while red) as its own unit(s), then the in-alpha fix prompt + revalidation.
     3. RED + work already committed -> in-alpha fix prompt + revalidation only.
     4. GREEN + uncommitted alpha changes -> alpha commit commands. For a low-risk phase (docs/workflow/tooling only; no product source, tests, or dependency changes) you may also include the full closeout packet in the same message, gated behind a clean git status --short. For product/source/test/dependency phases, give commit commands only.
-    5. GREEN + branch clean -> full closeout packet (switch/pull/merge --no-ff with inline -m, post-merge validation path, promote.ps1, then run promote.ps1's printed Next steps).
+    5. GREEN + branch clean -> full closeout packet, emitted byte-identically from the Closeout Packet Template below (switch/pull/merge --no-ff with inline -m, post-merge validation path, promote.ps1, then run promote.ps1's printed Next steps). This is the single next action after a green alpha validation run; never route a green phase-branch validation to promote.ps1 directly.
+
+Closeout Packet Template (case 5; emit byte-identical, substituting only the angle-bracket placeholders):
+
+    git switch master
+    git pull origin master
+    git merge --no-ff phase/<version-slug> -m "merge: bring <version> <short phase name> into master"
+
+Then the post-merge validation path (full .\scripts\validate.ps1 when source/tests/scripts/dependencies/validation logic changed; targeted checks for a clean docs-only merge):
+
+    .\scripts\validate.ps1
+
+Then promote and run promote.ps1's printed Next steps (never re-emit promote.ps1's stable commit/push commands):
+
+    .\scripts\promote.ps1
 
 Refusal rules: never assume green without pasted evidence; if evidence is ambiguous, ask for git status --short or the validate output before classifying.
 

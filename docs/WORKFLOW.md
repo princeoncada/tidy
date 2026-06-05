@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.8.2 -->
+<!-- Current Version: 1.8.3-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -521,7 +521,11 @@ commits, final targeted status check, and push one message at a time.
 
 3. Closeout packet - When alpha validation is green and the phase branch is
    clean, provide command blocks that take the user from merge through final
-   push. The merge command must include the inline `-m` message. After the
+   push. The closeout packet is the single next action after a green alpha
+   validation run; a green `.\scripts\validate.ps1` on a phase branch routes
+   here, never to `promote.ps1` on the phase branch. `tidy-validation-judge`
+   (case 5) owns the byte-identical closeout packet template; emit it verbatim.
+   The merge command must include the inline `-m` message. After the
    merge, choose the post-merge validation path from
    [Post-Merge Validation](#post-merge-validation):
 

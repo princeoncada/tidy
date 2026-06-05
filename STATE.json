@@ -1,9 +1,9 @@
 {
-    "version":  "1.8.2",
-    "state":  "stable",
-    "phase":  "1.8.2",
-    "phaseTitle":  "Script-Printed Command Re-Emit Hardening",
-    "nextPhase":  "1.8.3 - Post-Validation Closeout Enforcement",
+    "version":  "1.8.3-alpha",
+    "state":  "alpha",
+    "phase":  "1.8.3",
+    "phaseTitle":  "Post-Validation Closeout Enforcement",
+    "nextPhase":  "1.8.4 - Workflow Source-of-Truth Migration Into Skills",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
