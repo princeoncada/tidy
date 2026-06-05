@@ -1,9 +1,9 @@
-<!-- Current Version: 1.8.3-alpha -->
+<!-- Current Version: 1.8.3 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.8.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.8.3 - Post-Validation Closeout Enforcement
 **Next**: 1.8.4 - Workflow Source-of-Truth Migration Into Skills
 
