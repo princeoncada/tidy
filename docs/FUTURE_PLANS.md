@@ -182,12 +182,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.7.3 - Refresh/Crash Pending Work Decision (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.7.3 - Refresh/Crash Pending Work Decision
-- **Status:** Open | Priority: P1 local-first decision
+- **Status:** In progress | Priority: P1 local-first decision
 - **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, docs/DECISIONS.md, docs/FUTURE_PLANS.md
 - **Problem:** In-memory queues can lose pending writes on refresh or crash.
 - **Scope:** decide whether to keep in-memory queues temporarily or begin Dexie-backed pending writes; record durable decision in DECISIONS.md if architecture changes.
