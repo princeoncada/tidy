@@ -1,11 +1,11 @@
-<!-- Current Version: 1.8.3 -->
+<!-- Current Version: 1.8.4-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.8.3 - Post-Validation Closeout Enforcement
-**Next**: 1.8.4 - Workflow Source-of-Truth Migration Into Skills
+**Current Version**: 1.8.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.8.4 - Workflow Source-of-Truth Migration Into Skills
+**Next**: 1.8.5 - Outbox Replay Integration Test Plan
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.

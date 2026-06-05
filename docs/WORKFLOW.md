@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.8.3 -->
+<!-- Current Version: 1.8.4-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -118,21 +118,23 @@ committed when they preserve real debugging history; fake activity commits are
 forbidden. If a phase expands too much, split the remaining work into the next
 planned phase instead of looping endlessly.
 
-Pre-Codex opening sequence (always emit in this order before pasting the master
-prompt): (1) `git switch -c phase/<version-slug>` from clean stable master,
-(2) `.\scripts\open-phase.ps1` with `-NextPhase`/`-NoNextPhase`, (3) run the
-per-file opener commit commands open-phase prints, (4) a `Get-Content STATE.json`
-confirm gate. Never emit the open-phase command without the preceding
-branch-creation step. Because open-phase writes the In Progress pointer into
-`docs/FUTURE_PLANS.md`, commit the opener before Codex edits that file.
+Pre-Codex opening sequence: the fixed four-step order - branch-create
+(`git switch -c phase/<version-slug>` from clean stable master) -> `open-phase.ps1`
+with `-NextPhase`/`-NoNextPhase` -> run the per-file opener commit commands
+open-phase prints -> `Get-Content STATE.json` confirm gate - and its byte-identical
+opener template are owned by `.claude/skills/tidy-codex-prompt-builder` (Opening
+sequence). Rationale: open-phase writes the In Progress pointer into
+`docs/FUTURE_PLANS.md`, so the opener must be committed before Codex edits that
+file to keep the granular commits separable. Emit the sequence from the skill;
+do not restate the template here.
 
-During active editing, use targeted checks. Run full `.\scripts\validate.ps1` at
-meaningful gates. When the alpha branch is clean and full validation is green,
-provide the full closeout command packet: switch to master, pull master, merge
-the phase branch with `--no-ff` and an inline `-m` message, run post-merge
-validation on master using the documented post-merge validation rule, promote on
-master, commit promotion files one by one, run a final targeted status check,
-then push master. If any command in the closeout packet fails, stop and paste
+During active editing, use targeted checks and run full `.\scripts\validate.ps1`
+at meaningful gates. When the alpha branch is clean and full validation is green,
+the full closeout command packet (switch to master, pull, merge `--no-ff` with an
+inline `-m` message, post-merge validation, promote, then run promote.ps1's
+printed Next steps) is owned by `.claude/skills/tidy-validation-judge` (case 5,
+Closeout Packet Template); emit it byte-identically from the skill rather than
+restating it here. If any command in the closeout packet fails, stop and paste
 the output before continuing.
 
 If `git push` reports that the repository moved, update origin with
@@ -214,31 +216,13 @@ Prefer the surgical format whenever feasible; use the exploratory format only wh
 
 ### Assistant Output Formatting Contract
 
-- Keep markdown section headings outside code blocks.
-- Section 1 - Master Prompt heading must stay outside the code block.
-- Section 2 - Validation heading must stay outside the code block.
-- The Codex prompt must be one text code block containing only the prompt intended for Codex.
-- The validation block must be one PowerShell code block containing only validation commands.
-- The alpha commit sequence must be one PowerShell code block containing all alpha commit commands, one command per line.
-- Do not re-emit the stable promotion commit or push commands; promote.ps1 prints the exact per-file stable commit commands (including the conditional codebase-graph.json commit) and the final push, so instruct the user to run promote.ps1's printed Next steps instead.
-- Never place `Section 1 - Master Prompt` or `Section 2 - Validation` inside
-  copyable code blocks.
-- Do not wrap both sections in one code block.
-- Do not combine Codex prompt text and PowerShell commands in the same code block.
-- The push command must be separate from commit command blocks.
-- When providing a merge command, include the merge message inline with `-m` so
-  Git does not open the default editor:
-  `git merge --no-ff phase/<version-slug> -m "merge: bring <version> <short phase name> into master"`
-- Code blocks must be copy-paste runnable for their target tool.
-- Do not place explanatory prose, bullets, markdown headings, wrappers, or
-  comments inside copyable command blocks unless they are commands the user
-  should actually run.
-- Use `text` for Codex prompt blocks.
-- Use `powershell` for validation and command blocks.
-- Codex implementation summaries must not include "Verified directly" or equivalent self-validation sections.
-- Validation sections in Codex output must only contain commands for the user/controller to run.
-- If Codex did not run validation, it must say "Validation not run by Codex."
-- Codex must not claim validation/test/audit results unless the user provided them.
+The canonical Assistant Output Formatting Contract - the full bullet list
+governing how Codex prompts, validation blocks, and command blocks are shaped in
+assistant responses - is owned by `.claude/skills/tidy-codex-prompt-builder`
+(Assistant Output Formatting Contract section) and enforced there as part of that
+skill's emit-and-self-check flow. Rationale: the formatting rules apply only when
+an assistant is emitting a Codex prompt, so the single owner is the skill that
+writes them. Do not restate the bullet list here; update the skill instead.
 
 When scoping implementation prompts, include `codebase-graph.json` as an early
 read after `STATE.json` when it exists. The graph narrows file selection; it
@@ -402,16 +386,11 @@ Once alpha validation is green and the phase branch is clean, the assistant may
 provide the full closeout command packet. For a low-risk phase (docs, workflow,
 or tooling only; no product source, tests, or dependency changes) the assistant
 may include this packet in the same message as the alpha commit sequence, gated
-behind a clean `git status --short`. The packet must include, in order:
-- switch to master
-- pull master
-- merge into master using the inline `-m` merge message:
-  `git merge --no-ff phase/<version-slug> -m "merge: bring <version> <short phase name> into master"`
-- run the documented post-merge validation path on master
-- promote
-- run the per-file stable commit commands and the push that promote.ps1 prints in its Next steps; the assistant does not re-emit them
-
-If any closeout command fails, stop and paste the output before continuing.
+behind a clean `git status --short`; for product/source/test/dependency phases
+keep commits and closeout in separate messages. The packet's exact contents and
+order are owned by `.claude/skills/tidy-validation-judge` (case 5, Closeout Packet
+Template) - emit it from the skill, do not restate the command list here. If any
+closeout command fails, stop and paste the output before continuing.
 
 If the user says "we won't be promoting because we have a problem" or equivalent
 during alpha, treat it as an in-alpha fix situation. Provide an in-alpha fix

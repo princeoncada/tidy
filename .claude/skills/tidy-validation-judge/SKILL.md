@@ -41,6 +41,8 @@ Then promote and run promote.ps1's printed Next steps (never re-emit promote.ps1
 
     .\scripts\promote.ps1
 
+If promote.ps1's printed Next steps are no longer on screen, do not improvise them - reconstruct from the canonical fallback in `.claude/skills/tidy-codex-prompt-builder` (Script-printed command rule, "Fallback when the printout is gone").
+
 Refusal rules: never assume green without pasted evidence; if evidence is ambiguous, ask for git status --short or the validate output before classifying.
 
 Source of truth: docs/WORKFLOW.md Validation-Gated Assistant Responses + Post-Validation Workflow.
