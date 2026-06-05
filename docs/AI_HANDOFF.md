@@ -1,11 +1,11 @@
-<!-- Current Version: 1.7.2 -->
+<!-- Current Version: 1.7.3-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.7.2 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.7.2 - Pending Mutation Cancellation Rules
-**Next**: 1.7.3 - Refresh/Crash Pending Work Decision
+**Current Version**: 1.7.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.7.3 - Refresh/Crash Pending Work Decision
+**Next**: 1.8.0 - Local DB Role Audit Through Tests
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
