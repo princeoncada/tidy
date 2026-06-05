@@ -1,9 +1,9 @@
-<!-- Current Version: 1.8.2-alpha -->
+<!-- Current Version: 1.8.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.8.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.8.2 - Script-Printed Command Re-Emit Hardening
 **Next**: 1.8.3 - Post-Validation Closeout Enforcement
 
