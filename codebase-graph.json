@@ -2767,6 +2767,34 @@
       ]
     },
     {
+      "path": "tests/unit/router-ownership-sweep.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [
+        "authedCaller",
+        "expectTrpcCode",
+        "dbMock",
+        "createCaller",
+        "USER_B",
+        "LIST_FOREIGN",
+        "LIST_OWNED",
+        "TAG_FOREIGN",
+        "TAG_OWNED",
+        "VIEW_FOREIGN",
+        "NEW_LIST",
+        "NEW_VIEW",
+        "helpers",
+        "TestTRPCContext"
+      ],
+      "imports": [
+        "@trpc/server",
+        "vitest",
+        "@/trpc/init",
+        "@/trpc/routers/_app",
+        "@/trpc/routers/viewHelpers"
+      ]
+    },
+    {
       "path": "tests/unit/sync-endpoint-contract.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -4549,6 +4577,24 @@
       "to": "trpc/routers/_app.ts",
       "type": "imports",
       "import": "@/trpc/routers/_app"
+    },
+    {
+      "from": "tests/unit/router-ownership-sweep.test.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "@/trpc/init"
+    },
+    {
+      "from": "tests/unit/router-ownership-sweep.test.ts",
+      "to": "trpc/routers/_app.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/_app"
+    },
+    {
+      "from": "tests/unit/router-ownership-sweep.test.ts",
+      "to": "trpc/routers/viewHelpers.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/viewHelpers"
     },
     {
       "from": "tests/unit/sync-endpoint-contract.test.ts",
