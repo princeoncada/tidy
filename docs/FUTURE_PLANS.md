@@ -194,12 +194,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.8.5 - Outbox Replay Integration Test Plan (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.8.5 - Outbox Replay Integration Test Plan
-- **Status:** Open | Priority: P2 offline architecture
+- **Status:** In progress | Priority: P2 offline architecture
 - **Files:** lib/local-db/sync-replay-client.ts, lib/sync/sync-endpoint-contract.ts, tests/
 - **Problem:** Outbox replay helpers exist but are not connected to real app mutations.
 - **Scope:** plan and test the integration contract before wiring replay into runtime behavior.
