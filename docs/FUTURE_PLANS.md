@@ -172,6 +172,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.6.5 - Codebase Graph Generator Stability Fix (active) - see Planned
 ---
 
 ## Planned
