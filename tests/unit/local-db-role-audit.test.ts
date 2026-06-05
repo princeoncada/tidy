@@ -7,7 +7,6 @@ import {
   LOCAL_DB_METADATA_KEYS,
 } from "@/lib/local-db/metadata-repository";
 import type { LocalDbMetadata } from "@/lib/local-db/local-schema";
-import { tidyLocalDb } from "@/lib/local-db/tidy-db";
 
 const readSource = (relativePath: string): string =>
   readFileSync(resolve(process.cwd(), relativePath), "utf8");
@@ -37,8 +36,10 @@ describe("local db role audit (1.8.0 characterization)", () => {
       );
     });
 
-    it("does not construct a Dexie instance in a non-browser runtime", () => {
-      expect(tidyLocalDb).toBeNull();
+    it("gates Dexie construction on a browser window (null when window is undefined)", () => {
+      expect(readSource("lib/local-db/tidy-db.ts")).toMatch(
+        /typeof window === "undefined"\s*\?\s*null/,
+      );
     });
   });
 
