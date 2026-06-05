@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.0-alpha",
-    "state":  "alpha",
+    "version":  "1.9.0",
+    "state":  "stable",
     "phase":  "1.9.0",
     "phaseTitle":  "Dashboard Component Responsibility Audit",
     "nextPhase":  "1.9.1 - Extract Dashboard Query Key Helper",
