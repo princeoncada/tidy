@@ -1,6 +1,6 @@
 {
-    "version":  "1.8.2-alpha",
-    "state":  "alpha",
+    "version":  "1.8.2",
+    "state":  "stable",
     "phase":  "1.8.2",
     "phaseTitle":  "Script-Printed Command Re-Emit Hardening",
     "nextPhase":  "1.8.3 - Post-Validation Closeout Enforcement",
