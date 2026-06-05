@@ -189,6 +189,8 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Problem:** Rollbacks must not wipe unrelated newer optimistic work or repaint stale cache snapshots.
 - **Scope:** define and implement safer rollback rules per optimistic scope; add regression tests.
 - **Acceptance:** failed mutations only rollback their own intended changes; newer visible user actions are preserved.
+- **Implementation note:** failed non-CancelledError queue tasks no longer cancel later same-scope entries; rollback is skipped for canceled or superseded entries once newer same-scope work has started.
+- **Follow-up:** blind snapshot rollback can still leave or repaint stale state when newer same-scope optimistic work is queued but has not started and does not overwrite the failed field.
 
 ### 1.7.2 - Pending Mutation Cancellation Rules
 - **Status:** Open | Priority: P1 optimistic stability
@@ -335,7 +337,7 @@ Assigned a version only when scoped.
 
 ## Known Cross-Cutting Risks
 
-- Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.0); broader cross-component optimistic race behavior is still not fully proven.
+- Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
 - PWA/offline is not implemented despite product goals.
 - In-memory queues can lose pending writes on refresh or crash.
 - Large components increase risk for focused changes.
