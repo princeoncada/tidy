@@ -205,9 +205,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ### 1.8.4 - Workflow Source-of-Truth Migration Into Skills
 - **Status:** Open | Priority: P1 workflow hardening
 - **Files:** .claude/skills/*, docs/WORKFLOW.md
-- **Problem:** Response-shaping rules (opening sequence, closeout lifecycle, output formatting) live in docs-only homes that duplicate skill guidance and invite drift.
-- **Scope:** move the response-shaping rules into skills with inline templates and demote the doc copies to rationale/reference only.
-- **Acceptance:** each response-shaping rule has one skill owner with an inline template; WORKFLOW.md points to the owner instead of restating it; no behavior or versioning-location change.
+- **Problem:** Response-shaping rules (opening sequence, closeout lifecycle, output formatting) live in docs-only homes that duplicate skill guidance and invite drift. The no-re-emit rule (1.8.2) also assumes a script's printed Next steps are still on screen; when the printout is cleared there is no sanctioned fallback for reconstructing open-phase.ps1's opener commits or promote.ps1's stable commits/push.
+- **Scope:** move the response-shaping rules into skills with inline templates and demote the doc copies to rationale/reference only. Add a sanctioned fallback for the no-re-emit rule when the script printout is gone (e.g. open-phase.ps1/promote.ps1 persist their Next steps to a file, or a skill documents reconstructing them from the script's known output).
+- **Acceptance:** each response-shaping rule has one skill owner with an inline template; WORKFLOW.md points to the owner instead of restating it; the no-re-emit rule has a documented fallback when the printout is unavailable; no behavior or versioning-location change.
 
 ### 1.8.5 - Outbox Replay Integration Test Plan
 - **Status:** Open | Priority: P2 offline architecture
