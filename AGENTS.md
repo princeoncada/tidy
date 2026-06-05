@@ -84,6 +84,14 @@ These rules exist so lower-capability models cannot silently drift:
   STATE.json and next backlog item from FUTURE_PLANS remain separate concepts.
 - Never state version, phase, or "what's next" from memory. Read the files
   fresh every session.
+- When the user references a phase, version, or work item that is not a heading
+  in `docs/FUTURE_PLANS.md`, STOP and reconcile intent vs docs with the user
+  before scoping; never silently default to `STATE.json.nextPhase`. Before
+  asserting a continuity or handoff failure, verify against the current
+  session's own history - never fabricate a lost-state narrative for a
+  reference the assistant itself introduced. Any agreed future work must be
+  pinned to a single home (a Planned heading or an explicit Potential Next
+  Direction), never left floating in conversation.
 - scripts/validate.ps1 enforces version consistency across all five
   versioning locations. A failing consistency gate blocks promotion.
 - If `codebase-graph.json` exists but its version does not match `STATE.json`,
