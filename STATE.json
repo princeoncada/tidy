@@ -1,9 +1,9 @@
 {
-    "version":  "1.8.1",
-    "state":  "stable",
-    "phase":  "1.8.1",
-    "phaseTitle":  "Scope-Output Opening-Sequence Template",
-    "nextPhase":  "1.8.2 - Post-Validation Closeout Enforcement",
+    "version":  "1.8.2-alpha",
+    "state":  "alpha",
+    "phase":  "1.8.2",
+    "phaseTitle":  "Script-Printed Command Re-Emit Hardening",
+    "nextPhase":  "1.8.3 - Post-Validation Closeout Enforcement",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }

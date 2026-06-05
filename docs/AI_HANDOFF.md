@@ -1,11 +1,11 @@
-<!-- Current Version: 1.8.1 -->
+<!-- Current Version: 1.8.2-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.8.1 - Scope-Output Opening-Sequence Template
-**Next**: 1.8.2 - Post-Validation Closeout Enforcement
+**Current Version**: 1.8.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.8.2 - Script-Printed Command Re-Emit Hardening
+**Next**: 1.8.3 - Post-Validation Closeout Enforcement
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
