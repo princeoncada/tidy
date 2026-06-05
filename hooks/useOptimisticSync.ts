@@ -11,6 +11,7 @@ export type OptimisticScope =
 
 type QueueEntry = {
   canceled: boolean;
+  sequence: number;
 };
 
 export type EnqueueOptions = {
@@ -54,6 +55,18 @@ const entries: Record<OptimisticScope, QueueEntry[]> = {
   "item-edits": [],
 };
 
+const latestStartedSequence: Record<OptimisticScope, number> = {
+  views: 0,
+  "list-tags": 0,
+  "list-order": 0,
+  "item-order": 0,
+  "view-selection": 0,
+  "list-edits": 0,
+  "item-edits": 0,
+};
+
+let nextSequence = 0;
+
 function describeError(error: unknown) {
   if (error instanceof Error) {
     return {
@@ -75,6 +88,10 @@ function isCancelledError(error: unknown) {
   );
 }
 
+function canRunRollback(scope: OptimisticScope, entry: QueueEntry) {
+  return !entry.canceled && latestStartedSequence[scope] <= entry.sequence;
+}
+
 export function useOptimisticSync(): OptimisticSyncApi {
   const cancelScope = useCallback((scope: OptimisticScope) => {
     entries[scope].forEach((entry) => {
@@ -89,20 +106,29 @@ export function useOptimisticSync(): OptimisticSyncApi {
     task: () => Promise<void>,
     options: EnqueueOptions = {}
   ) => {
-    const entry: QueueEntry = { canceled: false };
+    const entry: QueueEntry = {
+      canceled: false,
+      sequence: ++nextSequence,
+    };
     entries[scope].push(entry);
 
     // These queues are shared by every component instance. Tag writes from two open pickers must not overlap.
     chains[scope] = chains[scope]
       .then(async () => {
         if (entry.canceled) return;
+        latestStartedSequence[scope] = Math.max(
+          latestStartedSequence[scope],
+          entry.sequence
+        );
         await task();
       })
       .catch((error) => {
         if (isCancelledError(error)) return;
 
-        options.rollback?.();
-        cancelScope(scope);
+        if (canRunRollback(scope, entry)) {
+          options.rollback?.();
+        }
+
         console.error("Optimistic sync failed:", {
           scope,
           label: options.label ?? "unnamed task",
@@ -116,7 +142,7 @@ export function useOptimisticSync(): OptimisticSyncApi {
       });
 
     return chains[scope];
-  }, [cancelScope]);
+  }, []);
 
   const replacePending = useCallback((
     scope: OptimisticScope,

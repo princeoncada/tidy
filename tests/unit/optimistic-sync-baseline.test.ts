@@ -1,20 +1,26 @@
 import { renderHook } from "@testing-library/react";
+import { QueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+
+import { rollbackScope } from "@/lib/dashboard-cache";
 
 type Deferred = {
   promise: Promise<void>;
   resolve: () => void;
+  reject: (error: unknown) => void;
 };
 
 function deferred(): Deferred {
   let resolve!: () => void;
+  let reject!: (error: unknown) => void;
 
-  const promise = new Promise<void>((promiseResolve) => {
+  const promise = new Promise<void>((promiseResolve, promiseReject) => {
     resolve = promiseResolve;
+    reject = promiseReject;
   });
 
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 
 async function flushMicrotasks() {
@@ -123,7 +129,7 @@ describe("optimistic sync queue baseline", () => {
     expect(events).toEqual(["active-start", "newest", "active-end"]);
   });
 
-  it("rolls back failed tasks once, cancels the scope, and logs the failure", async () => {
+  it("rolls back failed tasks once, preserves the scope chain, and logs the failure", async () => {
     const { result } = await renderIsolatedOptimisticSync();
     const rollback = vi.fn();
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -138,14 +144,14 @@ describe("optimistic sync queue baseline", () => {
         },
         { label: "rename list", rollback }
       );
-      const skippedPromise = result.current.enqueue("list-edits", async () => {
-        events.push("skipped");
+      const newerPromise = result.current.enqueue("list-edits", async () => {
+        events.push("newer");
       });
 
       await failedPromise;
-      await skippedPromise;
+      await newerPromise;
 
-      expect(events).toEqual(["failed"]);
+      expect(events).toEqual(["failed", "newer"]);
       expect(rollback).toHaveBeenCalledTimes(1);
       expect(consoleError).toHaveBeenCalledTimes(1);
       expect(consoleError).toHaveBeenCalledWith(
@@ -155,6 +161,47 @@ describe("optimistic sync queue baseline", () => {
           label: "rename list",
         })
       );
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it("does not let a superseded failed task roll back over newer same-scope state", async () => {
+    const { result } = await renderIsolatedOptimisticSync();
+    const queryClient = new QueryClient();
+    const queryKey = ["optimistic-snapshot"];
+    const active = deferred();
+    const rollback = vi.fn(() => {
+      rollbackScope(queryClient, queryKey, { value: "before failed task" });
+    });
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    queryClient.setQueryData(queryKey, { value: "failed task optimistic state" });
+
+    try {
+      const failedPromise = result.current.enqueue(
+        "view-selection",
+        async () => {
+          await active.promise;
+        },
+        { label: "view-selection.superseded", rollback }
+      );
+      await flushMicrotasks();
+
+      const newerPromise = result.current.replacePending("view-selection", async () => {
+        queryClient.setQueryData(queryKey, { value: "newer optimistic state" });
+      });
+
+      await newerPromise;
+
+      active.reject(new Error("superseded selection failed"));
+      await failedPromise;
+
+      expect(rollback).not.toHaveBeenCalled();
+      expect(queryClient.getQueryData(queryKey)).toEqual({
+        value: "newer optimistic state",
+      });
+      expect(consoleError).toHaveBeenCalledTimes(1);
     } finally {
       consoleError.mockRestore();
     }

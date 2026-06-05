@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.7.0",
+  "version": "1.7.1-alpha",
   "generatedAt": "2026-06-05",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2104,8 +2104,10 @@
       "symbols": [],
       "imports": [
         "@testing-library/react",
+        "@tanstack/react-query",
         "react",
         "vitest",
+        "@/lib/dashboard-cache",
         "@/hooks/useOptimisticSync"
       ]
     },
@@ -3825,6 +3827,12 @@
       "to": "hooks/useOptimisticSync.ts",
       "type": "imports",
       "import": "@/hooks/useOptimisticSync"
+    },
+    {
+      "from": "tests/unit/optimistic-sync-baseline.test.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
     },
     {
       "from": "tests/unit/outbox-coalescing.test.ts",
