@@ -340,7 +340,7 @@ Assigned a version only when scoped.
 
 ## Known Cross-Cutting Risks
 
-- No automated tests prove most optimistic race behavior yet.
+- Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.0); broader cross-component optimistic race behavior is still not fully proven.
 - PWA/offline is not implemented despite product goals.
 - In-memory queues can lose pending writes on refresh or crash.
 - Large components increase risk for focused changes.
