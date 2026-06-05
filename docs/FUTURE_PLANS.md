@@ -170,6 +170,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.6.4 - Workflow Skill Evolution Sweep (active) - see Planned
 ---
 
 ## Planned
