@@ -174,16 +174,17 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.6.6 - Phase Scoping and Opening Workflow Hardening (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.6.6 - Phase Scoping and Opening Workflow Hardening
-- **Status:** Open | Priority: P2 workflow hardening
-- **Files:** .claude/skills/tidy-codex-prompt-builder/SKILL.md, .claude/skills/tidy-validation-judge/SKILL.md, .claude/skills/tidy-session-clone/SKILL.md, AGENTS.md, docs/WORKFLOW.md
-- **Problem:** Four reviewed learning-queue candidates remain unformalized: Codex should own roadmap edits (not manual); the opening sequence must always include branch creation + a master-prompt PRECONDITION block; never re-emit a full prompt for a small change; and reconcile intent-vs-docs before scoping when a referenced phase is absent from FUTURE_PLANS.
-- **Scope:** formalize those four candidates as prose edits to the named skills + docs; also relax the 1.6.4 graph-refresh rule to fire only when the file set, exports, or imports change, now that 1.6.5 makes the generator stable.
-- **Acceptance:** the four behaviors are documented; validate passes; no product behavior change.
+- **Status:** In progress | Priority: P2 workflow hardening
+- **Files:** .claude/skills/tidy-codex-prompt-builder/SKILL.md, .claude/skills/tidy-validation-judge/SKILL.md, .claude/skills/tidy-session-clone/SKILL.md, .claude/skills/tidy-minimal-handoff/SKILL.md, AGENTS.md, docs/WORKFLOW.md, docs/COMPACT_STRATEGY.md
+- **Problem:** Five reviewed learning-queue candidates remain unformalized: (1) Codex should own roadmap/FUTURE_PLANS edits (never handed to the user); (2) the opening sequence must always emit branch creation -> open-phase -> opener commits -> STATE confirm, and every alpha master prompt must carry a PRECONDITION block; (3) never re-emit a full master prompt for a small change (deltas / in-alpha only); (4) reconcile intent-vs-docs before scoping when a referenced phase is absent from FUTURE_PLANS, and never confabulate a lost-state narrative; (5) context discipline as a hard rule (one phase per session, mandatory minimal handoff at promote, targeted reads over full-file reads).
+- **Scope:** formalize those five candidates as prose edits to the named skills + docs; also relax the 1.6.4 graph-refresh rule so Section 2 leads with a graph refresh only when the source file set, top-level exported symbols, or imports change, now that 1.6.5 makes the generator stable and open-phase already version-syncs the graph.
+- **Acceptance:** the five behaviors are documented; the graph-refresh rule is relaxed; validate passes; no product behavior change.
 
 ### 1.7.0 - Optimistic Queue Race Test Baseline
 - **Status:** Open | Priority: P0 optimistic stability

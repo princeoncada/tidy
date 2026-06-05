@@ -15,7 +15,7 @@ Do not read: product source unless classifying a specific failure (then defer to
 
 Allowed actions: classify the evidence; emit only the single next valid action.
 
-Prohibited actions: running validation; claiming results the user did not paste; drip-feeding the whole workflow; giving closeout commands before alpha is green and the branch is clean; re-emitting promote.ps1's printed stable commit/push commands.
+Prohibited actions: running validation; claiming results the user did not paste; drip-feeding the whole workflow; giving closeout commands before alpha is green and the branch is clean; re-emitting promote.ps1's printed stable commit/push commands; re-emitting a full master prompt to apply an in-alpha fix - in-alpha corrections are delivered as labeled deltas or surgical OLD/NEW edits, never a full re-scoped prompt.
 
 Before classifying, run git status --short and check whether the five opener files (STATE.json, package.json, docs/VERSIONING.md, docs/WORKFLOW.md, docs/FUTURE_PLANS.md) from open-phase.ps1 are still uncommitted; if so, front-load an opener-commit section at the very top of the response (above the classification's next action), then continue. If they are already committed, just confirm and proceed. Opener commits are never inlined into the original scope - this catch-up is a post-validation safety check the judge owns.
 

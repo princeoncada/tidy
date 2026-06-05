@@ -5,7 +5,7 @@ description: Generate the lowest-token handoff packet so another AI session can 
 
 # tidy-minimal-handoff
 
-Trigger / use case: the user is stopping, switching tasks, stepping away, or handing to a new chathead/model. Prefer this over a SESSION_LOG checkpoint for normal continuation.
+Trigger / use case: the user is stopping, switching tasks, stepping away, or handing to a new chathead/model. Prefer this over a SESSION_LOG checkpoint for normal continuation. A minimal handoff is mandatory at phase promotion: after a phase is promoted to stable, stop and emit this handoff, then start the next phase in a fresh session. One phase per session - never chain phases.
 
 Read set (exact):
 - STATE.json - current version/state/phase/nextPhase (read fresh).
