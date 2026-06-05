@@ -196,12 +196,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.8.6 - Offline Write Path Prototype (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.8.6 - Offline Write Path Prototype
-- **Status:** Open | Priority: P2 offline prototype
+- **Status:** In progress | Priority: P2 offline prototype
 - **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, lib/sync/*, tests/
 - **Problem:** Offline/PWA goals require a proven write path, but a broad source-of-truth rewrite is risky.
 - **Scope:** prototype the smallest safe offline write path; keep feature flags or isolation if needed.
