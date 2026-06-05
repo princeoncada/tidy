@@ -118,6 +118,14 @@ committed when they preserve real debugging history; fake activity commits are
 forbidden. If a phase expands too much, split the remaining work into the next
 planned phase instead of looping endlessly.
 
+Pre-Codex opening sequence (always emit in this order before pasting the master
+prompt): (1) `git switch -c phase/<version-slug>` from clean stable master,
+(2) `.\scripts\open-phase.ps1` with `-NextPhase`/`-NoNextPhase`, (3) run the
+per-file opener commit commands open-phase prints, (4) a `Get-Content STATE.json`
+confirm gate. Never emit the open-phase command without the preceding
+branch-creation step. Because open-phase writes the In Progress pointer into
+`docs/FUTURE_PLANS.md`, commit the opener before Codex edits that file.
+
 During active editing, use targeted checks. Run full `.\scripts\validate.ps1` at
 meaningful gates. When the alpha branch is clean and full validation is green,
 provide the full closeout command packet: switch to master, pull master, merge
@@ -142,6 +150,7 @@ Rules:
 - New minor or major insertions must push later Planned versions back according to the Planned Renumber Rule in `docs/VERSIONING.md`.
 - Do not leave the roadmap implying the next implementation is a later phase when cleanup patches have been agreed first.
 - This does not make `docs/FUTURE_PLANS.md` a versioning location. It remains the roadmap owner only.
+- `docs/FUTURE_PLANS.md` roadmap edits are owned by Codex through the master prompt, never handed to the user as manual hand-edits. For a brand-new (not-yet-listed) phase, put the roadmap-capture edits (new Planned heading with `Status: In progress`, any Potential Next Direction) into the Codex master prompt as ordinary MODIFY items. For an already-listed phase, `open-phase.ps1` flips its Status to In progress and writes the In Progress pointer; any further reconciliation of that heading (Files/Problem/Scope/Acceptance) is also a Codex MODIFY item. Because open-phase writes the In Progress pointer into `docs/FUTURE_PLANS.md`, commit the opener before Codex edits the same file so the granular commits stay separable.
 
 ### Product Phase Planning
 
@@ -180,6 +189,13 @@ Check STATE.json before deciding how to respond to a fix or change request:
   SAFETY CONSTRAINTS, and STOP AND SUMMARIZE.
 
 Never re-scope a full phase for a fix when the current version is already alpha.
+
+Never re-emit a full master prompt to change part of an already-delivered
+prompt. Once a master prompt has been delivered - and especially once the phase
+is open in alpha - apply changes as a labeled delta (only the changed items) or
+route them through the in-alpha correction path. Re-emit a full prompt only if
+the phase identity itself changed. Regenerating a whole prompt to fix a few
+lines is forbidden token waste.
 
 ---
 
@@ -250,10 +266,12 @@ Graph Routing Summary:
 - Intentionally skipped: app source, tRPC routers, Prisma output
 - Direct reads still required: yes, read selected docs before editing
 
-Refresh the graph after any change to tracked files. Because the committed graph
-can read as stale against the validate gate's regeneration even for body-only
-edits, Section 2 of every phase that edits tracked files must lead with this
-refresh; only a no-file-change interaction may skip it:
+Section 2 must lead with this refresh only when the phase changes the source
+file set (add/remove/rename) or any top-level exported symbol or import.
+`open-phase.ps1` already refreshes and version-syncs the committed graph when the
+alpha phase opens, and since 1.6.5 the generator captures only top-level exported
+symbols, so a docs/skills or body-only phase that changes no source exports or
+imports does not need a Section 2 graph refresh. When a refresh is needed:
 
 ```powershell
 npm run graph:codebase
@@ -261,7 +279,9 @@ npm run graph:codebase
 
 `scripts/validate.ps1` checks that the committed graph is present, versioned to
 `STATE.json`, excludes protected paths, and is fresh against fallback generator
-output.
+output. `validate.ps1` regenerates and gates graph freshness whether or not
+Section 2 ran a manual refresh; if it ever reports the committed graph as stale,
+run `npm run graph:codebase`, commit the result, and re-validate.
 
 `npm run graph:audit` proves graph quality by checking required nodes,
 classifications, protected-path exclusions, and routing metadata. It runs
@@ -270,13 +290,27 @@ the normal read loop.
 
 ### Section 1 - Master Prompt
 
-A single `text` code block containing only the prompt intended for Codex. It
-contains all of the following blocks in this exact order:
+A single `text` code block containing only the prompt intended for Codex. Every
+master prompt that opens an alpha phase must include a PRECONDITION block
+immediately after the opening version lines, telling Codex the opener has
+already set the alpha version, to proceed if STATE.json matches, and to STOP and
+report "run the opener first" if STATE.json still shows the prior stable
+version. It contains all of the following blocks in this exact order:
 
 ```text
 You are implementing Phase X.Y.Z - [Name] for Tidy.
 Current stable version: X.Y.Z-stable.
 This implementation opens X.Y.Z-alpha.
+
+---
+
+PRECONDITION:
+
+The opener has already run and set STATE.json to X.Y.Z-alpha.
+If STATE.json shows X.Y.Z-alpha, proceed.
+If STATE.json still shows the prior stable version, STOP and report
+"run the opener first" - do not treat this header as drift to reconcile,
+and do not edit versioning files to force a match.
 
 ---
 
@@ -548,6 +582,15 @@ whether local evidence is required, the smallest next read set, which Tidy skill
 to invoke next, and an explicit do-not-read list). The minimal handoff plus
 STATE.json + docs/FUTURE_PLANS.md + docs/AI_HANDOFF.md is the continuity
 mechanism; a brand-new model must be able to resume from those alone.
+
+One phase per session is a hard rule: scope and run a single phase, then at
+promotion STOP, emit a minimal handoff, and start the next phase in a fresh
+session. Never chain phases (open one, promote it, then immediately scope the
+next) in the same session - that balloons context and forces an expensive
+full-transcript reload on the next start. Prefer targeted reads (Grep or
+offset+limit on the needed block) over full-file reads of large docs, and never
+re-read a file already read in the session. See `docs/COMPACT_STRATEGY.md`
+Context Discipline for the full rationale.
 
 SESSION_LOG is historical audit only, not the normal continuation path. Write a
 committed checkpoint only for the rarer audit cases: a phase retrospective, a
