@@ -179,6 +179,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.8.1 - Scope-Output Opening-Sequence Template~~ (stable 2026-06-05)
 
+- ~~1.8.2 - Script-Printed Command Re-Emit Hardening~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -188,17 +190,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.8.2 - Script-Printed Command Re-Emit Hardening (active) - see Planned
 ---
 
 ## Planned
-
-### 1.8.2 - Script-Printed Command Re-Emit Hardening
-- **Status:** In progress | Priority: P1 workflow hardening
-- **Files:** .claude/skills/tidy-codex-prompt-builder/SKILL.md, AGENTS.md, docs/FUTURE_PLANS.md
-- **Problem:** AGENTS.md forbids re-emitting promote.ps1's printed commands but has no symmetric rule for open-phase.ps1, so opener commit commands get re-typed into scope output and drift from what the script prints.
-- **Scope:** make the skill the single owner of a symmetric "never re-emit script-printed commands (open-phase + promote) - point to the printed Next steps" rule; strengthen the opening-sequence step (3) to forbid re-emission; demote AGENTS.md's promote-only line to a pointer at that rule.
-- **Acceptance:** the skill carries the canonical symmetric rule; AGENTS.md points to it; scope outputs reference open-phase's printed Next steps instead of a re-typed commit block; no product source change.
 
 ### 1.8.3 - Post-Validation Closeout Enforcement
 - **Status:** Open | Priority: P1 workflow hardening
