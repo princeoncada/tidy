@@ -1,9 +1,9 @@
-<!-- Current Version: 1.8.5-alpha -->
+<!-- Current Version: 1.8.5 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.8.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.8.5 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.8.5 - Outbox Replay Integration Test Plan
 **Next**: 1.8.6 - Offline Write Path Prototype
 
