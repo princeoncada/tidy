@@ -171,6 +171,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.7.1 - Scope Rollback Rules~~ (stable 2026-06-05)
 
+- ~~1.7.2 - Pending Mutation Cancellation Rules~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -180,17 +182,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.7.2 - Pending Mutation Cancellation Rules (active) - see Planned
 ---
 
 ## Planned
-
-### 1.7.2 - Pending Mutation Cancellation Rules
-- **Status:** In progress | Priority: P1 optimistic stability
-- **Files:** hooks/useOptimisticSync.ts, components/list/*, components/views/*, tests/
-- **Problem:** replacePending is correct for newest-state-wins flows, but unsafe if applied to actions where every mutation must persist.
-- **Scope:** review and test replacePending usage for reorder and view selection; keep enqueue for actions that must persist.
-- **Acceptance:** only newest-state-wins flows cancel earlier work; required user actions are not dropped.
 
 ### 1.7.3 - Refresh/Crash Pending Work Decision
 - **Status:** Open | Priority: P1 local-first decision
