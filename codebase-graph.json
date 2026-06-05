@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.7.3",
+  "version": "1.8.0-alpha",
   "generatedAt": "2026-06-05",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2087,6 +2087,19 @@
       ]
     },
     {
+      "path": "tests/unit/local-db-role-audit.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "node:fs",
+        "node:path",
+        "vitest",
+        "@/lib/local-db/metadata-repository",
+        "@/lib/local-db/local-schema"
+      ]
+    },
+    {
       "path": "tests/unit/local-repositories.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3806,6 +3819,18 @@
     },
     {
       "from": "tests/unit/local-db-metadata.test.ts",
+      "to": "lib/local-db/metadata-repository.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/metadata-repository"
+    },
+    {
+      "from": "tests/unit/local-db-role-audit.test.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/local-db-role-audit.test.ts",
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
       "import": "@/lib/local-db/metadata-repository"

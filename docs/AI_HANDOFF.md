@@ -1,11 +1,11 @@
-<!-- Current Version: 1.7.3 -->
+<!-- Current Version: 1.8.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.7.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.7.3 - Refresh/Crash Pending Work Decision
-**Next**: 1.8.0 - Local DB Role Audit Through Tests
+**Current Version**: 1.8.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.8.0 - Local DB Role Audit Through Tests
+**Next**: 1.8.1 - Outbox Replay Integration Test Plan
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -113,6 +113,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - No auto-running sync worker is mounted.
 - No outbox replay is wired to dashboard mutations yet.
 - Dashboard data still flows through server/TanStack/tRPC.
+- The local DB's non-source-of-truth role is now characterized by `tests/unit/local-db-role-audit.test.ts` (1.8.0): runtime startup persists only health metadata, the dashboard write path does not import `lib/local-db`, and no sync worker or outbox replay is wired into runtime.
 
 ---
 

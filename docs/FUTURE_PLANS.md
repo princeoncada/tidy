@@ -184,12 +184,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.8.0 - Local DB Role Audit Through Tests (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.8.0 - Local DB Role Audit Through Tests
-- **Status:** Open | Priority: P1 local-first clarity
+- **Status:** In progress | Priority: P1 local-first clarity
 - **Files:** lib/local-db/*, hooks/use-local-db-health-check.ts, tests/unit/*
 - **Problem:** Dexie/local DB exists as foundation but is not the dashboard source of truth.
 - **Scope:** prove what local DB currently does and does not do through tests; clarify that runtime behavior remains server/TanStack-driven unless later changed.

@@ -1,9 +1,9 @@
 {
-    "version":  "1.7.3",
-    "state":  "stable",
-    "phase":  "1.7.3",
-    "phaseTitle":  "Refresh/Crash Pending Work Decision",
-    "nextPhase":  "1.8.0 - Local DB Role Audit Through Tests",
+    "version":  "1.8.0-alpha",
+    "state":  "alpha",
+    "phase":  "1.8.0",
+    "phaseTitle":  "Local DB Role Audit Through Tests",
+    "nextPhase":  "1.8.1 - Outbox Replay Integration Test Plan",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
