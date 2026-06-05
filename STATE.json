@@ -1,9 +1,9 @@
 {
-    "version":  "1.8.0",
-    "state":  "stable",
-    "phase":  "1.8.0",
-    "phaseTitle":  "Local DB Role Audit Through Tests",
-    "nextPhase":  "1.8.1 - Outbox Replay Integration Test Plan",
+    "version":  "1.8.1-alpha",
+    "state":  "alpha",
+    "phase":  "1.8.1",
+    "phaseTitle":  "Scope-Output Opening-Sequence Template",
+    "nextPhase":  "1.8.2 - Post-Validation Closeout Enforcement",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
