@@ -181,6 +181,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.8.2 - Script-Printed Command Re-Emit Hardening~~ (stable 2026-06-05)
 
+- ~~1.8.3 - Post-Validation Closeout Enforcement~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -190,17 +192,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.8.3 - Post-Validation Closeout Enforcement (active) - see Planned
 ---
 
 ## Planned
-
-### 1.8.3 - Post-Validation Closeout Enforcement
-- **Status:** In progress | Priority: P1 workflow hardening
-- **Files:** .claude/skills/tidy-validation-judge/SKILL.md, scripts/validate.ps1, docs/WORKFLOW.md
-- **Problem:** After GREEN alpha validation the single next action (full closeout packet on master) is not enforced, so sessions can drift into promoting on the phase branch.
-- **Scope:** make the full closeout packet the explicit single next action after green validation (a skill owns the byte-identical template) and reword validate.ps1's final "ready for promote.ps1" line accordingly.
-- **Acceptance:** validation-green guidance routes to the closeout packet (switch -> pull -> merge --no-ff -> validate -> promote -> printed per-file commits/push); no promote-on-phase-branch path remains.
 
 ### 1.8.4 - Workflow Source-of-Truth Migration Into Skills
 - **Status:** Open | Priority: P1 workflow hardening
