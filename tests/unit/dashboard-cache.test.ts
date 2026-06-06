@@ -822,6 +822,10 @@ describe("list mutation cache helpers", () => {
       view: allListsView,
       lists: [list("previous-all")],
     };
+    const previousCurrentView = {
+      view: customView,
+      lists: [list("previous-current", ["a", "b"])],
+    };
     const previousSelectedView = {
       view: customView,
       lists: [list("previous-selected", ["a", "b"])],
@@ -842,12 +846,12 @@ describe("list mutation cache helpers", () => {
 
     rollbackDashboardCaches(queryClient, keys, {
       previousAllLists,
-      previousCurrentView: undefined,
+      previousCurrentView,
       previousSelectedView,
     });
 
     expect(queryClient.getQueryData(keys.allLists)).toStrictEqual(previousAllLists);
-    expect(queryClient.getQueryData(keys.currentView)).toBeUndefined();
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(previousCurrentView);
     expect(queryClient.getQueryData(keys.selectedView)).toStrictEqual(previousSelectedView);
   });
 });
