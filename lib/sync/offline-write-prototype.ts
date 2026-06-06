@@ -1,5 +1,6 @@
 import {
   enqueueOutboxOperation,
+  getOutboxOperationsForUser,
   getPendingOutboxOperations,
   type LocalOutboxRepositoryDatabase,
 } from "@/lib/local-db/outbox-repository";
@@ -10,6 +11,10 @@ import {
   type SyncReplayTransport,
 } from "@/lib/local-db/sync-replay-client";
 import { createOutboxOperation } from "@/lib/local-db/local-repositories";
+import {
+  createSyncStatusSurface,
+  type SyncStatusSurface,
+} from "@/lib/sync/sync-status-surface";
 import type {
   LocalJsonValue,
   LocalOutboxEntityType,
@@ -157,5 +162,30 @@ export async function reconcilePendingWritesOnLoad(
   } catch (error) {
     console.error("Failed to reconcile pending outbox writes on load", error);
     return [];
+  }
+}
+
+export type ReadSyncStatusSurfaceArgs = {
+  userId: string;
+  db?: LocalOutboxRepositoryDatabase;
+};
+
+export async function readSyncStatusSurfaceForUser(
+  args: ReadSyncStatusSurfaceArgs,
+): Promise<SyncStatusSurface> {
+  if (!isOfflineWriteCaptureEnabled()) {
+    return createSyncStatusSurface([]);
+  }
+
+  try {
+    const queryArgs: { userId: string; db?: LocalOutboxRepositoryDatabase } = {
+      userId: args.userId,
+    };
+    if (args.db !== undefined) queryArgs.db = args.db;
+    const operations = await getOutboxOperationsForUser(queryArgs);
+    return createSyncStatusSurface(operations);
+  } catch (error) {
+    console.error("Failed to read sync status surface", error);
+    return createSyncStatusSurface([]);
   }
 }
