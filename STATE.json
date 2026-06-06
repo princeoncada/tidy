@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.6-alpha",
-    "state":  "alpha",
+    "version":  "1.9.6",
+    "state":  "stable",
     "phase":  "1.9.6",
     "phaseTitle":  "Durable Pending-Write Integration",
     "nextPhase":  "1.9.7 - Automatic Replay Worker",
