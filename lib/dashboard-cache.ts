@@ -806,6 +806,59 @@ export function reconcileAffectedViewLists(
   );
 }
 
+export type TagMutationSnapshots = {
+  allLists: DashboardSnapshot | undefined;
+  currentView: CurrentViewSnapshot | undefined;
+  selectedView: CurrentViewSnapshot | undefined;
+  views: ViewsCache | undefined;
+};
+
+export function captureTagMutationSnapshots(
+  queryClient: QueryClient,
+  keys: DashboardKeys
+): TagMutationSnapshots {
+  return {
+    allLists: queryClient.getQueryData<DashboardSnapshot>(keys.allLists),
+    currentView: queryClient.getQueryData<CurrentViewSnapshot>(keys.currentView),
+    selectedView: queryClient.getQueryData<CurrentViewSnapshot>(keys.selectedView),
+    views: queryClient.getQueryData<ViewsCache>(keys.views),
+  };
+}
+
+export function rollbackTagMutationCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  snapshots: TagMutationSnapshots
+) {
+  queryClient.setQueryData(keys.allLists, snapshots.allLists);
+  queryClient.setQueryData(keys.currentView, snapshots.currentView);
+  queryClient.setQueryData(keys.selectedView, snapshots.selectedView);
+  queryClient.setQueryData(keys.views, snapshots.views);
+}
+
+export function applyTagMetadataToDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  tag: DashboardTag
+) {
+  const updateTag = (snapshot: DashboardSnapshot | undefined) =>
+    snapshot
+      ? {
+        ...snapshot,
+        lists: snapshot.lists.map((list) => ({
+          ...list,
+          listTags: list.listTags.map((listTag) =>
+            listTag.tagId === tag.id ? { ...listTag, tag } : listTag
+          ),
+        })),
+      }
+      : snapshot;
+
+  queryClient.setQueryData<DashboardSnapshot>(keys.allLists, updateTag);
+  queryClient.setQueryData<DashboardSnapshot>(keys.currentView, updateTag);
+  queryClient.setQueryData<DashboardSnapshot>(keys.selectedView, updateTag);
+}
+
 export function rollbackScope<T>(
   queryClient: QueryClient,
   queryKey: QueryKey,

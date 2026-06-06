@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.3",
-    "state":  "stable",
-    "phase":  "1.9.3",
-    "phaseTitle":  "Extract View Mutation Cache Helpers",
-    "nextPhase":  "1.9.4 - Extract Tag Mutation Cache Helpers",
+    "version":  "1.9.4-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.4",
+    "phaseTitle":  "Extract Tag Mutation Cache Helpers",
+    "nextPhase":  "1.9.5 - Dashboard Mutation to Outbox Wiring",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-06"
 }

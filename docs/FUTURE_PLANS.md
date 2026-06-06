@@ -208,12 +208,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.4 - Extract Tag Mutation Cache Helpers (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.4 - Extract Tag Mutation Cache Helpers
-- **Status:** Open | Priority: P1 maintainability
+- **Status:** In progress | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListTagPicker.tsx, tests/
 - **Problem:** Tag add/remove/delete projection helpers already route through `applyTagChangeToCaches`, `applyDeletedTagToDashboardCaches`, `reconcileSavedListTags`, and `reconcileAffectedViewLists`, but `ListTagPicker` still owns residual raw writes for tag metadata/color reconciliation, batching rollback snapshots, and affected cache restoration.
 - **Scope:** consolidate remaining tag write paths so all tag-driven dashboard cache writes go through the `lib/dashboard-cache.ts` trio-write seam, folding `ListTagPicker` batching reconciliation and rollback restoration into named helpers without changing batch timing or server write behavior.

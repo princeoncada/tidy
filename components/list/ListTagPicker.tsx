@@ -27,11 +27,13 @@ import type { CurrentView, Lists } from "./types";
 import {
   applyDeletedTagToDashboardCaches,
   applyTagChangeToCaches,
+  applyTagMetadataToDashboardCaches,
+  captureTagMutationSnapshots,
   DashboardKeys,
-  DashboardSnapshot,
   reconcileAffectedViewLists,
   reconcileSavedListTags,
-  ViewsCache,
+  rollbackTagMutationCaches,
+  TagMutationSnapshots,
 } from "@/lib/dashboard-cache";
 import { measureCacheWrite, measureRequest, useRenderMeasure } from "@/lib/optimistic-debug";
 
@@ -95,12 +97,7 @@ export default function ListTagPicker({
   const tagFlushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tagSaveChainRef = useRef(Promise.resolve());
   const tagOptimisticVersionRef = useRef(0);
-  const tagRollbackSnapshotRef = useRef<{
-    allLists: DashboardSnapshot | undefined;
-    currentView: CurrentView | undefined;
-    selectedView: CurrentView | undefined;
-    views: ViewsCache | undefined;
-  } | null>(null);
+  const tagRollbackSnapshotRef = useRef<TagMutationSnapshots | null>(null);
 
   const { data: tags = [] } = useQuery(trpc.tag.getAll.queryOptions());
 
@@ -123,25 +120,6 @@ export default function ListTagPicker({
   const exactTagExists = tags.some(
     (tag) => tag.name.toLowerCase() === search.trim().toLowerCase()
   );
-
-  const setTagInListsCache = (tag: TagValue) => {
-    const updateTag = (currentView: CurrentView | undefined) =>
-      currentView
-        ? {
-          ...currentView,
-          lists: currentView.lists.map((list) => ({
-            ...list,
-            listTags: list.listTags.map((listTag) =>
-              listTag.tagId === tag.id ? { ...listTag, tag } : listTag
-            ),
-          })),
-        }
-        : currentView;
-
-    queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, updateTag);
-    queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, updateTag);
-    queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, updateTag);
-  };
 
   const addTagToListCache = (tag: TagValue) => {
     applyTagChangeToCaches(queryClient, dashboardKeys, listId, tag, "add");
@@ -183,12 +161,10 @@ export default function ListTagPicker({
     void cancelTagCacheQueries();
 
     if (!tagRollbackSnapshotRef.current) {
-      tagRollbackSnapshotRef.current = {
-        allLists: queryClient.getQueryData<DashboardSnapshot>(queryKey),
-        currentView: queryClient.getQueryData<CurrentView>(dashboardKeys.currentView),
-        selectedView: queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView),
-        views: queryClient.getQueryData<ViewsCache>(dashboardKeys.views),
-      };
+      tagRollbackSnapshotRef.current = captureTagMutationSnapshots(
+        queryClient,
+        dashboardKeys
+      );
     }
 
     pendingTagOperationsRef.current.set(cacheTag.id, action);
@@ -247,11 +223,8 @@ export default function ListTagPicker({
           );
         })
         .catch((error) => {
-          if (flushVersion === tagOptimisticVersionRef.current) {
-            queryClient.setQueryData(queryKey, rollbackSnapshot?.allLists);
-            queryClient.setQueryData(dashboardKeys.currentView, rollbackSnapshot?.currentView);
-            queryClient.setQueryData(dashboardKeys.selectedView, rollbackSnapshot?.selectedView);
-            queryClient.setQueryData(dashboardKeys.views, rollbackSnapshot?.views);
+          if (flushVersion === tagOptimisticVersionRef.current && rollbackSnapshot) {
+            rollbackTagMutationCaches(queryClient, dashboardKeys, rollbackSnapshot);
           }
           console.error("Tag sync failed:", error);
         });
@@ -292,7 +265,7 @@ export default function ListTagPicker({
           listTags: tag.listTags,
         } : tag)
       );
-      setTagInListsCache({ ...createdTag, listTags: [] });
+      applyTagMetadataToDashboardCaches(queryClient, dashboardKeys, { ...createdTag, listTags: [] });
     },
   }));
 
@@ -306,9 +279,7 @@ export default function ListTagPicker({
       ]);
 
       const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
-      const previousLists = queryClient.getQueryData<CurrentView>(queryKey);
-      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
-      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
+      const dashboardSnapshots = captureTagMutationSnapshots(queryClient, dashboardKeys);
 
       queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
         currentTags.map((tag) =>
@@ -318,16 +289,16 @@ export default function ListTagPicker({
 
       const existingTag = previousTags?.find((tag) => tag.id === updatedTag.id);
       if (existingTag) {
-        setTagInListsCache({ ...existingTag, ...updatedTag });
+        applyTagMetadataToDashboardCaches(queryClient, dashboardKeys, { ...existingTag, ...updatedTag });
       }
 
-      return { previousTags, previousLists, previousCurrentView, previousSelectedView };
+      return { previousTags, dashboardSnapshots };
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(tagsQueryKey, context?.previousTags);
-      queryClient.setQueryData(queryKey, context?.previousLists);
-      queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
-      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
+      if (context?.dashboardSnapshots) {
+        rollbackTagMutationCaches(queryClient, dashboardKeys, context.dashboardSnapshots);
+      }
     },
   }));
 
@@ -336,24 +307,20 @@ export default function ListTagPicker({
       await cancelTagCacheQueries();
 
       const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
-      const previousLists = queryClient.getQueryData<CurrentView>(queryKey);
-      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
-      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
-      const previousViews = queryClient.getQueryData<ViewsCache>(dashboardKeys.views);
+      const dashboardSnapshots = captureTagMutationSnapshots(queryClient, dashboardKeys);
 
       queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
         currentTags.filter((tag) => tag.id !== deletedTag.id)
       );
       applyDeletedTagToDashboardCaches(queryClient, dashboardKeys, deletedTag.id);
 
-      return { previousTags, previousLists, previousCurrentView, previousSelectedView, previousViews };
+      return { previousTags, dashboardSnapshots };
     },
     onError(_error, _variables, context) {
       queryClient.setQueryData(tagsQueryKey, context?.previousTags);
-      queryClient.setQueryData(queryKey, context?.previousLists);
-      queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
-      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
-      queryClient.setQueryData(dashboardKeys.views, context?.previousViews);
+      if (context?.dashboardSnapshots) {
+        rollbackTagMutationCaches(queryClient, dashboardKeys, context.dashboardSnapshots);
+      }
     },
     async onSuccess(result) {
       reconcileAffectedViewLists(queryClient, dashboardKeys, result.affectedViews);

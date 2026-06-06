@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.3 -->
+<!-- Current Version: 1.9.4-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.3 - Extract View Mutation Cache Helpers
-**Next**: 1.9.4 - Extract Tag Mutation Cache Helpers
+**Current Version**: 1.9.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.4 - Extract Tag Mutation Cache Helpers
+**Next**: 1.9.5 - Dashboard Mutation to Outbox Wiring
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -72,7 +72,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Latest-selected-view guards prevent stale view fetches or rollbacks from repainting `currentView`.
 - Created-list reconciliation preserves optimistic child items, tags, and order when the saved list replaces an optimistic list.
 - The single dashboard-mutation chokepoint for future outbox capture is the trio-write seam in `lib/dashboard-cache.ts`: the private `setDashboardQueryDataOnce` currently used by `updateListInDashboardCaches`, `removeListFromDashboardCaches`, and the other snapshot helpers to fan one logical mutation across `allLists`, `currentView`, and `selectedView`. 1.9.5 outbox capture will attach here, and the single-fan-out contract is characterized in `tests/unit/dashboard-cache.test.ts`.
-- Routed dashboard writes already go through `lib/dashboard-cache.ts` for list rename, list delete removal, list/item rename and completion, most item create paths, tag add/remove/delete affected-view reconciliation, and view selection. Scattered raw `queryClient.setQueryData` writes still live in components for `ListAdder` create-list optimistic insert/reconcile/rollback, `ListComponent` create-item rollback and list-delete rollback, `ListItemComponent` delete-item rollback, `ListsContainer` list/item reorder, `ViewsSidebarPreview` view create/rename/updateFilter/delete/reorder/select follow-up writes, and `ListTagPicker` tag metadata/color reconciliation and rollbacks. Routing these through the seam is the 1.9.2-1.9.4 work and a precondition for 1.9.5.
+- Routed dashboard writes already go through `lib/dashboard-cache.ts` for list rename, list delete removal, list/item rename and completion, most item create paths, tag add/remove/delete affected-view reconciliation, view selection, and `ListTagPicker` tag metadata/color reconciliation and rollbacks (via `applyTagMetadataToDashboardCaches`, `captureTagMutationSnapshots`, and `rollbackTagMutationCaches`). Scattered raw `queryClient.setQueryData` writes still live in components for `ListAdder` create-list optimistic insert/reconcile/rollback, `ListComponent` create-item rollback and list-delete rollback, `ListItemComponent` delete-item rollback, `ListsContainer` list/item reorder, and `ViewsSidebarPreview` view create/rename/updateFilter/delete/reorder/select follow-up writes. The 1.9.2-1.9.4 list/view/tag mutation extraction arc is complete and the trio-write seam is ready for 1.9.5 outbox wiring.
 
 **Optimistic updates:**
 - Dashboard writes cache first and queues server saves second.
