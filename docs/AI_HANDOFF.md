@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.8-alpha -->
+<!-- Current Version: 1.9.8 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.8-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.8 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.8 - Sync Status UI Surface
 **Next**: 1.9.9 - Offline Conflict Resolution Rules
 
