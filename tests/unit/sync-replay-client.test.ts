@@ -71,6 +71,7 @@ describe("sync replay client", () => {
       failedCount: 0,
       discardedCount: 0,
       missingCount: 0,
+      serverWonCount: 0,
       results: [],
     });
     expect(transport).not.toHaveBeenCalled();
