@@ -24,6 +24,30 @@ export type DashboardKeys = {
   selectedView: QueryKey;
 };
 
+export type DashboardKeySource = {
+  view: {
+    getAll: { queryKey: () => QueryKey };
+    getCurrentViewListsWithItems: { queryKey: () => QueryKey };
+    getViewListsWithItems: { queryKey: (input: { viewId: string }) => QueryKey };
+  };
+};
+
+export function buildDashboardKeys(
+  source: DashboardKeySource,
+  ids: { allListsViewId?: string; selectedViewId?: string }
+): DashboardKeys {
+  const views = source.view.getAll.queryKey();
+  const currentView = source.view.getCurrentViewListsWithItems.queryKey();
+  const allLists = ids.allListsViewId
+    ? source.view.getViewListsWithItems.queryKey({ viewId: ids.allListsViewId })
+    : currentView;
+  const selectedView = ids.selectedViewId
+    ? source.view.getViewListsWithItems.queryKey({ viewId: ids.selectedViewId })
+    : currentView;
+
+  return { views, allLists, currentView, selectedView };
+}
+
 export type PersistedOrderPayload = {
   id: string;
   order: number;

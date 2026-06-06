@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.0",
-    "state":  "stable",
-    "phase":  "1.9.0",
-    "phaseTitle":  "Dashboard Component Responsibility Audit",
-    "nextPhase":  "1.9.1 - Extract Dashboard Query Key Helper",
+    "version":  "1.9.1-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.1",
+    "phaseTitle":  "Extract Dashboard Query Key Helper",
+    "nextPhase":  "1.9.2 - Extract List Mutation Cache Helpers",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
