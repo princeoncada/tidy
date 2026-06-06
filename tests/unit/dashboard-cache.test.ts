@@ -846,9 +846,9 @@ describe("list mutation cache helpers", () => {
       previousSelectedView,
     });
 
-    expect(queryClient.getQueryData(keys.allLists)).toBe(previousAllLists);
+    expect(queryClient.getQueryData(keys.allLists)).toStrictEqual(previousAllLists);
     expect(queryClient.getQueryData(keys.currentView)).toBeUndefined();
-    expect(queryClient.getQueryData(keys.selectedView)).toBe(previousSelectedView);
+    expect(queryClient.getQueryData(keys.selectedView)).toStrictEqual(previousSelectedView);
   });
 });
 
