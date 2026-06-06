@@ -205,6 +205,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.6 - Durable Pending-Write Integration~~ (stable 2026-06-06)
 
+- ~~1.9.7 - Automatic Replay Worker~~ (stable 2026-06-06)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -214,17 +216,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.7 - Automatic Replay Worker (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.7 - Automatic Replay Worker
-- **Status:** In progress | Priority: P1 offline integration
-- **Files:** new app/api/sync route, lib/sync/*, lib/local-db/sync-replay-client.ts, a mounted client hook, tests/
-- **Problem:** replayOutboxOperations exists but nothing runs it, and there is no server endpoint.
-- **Scope:** add a real protected /api/sync route that uses validateSyncEndpointRequest, and mount a replay trigger (on load plus online event) using createHttpSyncReplayTransport; respect user scoping.
-- **Acceptance:** queued operations replay automatically when online and are marked synced/failed; failures do not block the queue; tests cover the route contract and the trigger.
 
 ### 1.9.8 - Sync Status UI Surface
 - **Status:** Open | Priority: P2 offline integration
