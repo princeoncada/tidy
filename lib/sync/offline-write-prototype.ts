@@ -16,7 +16,9 @@ import type {
   LocalOutboxOperationType,
 } from "@/lib/local-db/outbox-schema";
 
-export const OFFLINE_WRITE_PROTOTYPE_ENABLED = false;
+export function isOfflineWriteCaptureEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED === "true";
+}
 
 export type OfflineWriteIntent = {
   userId: string;
@@ -35,6 +37,22 @@ export async function captureOfflineWrite(
   const operation = createOutboxOperation(intent);
   await enqueueOutboxOperation(operation, options.db);
   return operation;
+}
+
+export async function captureDashboardMutationOutbox(
+  intent: OfflineWriteIntent,
+  options: { db?: LocalOutboxRepositoryDatabase } = {},
+): Promise<LocalOutboxOperation | null> {
+  if (!isOfflineWriteCaptureEnabled()) {
+    return null;
+  }
+
+  try {
+    return await captureOfflineWrite(intent, options);
+  } catch (error) {
+    console.error("Failed to capture dashboard mutation outbox operation", error);
+    return null;
+  }
 }
 
 export type CreateHttpSyncReplayTransportArgs = {

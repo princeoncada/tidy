@@ -18,6 +18,7 @@ import {
   rollbackDashboardCaches,
   selectedViewFromCache,
 } from "@/lib/dashboard-cache";
+import { captureDashboardMutationOutbox } from "@/lib/sync/offline-write-prototype";
 import { Skeleton } from "../ui/skeleton";
 
 
@@ -112,6 +113,17 @@ const ListAdder = () => {
         createdList,
         variables.id
       );
+      void captureDashboardMutationOutbox({
+        userId: createdList.userId,
+        entityType: "list",
+        entityClientId: variables.id,
+        entityServerId: createdList.id,
+        operationType: "create",
+        payload: {
+          name: variables.name,
+          viewId: variables.viewId ?? null,
+        },
+      });
       await queryClient.invalidateQueries({ queryKey: dashboardKeys.views });
       await invalidateViewPayloadQueries(queryClient);
     },

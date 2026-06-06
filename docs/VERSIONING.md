@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.4
-- **Current phase:** 1.9.4 - Extract Tag Mutation Cache Helpers
-- **Next phase:** 1.9.5 - Dashboard Mutation to Outbox Wiring
+- **Current version:** 1.9.5-alpha
+- **Current phase:** 1.9.5 - Dashboard Mutation to Outbox Wiring
+- **Next phase:** 1.9.6 - Durable Pending-Write Integration
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.9.5 | alpha | 2026-06-06 | Dashboard Mutation to Outbox Wiring | (in progress) |
 | 1.9.4 | stable | 2026-06-06 | Extract Tag Mutation Cache Helpers | (in progress) |
 | 1.9.3 | stable | 2026-06-06 | Extract View Mutation Cache Helpers | (in progress) |
 | 1.9.2 | stable | 2026-06-05 | Extract List Mutation Cache Helpers | (in progress) |
