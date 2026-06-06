@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.2",
-    "state":  "stable",
-    "phase":  "1.9.2",
-    "phaseTitle":  "Extract List Mutation Cache Helpers",
-    "nextPhase":  "1.9.3 - Extract View Mutation Cache Helpers",
+    "version":  "1.9.3-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.3",
+    "phaseTitle":  "Extract View Mutation Cache Helpers",
+    "nextPhase":  "1.9.4 - Extract Tag Mutation Cache Helpers",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-05"
+    "lastUpdated":  "2026-06-06"
 }
