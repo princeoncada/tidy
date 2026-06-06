@@ -42,18 +42,22 @@ export function useSyncStatusSurface(): SyncStatusSurface | null {
       return;
     }
 
-    void refresh();
-
-    const handleOnline = () => {
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) {
+        return;
+      }
       void refresh();
     };
-    window.addEventListener("online", handleOnline);
-    const intervalId = window.setInterval(() => {
-      void refresh();
-    }, SYNC_STATUS_POLL_INTERVAL_MS);
+
+    const initialReadTimeout = window.setTimeout(run, 0);
+    window.addEventListener("online", run);
+    const intervalId = window.setInterval(run, SYNC_STATUS_POLL_INTERVAL_MS);
 
     return () => {
-      window.removeEventListener("online", handleOnline);
+      cancelled = true;
+      window.clearTimeout(initialReadTimeout);
+      window.removeEventListener("online", run);
       window.clearInterval(intervalId);
     };
   }, [refresh]);
