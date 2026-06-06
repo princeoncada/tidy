@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.5-alpha -->
+<!-- Current Version: 1.9.5 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.5 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.5 - Dashboard Mutation to Outbox Wiring
 **Next**: 1.9.6 - Durable Pending-Write Integration
 
