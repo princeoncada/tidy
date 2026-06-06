@@ -161,3 +161,15 @@ Source-of-Truth Decision), which will supply a real snapshot provider.
 
 **Impact**: The "No conflict policy exists for offline replay" known risk in `docs/AI_HANDOFF.md` is discharged as
 a recorded, tested policy; runtime application of that policy still waits on 1.9.10.
+
+---
+
+## 2026-06-06: Dashboard source of truth is the server; Dexie is a write-side buffer, not a read source (1.9.10)
+
+The dashboard read authority is the server: the tRPC All-Lists payload (view.getViewListsWithItems({ viewId: allListsView.id })), surfaced through the TanStack Query cache and lib/dashboard-cache.ts. Dexie / the local outbox (lib/local-db/*) is a durable WRITE-side buffer for offline-originated mutations only; it is never read as the source of truth for rendering lists, items, tags, or views at runtime. No read change is adopted in 1.9.10.
+
+**Reason**: The entire 1.9.5-1.9.9 integration arc was built on the server as the read authority - All Lists is the canonical payload, custom views project from it, TanStack query keys/cache shapes and optimistic/rollback invariants all key off the server payload, and the 1.9.9 conflict policy is server-authoritative on ties. Making Dexie the read source would require wiring lib/local-db into lib/dashboard-cache.ts, which deliberately breaks the local-db-role-audit.test.ts guard and re-bases every projection and optimistic invariant on local state - a high-risk architectural inversion with no current product driver. Keeping the server authoritative preserves those invariants and keeps Dexie's role (durable offline write queue + replay) exactly as scaffolded.
+
+**Scope and deferral**: This is a recorded decision with no source change. The optional getServerSnapshot provider added to replayOutboxOperations in 1.9.9 remains intentionally unsupplied at runtime: because the server stays the source of truth and the dashboard does not read Dexie, there is no runtime path that applies replayed operations to a local DB and re-reads it. Applying replayed operations server-side (a real /api/sync that mutates the database) and any future local-read mode remain out of scope and would be a new, explicitly-driven phase, not part of this on-ramp.
+
+**Impact**: Discharges the 1.9.10 "Local DB Source-of-Truth Decision" item. The seriesComplete flag in STATE.json stays false by decision (to be flipped in a later explicit step). Dexie/local DB remains the non-source-of-truth local layer characterized by tests/unit/local-db-role-audit.test.ts; that guard stays green and unchanged.
