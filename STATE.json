@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.9-alpha",
-    "state":  "alpha",
+    "version":  "1.9.9",
+    "state":  "stable",
     "phase":  "1.9.9",
     "phaseTitle":  "Offline Conflict Resolution Rules",
     "nextPhase":  "1.9.10 - Local DB Source-of-Truth Decision",
