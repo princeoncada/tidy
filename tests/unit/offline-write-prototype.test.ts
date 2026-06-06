@@ -8,9 +8,13 @@ import {
   createHttpSyncReplayTransport,
   flushOfflineWrites,
   isOfflineWriteCaptureEnabled,
+  reconcilePendingWritesOnLoad,
 } from "@/lib/sync/offline-write-prototype";
 import { isLocalOutboxOperation, type LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
-import type { LocalOutboxRepositoryDatabase } from "@/lib/local-db/outbox-repository";
+import {
+  markOutboxOperationSynced,
+  type LocalOutboxRepositoryDatabase,
+} from "@/lib/local-db/outbox-repository";
 import { validateSyncEndpointRequest } from "@/lib/sync/sync-endpoint-contract";
 
 type StoredOperation = LocalOutboxOperation;
@@ -374,8 +378,111 @@ describe("offline write prototype", () => {
   });
 
   it("does not import the prototype from runtime dashboard entry points", () => {
-    expect(readSource("hooks/useOptimisticSync.ts")).not.toMatch(/offline-write-prototype/);
     expect(readSource("lib/dashboard-cache.ts")).not.toMatch(/offline-write-prototype/);
     expect(readSource("trpc/client.tsx")).not.toMatch(/offline-write-prototype/);
+  });
+
+  it("wires durable pending-write backing into the optimistic sync hook", () => {
+    expect(readSource("hooks/useOptimisticSync.ts")).toMatch(/offline-write-prototype/);
+  });
+
+  it("reconciles pending writes by user in createdAt order and survives reload", async () => {
+    const { db, store } = createFakeOutboxDb();
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "true");
+
+    const userOneLater = await captureOfflineWrite(
+      {
+        userId: "user-1",
+        entityType: "list",
+        entityClientId: "local-list-1",
+        operationType: "create",
+        payload: { name: "Inbox" },
+      },
+      { db },
+    );
+    const userOneEarlier = await captureOfflineWrite(
+      {
+        userId: "user-1",
+        entityType: "list",
+        entityClientId: "local-list-2",
+        operationType: "create",
+        payload: { name: "Today" },
+      },
+      { db },
+    );
+    await captureOfflineWrite(
+      {
+        userId: "user-2",
+        entityType: "list",
+        entityClientId: "local-list-3",
+        operationType: "create",
+        payload: { name: "Other user" },
+      },
+      { db },
+    );
+
+    const earlier = {
+      ...userOneEarlier,
+      createdAt: "2026-05-10T10:00:00.000Z",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+    };
+    const later = {
+      ...userOneLater,
+      createdAt: "2026-05-10T10:00:01.000Z",
+      updatedAt: "2026-05-10T10:00:01.000Z",
+    };
+    store.set(earlier.operationId, earlier);
+    store.set(later.operationId, later);
+
+    const firstLoad = await reconcilePendingWritesOnLoad({ userId: "user-1", db });
+    const simulatedReload = await reconcilePendingWritesOnLoad({ userId: "user-1", db });
+
+    expect(firstLoad).toEqual([earlier, later]);
+    expect(simulatedReload).toEqual([earlier, later]);
+  });
+
+  it("excludes non-pending writes from load reconciliation", async () => {
+    const { db } = createFakeOutboxDb();
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "true");
+
+    const syncedOperation = await captureOfflineWrite(
+      {
+        userId: "user-1",
+        entityType: "list",
+        entityClientId: "local-list-1",
+        operationType: "create",
+        payload: { name: "Inbox" },
+      },
+      { db },
+    );
+    const pendingOperation = await captureOfflineWrite(
+      {
+        userId: "user-1",
+        entityType: "list",
+        entityClientId: "local-list-2",
+        operationType: "create",
+        payload: { name: "Today" },
+      },
+      { db },
+    );
+
+    await markOutboxOperationSynced({
+      operationId: syncedOperation.operationId,
+      db,
+    });
+
+    const reconciled = await reconcilePendingWritesOnLoad({ userId: "user-1", db });
+
+    expect(reconciled).toEqual([pendingOperation]);
+  });
+
+  it("returns no pending writes and performs no read while the gate is off", async () => {
+    const { db } = createFakeOutboxDb();
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "false");
+
+    const reconciled = await reconcilePendingWritesOnLoad({ userId: "user-1", db });
+
+    expect(reconciled).toEqual([]);
+    expect(db.outboxOperations.where).not.toHaveBeenCalled();
   });
 });
