@@ -220,12 +220,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.10 - Local DB Source-of-Truth Decision (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.10 - Local DB Source-of-Truth Decision
-- **Status:** Open | Priority: P1 offline integration
+- **Status:** In progress | Priority: P1 offline integration
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, lib/dashboard-cache.ts if adopted, tests/
 - **Problem:** After durable writes plus replay, whether the dashboard reads from Dexie or server must be decided explicitly.
 - **Scope:** decide and document read-from-Dexie versus read-from-server (or hybrid); implement only if the decision adopts a change.
