@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.6 -->
+<!-- Current Version: 1.9.7-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.6 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.6 - Durable Pending-Write Integration
-**Next**: 1.9.7 - Automatic Replay Worker
+**Current Version**: 1.9.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.7 - Automatic Replay Worker
+**Next**: 1.9.8 - Sync Status UI Surface
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
