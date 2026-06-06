@@ -202,12 +202,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.1 - Extract Dashboard Query Key Helper (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.1 - Extract Dashboard Query Key Helper
-- **Status:** Open | Priority: P1 maintainability
+- **Status:** In progress | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts or new small helper, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListItemComponent.tsx, components/list/ListsContainer.tsx, components/views/ViewsSidebarPreview.tsx, tests/unit/dashboard-cache.test.ts
 - **Problem:** `DashboardKeys` construction is rebuilt inline across `ListsContainer`, `ListAdder`, `ListComponent`, `ListItemComponent`, and `ViewsSidebarPreview`, increasing the risk of key-shape drift before writes are routed through one seam.
 - **Scope:** centralize the existing `views`/`allLists`/`currentView`/`selectedView` key construction into one helper without changing query key shapes or runtime behavior; this is read-path maintainability, not the mutation chokepoint itself.
