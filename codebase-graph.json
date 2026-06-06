@@ -472,6 +472,7 @@
         "./types",
         "lucide-react",
         "@/lib/dashboard-cache",
+        "@/lib/sync/offline-write-prototype",
         "../ui/skeleton"
       ]
     },
@@ -1580,11 +1581,12 @@
       "symbols": [
         "CreateHttpSyncReplayTransportArgs",
         "FlushOfflineWritesArgs",
-        "OFFLINE_WRITE_PROTOTYPE_ENABLED",
         "OfflineWriteIntent",
+        "captureDashboardMutationOutbox",
         "captureOfflineWrite",
         "createHttpSyncReplayTransport",
-        "flushOfflineWrites"
+        "flushOfflineWrites",
+        "isOfflineWriteCaptureEnabled"
       ],
       "imports": [
         "@/lib/local-db/outbox-repository",
@@ -2837,6 +2839,12 @@
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/list/ListAdder.tsx",
