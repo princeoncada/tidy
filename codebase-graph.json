@@ -1286,14 +1286,14 @@
         "PersistedOrderPayload",
         "SavedListTags",
         "ViewCacheItem",
+        "ViewMutationSnapshots",
         "ViewsCache",
         "applyDeletedTagToDashboardCaches",
+        "applySelectedViewPayloadToCurrentView",
         "applyTagChangeToCaches",
-        "applyViewSelection",
-        "applyViewSelectionToViews",
-        "buildDashboardKeys",
-        "buildPersistedItemOrderPayload",
-        "buildPersistedListOrderPayload"
+        "applyViewFilterUpdateToCaches",
+        "applyViewRenameToViewsCache",
+        "applyViewSelection"
       ],
       "imports": [
         "@tanstack/react-query",
