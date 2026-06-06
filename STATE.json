@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.1",
-    "state":  "stable",
-    "phase":  "1.9.1",
-    "phaseTitle":  "Extract Dashboard Query Key Helper",
-    "nextPhase":  "1.9.2 - Extract List Mutation Cache Helpers",
+    "version":  "1.9.2-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.2",
+    "phaseTitle":  "Extract List Mutation Cache Helpers",
+    "nextPhase":  "1.9.3 - Extract View Mutation Cache Helpers",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-05"
 }
