@@ -206,12 +206,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.3 - Extract View Mutation Cache Helpers (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.3 - Extract View Mutation Cache Helpers
-- **Status:** Open | Priority: P1 maintainability
+- **Status:** In progress | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/views/ViewsSidebarPreview.tsx, tests/
 - **Problem:** `ViewsSidebarPreview` owns raw cache writes for view create, rename, updateFilter, delete, reorder, and select follow-up payload handling, so view mutation behavior is concentrated in one large component instead of the dashboard cache seam.
 - **Scope:** route view create/rename/updateFilter/delete/reorder/select cache writes through named `lib/dashboard-cache.ts` helpers that preserve latest-selection guards, view ordering, rollback behavior, and query key shapes.
