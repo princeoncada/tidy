@@ -204,12 +204,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.2 - Extract List Mutation Cache Helpers (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.2 - Extract List Mutation Cache Helpers
-- **Status:** Open | Priority: P1 maintainability
+- **Status:** In progress | Priority: P1 maintainability
 - **Files:** lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListsContainer.tsx, tests/
 - **Problem:** `ListAdder` create-list optimistic insert/reconcile/rollback and `ListComponent` create-item optimistic/onSuccess/rollback still contain raw component cache writes around the existing `lib/dashboard-cache.ts` trio-write seam.
 - **Scope:** route create-list and create-item cache behavior through named `lib/dashboard-cache.ts` helpers that use the existing chokepoint seam, while preserving optimistic behavior, rollback snapshots, projection behavior, and query key shapes.
