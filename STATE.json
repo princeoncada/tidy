@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.5-alpha",
-    "state":  "alpha",
+    "version":  "1.9.5",
+    "state":  "stable",
     "phase":  "1.9.5",
     "phaseTitle":  "Dashboard Mutation to Outbox Wiring",
     "nextPhase":  "1.9.6 - Durable Pending-Write Integration",
