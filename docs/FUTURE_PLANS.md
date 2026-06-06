@@ -212,12 +212,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.6 - Durable Pending-Write Integration (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.6 - Durable Pending-Write Integration
-- **Status:** Open | Priority: P1 offline integration
+- **Status:** In progress | Priority: P1 offline integration
 - **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, lib/dashboard-cache.ts, tests/
 - **Problem:** In-memory optimistic queues lose pending writes on refresh or crash (accepted-temporary since 1.7.3).
 - **Scope:** back pending writes with the durable outbox so unsynced work survives reload, without changing optimistic UX; reconcile on load.
