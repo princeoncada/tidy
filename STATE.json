@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.1-alpha",
-    "state":  "alpha",
+    "version":  "1.9.1",
+    "state":  "stable",
     "phase":  "1.9.1",
     "phaseTitle":  "Extract Dashboard Query Key Helper",
     "nextPhase":  "1.9.2 - Extract List Mutation Cache Helpers",
