@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.8",
-    "state":  "stable",
-    "phase":  "1.9.8",
-    "phaseTitle":  "Sync Status UI Surface",
-    "nextPhase":  "1.9.9 - Offline Conflict Resolution Rules",
+    "version":  "1.9.9-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.9",
+    "phaseTitle":  "Offline Conflict Resolution Rules",
+    "nextPhase":  "1.9.10 - Local DB Source-of-Truth Decision",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-06"
 }

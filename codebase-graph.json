@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.8",
+  "version": "1.9.9-alpha",
   "generatedAt": "2026-06-06",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1535,12 +1535,14 @@
         "SyncReplayResult",
         "SyncReplayTransport",
         "SyncReplayTransportRequest",
+        "SyncServerSnapshotProvider",
         "replayOutboxOperations"
       ],
       "imports": [
         "./outbox-coalescing",
         "./outbox-repository",
-        "./outbox-schema"
+        "./outbox-schema",
+        "@/lib/sync/conflict-resolution"
       ]
     },
     {
@@ -1636,6 +1638,19 @@
       "imports": [
         "@supabase/ssr",
         "next/headers"
+      ]
+    },
+    {
+      "path": "lib/sync/conflict-resolution.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "SyncConflictResolution",
+        "SyncServerEntitySnapshot",
+        "resolveOutboxOperationConflict"
+      ],
+      "imports": [
+        "@/lib/local-db/outbox-schema"
       ]
     },
     {
@@ -2145,6 +2160,16 @@
       ]
     },
     {
+      "path": "tests/unit/conflict-resolution.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/conflict-resolution"
+      ]
+    },
+    {
       "path": "tests/unit/dashboard-cache.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2326,6 +2351,17 @@
     },
     {
       "path": "tests/unit/sync-replay-client.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/local-db/sync-replay-client",
+        "@/lib/local-db/outbox-schema"
+      ]
+    },
+    {
+      "path": "tests/unit/sync-replay-conflict.test.ts",
       "kind": "test",
       "extension": ".ts",
       "symbols": [],
@@ -3826,6 +3862,12 @@
       "import": "./outbox-schema"
     },
     {
+      "from": "lib/local-db/sync-replay-client.ts",
+      "to": "lib/sync/conflict-resolution.ts",
+      "type": "imports",
+      "import": "@/lib/sync/conflict-resolution"
+    },
+    {
       "from": "lib/local-db/sync-status.ts",
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
@@ -3854,6 +3896,12 @@
       "to": "lib/supabase/server.ts",
       "type": "imports",
       "import": "@/lib/supabase/server"
+    },
+    {
+      "from": "lib/sync/conflict-resolution.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
     },
     {
       "from": "lib/sync/offline-write-prototype.ts",
@@ -4096,6 +4144,12 @@
       "import": "./utils/seed"
     },
     {
+      "from": "tests/unit/conflict-resolution.test.ts",
+      "to": "lib/sync/conflict-resolution.ts",
+      "type": "imports",
+      "import": "@/lib/sync/conflict-resolution"
+    },
+    {
       "from": "tests/unit/dashboard-cache.test.ts",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
@@ -4301,6 +4355,18 @@
     },
     {
       "from": "tests/unit/sync-replay-client.test.ts",
+      "to": "lib/local-db/sync-replay-client.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/sync-replay-client"
+    },
+    {
+      "from": "tests/unit/sync-replay-conflict.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/sync-replay-conflict.test.ts",
       "to": "lib/local-db/sync-replay-client.ts",
       "type": "imports",
       "import": "@/lib/local-db/sync-replay-client"

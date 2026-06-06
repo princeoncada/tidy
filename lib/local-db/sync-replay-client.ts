@@ -9,6 +9,10 @@ import {
   type LocalOutboxRepositoryDatabase,
 } from "./outbox-repository";
 import type { LocalOutboxOperation } from "./outbox-schema";
+import {
+  resolveOutboxOperationConflict,
+  type SyncServerEntitySnapshot,
+} from "@/lib/sync/conflict-resolution";
 
 export type SyncReplayTransportRequest = {
   operation: LocalOutboxOperation;
@@ -19,7 +23,7 @@ export type SyncReplayTransport = (request: SyncReplayTransportRequest) => Promi
 
 export type SyncReplayOperationResult = {
   operationId: string;
-  status: "synced" | "failed" | "discarded" | "missing";
+  status: "synced" | "failed" | "discarded" | "missing" | "resolved-server-wins";
   errorMessage: string | null;
 };
 
@@ -29,6 +33,7 @@ export type SyncReplayResult = {
   failedCount: number;
   discardedCount: number;
   missingCount: number;
+  serverWonCount: number;
   results: SyncReplayOperationResult[];
 };
 
@@ -44,12 +49,17 @@ export type SyncReplayRepository = {
   incrementRetryCount(args: { operationId: string }): Promise<LocalOutboxOperation | null>;
 };
 
+export type SyncServerSnapshotProvider = (
+  operation: LocalOutboxOperation,
+) => Promise<SyncServerEntitySnapshot | null>;
+
 export type ReplayOutboxOperationsArgs = {
   userId: string;
   transport: SyncReplayTransport;
   limit?: number;
   db?: LocalOutboxRepositoryDatabase;
   repository?: SyncReplayRepository;
+  getServerSnapshot?: SyncServerSnapshotProvider;
 };
 
 function getErrorMessage(error: unknown): string {
@@ -84,6 +94,7 @@ function summarizeReplayResults(results: SyncReplayOperationResult[]): SyncRepla
     failedCount: results.filter((result) => result.status === "failed").length,
     discardedCount: results.filter((result) => result.status === "discarded").length,
     missingCount: results.filter((result) => result.status === "missing").length,
+    serverWonCount: results.filter((result) => result.status === "resolved-server-wins").length,
     results,
   };
 }
@@ -94,6 +105,7 @@ export async function replayOutboxOperations({
   limit,
   db,
   repository = createDefaultSyncReplayRepository(db),
+  getServerSnapshot,
 }: ReplayOutboxOperationsArgs): Promise<SyncReplayResult> {
   const pendingOperations = await repository.getPendingOutboxOperations({ userId, limit });
   const { operations, discardedOperationIds } = coalesceOutboxOperations(pendingOperations);
@@ -110,6 +122,26 @@ export async function replayOutboxOperations({
   }
 
   for (const operation of operations) {
+    if (getServerSnapshot) {
+      const serverSnapshot = await getServerSnapshot(operation);
+      const resolution = resolveOutboxOperationConflict({ operation, serverSnapshot });
+
+      if (resolution.resolution === "skip") {
+        const resolvedOperation = await repository.markOutboxOperationDiscarded({
+          operationId: operation.operationId,
+        });
+
+        results.push({
+          operationId: operation.operationId,
+          status: resolvedOperation ? "resolved-server-wins" : "missing",
+          errorMessage: resolvedOperation
+            ? null
+            : "Outbox operation was not found while resolving a server-wins conflict.",
+        });
+        continue;
+      }
+    }
+
     const syncingOperation = await repository.markOutboxOperationSyncing({
       operationId: operation.operationId,
     });
