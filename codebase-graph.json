@@ -232,6 +232,18 @@
       ]
     },
     {
+      "path": "app/api/sync/route.ts",
+      "kind": "api_route",
+      "extension": ".ts",
+      "symbols": [
+        "POST"
+      ],
+      "imports": [
+        "@/lib/supabase/server",
+        "@/lib/sync/sync-endpoint-contract"
+      ]
+    },
+    {
       "path": "app/api/trpc/[trpc]/route.ts",
       "kind": "api_route",
       "extension": ".ts",
@@ -651,6 +663,17 @@
       "imports": [
         "react",
         "@/lib/utils"
+      ]
+    },
+    {
+      "path": "components/OfflineReplayTrigger.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "OfflineReplayTrigger"
+      ],
+      "imports": [
+        "@/hooks/use-offline-replay-trigger"
       ]
     },
     {
@@ -1243,6 +1266,19 @@
       "imports": [
         "@/lib/local-db/metadata-repository",
         "react"
+      ]
+    },
+    {
+      "path": "hooks/use-offline-replay-trigger.ts",
+      "kind": "hook",
+      "extension": ".ts",
+      "symbols": [
+        "useOfflineReplayTrigger"
+      ],
+      "imports": [
+        "react",
+        "@/lib/supabase/client",
+        "@/lib/sync/offline-write-prototype"
       ]
     },
     {
@@ -2250,6 +2286,17 @@
       ]
     },
     {
+      "path": "tests/unit/sync-endpoint-route.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/local-db/outbox-schema",
+        "@/app/api/sync/route"
+      ]
+    },
+    {
       "path": "tests/unit/sync-replay-client.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2294,6 +2341,18 @@
       ]
     },
     {
+      "path": "tests/unit/use-offline-replay-trigger.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "react",
+        "vitest",
+        "@/hooks/use-offline-replay-trigger"
+      ]
+    },
+    {
       "path": "tests/unit/view-helpers.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2321,7 +2380,8 @@
         "superjson",
         "@/lib/utils",
         "@/components/AuthSync",
-        "@/hooks/use-local-db-health-check"
+        "@/hooks/use-local-db-health-check",
+        "@/components/OfflineReplayTrigger"
       ]
     },
     {
@@ -2529,6 +2589,18 @@
       "to": "lib/supabase/auth-confirm.ts",
       "type": "imports",
       "import": "@/lib/supabase/auth-confirm"
+    },
+    {
+      "from": "app/api/sync/route.ts",
+      "to": "lib/supabase/server.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/server"
+    },
+    {
+      "from": "app/api/sync/route.ts",
+      "to": "lib/sync/sync-endpoint-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-endpoint-contract"
     },
     {
       "from": "app/api/trpc/[trpc]/route.ts",
@@ -3203,6 +3275,12 @@
       "import": "@/lib/utils"
     },
     {
+      "from": "components/OfflineReplayTrigger.tsx",
+      "to": "hooks/use-offline-replay-trigger.ts",
+      "type": "imports",
+      "import": "@/hooks/use-offline-replay-trigger"
+    },
+    {
       "from": "components/ui/avatar.tsx",
       "to": "lib/utils.ts",
       "type": "imports",
@@ -3519,6 +3597,18 @@
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
       "import": "@/lib/local-db/metadata-repository"
+    },
+    {
+      "from": "hooks/use-offline-replay-trigger.ts",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "hooks/use-offline-replay-trigger.ts",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "hooks/useOptimisticSync.ts",
@@ -4091,6 +4181,18 @@
       "import": "@/lib/sync/sync-endpoint-contract"
     },
     {
+      "from": "tests/unit/sync-endpoint-route.test.ts",
+      "to": "app/api/sync/route.ts",
+      "type": "imports",
+      "import": "@/app/api/sync/route"
+    },
+    {
+      "from": "tests/unit/sync-endpoint-route.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
       "from": "tests/unit/sync-replay-client.test.ts",
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
@@ -4139,6 +4241,12 @@
       "import": "@/lib/local-db/sync-status"
     },
     {
+      "from": "tests/unit/use-offline-replay-trigger.test.ts",
+      "to": "hooks/use-offline-replay-trigger.ts",
+      "type": "imports",
+      "import": "@/hooks/use-offline-replay-trigger"
+    },
+    {
       "from": "tests/unit/view-helpers.test.ts",
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
@@ -4149,6 +4257,12 @@
       "to": "components/AuthSync.tsx",
       "type": "imports",
       "import": "@/components/AuthSync"
+    },
+    {
+      "from": "trpc/client.tsx",
+      "to": "components/OfflineReplayTrigger.tsx",
+      "type": "imports",
+      "import": "@/components/OfflineReplayTrigger"
     },
     {
       "from": "trpc/client.tsx",
