@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.3-alpha -->
+<!-- Current Version: 1.9.3 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.3 - Extract View Mutation Cache Helpers
 **Next**: 1.9.4 - Extract Tag Mutation Cache Helpers
 
