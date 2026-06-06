@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.10-alpha",
-    "state":  "alpha",
+    "version":  "1.9.10",
+    "state":  "stable",
     "phase":  "1.9.10",
     "phaseTitle":  "Local DB Source-of-Truth Decision",
     "nextPhase":  "1.10.0 - Deploy Env Documentation",
