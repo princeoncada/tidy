@@ -210,12 +210,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.5 - Dashboard Mutation to Outbox Wiring (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.5 - Dashboard Mutation to Outbox Wiring
-- **Status:** Open | Priority: P1 offline integration
+- **Status:** In progress | Priority: P1 offline integration
 - **Files:** lib/dashboard-cache.ts, lib/sync/offline-write-prototype.ts, components/list/*, components/views/ViewsSidebarPreview.tsx, tests/
 - **Problem:** No dashboard mutation creates an outbox operation; offline replay has nothing to replay.
 - **Scope:** route committed dashboard mutations through the 1.9.2-1.9.4 chokepoint to also capture an outbox operation, behind a runtime feature flag (promote OFFLINE_WRITE_PROTOTYPE_ENABLED to a real gate); keep server/TanStack as source of truth.
