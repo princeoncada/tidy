@@ -203,6 +203,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.5 - Dashboard Mutation to Outbox Wiring~~ (stable 2026-06-06)
 
+- ~~1.9.6 - Durable Pending-Write Integration~~ (stable 2026-06-06)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -212,17 +214,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.6 - Durable Pending-Write Integration (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.6 - Durable Pending-Write Integration
-- **Status:** In progress | Priority: P1 offline integration
-- **Files:** hooks/useOptimisticSync.ts, lib/local-db/*, lib/dashboard-cache.ts, tests/
-- **Problem:** In-memory optimistic queues lose pending writes on refresh or crash (accepted-temporary since 1.7.3).
-- **Scope:** back pending writes with the durable outbox so unsynced work survives reload, without changing optimistic UX; reconcile on load.
-- **Acceptance:** a pending write survives a simulated reload and replays; no regression to optimistic/rollback behavior; tests cover persistence and reload reconciliation.
 
 ### 1.9.7 - Automatic Replay Worker
 - **Status:** Open | Priority: P1 offline integration
