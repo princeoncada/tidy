@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.5 -->
+<!-- Current Version: 1.9.6-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.5 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.5 - Dashboard Mutation to Outbox Wiring
-**Next**: 1.9.6 - Durable Pending-Write Integration
+**Current Version**: 1.9.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.6 - Durable Pending-Write Integration
+**Next**: 1.9.7 - Automatic Replay Worker
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -71,7 +71,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Projected views apply per-view `ViewList.order` with list order fallback and deterministic tie-breaking.
 - Latest-selected-view guards prevent stale view fetches or rollbacks from repainting `currentView`.
 - Created-list reconciliation preserves optimistic child items, tags, and order when the saved list replaces an optimistic list.
-- The single dashboard-mutation chokepoint is the trio-write seam in `lib/dashboard-cache.ts`: the private `setDashboardQueryDataOnce` used by `updateListInDashboardCaches`, `removeListFromDashboardCaches`, and the other snapshot helpers to fan one logical mutation across `allLists`, `currentView`, and `selectedView`; the single-fan-out contract is characterized in `tests/unit/dashboard-cache.test.ts`. 1.9.5 attached the first outbox consumer at the COMMIT (`onSuccess`) site of the create-list mutation in `ListAdder` via `captureDashboardMutationOutbox`, gated by `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` (`isOfflineWriteCaptureEnabled`). The gate defaults OFF, so default behavior is unchanged; capture lives in `lib/sync/offline-write-prototype.ts` (never imported by `lib/dashboard-cache.ts`, `hooks/useOptimisticSync.ts`, or `trpc/client.tsx`), is fire-and-forget, and swallows its own errors. List-item create capture is deferred because `ListItem` has no `userId`; durable persistence (1.9.6) and replay (1.9.7) are not wired yet.
+- The single dashboard-mutation chokepoint is the trio-write seam in `lib/dashboard-cache.ts`: the private `setDashboardQueryDataOnce` used by `updateListInDashboardCaches`, `removeListFromDashboardCaches`, and the other snapshot helpers to fan one logical mutation across `allLists`, `currentView`, and `selectedView`; the single-fan-out contract is characterized in `tests/unit/dashboard-cache.test.ts`. 1.9.5 attached the first outbox consumer at the COMMIT (`onSuccess`) site of the create-list mutation in `ListAdder` via `captureDashboardMutationOutbox`, gated by `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` (`isOfflineWriteCaptureEnabled`). The gate defaults OFF, so default behavior is unchanged; capture lives in `lib/sync/offline-write-prototype.ts` (still never imported by `lib/dashboard-cache.ts` or `trpc/client.tsx`), is fire-and-forget, and swallows its own errors. List-item create capture is deferred because `ListItem` has no `userId`; replay (1.9.7) is not wired yet.
 - Routed dashboard writes already go through `lib/dashboard-cache.ts` for list rename, list delete removal, list/item rename and completion, most item create paths, tag add/remove/delete affected-view reconciliation, view selection, and `ListTagPicker` tag metadata/color reconciliation and rollbacks (via `applyTagMetadataToDashboardCaches`, `captureTagMutationSnapshots`, and `rollbackTagMutationCaches`). Scattered raw `queryClient.setQueryData` writes still live in components for `ListAdder` create-list optimistic insert/reconcile/rollback, `ListComponent` create-item rollback and list-delete rollback, `ListItemComponent` delete-item rollback, `ListsContainer` list/item reorder, and `ViewsSidebarPreview` view create/rename/updateFilter/delete/reorder/select follow-up writes. The 1.9.2-1.9.4 list/view/tag mutation extraction arc is complete and the trio-write seam is ready for 1.9.5 outbox wiring.
 
 **Optimistic updates:**
@@ -84,6 +84,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Failed non-CancelledError queue tasks no longer cancel their whole optimistic scope as of 1.7.1. A failed task runs its rollback only when it has not been explicitly canceled or superseded by later started same-scope work, then the same-scope chain continues.
 - Active optimistic scopes include `views`, `list-tags`, `list-order`, `item-order`, `view-selection`, `list-edits`, and `item-edits`.
 - Optimistic markers are `isOptimistic: true` on list/item shapes and `userId: "optimistic"` on view shapes.
+- 1.9.6 added gated durable backing for pending optimistic writes: `useOptimisticSync.enqueue` accepts an optional `durable` ({ intent, db? }) that records a durable outbox operation via `captureDashboardMutationOutbox` (gated by `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED`, fire-and-forget, never awaited before the optimistic task), then marks it synced on success or failed on rollback. `reconcilePendingWritesOnLoad` (in `lib/sync/offline-write-prototype.ts`) reads pending durable ops for reload reconciliation. `hooks/useOptimisticSync.ts` therefore now imports `offline-write-prototype` under the gate and has LEFT the isolation-guard list; `lib/dashboard-cache.ts` and `trpc/client.tsx` remain guarded. No new capture call-sites and no replay were added (replay is 1.9.7); default behavior is unchanged when the gate is off.
 - 1.4.27 fixed inline rename display reconciliation by syncing `ListInlineEdit` display/edit state from authoritative props only while not editing; optimistic instant display on save remains intact.
 - 1.4.27 kept delete product behavior unchanged and hardened delete/reload E2E coverage by waiting for successful delete mutations instead of broadening the console gate.
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.5",
+  "version": "1.9.6-alpha",
   "generatedAt": "2026-06-06",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1250,12 +1250,15 @@
       "kind": "hook",
       "extension": ".ts",
       "symbols": [
+        "DurablePendingWrite",
         "EnqueueOptions",
         "OptimisticScope",
         "useOptimisticSync"
       ],
       "imports": [
-        "react"
+        "react",
+        "@/lib/sync/offline-write-prototype",
+        "@/lib/local-db/outbox-repository"
       ]
     },
     {
@@ -1582,11 +1585,13 @@
         "CreateHttpSyncReplayTransportArgs",
         "FlushOfflineWritesArgs",
         "OfflineWriteIntent",
+        "ReconcilePendingWritesArgs",
         "captureDashboardMutationOutbox",
         "captureOfflineWrite",
         "createHttpSyncReplayTransport",
         "flushOfflineWrites",
-        "isOfflineWriteCaptureEnabled"
+        "isOfflineWriteCaptureEnabled",
+        "reconcilePendingWritesOnLoad"
       ],
       "imports": [
         "@/lib/local-db/outbox-repository",
@@ -2158,6 +2163,21 @@
         "react",
         "vitest",
         "@/lib/dashboard-cache",
+        "@/hooks/useOptimisticSync"
+      ]
+    },
+    {
+      "path": "tests/unit/optimistic-sync-durable.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "react",
+        "vitest",
+        "@/lib/local-db/outbox-repository",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/offline-write-prototype",
         "@/hooks/useOptimisticSync"
       ]
     },
@@ -3501,6 +3521,18 @@
       "import": "@/lib/local-db/metadata-repository"
     },
     {
+      "from": "hooks/useOptimisticSync.ts",
+      "to": "lib/local-db/outbox-repository.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-repository"
+    },
+    {
+      "from": "hooks/useOptimisticSync.ts",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
+    },
+    {
       "from": "hooks/useUser.ts",
       "to": "lib/supabase/client.ts",
       "type": "imports",
@@ -3961,6 +3993,30 @@
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "tests/unit/optimistic-sync-durable.test.ts",
+      "to": "hooks/useOptimisticSync.ts",
+      "type": "imports",
+      "import": "@/hooks/useOptimisticSync"
+    },
+    {
+      "from": "tests/unit/optimistic-sync-durable.test.ts",
+      "to": "lib/local-db/outbox-repository.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-repository"
+    },
+    {
+      "from": "tests/unit/optimistic-sync-durable.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/optimistic-sync-durable.test.ts",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "tests/unit/outbox-coalescing.test.ts",
