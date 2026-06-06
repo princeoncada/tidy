@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.2-alpha",
-    "state":  "alpha",
+    "version":  "1.9.2",
+    "state":  "stable",
     "phase":  "1.9.2",
     "phaseTitle":  "Extract List Mutation Cache Helpers",
     "nextPhase":  "1.9.3 - Extract View Mutation Cache Helpers",
