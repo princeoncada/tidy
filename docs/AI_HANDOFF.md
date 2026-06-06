@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.7 -->
+<!-- Current Version: 1.9.8-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.7 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.7 - Automatic Replay Worker
-**Next**: 1.9.8 - Sync Status UI Surface
+**Current Version**: 1.9.8-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.8 - Sync Status UI Surface
+**Next**: 1.9.9 - Offline Conflict Resolution Rules
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -86,6 +86,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Optimistic markers are `isOptimistic: true` on list/item shapes and `userId: "optimistic"` on view shapes.
 - 1.9.6 added gated durable backing for pending optimistic writes: `useOptimisticSync.enqueue` accepts an optional `durable` ({ intent, db? }) that records a durable outbox operation via `captureDashboardMutationOutbox` (gated by `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED`, fire-and-forget, never awaited before the optimistic task), then marks it synced on success or failed on rollback. `reconcilePendingWritesOnLoad` (in `lib/sync/offline-write-prototype.ts`) reads pending durable ops for reload reconciliation. `hooks/useOptimisticSync.ts` therefore now imports `offline-write-prototype` under the gate and has LEFT the isolation-guard list; `lib/dashboard-cache.ts` and `trpc/client.tsx` remain guarded. No new capture call-sites and no replay were added (replay is 1.9.7); default behavior is unchanged when the gate is off.
 - 1.9.7 added the automatic replay worker: a protected POST `app/api/sync/route.ts` that re-derives the Supabase user server-side and runs `validateSyncEndpointRequest` (401 unauthenticated, 422 on validation errors, 200 on accept); it validates and acknowledges only and does NOT apply operations to the database (server-side application is deferred to 1.9.9 conflict resolution and 1.9.10 source-of-truth). The replay trigger `hooks/use-offline-replay-trigger.ts`, mounted via `components/OfflineReplayTrigger.tsx` in `trpc/client.tsx`, runs `reconcilePendingWritesOnLoad` then `flushOfflineWrites` on load and on the `online` event, gated by `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED`; failures are swallowed and never block the queue. `trpc/client.tsx` imports only the component, so the local-db-role-audit and offline-write-prototype isolation guards stay green. No new durable capture call-sites were added.
+- 1.9.8 adds a gated, read-only Sync Status surface: `components/SyncStatusBadge.tsx` (mounted in the dashboard header) reads the local outbox via the gated `readSyncStatusSurfaceForUser` bridge and the pure `createSyncStatusSurface` helper; it is inert when `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` is off, is not wired through TanStack Query, and is deliberately kept out of `trpc/client.tsx` and `lib/dashboard-cache.ts` so the isolation guards stay green.
 - 1.4.27 fixed inline rename display reconciliation by syncing `ListInlineEdit` display/edit state from authoritative props only while not editing; optimistic instant display on save remains intact.
 - 1.4.27 kept delete product behavior unchanged and hardened delete/reload E2E coverage by waiting for successful delete mutations instead of broadening the console gate.
 
