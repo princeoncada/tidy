@@ -4,6 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import {
   applyDeletedTagToDashboardCaches,
   applyTagChangeToCaches,
+  buildDashboardKeys,
   buildPersistedItemOrderPayload,
   buildPersistedListOrderPayload,
   buildPersistedViewOrderPayload,
@@ -73,6 +74,53 @@ const view = (overrides = {}) => ({
   ],
   viewLists: [],
   ...overrides,
+});
+
+describe("buildDashboardKeys", () => {
+  const source = {
+    view: {
+      getAll: { queryKey: () => ["view", "getAll"] },
+      getCurrentViewListsWithItems: { queryKey: () => ["view", "current"] },
+      getViewListsWithItems: {
+        queryKey: ({ viewId }: { viewId: string }) => ["view", "byId", viewId],
+      },
+    },
+  };
+
+  it("builds all four keys when both view ids are present", () => {
+    const keys = buildDashboardKeys(source, {
+      allListsViewId: "all-1",
+      selectedViewId: "sel-1",
+    });
+
+    expect(keys).toEqual({
+      views: ["view", "getAll"],
+      currentView: ["view", "current"],
+      allLists: ["view", "byId", "all-1"],
+      selectedView: ["view", "byId", "sel-1"],
+    });
+  });
+
+  it("falls back allLists to the currentView key when allListsViewId is missing", () => {
+    const keys = buildDashboardKeys(source, { selectedViewId: "sel-1" });
+
+    expect(keys.allLists).toEqual(keys.currentView);
+    expect(keys.selectedView).toEqual(["view", "byId", "sel-1"]);
+  });
+
+  it("falls back selectedView to the currentView key when selectedViewId is missing", () => {
+    const keys = buildDashboardKeys(source, { allListsViewId: "all-1" });
+
+    expect(keys.selectedView).toEqual(keys.currentView);
+    expect(keys.allLists).toEqual(["view", "byId", "all-1"]);
+  });
+
+  it("falls both fan-out keys back to currentView when no ids are given", () => {
+    const keys = buildDashboardKeys(source, {});
+
+    expect(keys.allLists).toEqual(keys.currentView);
+    expect(keys.selectedView).toEqual(keys.currentView);
+  });
 });
 
 describe("dashboard cache projection", () => {
