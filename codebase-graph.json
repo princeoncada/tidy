@@ -1276,6 +1276,7 @@
       "symbols": [
         "AffectedTagView",
         "CurrentViewSnapshot",
+        "DashboardKeySource",
         "DashboardKeys",
         "DashboardList",
         "DashboardSnapshot",
@@ -1289,11 +1290,10 @@
         "applyTagChangeToCaches",
         "applyViewSelection",
         "applyViewSelectionToViews",
+        "buildDashboardKeys",
         "buildPersistedItemOrderPayload",
         "buildPersistedListOrderPayload",
-        "buildPersistedViewOrderPayload",
-        "canApplySelectedViewPayload",
-        "canRollbackViewSelection"
+        "buildPersistedViewOrderPayload"
       ],
       "imports": [
         "@tanstack/react-query",
