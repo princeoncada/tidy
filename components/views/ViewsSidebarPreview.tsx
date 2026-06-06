@@ -42,14 +42,23 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOptimisticSync } from "@/hooks/useOptimisticSync";
 import {
+  applySelectedViewPayloadToCurrentView,
+  applyViewFilterUpdateToCaches,
+  applyViewRenameToViewsCache,
   applyViewSelection,
   buildDashboardKeys,
   buildPersistedViewOrderPayload,
-  canApplySelectedViewPayload,
-  canRollbackViewSelection,
+  captureViewMutationSnapshots,
+  commitViewOrderToViewsCache,
   DashboardSnapshot,
+  insertOptimisticViewIntoDashboardCaches,
   listMatchesView,
-  projectView,
+  reconcileCreatedViewInViewsCache,
+  reconcileUpdatedViewInViewsCache,
+  removeViewFromDashboardCaches,
+  rollbackScope,
+  rollbackSelectedView,
+  rollbackViewMutationCaches,
   ViewsCache,
 } from "@/lib/dashboard-cache";
 import {
@@ -451,44 +460,35 @@ export default function ViewsSidebarPreview() {
 
   const createMutation = useMutation(trpc.view.create.mutationOptions({
     async onMutate(variables) {
-      const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
-      const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
+      const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
       const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
       const optimisticView = buildOptimisticView({
         id: variables.id,
         name: variables.name,
         tagIds: variables.tagIds ?? [],
-        views: previousViews,
+        views: snapshots.previousViews,
         tags,
         allListsSnapshot,
       });
 
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews = []) => [
+      insertOptimisticViewIntoDashboardCaches(
+        queryClient,
+        dashboardKeys,
         optimisticView,
-        ...currentViews.map((view) => ({ ...view, isDefault: false })),
-      ].sort((a, b) => a.order - b.order));
-      queryClient.setQueryData(
-        currentViewQueryKey,
-        projectView(optimisticView, allListsSnapshot)
+        allListsSnapshot
       );
 
-      return { previousViews, previousCurrentView };
+      return snapshots;
     },
     async onSuccess(createdView) {
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews = []) =>
-        currentViews.map((view) => view.id === createdView.id ? {
-          ...view,
-          ...createdView,
-        } : view)
-      );
+      reconcileCreatedViewInViewsCache(queryClient, dashboardKeys, createdView);
       const createdViewPayload = await queryClient.fetchQuery(
         trpc.view.getViewListsWithItems.queryOptions({ viewId: createdView.id })
       );
       queryClient.setQueryData(currentViewQueryKey, createdViewPayload);
     },
     onError(error, _variables, context) {
-      queryClient.setQueryData(viewsQueryKey, context?.previousViews);
-      queryClient.setQueryData(currentViewQueryKey, context?.previousCurrentView);
+      if (context) rollbackViewMutationCaches(queryClient, dashboardKeys, context);
       toast.error(error.message || "View could not be created.");
     },
   }));
@@ -496,62 +496,30 @@ export default function ViewsSidebarPreview() {
   const renameMutation = useMutation(trpc.view.rename.mutationOptions({
     async onMutate(variables) {
       const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
-        currentViews?.map((view) =>
-          view.id === variables.id ? { ...view, name: variables.name } : view
-        )
-      );
+      applyViewRenameToViewsCache(queryClient, dashboardKeys, variables.id, variables.name);
       return { previousViews };
     },
     onError(_error, _variables, context) {
-      queryClient.setQueryData(viewsQueryKey, context?.previousViews);
+      rollbackScope(queryClient, viewsQueryKey, context?.previousViews);
     },
   }));
   const updateFilterMutation = useMutation(trpc.view.updateFilter.mutationOptions({
     async onMutate(variables) {
-      const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
-      const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
+      const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
       const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
       const selectedTagIds = variables.tagIds ?? [];
       const selectedTags = tags.filter((tag) => selectedTagIds.includes(tag.id));
-      let editedView: ViewItem | undefined;
 
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
-        currentViews?.map((view) => {
-          if (view.id !== variables.id) return view;
+      applyViewFilterUpdateToCaches(queryClient, dashboardKeys, {
+        viewId: variables.id,
+        selectedTags,
+        allListsSnapshot,
+      });
 
-          editedView = {
-            ...view,
-            viewTags: selectedTags.map((tag) => ({
-              viewId: variables.id,
-              tagId: tag.id,
-              tag,
-            })),
-          };
-
-          editedView.viewLists = (allListsSnapshot?.lists ?? [])
-            .filter((list) => editedView ? listMatchesView(list, editedView) : false)
-            .map((list) => ({ listId: list.id, order: list.order }));
-
-          return editedView;
-        })
-      );
-
-      if (editedView?.isDefault) {
-        queryClient.setQueryData(
-          currentViewQueryKey,
-          projectView(editedView, allListsSnapshot)
-        );
-      }
-
-      return { previousViews, previousCurrentView };
+      return snapshots;
     },
     async onSuccess(updatedView) {
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
-        currentViews?.map((view) =>
-          view.id === updatedView.id ? { ...view, ...updatedView } : view
-        )
-      );
+      reconcileUpdatedViewInViewsCache(queryClient, dashboardKeys, updatedView);
       if (updatedView.isDefault) {
         const updatedViewPayload = await queryClient.fetchQuery(
           trpc.view.getViewListsWithItems.queryOptions({ viewId: updatedView.id })
@@ -560,40 +528,21 @@ export default function ViewsSidebarPreview() {
       }
     },
     onError(_error, _variables, context) {
-      queryClient.setQueryData(viewsQueryKey, context?.previousViews);
-      queryClient.setQueryData(currentViewQueryKey, context?.previousCurrentView);
+      if (context) rollbackViewMutationCaches(queryClient, dashboardKeys, context);
     },
   }));
 
   const deleteMutation = useMutation(trpc.view.delete.mutationOptions({
     async onMutate({ id }) {
-      const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
-      const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
+      const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
       const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
-      const deletedView = previousViews?.find((view) => view.id === id);
-      const fallbackView = previousViews?.find((view) => view.type === "ALL_LISTS");
 
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
-        currentViews
-          ?.filter((view) => view.id !== id)
-          .map((view) => ({
-            ...view,
-            isDefault: deletedView?.isDefault ? view.id === fallbackView?.id : view.isDefault,
-          }))
-      );
+      removeViewFromDashboardCaches(queryClient, dashboardKeys, id, allListsSnapshot);
 
-      if (deletedView?.isDefault && fallbackView) {
-        queryClient.setQueryData(
-          currentViewQueryKey,
-          projectView(fallbackView, allListsSnapshot)
-        );
-      }
-
-      return { previousViews, previousCurrentView };
+      return snapshots;
     },
     onError(_error, _variables, context) {
-      queryClient.setQueryData(viewsQueryKey, context?.previousViews);
-      queryClient.setQueryData(currentViewQueryKey, context?.previousCurrentView);
+      if (context) rollbackViewMutationCaches(queryClient, dashboardKeys, context);
     },
   }));
 
@@ -626,12 +575,9 @@ export default function ViewsSidebarPreview() {
   const commitViewOrder = useCallback((nextViews: ViewItem[]) => {
     // Only save the final dropped order. Older drag positions do not matter.
     measureCacheWrite("views.drop.order", nextViews);
-    queryClient.setQueryData<ViewItem[]>(viewsQueryKey, (currentViews = []) => {
-      const fixedViews = currentViews.filter((view) => view.type !== "CUSTOM");
-      return [...fixedViews, ...nextViews].sort((a, b) => a.order - b.order);
-    });
+    commitViewOrderToViewsCache(queryClient, dashboardKeys, nextViews);
     scheduleReorderSave(nextViews);
-  }, [queryClient, scheduleReorderSave, viewsQueryKey]);
+  }, [queryClient, scheduleReorderSave, dashboardKeys]);
 
   const moveViewPreview = useCallback((sourceId: string, targetId: string) => {
     const baseViews = dragPreviewViewsRef.current ?? customViews;
@@ -649,8 +595,7 @@ export default function ViewsSidebarPreview() {
      */
     latestSelectedViewIdRef.current = id;
 
-    const previousViews = queryClient.getQueryData<ViewItem[]>(viewsQueryKey);
-    const previousCurrentView = queryClient.getQueryData(currentViewQueryKey);
+    const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
 
     // Update the sidebar and dashboard immediately; the server only records the last selected view.
     applyViewSelection(queryClient, dashboardKeys, id);
@@ -666,9 +611,12 @@ export default function ViewsSidebarPreview() {
           nextViewQueryKey
         );
 
-        if (canApplySelectedViewPayload(latestSelectedViewIdRef.current, cachedNextView)) {
-          queryClient.setQueryData(currentViewQueryKey, cachedNextView);
-        }
+        applySelectedViewPayloadToCurrentView(
+          queryClient,
+          dashboardKeys,
+          latestSelectedViewIdRef.current,
+          cachedNextView
+        );
 
         await selectViewMutation.mutateAsync({ viewId: id });
 
@@ -682,19 +630,23 @@ export default function ViewsSidebarPreview() {
           nextViewQueryKey
         );
 
-        if (canApplySelectedViewPayload(latestSelectedViewIdRef.current, freshNextView)) {
-          queryClient.setQueryData(currentViewQueryKey, freshNextView);
-        }
+        applySelectedViewPayloadToCurrentView(
+          queryClient,
+          dashboardKeys,
+          latestSelectedViewIdRef.current,
+          freshNextView
+        );
       },
       {
         label: "view.saveSelectedView",
         rollback: () => {
-          if (!canRollbackViewSelection(latestSelectedViewIdRef.current, id)) {
-            return;
-          }
-
-          queryClient.setQueryData(viewsQueryKey, previousViews);
-          queryClient.setQueryData(currentViewQueryKey, previousCurrentView);
+          rollbackSelectedView(
+            queryClient,
+            dashboardKeys,
+            latestSelectedViewIdRef.current,
+            id,
+            snapshots
+          );
         },
       }
     );

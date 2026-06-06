@@ -3,23 +3,34 @@ import { QueryClient } from "@tanstack/react-query";
 
 import {
   applyDeletedTagToDashboardCaches,
+  applySelectedViewPayloadToCurrentView,
   applyTagChangeToCaches,
+  applyViewFilterUpdateToCaches,
+  applyViewRenameToViewsCache,
   buildDashboardKeys,
   buildPersistedItemOrderPayload,
   buildPersistedListOrderPayload,
   buildPersistedViewOrderPayload,
   canApplySelectedViewPayload,
   canRollbackViewSelection,
+  captureViewMutationSnapshots,
+  commitViewOrderToViewsCache,
   hasSavedListInDashboardSnapshots,
   insertOptimisticListIntoDashboardCaches,
+  insertOptimisticViewIntoDashboardCaches,
   type DashboardSnapshot,
   listMatchesView,
   projectView,
   reconcileCreatedListInSnapshot,
   reconcileCreatedListInDashboardCaches,
+  reconcileCreatedViewInViewsCache,
+  reconcileUpdatedViewInViewsCache,
   removeListFromDashboardCaches,
   removeListItemFromDashboardCaches,
+  removeViewFromDashboardCaches,
   rollbackDashboardCaches,
+  rollbackSelectedView,
+  rollbackViewMutationCaches,
   selectedViewFromCache,
   updateListInDashboardCaches,
   type ViewsCache,
@@ -853,6 +864,366 @@ describe("list mutation cache helpers", () => {
     expect(queryClient.getQueryData(keys.allLists)).toStrictEqual(previousAllLists);
     expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(previousCurrentView);
     expect(queryClient.getQueryData(keys.selectedView)).toStrictEqual(previousSelectedView);
+  });
+});
+
+describe("view mutation cache helpers", () => {
+  const keys = {
+    views: ["views"],
+    allLists: ["all-lists"],
+    currentView: ["current-view"],
+    selectedView: ["selected-view"],
+  };
+
+  it("inserts an optimistic view, resets defaults, sorts by order, and projects current view", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [], order: 0 });
+    const existingView = view({ id: "existing", isDefault: true, order: 10 });
+    const optimisticView = view({
+      id: "optimistic",
+      name: "Optimistic",
+      isDefault: true,
+      order: -1,
+      viewTags: [{ viewId: "optimistic", tagId: "a", tag: tag("a") }],
+    });
+    const allListsSnapshot = {
+      view: allListsView,
+      lists: [list("match", ["a"], 0), list("hidden", [], 1)],
+    };
+
+    queryClient.setQueryData(keys.views, [allListsView, existingView]);
+
+    insertOptimisticViewIntoDashboardCaches(
+      queryClient,
+      keys,
+      optimisticView,
+      allListsSnapshot
+    );
+
+    expect(
+      queryClient.getQueryData<ViewsCache>(keys.views)?.map((entry) => ({
+        id: entry.id,
+        isDefault: entry.isDefault,
+      }))
+    ).toEqual([
+      { id: "optimistic", isDefault: true },
+      { id: "all", isDefault: false },
+      { id: "existing", isDefault: false },
+    ]);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(
+      projectView(optimisticView, allListsSnapshot)
+    );
+  });
+
+  it("merges created view server fields into the matching view only", () => {
+    const queryClient = new QueryClient();
+    const target = view({ id: "target", name: "Optimistic name" });
+    const other = view({ id: "other", name: "Other" });
+
+    queryClient.setQueryData(keys.views, [target, other]);
+
+    reconcileCreatedViewInViewsCache(queryClient, keys, {
+      id: "target",
+      name: "Saved name",
+      userId: "user-1",
+    });
+
+    expect(
+      queryClient.getQueryData<ViewsCache>(keys.views)?.map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        userId: entry.userId,
+      }))
+    ).toEqual([
+      { id: "target", name: "Saved name", userId: "user-1" },
+      { id: "other", name: "Other", userId: "user-1" },
+    ]);
+  });
+
+  it("merges updated view fields into the matching view only", () => {
+    const queryClient = new QueryClient();
+    const target = view({ id: "target", name: "Before", matchMode: "ALL" as const });
+    const other = view({ id: "other", name: "Other", matchMode: "ALL" as const });
+
+    queryClient.setQueryData(keys.views, [target, other]);
+
+    reconcileUpdatedViewInViewsCache(queryClient, keys, {
+      id: "target",
+      name: "After",
+      matchMode: "ANY" as const,
+    });
+
+    expect(
+      queryClient.getQueryData<ViewsCache>(keys.views)?.map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        matchMode: entry.matchMode,
+      }))
+    ).toEqual([
+      { id: "target", name: "After", matchMode: "ANY" },
+      { id: "other", name: "Other", matchMode: "ALL" },
+    ]);
+  });
+
+  it("renames the matching view only", () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(keys.views, [
+      view({ id: "target", name: "Before" }),
+      view({ id: "other", name: "Other" }),
+    ]);
+
+    applyViewRenameToViewsCache(queryClient, keys, "target", "After");
+
+    expect(
+      queryClient.getQueryData<ViewsCache>(keys.views)?.map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+      }))
+    ).toEqual([
+      { id: "target", name: "After" },
+      { id: "other", name: "Other" },
+    ]);
+  });
+
+  it("updates default view filters and writes the projected current view", () => {
+    const queryClient = new QueryClient();
+    const target = view({
+      id: "target",
+      isDefault: true,
+      viewTags: [{ viewId: "target", tagId: "a", tag: tag("a") }],
+    });
+    const allListsSnapshot = {
+      view: view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] }),
+      lists: [
+        list("matches", ["b"], 0),
+        list("hidden", ["a"], 1),
+      ],
+    };
+
+    queryClient.setQueryData(keys.views, [target]);
+
+    applyViewFilterUpdateToCaches(queryClient, keys, {
+      viewId: "target",
+      selectedTags: [tag("b")],
+      allListsSnapshot,
+    });
+
+    const editedView = queryClient
+      .getQueryData<ViewsCache>(keys.views)
+      ?.find((entry) => entry.id === "target");
+
+    expect(editedView?.viewTags.map((viewTag) => viewTag.tagId)).toEqual(["b"]);
+    expect(editedView?.viewLists).toEqual([{ listId: "matches", order: 0 }]);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(
+      projectView(editedView, allListsSnapshot)
+    );
+  });
+
+  it("updates non-default view filters without touching current view", () => {
+    const queryClient = new QueryClient();
+    const currentView = {
+      view: view({ id: "current" }),
+      lists: [list("current-list", ["a", "b"])],
+    };
+    const target = view({
+      id: "target",
+      isDefault: false,
+      viewTags: [{ viewId: "target", tagId: "a", tag: tag("a") }],
+    });
+    const allListsSnapshot = {
+      view: view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] }),
+      lists: [list("matches", ["b"], 0)],
+    };
+
+    queryClient.setQueryData(keys.views, [target]);
+    queryClient.setQueryData(keys.currentView, currentView);
+
+    applyViewFilterUpdateToCaches(queryClient, keys, {
+      viewId: "target",
+      selectedTags: [tag("b")],
+      allListsSnapshot,
+    });
+
+    expect(
+      queryClient
+        .getQueryData<ViewsCache>(keys.views)
+        ?.find((entry) => entry.id === "target")
+        ?.viewTags.map((viewTag) => viewTag.tagId)
+    ).toEqual(["b"]);
+    expect(queryClient.getQueryData(keys.currentView)).toBe(currentView);
+  });
+
+  it("removes a default view, reassigns the fallback, and projects current view", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({
+      id: "all",
+      type: "ALL_LISTS" as const,
+      isDefault: false,
+      viewTags: [],
+    });
+    const deletedView = view({ id: "deleted", isDefault: true });
+    const allListsSnapshot = {
+      view: allListsView,
+      lists: [list("first"), list("second")],
+    };
+
+    queryClient.setQueryData(keys.views, [deletedView, allListsView]);
+
+    removeViewFromDashboardCaches(queryClient, keys, "deleted", allListsSnapshot);
+
+    expect(
+      queryClient.getQueryData<ViewsCache>(keys.views)?.map((entry) => ({
+        id: entry.id,
+        isDefault: entry.isDefault,
+      }))
+    ).toEqual([{ id: "all", isDefault: true }]);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(
+      projectView(allListsView, allListsSnapshot)
+    );
+  });
+
+  it("removes a non-default view without touching current view", () => {
+    const queryClient = new QueryClient();
+    const currentView = {
+      view: view({ id: "current" }),
+      lists: [list("current-list", ["a", "b"])],
+    };
+    const allListsView = view({
+      id: "all",
+      type: "ALL_LISTS" as const,
+      isDefault: true,
+      viewTags: [],
+    });
+    const deletedView = view({ id: "deleted", isDefault: false });
+
+    queryClient.setQueryData(keys.views, [allListsView, deletedView]);
+    queryClient.setQueryData(keys.currentView, currentView);
+
+    removeViewFromDashboardCaches(queryClient, keys, "deleted", {
+      view: allListsView,
+      lists: [list("first")],
+    });
+
+    expect(
+      queryClient.getQueryData<ViewsCache>(keys.views)?.map((entry) => entry.id)
+    ).toEqual(["all"]);
+    expect(queryClient.getQueryData(keys.currentView)).toBe(currentView);
+  });
+
+  it("commits custom view order while preserving fixed views and sorting by order", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({
+      id: "all",
+      type: "ALL_LISTS" as const,
+      viewTags: [],
+      order: 0,
+    });
+    const untaggedView = view({
+      id: "untagged",
+      type: "UNTAGGED" as const,
+      viewTags: [],
+      order: 1,
+    });
+    const reorderedCustomViews = [
+      view({ id: "custom-b", order: 3 }),
+      view({ id: "custom-a", order: 2 }),
+    ];
+
+    queryClient.setQueryData(keys.views, [
+      allListsView,
+      view({ id: "old-custom", order: 2 }),
+      untaggedView,
+    ]);
+
+    commitViewOrderToViewsCache(queryClient, keys, reorderedCustomViews);
+
+    expect(
+      queryClient.getQueryData<ViewsCache>(keys.views)?.map((entry) => entry.id)
+    ).toEqual(["all", "untagged", "custom-a", "custom-b"]);
+  });
+
+  it("applies selected view payloads only when they match the latest selection", () => {
+    const queryClient = new QueryClient();
+    const currentView = {
+      view: view({ id: "current" }),
+      lists: [list("current-list", ["a", "b"])],
+    };
+    const freshPayload = {
+      view: view({ id: "fresh" }),
+      lists: [list("fresh-list", ["a", "b"])],
+    };
+    const stalePayload = {
+      view: view({ id: "stale" }),
+      lists: [list("stale-list", ["a", "b"])],
+    };
+
+    queryClient.setQueryData(keys.currentView, currentView);
+
+    applySelectedViewPayloadToCurrentView(queryClient, keys, "fresh", freshPayload);
+
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(freshPayload);
+
+    applySelectedViewPayloadToCurrentView(queryClient, keys, "fresh", stalePayload);
+
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(freshPayload);
+  });
+
+  it("captures and restores defined view mutation snapshots", () => {
+    const queryClient = new QueryClient();
+    const previousViews = [view({ id: "previous" })];
+    const previousCurrentView = {
+      view: view({ id: "previous" }),
+      lists: [list("previous-list", ["a", "b"])],
+    };
+
+    queryClient.setQueryData(keys.views, previousViews);
+    queryClient.setQueryData(keys.currentView, previousCurrentView);
+
+    const snapshots = captureViewMutationSnapshots(queryClient, keys);
+
+    queryClient.setQueryData(keys.views, [view({ id: "changed" })]);
+    queryClient.setQueryData(keys.currentView, {
+      view: view({ id: "changed" }),
+      lists: [list("changed-list", ["a", "b"])],
+    });
+
+    rollbackViewMutationCaches(queryClient, keys, snapshots);
+
+    expect(queryClient.getQueryData(keys.views)).toStrictEqual(previousViews);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(previousCurrentView);
+  });
+
+  it("rolls back selected view snapshots only for the latest failed selection", () => {
+    const queryClient = new QueryClient();
+    const previousViews = [view({ id: "previous" })];
+    const previousCurrentView = {
+      view: view({ id: "previous" }),
+      lists: [list("previous-list", ["a", "b"])],
+    };
+    const changedViews = [view({ id: "changed" })];
+    const changedCurrentView = {
+      view: view({ id: "changed" }),
+      lists: [list("changed-list", ["a", "b"])],
+    };
+
+    queryClient.setQueryData(keys.views, changedViews);
+    queryClient.setQueryData(keys.currentView, changedCurrentView);
+
+    rollbackSelectedView(queryClient, keys, "newer", "failed", {
+      previousViews,
+      previousCurrentView,
+    });
+
+    expect(queryClient.getQueryData(keys.views)).toStrictEqual(changedViews);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(changedCurrentView);
+
+    rollbackSelectedView(queryClient, keys, "failed", "failed", {
+      previousViews,
+      previousCurrentView,
+    });
+
+    expect(queryClient.getQueryData(keys.views)).toStrictEqual(previousViews);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(previousCurrentView);
   });
 });
 

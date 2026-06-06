@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.2
-- **Current phase:** 1.9.2 - Extract List Mutation Cache Helpers
-- **Next phase:** 1.9.3 - Extract View Mutation Cache Helpers
+- **Current version:** 1.9.3-alpha
+- **Current phase:** 1.9.3 - Extract View Mutation Cache Helpers
+- **Next phase:** 1.9.4 - Extract Tag Mutation Cache Helpers
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.9.3 | alpha | 2026-06-06 | Extract View Mutation Cache Helpers | (in progress) |
 | 1.9.2 | stable | 2026-06-05 | Extract List Mutation Cache Helpers | (in progress) |
 | 1.9.1 | stable | 2026-06-05 | Extract Dashboard Query Key Helper | (in progress) |
 | 1.9.0 | stable | 2026-06-05 | Dashboard Component Responsibility Audit | (in progress) |
