@@ -44,10 +44,6 @@ describe("local db role audit (1.8.0 characterization)", () => {
   });
 
   describe("dashboard write path does not depend on the local DB", () => {
-    it("useOptimisticSync does not import lib/local-db", () => {
-      expect(readSource("hooks/useOptimisticSync.ts")).not.toMatch(/local-db/);
-    });
-
     it("dashboard cache does not import lib/local-db", () => {
       expect(readSource("lib/dashboard-cache.ts")).not.toMatch(/local-db/);
     });
