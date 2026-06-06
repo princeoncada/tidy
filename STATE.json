@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.7-alpha",
-    "state":  "alpha",
+    "version":  "1.9.7",
+    "state":  "stable",
     "phase":  "1.9.7",
     "phaseTitle":  "Automatic Replay Worker",
     "nextPhase":  "1.9.8 - Sync Status UI Surface",
