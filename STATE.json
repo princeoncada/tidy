@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.9",
-    "state":  "stable",
-    "phase":  "1.9.9",
-    "phaseTitle":  "Offline Conflict Resolution Rules",
-    "nextPhase":  "1.9.10 - Local DB Source-of-Truth Decision",
+    "version":  "1.9.10-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.10",
+    "phaseTitle":  "Local DB Source-of-Truth Decision",
+    "nextPhase":  "1.10.0 - Deploy Env Documentation",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-06"
 }
