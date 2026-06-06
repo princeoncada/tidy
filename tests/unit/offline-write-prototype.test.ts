@@ -1,11 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  captureDashboardMutationOutbox,
   captureOfflineWrite,
   createHttpSyncReplayTransport,
   flushOfflineWrites,
+  isOfflineWriteCaptureEnabled,
 } from "@/lib/sync/offline-write-prototype";
 import { isLocalOutboxOperation, type LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
 import type { LocalOutboxRepositoryDatabase } from "@/lib/local-db/outbox-repository";
@@ -74,6 +76,95 @@ function createEndpointFetch(authenticatedUserId: string): typeof fetch {
     return createOkResponse();
   });
 }
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+
+describe("offline dashboard mutation capture gate", () => {
+  it("enables dashboard capture only when the public prototype flag is true", () => {
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "");
+    expect(isOfflineWriteCaptureEnabled()).toBe(false);
+
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "false");
+    expect(isOfflineWriteCaptureEnabled()).toBe(false);
+
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "true");
+    expect(isOfflineWriteCaptureEnabled()).toBe(true);
+  });
+
+  it("does not enqueue dashboard mutation outbox operations while the gate is off", async () => {
+    const { db } = createFakeOutboxDb();
+
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "false");
+
+    const result = await captureDashboardMutationOutbox(
+      {
+        userId: "user-1",
+        entityType: "list",
+        entityClientId: "local-list-1",
+        entityServerId: "server-list-1",
+        operationType: "create",
+        payload: { name: "Inbox", viewId: null },
+      },
+      { db },
+    );
+
+    expect(result).toBeNull();
+    expect(db.outboxOperations.put).not.toHaveBeenCalled();
+  });
+
+  it("enqueues dashboard mutation outbox operations when the gate is on", async () => {
+    const { db, store } = createFakeOutboxDb();
+
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "true");
+
+    const result = await captureDashboardMutationOutbox(
+      {
+        userId: "user-1",
+        entityType: "list",
+        entityClientId: "local-list-1",
+        entityServerId: "server-list-1",
+        operationType: "create",
+        payload: { name: "Inbox", viewId: null },
+      },
+      { db },
+    );
+
+    expect(isLocalOutboxOperation(result)).toBe(true);
+    expect(result?.status).toBe("pending");
+    expect(db.outboxOperations.put).toHaveBeenCalledWith(result);
+    expect(result ? store.get(result.operationId) : undefined).toEqual(result);
+  });
+
+  it("swallows dashboard mutation outbox capture failures when the gate is on", async () => {
+    const { db } = createFakeOutboxDb();
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "true");
+    vi.mocked(db.outboxOperations.put).mockRejectedValueOnce(new Error("IndexedDB unavailable"));
+
+    await expect(
+      captureDashboardMutationOutbox(
+        {
+          userId: "user-1",
+          entityType: "list",
+          entityClientId: "local-list-1",
+          entityServerId: "server-list-1",
+          operationType: "create",
+          payload: { name: "Inbox", viewId: null },
+        },
+        { db },
+      ),
+    ).resolves.toBeNull();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Failed to capture dashboard mutation outbox operation",
+      expect.any(Error),
+    );
+  });
+});
 
 describe("offline write prototype", () => {
   it("captures an offline write as a pending outbox operation in an injected db", async () => {
