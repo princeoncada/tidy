@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.4",
-    "state":  "stable",
-    "phase":  "1.9.4",
-    "phaseTitle":  "Extract Tag Mutation Cache Helpers",
-    "nextPhase":  "1.9.5 - Dashboard Mutation to Outbox Wiring",
+    "version":  "1.9.5-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.5",
+    "phaseTitle":  "Dashboard Mutation to Outbox Wiring",
+    "nextPhase":  "1.9.6 - Durable Pending-Write Integration",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-06"
 }
