@@ -193,6 +193,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.0 - Dashboard Component Responsibility Audit~~ (stable 2026-06-05)
 
+- ~~1.9.1 - Extract Dashboard Query Key Helper~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -202,17 +204,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.1 - Extract Dashboard Query Key Helper (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.1 - Extract Dashboard Query Key Helper
-- **Status:** In progress | Priority: P1 maintainability
-- **Files:** lib/dashboard-cache.ts or new small helper, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListItemComponent.tsx, components/list/ListsContainer.tsx, components/views/ViewsSidebarPreview.tsx, tests/unit/dashboard-cache.test.ts
-- **Problem:** `DashboardKeys` construction is rebuilt inline across `ListsContainer`, `ListAdder`, `ListComponent`, `ListItemComponent`, and `ViewsSidebarPreview`, increasing the risk of key-shape drift before writes are routed through one seam.
-- **Scope:** centralize the existing `views`/`allLists`/`currentView`/`selectedView` key construction into one helper without changing query key shapes or runtime behavior; this is read-path maintainability, not the mutation chokepoint itself.
-- **Acceptance:** behavior is preserved, query keys remain identical, and `tests/unit/dashboard-cache.test.ts` is extended to prove no key-shape change.
 
 ### 1.9.2 - Extract List Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
