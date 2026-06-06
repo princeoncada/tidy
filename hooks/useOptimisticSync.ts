@@ -1,4 +1,13 @@
 import { useCallback } from "react";
+import {
+  captureDashboardMutationOutbox,
+  type OfflineWriteIntent,
+} from "@/lib/sync/offline-write-prototype";
+import {
+  markOutboxOperationFailed,
+  markOutboxOperationSynced,
+  type LocalOutboxRepositoryDatabase,
+} from "@/lib/local-db/outbox-repository";
 
 export type OptimisticScope =
   | "views"
@@ -14,9 +23,15 @@ type QueueEntry = {
   sequence: number;
 };
 
+export type DurablePendingWrite = {
+  intent: OfflineWriteIntent;
+  db?: LocalOutboxRepositoryDatabase;
+};
+
 export type EnqueueOptions = {
   label?: string;
   rollback?: () => void;
+  durable?: DurablePendingWrite;
 };
 
 type OptimisticTask = () => Promise<void>;
@@ -92,6 +107,38 @@ function canRunRollback(scope: OptimisticScope, entry: QueueEntry) {
   return !entry.canceled && latestStartedSequence[scope] <= entry.sequence;
 }
 
+function startDurablePendingWrite(
+  durable: DurablePendingWrite,
+): Promise<string | null> {
+  const options = durable.db ? { db: durable.db } : {};
+  return captureDashboardMutationOutbox(durable.intent, options)
+    .then((operation) => operation?.operationId ?? null)
+    .catch(() => null);
+}
+
+function settleDurablePendingWrite(
+  operationIdPromise: Promise<string | null>,
+  durable: DurablePendingWrite,
+  outcome: "synced" | "failed",
+  error?: unknown,
+): void {
+  void operationIdPromise
+    .then((operationId) => {
+      if (!operationId) return;
+      const dbArg = durable.db ? { db: durable.db } : {};
+      if (outcome === "synced") {
+        return markOutboxOperationSynced({ operationId, ...dbArg });
+      }
+      return markOutboxOperationFailed({
+        operationId,
+        errorMessage:
+          error instanceof Error ? error.message : "Optimistic sync failed",
+        ...dbArg,
+      });
+    })
+    .catch(() => {});
+}
+
 export function useOptimisticSync(): OptimisticSyncApi {
   const cancelScope = useCallback((scope: OptimisticScope) => {
     entries[scope].forEach((entry) => {
@@ -120,7 +167,31 @@ export function useOptimisticSync(): OptimisticSyncApi {
           latestStartedSequence[scope],
           entry.sequence
         );
-        await task();
+
+        const durableOperationIdPromise = options.durable
+          ? startDurablePendingWrite(options.durable)
+          : null;
+
+        try {
+          await task();
+          if (durableOperationIdPromise && options.durable) {
+            settleDurablePendingWrite(
+              durableOperationIdPromise,
+              options.durable,
+              "synced"
+            );
+          }
+        } catch (error) {
+          if (durableOperationIdPromise && options.durable) {
+            settleDurablePendingWrite(
+              durableOperationIdPromise,
+              options.durable,
+              "failed",
+              error
+            );
+          }
+          throw error;
+        }
       })
       .catch((error) => {
         if (isCancelledError(error)) return;
