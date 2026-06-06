@@ -120,6 +120,7 @@ describe("sync status surface hook", () => {
 
     const { unmount } = await renderIsolatedSyncStatusSurface();
     await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
       await flushEffects();
     });
     expect(readSyncStatusSurfaceForUserMock).toHaveBeenCalledTimes(1);
