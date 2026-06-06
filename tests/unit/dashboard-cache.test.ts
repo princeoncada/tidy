@@ -5,6 +5,7 @@ import {
   applyDeletedTagToDashboardCaches,
   applySelectedViewPayloadToCurrentView,
   applyTagChangeToCaches,
+  applyTagMetadataToDashboardCaches,
   applyViewFilterUpdateToCaches,
   applyViewRenameToViewsCache,
   buildDashboardKeys,
@@ -13,6 +14,7 @@ import {
   buildPersistedViewOrderPayload,
   canApplySelectedViewPayload,
   canRollbackViewSelection,
+  captureTagMutationSnapshots,
   captureViewMutationSnapshots,
   commitViewOrderToViewsCache,
   hasSavedListInDashboardSnapshots,
@@ -30,6 +32,7 @@ import {
   removeViewFromDashboardCaches,
   rollbackDashboardCaches,
   rollbackSelectedView,
+  rollbackTagMutationCaches,
   rollbackViewMutationCaches,
   selectedViewFromCache,
   updateListInDashboardCaches,
@@ -864,6 +867,145 @@ describe("list mutation cache helpers", () => {
     expect(queryClient.getQueryData(keys.allLists)).toStrictEqual(previousAllLists);
     expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(previousCurrentView);
     expect(queryClient.getQueryData(keys.selectedView)).toStrictEqual(previousSelectedView);
+  });
+});
+
+describe("tag mutation cache helpers", () => {
+  const keys = {
+    views: ["views"],
+    allLists: ["all-lists"],
+    currentView: ["current-view"],
+    selectedView: ["selected-view"],
+  };
+
+  it("applies tag metadata updates across dashboard snapshots", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({
+      id: "custom",
+      viewTags: [{ viewId: "custom", tagId: "a", tag: tag("a") }],
+    });
+    const taggedList = list("target", ["a"]);
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [taggedList],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [taggedList],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [taggedList],
+    });
+
+    applyTagMetadataToDashboardCaches(queryClient, keys, {
+      ...tag("a"),
+      color: "blue" as const,
+    });
+
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.allLists)
+        ?.lists[0].listTags[0].tag.color
+    ).toBe("blue");
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.currentView)
+        ?.lists[0].listTags[0].tag.color
+    ).toBe("blue");
+    expect(
+      queryClient
+        .getQueryData<DashboardSnapshot>(keys.selectedView)
+        ?.lists[0].listTags[0].tag.color
+    ).toBe("blue");
+  });
+
+  it("captures defined tag mutation snapshots across dashboard keys", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({
+      id: "custom",
+      viewTags: [{ viewId: "custom", tagId: "a", tag: tag("a") }],
+    });
+    const allListsSnapshot = {
+      view: allListsView,
+      lists: [list("all-target", ["a"])],
+    };
+    const currentViewSnapshot = {
+      view: customView,
+      lists: [list("current-target", ["a"])],
+    };
+    const selectedViewSnapshot = {
+      view: customView,
+      lists: [list("selected-target", ["a"])],
+    };
+    const viewsSnapshot = [allListsView, customView];
+
+    queryClient.setQueryData(keys.allLists, allListsSnapshot);
+    queryClient.setQueryData(keys.currentView, currentViewSnapshot);
+    queryClient.setQueryData(keys.selectedView, selectedViewSnapshot);
+    queryClient.setQueryData(keys.views, viewsSnapshot);
+
+    expect(captureTagMutationSnapshots(queryClient, keys)).toStrictEqual({
+      allLists: allListsSnapshot,
+      currentView: currentViewSnapshot,
+      selectedView: selectedViewSnapshot,
+      views: viewsSnapshot,
+    });
+  });
+
+  it("restores defined tag mutation snapshots across dashboard keys", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({
+      id: "custom",
+      viewTags: [{ viewId: "custom", tagId: "a", tag: tag("a") }],
+    });
+    const previousAllLists = {
+      view: allListsView,
+      lists: [list("previous-all", ["a"])],
+    };
+    const previousCurrentView = {
+      view: customView,
+      lists: [list("previous-current", ["a"])],
+    };
+    const previousSelectedView = {
+      view: customView,
+      lists: [list("previous-selected", ["a"])],
+    };
+    const previousViews = [allListsView, customView];
+
+    queryClient.setQueryData(keys.allLists, previousAllLists);
+    queryClient.setQueryData(keys.currentView, previousCurrentView);
+    queryClient.setQueryData(keys.selectedView, previousSelectedView);
+    queryClient.setQueryData(keys.views, previousViews);
+
+    const snapshots = captureTagMutationSnapshots(queryClient, keys);
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("changed-all")],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [list("changed-current", ["a"])],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [list("changed-selected", ["a"])],
+    });
+    queryClient.setQueryData(keys.views, [
+      view({ id: "changed-view", viewTags: [] }),
+    ]);
+
+    rollbackTagMutationCaches(queryClient, keys, snapshots);
+
+    expect(queryClient.getQueryData(keys.allLists)).toStrictEqual(previousAllLists);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(previousCurrentView);
+    expect(queryClient.getQueryData(keys.selectedView)).toStrictEqual(previousSelectedView);
+    expect(queryClient.getQueryData(keys.views)).toStrictEqual(previousViews);
   });
 });
 
