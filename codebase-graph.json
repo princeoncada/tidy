@@ -1285,15 +1285,15 @@
         "PersistedItemOrderPayload",
         "PersistedOrderPayload",
         "SavedListTags",
+        "TagMutationSnapshots",
         "ViewCacheItem",
         "ViewMutationSnapshots",
         "ViewsCache",
         "applyDeletedTagToDashboardCaches",
         "applySelectedViewPayloadToCurrentView",
         "applyTagChangeToCaches",
-        "applyViewFilterUpdateToCaches",
-        "applyViewRenameToViewsCache",
-        "applyViewSelection"
+        "applyTagMetadataToDashboardCaches",
+        "applyViewFilterUpdateToCaches"
       ],
       "imports": [
         "@tanstack/react-query",
