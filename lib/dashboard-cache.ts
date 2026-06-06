@@ -216,6 +216,86 @@ export function reconcileCreatedListInSnapshot(
   };
 }
 
+export function insertOptimisticListIntoDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  optimisticList: DashboardList,
+  activeView: { type?: string; id?: string } | undefined
+) {
+  const updatedKeys = new Set<string>();
+  const prepend = (snapshot: DashboardSnapshot | undefined) =>
+    snapshot
+      ? { ...snapshot, lists: [optimisticList, ...snapshot.lists] }
+      : snapshot;
+  const prependWhenVisible = (snapshot: DashboardSnapshot | undefined) => {
+    if (!snapshot) return snapshot;
+
+    const showsInView =
+      activeView?.type !== "CUSTOM" || activeView?.id === snapshot.view.id;
+
+    return showsInView
+      ? { ...snapshot, lists: [optimisticList, ...snapshot.lists] }
+      : snapshot;
+  };
+
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.allLists, prepend);
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.currentView, prependWhenVisible);
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.selectedView, prependWhenVisible);
+}
+
+export function reconcileCreatedListInDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  savedList: CreatedListPayload,
+  optimisticListId: string
+) {
+  const updatedKeys = new Set<string>();
+  const replaceOptimisticList = (snapshot: DashboardSnapshot | undefined) =>
+    reconcileCreatedListInSnapshot(snapshot, savedList, optimisticListId);
+
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.allLists, replaceOptimisticList);
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.currentView, replaceOptimisticList);
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.selectedView, replaceOptimisticList);
+}
+
+export function removeListItemFromDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  itemId: string
+) {
+  const updatedKeys = new Set<string>();
+  const removeItem = (snapshot: DashboardSnapshot | undefined) =>
+    snapshot
+      ? {
+        ...snapshot,
+        lists: snapshot.lists.map((list) => ({
+          ...list,
+          listItems: list.listItems.filter((item) => item.id !== itemId),
+        })),
+      }
+      : snapshot;
+
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.allLists, removeItem);
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.currentView, removeItem);
+  setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.selectedView, removeItem);
+}
+
+export type DashboardCacheSnapshots = {
+  previousAllLists: DashboardSnapshot | undefined;
+  previousCurrentView: DashboardSnapshot | undefined;
+  previousSelectedView: DashboardSnapshot | undefined;
+};
+
+export function rollbackDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  snapshots: DashboardCacheSnapshots
+) {
+  queryClient.setQueryData(keys.allLists, snapshots.previousAllLists);
+  queryClient.setQueryData(keys.currentView, snapshots.previousCurrentView);
+  queryClient.setQueryData(keys.selectedView, snapshots.previousSelectedView);
+}
+
 export function hasSavedListInDashboardSnapshots(
   snapshots: Array<DashboardSnapshot | undefined>,
   listId: string

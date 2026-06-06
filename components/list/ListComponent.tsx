@@ -5,6 +5,8 @@ import {
   DashboardKeys,
   hasSavedListInDashboardSnapshots,
   removeListFromDashboardCaches,
+  removeListItemFromDashboardCaches,
+  rollbackDashboardCaches,
   updateListInDashboardCaches,
 } from "@/lib/dashboard-cache";
 import { measureCacheWrite, useRenderMeasure } from "@/lib/optimistic-debug";
@@ -37,18 +39,6 @@ function itemIsAlreadyInCache(currentView: CurrentView | undefined, itemId: stri
       currentList.listItems.some((item) => item.id === itemId)
     )
   );
-}
-
-function removeItemFromCache(currentView: CurrentView | undefined, itemId: string) {
-  if (!currentView) return currentView;
-
-  return {
-    ...currentView,
-    lists: currentView.lists.map((currentList) => ({
-      ...currentList,
-      listItems: currentList.listItems.filter((item) => item.id !== itemId),
-    })),
-  };
 }
 
 async function waitForSavedListInDashboardCaches(
@@ -272,21 +262,15 @@ const ListComponent = ({
     },
     onError(_errors, variables, context) {
       if (context?.addedToCache) {
-        queryClient.setQueryData(dashboardKeys.allLists, context.previousAllLists);
-        queryClient.setQueryData(dashboardKeys.currentView, context.previousCurrentView);
-        queryClient.setQueryData(dashboardKeys.selectedView, context.previousSelectedView);
+        rollbackDashboardCaches(queryClient, dashboardKeys, {
+          previousAllLists: context.previousAllLists,
+          previousCurrentView: context.previousCurrentView,
+          previousSelectedView: context.previousSelectedView,
+        });
         return;
       }
 
-      queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, (current) =>
-        removeItemFromCache(current, variables.id)
-      );
-      queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, (current) =>
-        removeItemFromCache(current, variables.id)
-      );
-      queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, (current) =>
-        removeItemFromCache(current, variables.id)
-      );
+      removeListItemFromDashboardCaches(queryClient, dashboardKeys, variables.id);
     }
   }));
 

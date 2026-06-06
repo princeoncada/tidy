@@ -12,9 +12,10 @@ import { CurrentView, OptimisticList } from "./types";
 import { Plus } from "lucide-react";
 import {
   buildDashboardKeys,
+  insertOptimisticListIntoDashboardCaches,
   invalidateViewPayloadQueries,
-  queryKeysEqual,
-  reconcileCreatedListInSnapshot,
+  reconcileCreatedListInDashboardCaches,
+  rollbackDashboardCaches,
   selectedViewFromCache,
 } from "@/lib/dashboard-cache";
 import { Skeleton } from "../ui/skeleton";
@@ -95,59 +96,31 @@ const ListAdder = () => {
         isOptimistic: true
       };
 
-      const insertOptimisticList = (current: CurrentView | undefined) =>
-        current
-          ? {
-            ...current,
-            lists: [
-              optimisticList,
-              ...current.lists,
-            ],
-          }
-          : current;
-
-      const insertIntoSelectedView = (current: CurrentView | undefined) =>
-        current && (activeView?.type !== "CUSTOM" || activeView.id === current.view.id)
-          ? {
-            ...current,
-            lists: [
-              optimisticList,
-              ...current.lists,
-            ],
-          }
-          : current;
-
-      queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, insertOptimisticList);
-      queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, insertIntoSelectedView);
-      if (
-        !queryKeysEqual(dashboardKeys.selectedView, dashboardKeys.allLists) &&
-        !queryKeysEqual(dashboardKeys.selectedView, dashboardKeys.currentView)
-      ) {
-        queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, insertIntoSelectedView);
-      }
+      insertOptimisticListIntoDashboardCaches(
+        queryClient,
+        dashboardKeys,
+        optimisticList,
+        activeView
+      );
 
       return { previousAllLists, previousCurrentView, previousSelectedView };
     },
     async onSuccess(createdList, variables) {
-      const replaceOptimisticList = (current: CurrentView | undefined) => {
-        return reconcileCreatedListInSnapshot(current, createdList, variables.id);
-      };
-
-      queryClient.setQueryData<CurrentView>(dashboardKeys.allLists, replaceOptimisticList);
-      queryClient.setQueryData<CurrentView>(dashboardKeys.currentView, replaceOptimisticList);
-      if (
-        !queryKeysEqual(dashboardKeys.selectedView, dashboardKeys.allLists) &&
-        !queryKeysEqual(dashboardKeys.selectedView, dashboardKeys.currentView)
-      ) {
-        queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView, replaceOptimisticList);
-      }
+      reconcileCreatedListInDashboardCaches(
+        queryClient,
+        dashboardKeys,
+        createdList,
+        variables.id
+      );
       await queryClient.invalidateQueries({ queryKey: dashboardKeys.views });
       await invalidateViewPayloadQueries(queryClient);
     },
     onError(_error, _variables, context) {
-      queryClient.setQueryData(dashboardKeys.allLists, context?.previousAllLists);
-      queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
-      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
+      rollbackDashboardCaches(queryClient, dashboardKeys, {
+        previousAllLists: context?.previousAllLists,
+        previousCurrentView: context?.previousCurrentView,
+        previousSelectedView: context?.previousSelectedView,
+      });
     },
   }));
 

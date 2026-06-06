@@ -11,11 +11,15 @@ import {
   canApplySelectedViewPayload,
   canRollbackViewSelection,
   hasSavedListInDashboardSnapshots,
+  insertOptimisticListIntoDashboardCaches,
   type DashboardSnapshot,
   listMatchesView,
   projectView,
   reconcileCreatedListInSnapshot,
+  reconcileCreatedListInDashboardCaches,
   removeListFromDashboardCaches,
+  removeListItemFromDashboardCaches,
+  rollbackDashboardCaches,
   selectedViewFromCache,
   updateListInDashboardCaches,
   type ViewsCache,
@@ -611,6 +615,244 @@ describe("dashboard cache projection", () => {
       { id: "saved-second", order: 0 },
       { id: "saved-first", order: 1 },
     ]);
+  });
+});
+
+describe("list mutation cache helpers", () => {
+  const keys = {
+    views: ["views"],
+    allLists: ["all-lists"],
+    currentView: ["current-view"],
+    selectedView: ["selected-view"],
+  };
+
+  it("prepends optimistic lists to all dashboard snapshots when no custom view guard applies", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const selectedView = view({ id: "selected", type: "ALL_LISTS" as const, viewTags: [] });
+    const optimisticList = list("optimistic-list", [], -1, { isOptimistic: true });
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("all-existing")],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: selectedView,
+      lists: [list("current-existing")],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: selectedView,
+      lists: [list("selected-existing")],
+    });
+
+    insertOptimisticListIntoDashboardCaches(queryClient, keys, optimisticList, undefined);
+
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "all-existing"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.currentView)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "current-existing"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.selectedView)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "selected-existing"]);
+  });
+
+  it("prepends optimistic lists to visible snapshots when the active view is not custom", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const untaggedView = view({ id: "untagged", type: "UNTAGGED" as const, viewTags: [] });
+    const optimisticList = list("optimistic-list", [], -1, { isOptimistic: true });
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("all-existing")],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: untaggedView,
+      lists: [list("current-existing")],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: untaggedView,
+      lists: [list("selected-existing")],
+    });
+
+    insertOptimisticListIntoDashboardCaches(queryClient, keys, optimisticList, {
+      type: "UNTAGGED",
+      id: "untagged",
+    });
+
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "all-existing"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.currentView)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "current-existing"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.selectedView)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "selected-existing"]);
+  });
+
+  it("prepends optimistic lists only into matching custom view snapshots", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const matchingView = view({ id: "matching-custom" });
+    const otherView = view({ id: "other-custom" });
+    const optimisticList = list("optimistic-list", ["a", "b"], -1, { isOptimistic: true });
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("all-existing")],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: matchingView,
+      lists: [list("matching-existing", ["a", "b"])],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: otherView,
+      lists: [list("other-existing", ["a", "b"])],
+    });
+
+    insertOptimisticListIntoDashboardCaches(queryClient, keys, optimisticList, {
+      type: "CUSTOM",
+      id: "matching-custom",
+    });
+
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "all-existing"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.currentView)?.lists.map((entry) => entry.id)
+    ).toEqual(["optimistic-list", "matching-existing"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.selectedView)?.lists.map((entry) => entry.id)
+    ).toEqual(["other-existing"]);
+  });
+
+  it("reconciles created lists across all dashboard snapshots", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({ id: "custom" });
+    const optimisticItem = item("optimistic-item", "list-1");
+    const optimisticList = list("list-1", ["a"], -1, {
+      isOptimistic: true,
+      listItems: [optimisticItem],
+    });
+    const savedList = list("list-1", [], 5, { name: "Saved list" });
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [optimisticList],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [optimisticList],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [optimisticList],
+    });
+
+    reconcileCreatedListInDashboardCaches(queryClient, keys, savedList, "list-1");
+
+    expect(queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists[0]).toMatchObject({
+      id: "list-1",
+      name: "Saved list",
+      order: -1,
+      listItems: [optimisticItem],
+    });
+    expect(queryClient.getQueryData<DashboardSnapshot>(keys.currentView)?.lists[0]).toMatchObject({
+      id: "list-1",
+      name: "Saved list",
+      order: -1,
+      listItems: [optimisticItem],
+    });
+    expect(queryClient.getQueryData<DashboardSnapshot>(keys.selectedView)?.lists[0]).toMatchObject({
+      id: "list-1",
+      name: "Saved list",
+      order: -1,
+      listItems: [optimisticItem],
+    });
+  });
+
+  it("removes a list item from every list across dashboard snapshots", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({ id: "custom" });
+    const firstList = list("first", [], 0, {
+      listItems: [item("target-item", "first"), item("keep-first", "first")],
+    });
+    const secondList = list("second", [], 1, {
+      listItems: [item("target-item", "second"), item("keep-second", "second")],
+    });
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [firstList, secondList],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [firstList],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [secondList],
+    });
+
+    removeListItemFromDashboardCaches(queryClient, keys, "target-item");
+
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists.flatMap((entry) =>
+        entry.listItems.map((listItem) => listItem.id)
+      )
+    ).toEqual(["keep-first", "keep-second"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.currentView)?.lists[0].listItems.map((listItem) => listItem.id)
+    ).toEqual(["keep-first"]);
+    expect(
+      queryClient.getQueryData<DashboardSnapshot>(keys.selectedView)?.lists[0].listItems.map((listItem) => listItem.id)
+    ).toEqual(["keep-second"]);
+  });
+
+  it("restores dashboard cache snapshots exactly during rollback", () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const customView = view({ id: "custom" });
+    const previousAllLists = {
+      view: allListsView,
+      lists: [list("previous-all")],
+    };
+    const previousCurrentView = {
+      view: customView,
+      lists: [list("previous-current", ["a", "b"])],
+    };
+    const previousSelectedView = {
+      view: customView,
+      lists: [list("previous-selected", ["a", "b"])],
+    };
+
+    queryClient.setQueryData(keys.allLists, {
+      view: allListsView,
+      lists: [list("changed-all")],
+    });
+    queryClient.setQueryData(keys.currentView, {
+      view: customView,
+      lists: [list("changed-current", ["a", "b"])],
+    });
+    queryClient.setQueryData(keys.selectedView, {
+      view: customView,
+      lists: [list("changed-selected", ["a", "b"])],
+    });
+
+    rollbackDashboardCaches(queryClient, keys, {
+      previousAllLists,
+      previousCurrentView,
+      previousSelectedView,
+    });
+
+    expect(queryClient.getQueryData(keys.allLists)).toStrictEqual(previousAllLists);
+    expect(queryClient.getQueryData(keys.currentView)).toStrictEqual(previousCurrentView);
+    expect(queryClient.getQueryData(keys.selectedView)).toStrictEqual(previousSelectedView);
   });
 });
 

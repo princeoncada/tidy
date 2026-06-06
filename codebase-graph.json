@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.1",
+  "version": "1.9.2-alpha",
   "generatedAt": "2026-06-05",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1276,6 +1276,7 @@
       "symbols": [
         "AffectedTagView",
         "CurrentViewSnapshot",
+        "DashboardCacheSnapshots",
         "DashboardKeySource",
         "DashboardKeys",
         "DashboardList",
@@ -1292,8 +1293,7 @@
         "applyViewSelectionToViews",
         "buildDashboardKeys",
         "buildPersistedItemOrderPayload",
-        "buildPersistedListOrderPayload",
-        "buildPersistedViewOrderPayload"
+        "buildPersistedListOrderPayload"
       ],
       "imports": [
         "@tanstack/react-query",
