@@ -195,6 +195,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.1 - Extract Dashboard Query Key Helper~~ (stable 2026-06-05)
 
+- ~~1.9.2 - Extract List Mutation Cache Helpers~~ (stable 2026-06-05)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -204,17 +206,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.2 - Extract List Mutation Cache Helpers (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.2 - Extract List Mutation Cache Helpers
-- **Status:** In progress | Priority: P1 maintainability
-- **Files:** lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListsContainer.tsx, tests/
-- **Problem:** `ListAdder` create-list optimistic insert/reconcile/rollback and `ListComponent` create-item optimistic/onSuccess/rollback still contain raw component cache writes around the existing `lib/dashboard-cache.ts` trio-write seam.
-- **Scope:** route create-list and create-item cache behavior through named `lib/dashboard-cache.ts` helpers that use the existing chokepoint seam, while preserving optimistic behavior, rollback snapshots, projection behavior, and query key shapes.
-- **Acceptance:** behavior is preserved, the list mutation helpers are backed by extending `tests/unit/dashboard-cache.test.ts`, and no optimistic/rollback behavior changes.
 
 ### 1.9.3 - Extract View Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
