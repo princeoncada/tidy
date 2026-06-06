@@ -43,6 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useOptimisticSync } from "@/hooks/useOptimisticSync";
 import {
   applyViewSelection,
+  buildDashboardKeys,
   buildPersistedViewOrderPayload,
   canApplySelectedViewPayload,
   canRollbackViewSelection,
@@ -402,8 +403,6 @@ export default function ViewsSidebarPreview() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const optimisticSync = useOptimisticSync();
-  const viewsQueryKey = trpc.view.getAll.queryKey();
-  const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
   const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dragPreviewViewsRef = useRef<ViewItem[] | null>(null);
   const latestSelectedViewIdRef = useRef<string | null>(null);
@@ -420,10 +419,6 @@ export default function ViewsSidebarPreview() {
     () => views.find((view) => view.type === "ALL_LISTS"),
     [views]
   );
-  const allListsQueryKey = allListsView
-    ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
-    : currentViewQueryKey;
-  const queryKey = allListsQueryKey;
   const { isLoading: allListsLoading } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
@@ -439,15 +434,16 @@ export default function ViewsSidebarPreview() {
     () => views.find((view) => view.isDefault)?.id ?? allListsView?.id,
     [allListsView?.id, views]
   );
-  const selectedViewQueryKey = selectedViewId
-    ? trpc.view.getViewListsWithItems.queryKey({ viewId: selectedViewId })
-    : currentViewQueryKey;
-  const dashboardKeys = {
+  const dashboardKeys = buildDashboardKeys(trpc, {
+    allListsViewId: allListsView?.id,
+    selectedViewId,
+  });
+  const {
     views: viewsQueryKey,
     allLists: allListsQueryKey,
     currentView: currentViewQueryKey,
-    selectedView: selectedViewQueryKey,
-  };
+  } = dashboardKeys;
+  const queryKey = allListsQueryKey;
 
   const selectViewMutation = useMutation(
     trpc.view.saveSelectedView.mutationOptions()
