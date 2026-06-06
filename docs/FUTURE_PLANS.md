@@ -209,6 +209,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.8 - Sync Status UI Surface~~ (stable 2026-06-06)
 
+- ~~1.9.9 - Offline Conflict Resolution Rules~~ (stable 2026-06-06)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -218,17 +220,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.9 - Offline Conflict Resolution Rules (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.9 - Offline Conflict Resolution Rules
-- **Status:** In progress | Priority: P1 offline integration
-- **Files:** lib/sync/*, lib/local-db/*, docs/DECISIONS.md, tests/
-- **Problem:** No conflict policy exists for offline replay when server state diverged.
-- **Scope:** define and implement a conflict policy (for example last-write-wins versus server-wins per entity) for replayed operations; record the decision.
-- **Acceptance:** conflicting replays resolve deterministically per the recorded policy; tests cover the conflict cases.
 
 ### 1.9.10 - Local DB Source-of-Truth Decision
 - **Status:** Open | Priority: P1 offline integration
