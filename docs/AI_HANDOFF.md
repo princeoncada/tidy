@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.6-alpha -->
+<!-- Current Version: 1.9.6 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.6 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.6 - Durable Pending-Write Integration
 **Next**: 1.9.7 - Automatic Replay Worker
 
