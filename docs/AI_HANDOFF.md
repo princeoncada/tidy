@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.9-alpha -->
+<!-- Current Version: 1.9.9 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.9-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.9 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.9 - Offline Conflict Resolution Rules
 **Next**: 1.9.10 - Local DB Source-of-Truth Decision
 
