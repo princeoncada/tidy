@@ -207,6 +207,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.7 - Automatic Replay Worker~~ (stable 2026-06-06)
 
+- ~~1.9.8 - Sync Status UI Surface~~ (stable 2026-06-06)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -216,17 +218,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.8 - Sync Status UI Surface (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.8 - Sync Status UI Surface
-- **Status:** In progress | Priority: P2 offline integration
-- **Files:** components/* (new small status component), lib/sync/sync-status-surface.ts, tests/
-- **Problem:** createSyncStatusSurface is built and tested but rendered nowhere; users have no sync feedback.
-- **Scope:** surface pending/syncing/failed counts in the dashboard using the existing sync-status-surface helper.
-- **Acceptance:** status reflects real outbox state; failed operations are visible/actionable; no change to data behavior; tests cover the rendered states.
 
 ### 1.9.9 - Offline Conflict Resolution Rules
 - **Status:** Open | Priority: P1 offline integration
