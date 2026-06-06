@@ -12,6 +12,7 @@ import SuperJSON from 'superjson';
 import { absoluteUrl } from '@/lib/utils';
 import { AuthSync } from '@/components/AuthSync';
 import { useLocalDbHealthCheck } from '@/hooks/use-local-db-health-check';
+import { OfflineReplayTrigger } from '@/components/OfflineReplayTrigger';
 
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 
@@ -65,6 +66,7 @@ export function TRPCReactProvider(
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
         <AuthSync />
+        <OfflineReplayTrigger />
         {props.children}
       </TRPCProvider>
     </QueryClientProvider>

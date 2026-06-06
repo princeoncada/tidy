@@ -214,12 +214,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.7 - Automatic Replay Worker (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.7 - Automatic Replay Worker
-- **Status:** Open | Priority: P1 offline integration
+- **Status:** In progress | Priority: P1 offline integration
 - **Files:** new app/api/sync route, lib/sync/*, lib/local-db/sync-replay-client.ts, a mounted client hook, tests/
 - **Problem:** replayOutboxOperations exists but nothing runs it, and there is no server endpoint.
 - **Scope:** add a real protected /api/sync route that uses validateSyncEndpointRequest, and mount a replay trigger (on load plus online event) using createHttpSyncReplayTransport; respect user scoping.

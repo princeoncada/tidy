@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.9.6 -->
+<!-- Current Version: 1.9.7-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 

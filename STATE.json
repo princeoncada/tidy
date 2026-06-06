@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.6",
-    "state":  "stable",
-    "phase":  "1.9.6",
-    "phaseTitle":  "Durable Pending-Write Integration",
-    "nextPhase":  "1.9.7 - Automatic Replay Worker",
+    "version":  "1.9.7-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.7",
+    "phaseTitle":  "Automatic Replay Worker",
+    "nextPhase":  "1.9.8 - Sync Status UI Surface",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-06"
 }
