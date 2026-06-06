@@ -372,6 +372,185 @@ export function applyViewSelection(
   queryClient.setQueryData(keys.currentView, projectView(selectedView, allListsSnapshot));
 }
 
+export type ViewMutationSnapshots = {
+  previousViews: ViewsCache | undefined;
+  previousCurrentView: CurrentViewSnapshot | undefined;
+};
+
+export function captureViewMutationSnapshots(
+  queryClient: QueryClient,
+  keys: DashboardKeys
+): ViewMutationSnapshots {
+  return {
+    previousViews: queryClient.getQueryData<ViewsCache>(keys.views),
+    previousCurrentView: queryClient.getQueryData<CurrentViewSnapshot>(keys.currentView),
+  };
+}
+
+export function rollbackViewMutationCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  snapshots: ViewMutationSnapshots
+) {
+  queryClient.setQueryData(keys.views, snapshots.previousViews);
+  queryClient.setQueryData(keys.currentView, snapshots.previousCurrentView);
+}
+
+export function insertOptimisticViewIntoDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  optimisticView: ViewCacheItem,
+  allListsSnapshot: DashboardSnapshot | undefined
+) {
+  queryClient.setQueryData<ViewsCache>(keys.views, (currentViews = []) => [
+    optimisticView,
+    ...currentViews.map((view) => ({ ...view, isDefault: false })),
+  ].sort((a, b) => a.order - b.order));
+  queryClient.setQueryData(
+    keys.currentView,
+    projectView(optimisticView, allListsSnapshot)
+  );
+}
+
+export function reconcileCreatedViewInViewsCache(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  createdView: Partial<ViewCacheItem> & Pick<ViewCacheItem, "id">
+) {
+  queryClient.setQueryData<ViewsCache>(keys.views, (currentViews = []) =>
+    currentViews.map((view) =>
+      view.id === createdView.id ? { ...view, ...createdView } : view
+    )
+  );
+}
+
+export function reconcileUpdatedViewInViewsCache(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  updatedView: Partial<ViewCacheItem> & Pick<ViewCacheItem, "id">
+) {
+  queryClient.setQueryData<ViewsCache>(keys.views, (currentViews) =>
+    currentViews?.map((view) =>
+      view.id === updatedView.id ? { ...view, ...updatedView } : view
+    )
+  );
+}
+
+export function applyViewRenameToViewsCache(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  viewId: string,
+  name: string
+) {
+  queryClient.setQueryData<ViewsCache>(keys.views, (currentViews) =>
+    currentViews?.map((view) =>
+      view.id === viewId ? { ...view, name } : view
+    )
+  );
+}
+
+export function applyViewFilterUpdateToCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  params: {
+    viewId: string;
+    selectedTags: DashboardTag[];
+    allListsSnapshot: DashboardSnapshot | undefined;
+  }
+) {
+  const { viewId, selectedTags, allListsSnapshot } = params;
+  let editedView: ViewCacheItem | undefined;
+
+  queryClient.setQueryData<ViewsCache>(keys.views, (currentViews) =>
+    currentViews?.map((view) => {
+      if (view.id !== viewId) return view;
+
+      editedView = {
+        ...view,
+        viewTags: selectedTags.map((tag) => ({
+          viewId,
+          tagId: tag.id,
+          tag,
+        })),
+      };
+
+      editedView.viewLists = (allListsSnapshot?.lists ?? [])
+        .filter((list) => (editedView ? listMatchesView(list, editedView) : false))
+        .map((list) => ({ listId: list.id, order: list.order }));
+
+      return editedView;
+    })
+  );
+
+  if (editedView?.isDefault) {
+    queryClient.setQueryData(
+      keys.currentView,
+      projectView(editedView, allListsSnapshot)
+    );
+  }
+}
+
+export function removeViewFromDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  viewId: string,
+  allListsSnapshot: DashboardSnapshot | undefined
+) {
+  const previousViews = queryClient.getQueryData<ViewsCache>(keys.views);
+  const deletedView = previousViews?.find((view) => view.id === viewId);
+  const fallbackView = previousViews?.find((view) => view.type === "ALL_LISTS");
+
+  queryClient.setQueryData<ViewsCache>(keys.views, (currentViews) =>
+    currentViews
+      ?.filter((view) => view.id !== viewId)
+      .map((view) => ({
+        ...view,
+        isDefault: deletedView?.isDefault ? view.id === fallbackView?.id : view.isDefault,
+      }))
+  );
+
+  if (deletedView?.isDefault && fallbackView) {
+    queryClient.setQueryData(
+      keys.currentView,
+      projectView(fallbackView, allListsSnapshot)
+    );
+  }
+}
+
+export function commitViewOrderToViewsCache(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  nextViews: ViewCacheItem[]
+) {
+  queryClient.setQueryData<ViewsCache>(keys.views, (currentViews = []) => {
+    const fixedViews = currentViews.filter((view) => view.type !== "CUSTOM");
+    return [...fixedViews, ...nextViews].sort((a, b) => a.order - b.order);
+  });
+}
+
+export function applySelectedViewPayloadToCurrentView(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  latestSelectedViewId: string | null | undefined,
+  payload: DashboardSnapshot | undefined
+) {
+  if (canApplySelectedViewPayload(latestSelectedViewId, payload)) {
+    queryClient.setQueryData(keys.currentView, payload);
+  }
+}
+
+export function rollbackSelectedView(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  latestSelectedViewId: string | null | undefined,
+  failedViewId: string | null | undefined,
+  snapshots: ViewMutationSnapshots
+) {
+  if (!canRollbackViewSelection(latestSelectedViewId, failedViewId)) return;
+  queryClient.setQueryData(keys.views, snapshots.previousViews);
+  queryClient.setQueryData(keys.currentView, snapshots.previousCurrentView);
+}
+
 export function updateListInDashboardCaches(
   queryClient: QueryClient,
   keys: DashboardKeys,
