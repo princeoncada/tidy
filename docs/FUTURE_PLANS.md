@@ -211,6 +211,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.9 - Offline Conflict Resolution Rules~~ (stable 2026-06-06)
 
+- ~~1.9.10 - Local DB Source-of-Truth Decision~~ (stable 2026-06-06)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -220,17 +222,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.10 - Local DB Source-of-Truth Decision (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.10 - Local DB Source-of-Truth Decision
-- **Status:** In progress | Priority: P1 offline integration
-- **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, lib/dashboard-cache.ts if adopted, tests/
-- **Problem:** After durable writes plus replay, whether the dashboard reads from Dexie or server must be decided explicitly.
-- **Scope:** decide and document read-from-Dexie versus read-from-server (or hybrid); implement only if the decision adopts a change.
-- **Acceptance:** the source-of-truth decision is recorded with rationale; any adopted read change preserves projection/query-key/optimistic invariants and is test-backed.
 
 ### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness
