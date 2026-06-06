@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.7-alpha -->
+<!-- Current Version: 1.9.7 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.7 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.7 - Automatic Replay Worker
 **Next**: 1.9.8 - Sync Status UI Surface
 
