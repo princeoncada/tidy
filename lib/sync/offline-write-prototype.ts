@@ -1,5 +1,6 @@
 import {
   enqueueOutboxOperation,
+  getPendingOutboxOperations,
   type LocalOutboxRepositoryDatabase,
 } from "@/lib/local-db/outbox-repository";
 import {
@@ -129,4 +130,32 @@ export async function flushOfflineWrites(args: FlushOfflineWritesArgs): Promise<
   }
 
   return replayOutboxOperations(replayArgs);
+}
+
+export type ReconcilePendingWritesArgs = {
+  userId: string;
+  limit?: number;
+  db?: LocalOutboxRepositoryDatabase;
+};
+
+export async function reconcilePendingWritesOnLoad(
+  args: ReconcilePendingWritesArgs,
+): Promise<LocalOutboxOperation[]> {
+  if (!isOfflineWriteCaptureEnabled()) {
+    return [];
+  }
+
+  try {
+    const queryArgs: {
+      userId: string;
+      limit?: number;
+      db?: LocalOutboxRepositoryDatabase;
+    } = { userId: args.userId };
+    if (args.limit !== undefined) queryArgs.limit = args.limit;
+    if (args.db !== undefined) queryArgs.db = args.db;
+    return await getPendingOutboxOperations(queryArgs);
+  } catch (error) {
+    console.error("Failed to reconcile pending outbox writes on load", error);
+    return [];
+  }
 }
