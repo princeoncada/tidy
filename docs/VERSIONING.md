@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.7
-- **Current phase:** 1.9.7 - Automatic Replay Worker
-- **Next phase:** 1.9.8 - Sync Status UI Surface
+- **Current version:** 1.9.8-alpha
+- **Current phase:** 1.9.8 - Sync Status UI Surface
+- **Next phase:** 1.9.9 - Offline Conflict Resolution Rules
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.9.8 | alpha | 2026-06-06 | Sync Status UI Surface | (in progress) |
 | 1.9.7 | stable | 2026-06-06 | Automatic Replay Worker | (in progress) |
 | 1.9.6 | stable | 2026-06-06 | Durable Pending-Write Integration | (in progress) |
 | 1.9.5 | stable | 2026-06-06 | Dashboard Mutation to Outbox Wiring | (in progress) |
