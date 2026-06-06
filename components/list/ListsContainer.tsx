@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  buildDashboardKeys,
   buildPersistedItemOrderPayload,
   buildPersistedListOrderPayload,
   canApplySelectedViewPayload,
@@ -176,8 +177,6 @@ const ListsContainer = () => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const viewsQueryKey = trpc.view.getAll.queryKey();
-  const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
 
   const { data: views, isLoading: viewsLoading, isError: viewsError } = useQuery(
     trpc.view.getAll.queryOptions()
@@ -187,19 +186,17 @@ const ListsContainer = () => {
   const selectedView = selectedViewFromCache(views);
   const selectedViewId = selectedView?.id;
 
-  const allListsQueryKey = allListsView
-    ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
-    : currentViewQueryKey;
-  const selectedViewQueryKey = selectedViewId
-    ? trpc.view.getViewListsWithItems.queryKey({ viewId: selectedViewId })
-    : currentViewQueryKey;
+  const dashboardKeys = buildDashboardKeys(trpc, {
+    allListsViewId: allListsView?.id,
+    selectedViewId,
+  });
 
-  const dashboardKeys = {
+  const {
     views: viewsQueryKey,
     allLists: allListsQueryKey,
     currentView: currentViewQueryKey,
     selectedView: selectedViewQueryKey,
-  };
+  } = dashboardKeys;
 
   const queryKey = selectedViewQueryKey;
 
