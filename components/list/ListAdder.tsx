@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrentView, OptimisticList } from "./types";
 import { Plus } from "lucide-react";
 import {
+  buildDashboardKeys,
   invalidateViewPayloadQueries,
   queryKeysEqual,
   reconcileCreatedListInSnapshot,
@@ -26,24 +27,15 @@ const ListAdder = () => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const viewsQueryKey = trpc.view.getAll.queryKey();
-  const currentViewQueryKey = trpc.view.getCurrentViewListsWithItems.queryKey();
   const { data: views, isLoading: viewsLoading } = useQuery(trpc.view.getAll.queryOptions());
   const allListsView = views?.find((view) => view.type === "ALL_LISTS");
-  const allListsQueryKey = allListsView
-    ? trpc.view.getViewListsWithItems.queryKey({ viewId: allListsView.id })
-    : currentViewQueryKey;
   const selectedView = selectedViewFromCache(views);
   const selectedViewId = selectedView?.id;
-  const selectedViewQueryKey = selectedViewId
-    ? trpc.view.getViewListsWithItems.queryKey({ viewId: selectedViewId })
-    : currentViewQueryKey;
-  const dashboardKeys = {
-    views: viewsQueryKey,
-    allLists: allListsQueryKey,
-    currentView: currentViewQueryKey,
-    selectedView: selectedViewQueryKey,
-  };
+  const dashboardKeys = buildDashboardKeys(trpc, {
+    allListsViewId: allListsView?.id,
+    selectedViewId,
+  });
+  const { views: viewsQueryKey } = dashboardKeys;
 
   const { isLoading: bootListsLoading } = useQuery(
     trpc.view.getCurrentViewListsWithItems.queryOptions()
