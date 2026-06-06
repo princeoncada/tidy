@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.0 -->
+<!-- Current Version: 1.9.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.0 - Dashboard Component Responsibility Audit
-**Next**: 1.9.1 - Extract Dashboard Query Key Helper
+**Current Version**: 1.9.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.1 - Extract Dashboard Query Key Helper
+**Next**: 1.9.2 - Extract List Mutation Cache Helpers
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
