@@ -197,6 +197,8 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 
 - ~~1.9.2 - Extract List Mutation Cache Helpers~~ (stable 2026-06-05)
 
+- ~~1.9.3 - Extract View Mutation Cache Helpers~~ (stable 2026-06-06)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -206,17 +208,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.3 - Extract View Mutation Cache Helpers (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.3 - Extract View Mutation Cache Helpers
-- **Status:** In progress | Priority: P1 maintainability
-- **Files:** lib/dashboard-cache.ts, components/views/ViewsSidebarPreview.tsx, tests/
-- **Problem:** `ViewsSidebarPreview` owns raw cache writes for view create, rename, updateFilter, delete, reorder, and select follow-up payload handling, so view mutation behavior is concentrated in one large component instead of the dashboard cache seam.
-- **Scope:** route view create/rename/updateFilter/delete/reorder/select cache writes through named `lib/dashboard-cache.ts` helpers that preserve latest-selection guards, view ordering, rollback behavior, and query key shapes.
-- **Acceptance:** behavior is preserved, view query keys and rollback behavior do not change, and `tests/unit/dashboard-cache.test.ts` is extended to cover the extracted helpers.
 
 ### 1.9.4 - Extract Tag Mutation Cache Helpers
 - **Status:** Open | Priority: P1 maintainability
