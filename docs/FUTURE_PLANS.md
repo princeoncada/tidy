@@ -216,12 +216,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.8 - Sync Status UI Surface (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.8 - Sync Status UI Surface
-- **Status:** Open | Priority: P2 offline integration
+- **Status:** In progress | Priority: P2 offline integration
 - **Files:** components/* (new small status component), lib/sync/sync-status-surface.ts, tests/
 - **Problem:** createSyncStatusSurface is built and tested but rendered nowhere; users have no sync feedback.
 - **Scope:** surface pending/syncing/failed counts in the dashboard using the existing sync-status-surface helper.

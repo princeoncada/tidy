@@ -86,6 +86,19 @@ export async function getPendingOutboxOperations({
   return typeof limit === "number" ? operations.slice(0, limit) : operations;
 }
 
+export async function getOutboxOperationsForUser({
+  userId,
+  db,
+}: {
+  userId: string;
+  db?: LocalOutboxRepositoryDatabase;
+}): Promise<LocalOutboxOperation[]> {
+  return getOutboxRepositoryDb(db)
+    .outboxOperations.where("userId")
+    .equals(userId)
+    .sortBy("createdAt");
+}
+
 export async function markOutboxOperationSyncing(
   args: TimestampedUpdateArgs,
 ): Promise<LocalOutboxOperation | null> {

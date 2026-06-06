@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.7",
+  "version": "1.9.8-alpha",
   "generatedAt": "2026-06-06",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -464,7 +464,8 @@
         "./ui/separator",
         "./UserAccountNav",
         "@tanstack/react-query",
-        "./views/ViewsSidebarPreview"
+        "./views/ViewsSidebarPreview",
+        "./SyncStatusBadge"
       ]
     },
     {
@@ -674,6 +675,15 @@
       ],
       "imports": [
         "@/hooks/use-offline-replay-trigger"
+      ]
+    },
+    {
+      "path": "components/SyncStatusBadge.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@/hooks/use-sync-status-surface"
       ]
     },
     {
@@ -1282,6 +1292,20 @@
       ]
     },
     {
+      "path": "hooks/use-sync-status-surface.ts",
+      "kind": "hook",
+      "extension": ".ts",
+      "symbols": [
+        "useSyncStatusSurface"
+      ],
+      "imports": [
+        "react",
+        "@/lib/supabase/client",
+        "@/lib/sync/offline-write-prototype",
+        "@/lib/sync/sync-status-surface"
+      ]
+    },
+    {
       "path": "hooks/useOptimisticSync.ts",
       "kind": "hook",
       "extension": ".ts",
@@ -1465,6 +1489,7 @@
         "LocalOutboxRepositoryDatabase",
         "enqueueOutboxOperation",
         "getOutboxOperationById",
+        "getOutboxOperationsForUser",
         "getPendingOutboxOperations",
         "incrementRetryCount",
         "markOutboxOperationDiscarded",
@@ -1621,18 +1646,21 @@
         "CreateHttpSyncReplayTransportArgs",
         "FlushOfflineWritesArgs",
         "OfflineWriteIntent",
+        "ReadSyncStatusSurfaceArgs",
         "ReconcilePendingWritesArgs",
         "captureDashboardMutationOutbox",
         "captureOfflineWrite",
         "createHttpSyncReplayTransport",
         "flushOfflineWrites",
         "isOfflineWriteCaptureEnabled",
+        "readSyncStatusSurfaceForUser",
         "reconcilePendingWritesOnLoad"
       ],
       "imports": [
         "@/lib/local-db/outbox-repository",
         "@/lib/local-db/sync-replay-client",
         "@/lib/local-db/local-repositories",
+        "@/lib/sync/sync-status-surface",
         "@/lib/local-db/outbox-schema"
       ]
     },
@@ -2320,6 +2348,30 @@
       ]
     },
     {
+      "path": "tests/unit/sync-status-badge.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/SyncStatusBadge",
+        "@/lib/sync/sync-status-surface"
+      ]
+    },
+    {
+      "path": "tests/unit/sync-status-reader.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/offline-write-prototype",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/local-db/outbox-repository"
+      ]
+    },
+    {
       "path": "tests/unit/sync-status-surface.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2350,6 +2402,19 @@
         "react",
         "vitest",
         "@/hooks/use-offline-replay-trigger"
+      ]
+    },
+    {
+      "path": "tests/unit/use-sync-status-surface.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "react",
+        "vitest",
+        "@/lib/sync/sync-status-surface",
+        "@/hooks/use-sync-status-surface"
       ]
     },
     {
@@ -2862,6 +2927,12 @@
     },
     {
       "from": "components/Dashboard.tsx",
+      "to": "components/SyncStatusBadge.tsx",
+      "type": "imports",
+      "import": "./SyncStatusBadge"
+    },
+    {
+      "from": "components/Dashboard.tsx",
       "to": "components/ui/separator.tsx",
       "type": "imports",
       "import": "./ui/separator"
@@ -3281,6 +3352,12 @@
       "import": "@/hooks/use-offline-replay-trigger"
     },
     {
+      "from": "components/SyncStatusBadge.tsx",
+      "to": "hooks/use-sync-status-surface.ts",
+      "type": "imports",
+      "import": "@/hooks/use-sync-status-surface"
+    },
+    {
       "from": "components/ui/avatar.tsx",
       "to": "lib/utils.ts",
       "type": "imports",
@@ -3611,6 +3688,24 @@
       "import": "@/lib/sync/offline-write-prototype"
     },
     {
+      "from": "hooks/use-sync-status-surface.ts",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "hooks/use-sync-status-surface.ts",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
+    },
+    {
+      "from": "hooks/use-sync-status-surface.ts",
+      "to": "lib/sync/sync-status-surface.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-status-surface"
+    },
+    {
       "from": "hooks/useOptimisticSync.ts",
       "to": "lib/local-db/outbox-repository.ts",
       "type": "imports",
@@ -3783,6 +3878,12 @@
       "to": "lib/local-db/sync-replay-client.ts",
       "type": "imports",
       "import": "@/lib/local-db/sync-replay-client"
+    },
+    {
+      "from": "lib/sync/offline-write-prototype.ts",
+      "to": "lib/sync/sync-status-surface.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-status-surface"
     },
     {
       "from": "lib/sync/sync-endpoint-contract.ts",
@@ -4223,6 +4324,36 @@
       "import": "@/lib/sync/sync-endpoint-contract"
     },
     {
+      "from": "tests/unit/sync-status-badge.test.tsx",
+      "to": "components/SyncStatusBadge.tsx",
+      "type": "imports",
+      "import": "@/components/SyncStatusBadge"
+    },
+    {
+      "from": "tests/unit/sync-status-badge.test.tsx",
+      "to": "lib/sync/sync-status-surface.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-status-surface"
+    },
+    {
+      "from": "tests/unit/sync-status-reader.test.ts",
+      "to": "lib/local-db/outbox-repository.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-repository"
+    },
+    {
+      "from": "tests/unit/sync-status-reader.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/sync-status-reader.test.ts",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
+    },
+    {
       "from": "tests/unit/sync-status-surface.test.ts",
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
@@ -4245,6 +4376,18 @@
       "to": "hooks/use-offline-replay-trigger.ts",
       "type": "imports",
       "import": "@/hooks/use-offline-replay-trigger"
+    },
+    {
+      "from": "tests/unit/use-sync-status-surface.test.ts",
+      "to": "hooks/use-sync-status-surface.ts",
+      "type": "imports",
+      "import": "@/hooks/use-sync-status-surface"
+    },
+    {
+      "from": "tests/unit/use-sync-status-surface.test.ts",
+      "to": "lib/sync/sync-status-surface.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-status-surface"
     },
     {
       "from": "tests/unit/view-helpers.test.ts",

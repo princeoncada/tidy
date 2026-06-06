@@ -11,6 +11,7 @@ import { Separator } from "./ui/separator";
 import UserAccountNav from "./UserAccountNav";
 import { useQueryClient } from "@tanstack/react-query";
 import ViewsSidebarPreview from "./views/ViewsSidebarPreview";
+import SyncStatusBadge from "./SyncStatusBadge";
 
 const supabase = createClient();
 
@@ -47,7 +48,10 @@ const Dashboard = () => {
                     Your Todo Lists
                   </h1>
                 </div>
-                <ListAdder />
+                <div className="flex items-center gap-2">
+                  <SyncStatusBadge />
+                  <ListAdder />
+                </div>
               </div>
             </div>
 
