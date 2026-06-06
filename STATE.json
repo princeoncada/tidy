@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.8-alpha",
-    "state":  "alpha",
+    "version":  "1.9.8",
+    "state":  "stable",
     "phase":  "1.9.8",
     "phaseTitle":  "Sync Status UI Surface",
     "nextPhase":  "1.9.9 - Offline Conflict Resolution Rules",
