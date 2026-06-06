@@ -133,3 +133,31 @@ makes the capture wiring a single-seam change instead of a cross-component rewri
 
 **Impact**: 1.9.x is reframed from pure maintainability to the on-ramp for offline. The "in-memory
 queues lose pending writes on refresh/crash" risk remains accepted-temporary until 1.9.6.
+
+---
+
+## 2026-06-06: Offline replay conflict policy is timestamp last-write-wins, server-authoritative on ties (1.9.9)
+
+Replayed offline outbox operations resolve conflicts with the server using a deterministic, per-operation
+last-write-wins rule keyed on timestamps. `resolveOutboxOperationConflict` (`lib/sync/conflict-resolution.ts`)
+compares the operation's `updatedAt` against the server entity snapshot's `updatedAt`:
+
+- No server record for the entity -> client operation applies (no conflict).
+- Client `updatedAt` strictly newer than server -> client wins; the operation replays.
+- Server `updatedAt` newer than or equal to the client, or either timestamp missing/unparseable -> server wins;
+  the operation is discarded without replay and reported as `resolved-server-wins`.
+
+**Reason**: The rule must be deterministic so identical inputs always resolve the same way, and it must keep the
+sync endpoint as the authority (consistent with the replay seam where the endpoint is the auth authority).
+Last-write-wins matches the optimistic-UI expectation that a user's newest edit should win, while the
+server-authoritative tie-break (equal or missing timestamps resolve to the server) prevents nondeterministic
+flapping and stops a client silently clobbering equally-timestamped server state.
+
+**Scope and deferral**: 1.9.9 implements and tests the pure policy and wires it into the replay path behind an
+optional `getServerSnapshot` provider on `replayOutboxOperations`. No runtime caller supplies that provider yet,
+so default behavior and the off-by-default `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` UX are unchanged. Reading
+authoritative server state and applying operations to the database remains deferred to 1.9.10 (Local DB
+Source-of-Truth Decision), which will supply a real snapshot provider.
+
+**Impact**: The "No conflict policy exists for offline replay" known risk in `docs/AI_HANDOFF.md` is discharged as
+a recorded, tested policy; runtime application of that policy still waits on 1.9.10.
