@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.14-alpha",
-    "state":  "alpha",
+    "version":  "1.9.14",
+    "state":  "stable",
     "phase":  "1.9.14",
     "phaseTitle":  "Version-History Ownership De-Dup",
     "nextPhase":  "1.9.15 - Retire/Compress ai-harness Pointer Surface",
