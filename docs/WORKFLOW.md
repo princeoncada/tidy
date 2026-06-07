@@ -715,7 +715,7 @@ See `docs/VERSIONING.md` for the five versioning locations and the full bump rul
 ## Versioning Locations (All Five, Every Bump)
 
 1. `STATE.json` - `version` + `state` fields
-2. `docs/VERSIONING.md` - history table + current state row
+2. `docs/VERSIONING.md` - current state row
 3. `docs/AI_HANDOFF.md` - `<!-- Current Version: X.Y.Z -->` comment at top
 4. `package.json` - `version` field
 5. `docs/WORKFLOW.md` - `<!-- Current Version: X.Y.Z -->` comment at top (this file)
