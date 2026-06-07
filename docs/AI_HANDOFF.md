@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.14-alpha -->
+<!-- Current Version: 1.9.14 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.14-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.14 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.14 - Version-History Ownership De-Dup
 **Next**: 1.9.15 - Retire/Compress ai-harness Pointer Surface
 
