@@ -18,7 +18,9 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 
 ## Latest Completed Change
 
-**1.5.2 - AI Context Budget Audit** promoted the on-demand context budget audit (`npm run budget:context` / `scripts/ai-context-budget.ps1`) to stable. The 1.5.x harness series so far: 1.5.0 added the ai-harness skills and inactive hook contracts, 1.5.1 added the gitignored `.tidy-ai/` local memory and learning queue written by opt-in hooks, and 1.5.2 added the context budget audit. The Codex validation boundary and five-location versioning rules are unchanged.
+The latest completed change is the stable version recorded in `STATE.json`; read `docs/FUTURE_PLANS.md` Completed (top) and the `docs/VERSIONING.md` history table for the full trail. This is a pointer by design so this section cannot drift - do not restate a frozen "latest" here.
+
+Active arc: the 1.9.x product-first cleanup series. 1.9.11 added the Product-First Planning Contract and rebaselined the roadmap; 1.9.12 realigned the agent role model (Claude Code architects/scopes/plans/validates/writes prompts; Codex is the boosted implementer; ChatGPT reviews). The Codex validation boundary and five-location versioning rules are unchanged.
 
 ---
 
@@ -166,7 +168,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Never run `git restore <file>` on a file whose intended edit is still uncommitted; commit the file first, or strip only the injected negative-proof line.
 - Stable-promotion closeout routes users to the per-file commit commands and final push printed by `promote.ps1`; the assistant should not re-emit those stable promotion commands.
 - `open-phase.ps1` requires an explicit `-NextPhase "<version - title>"` or `-NoNextPhase` on every invocation; there is no silent default from the previous STATE.json nextPhase.
-- Product work resumes at the 1.6.x security series; authenticated E2E requires real Supabase credentials and per-worker storage state.
+- The next product work is the 1.9.x product-first local-first dashboard slices (1.9.16+ per `docs/FUTURE_PLANS.md`); authenticated E2E requires real Supabase credentials and per-worker storage state.
 
 ---
 
@@ -174,7 +176,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 1. Read `STATE.json`, `codebase-graph.json`, and `docs/FUTURE_PLANS.md` first.
 2. Use `docs/CONTEXT_INDEX.md` to choose any additional task-specific read set.
-3. Continue the 1.5.x workflow-to-skills re-architecture: 1.5.3 makes the skills real and operational under `.claude/skills/`, 1.5.4 deprecates session checkpointing as the continuation mechanism, 1.5.5 adds real opt-in hook guardrails, then 1.5.6 is the Phase Eval Artifact Baseline.
+3. Continue the active arc named by `STATE.json.nextPhase` and the first Planned item in `docs/FUTURE_PLANS.md`; do not hardcode a phase number here.
 4. Keep `docs/PHASE_LOG.md` historical only. Do not use it as active phase guidance.
 5. Preserve the Codex validation boundary.
 
