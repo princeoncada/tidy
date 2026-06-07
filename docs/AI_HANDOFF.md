@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.10 -->
+<!-- Current Version: 1.9.11-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.10 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.10 - Local DB Source-of-Truth Decision
-**Next**: 1.10.0 - Deploy Env Documentation
+**Current Version**: 1.9.11-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline
+**Next**: 1.9.12 - Agent Role-Model Realignment
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
