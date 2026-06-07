@@ -222,6 +222,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline (active) - see Planned
 ---
 
 ## Planned
