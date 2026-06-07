@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.12-alpha",
-    "state":  "alpha",
+    "version":  "1.9.12",
+    "state":  "stable",
     "phase":  "1.9.12",
     "phaseTitle":  "Agent Role-Model Realignment",
     "nextPhase":  "1.9.13 - Stale Doc Content Sweep",
