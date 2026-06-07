@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.11-alpha -->
+<!-- Current Version: 1.9.11 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.11-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.11 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline
 **Next**: 1.9.12 - Agent Role-Model Realignment
 
