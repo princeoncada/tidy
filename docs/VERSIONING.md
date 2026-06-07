@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.13
-- **Current phase:** 1.9.13 - Stale Doc Content Sweep
-- **Next phase:** 1.9.14 - Version-History Ownership De-Dup
+- **Current version:** 1.9.14-alpha
+- **Current phase:** 1.9.14 - Version-History Ownership De-Dup
+- **Next phase:** 1.9.15 - Retire/Compress ai-harness Pointer Surface
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.9.14 | alpha | 2026-06-07 | Version-History Ownership De-Dup | (in progress) |
 | 1.9.13 | stable | 2026-06-07 | Stale Doc Content Sweep | (in progress) |
 | 1.9.12 | stable | 2026-06-07 | Agent Role-Model Realignment | (in progress) |
 | 1.9.11 | stable | 2026-06-07 | Product-First Planning Contract and Roadmap Rebaseline | (in progress) |
