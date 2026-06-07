@@ -239,12 +239,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.13 - Stale Doc Content Sweep (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.13 - Stale Doc Content Sweep
-- **Status:** Open | Priority: P2 docs hygiene
+- **Status:** In progress | Priority: P2 docs hygiene
 - **Type:** docs cleanup
 - **Files:** docs/AI_HANDOFF.md, docs/VERSIONING.md
 - **Implementation goal:** fix AI_HANDOFF lower-section guidance still referencing 1.5.x/1.6.x continuation, and VERSIONING history rows whose Notes still read "(in progress)" on already-stable versions.
