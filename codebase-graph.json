@@ -1848,7 +1848,7 @@
       "imports": []
     },
     {
-      "path": "scripts/export-chatgpt-architect-context.ps1",
+      "path": "scripts/export-chatgpt-review-context.ps1",
       "kind": "script",
       "extension": ".ps1",
       "symbols": [],
