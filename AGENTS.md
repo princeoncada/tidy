@@ -24,17 +24,21 @@ Repo docs are the only source of truth. Never answer state queries,
 version questions, or "what's next" from session memory of docs.
 Always read STATE.json and docs/FUTURE_PLANS.md fresh.
 
-## ChatGPT Architect Mode
+## ChatGPT Reviewer Mode
 
-ChatGPT chat can use pushed GitHub master plus pasted local evidence. ChatGPT
-chat cannot directly read local uncommitted files, local git status, local git
-diff, local-only branch files, or local-only generated graph
-changes. Anything not pushed or pasted does not exist to ChatGPT architect.
+Claude Code is the architect/scoper/planner/validator/prompt builder and owns
+phase scoping and Codex-prompt authoring locally. ChatGPT is a reviewer,
+weak-point finder, and handoff reviewer: it reviews pushed GitHub master plus
+pasted local evidence and surfaces risks, gaps, and weak points; it does not
+scope phases or write Codex prompts. ChatGPT cannot directly read local
+uncommitted files, local git status, local git diff, local-only branch files,
+or local-only generated graph changes. Anything not pushed or pasted does not
+exist to ChatGPT.
 
-For docs-only phases that only affect pushed files, GitHub remote reads may be
+For docs-only review that only concerns pushed files, GitHub remote reads may be
 enough. For source-heavy phases, local-only work, active branches, or any phase
 where graph output matters, the user/controller must provide a Local Evidence
-Packet before ChatGPT scopes implementation.
+Packet before ChatGPT reviews the implementation.
 
 Local Evidence Packet (required for source-heavy or local-sensitive scoping):
 
@@ -56,13 +60,13 @@ Rules:
   Claude Code session self-gathers it with its own tools (run git status, read
   STATE.json, run npm run graph:codebase, run git diff --stat directly) and then
   scopes; it does not emit the packet for the user to paste back. The
-  emit-as-a-copy-paste-block-and-wait form is reserved for ChatGPT architect
-  scoping, or for a Claude session that genuinely lacks local access. This
+  emit-as-a-copy-paste-block-and-wait form is reserved for providing ChatGPT
+  reviewer context, or for a Claude session that genuinely lacks local access. This
   pre-scope evidence step is separate from the Section 2 `npm run graph:codebase`
   refresh that precedes validate.ps1; do not conflate the two.
-- If local evidence is required but missing, ChatGPT architect must either ask
-  for the packet or explicitly scope only from pushed remote state and state
-  that limitation.
+- If local evidence is required for review but missing, ChatGPT must either ask
+  for the packet or explicitly note it is reviewing from pushed remote state only
+  and state that limitation.
 - Do not pretend GitHub connector reads include local uncommitted work.
 - Pasted validation output may be used as local evidence, but it does not
   replace direct file reads when implementation details matter.

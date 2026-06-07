@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.9.11 -->
+<!-- Current Version: 1.9.12-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -8,27 +8,27 @@ This file governs how Claude Code and Codex operate together in Tidy. Session st
 
 ## Roles
 
-Three roles operate together: ChatGPT architects, Claude Code plans and validates, Codex implements. This section is the authoritative role-boundary definition; the ChatGPT Architect Mode subsection below adds only the evidence/scoping mechanics.
+Three roles operate together: Claude Code architects, scopes, plans, validates, and writes Codex prompts; Codex is the boosted implementer; ChatGPT reviews. This section is the authoritative role-boundary definition; the ChatGPT Reviewer Mode subsection below adds only the evidence/review mechanics.
 
-### ChatGPT (Architecture and Scoping)
+### Claude Code (Architecture, Scoping, Planning, Validation, Prompt Building)
 
-ChatGPT is the **architecture and scoping layer**. It designs the approach, decides phase scope, and produces implementation direction from pushed GitHub state plus pasted local evidence; it has no direct local access. See ChatGPT Architect Mode below for the evidence-packet mechanics.
-
-ChatGPT does **not**: read the local working tree directly, run commands, edit files, or claim local/validation results that were not pasted to it.
-
-### Claude Code (Planning, Validation, Commit Blocks)
-
-Claude Code is the **planning and validation layer**. It reads project state, scopes work, writes Codex prompts, validates output, and provides commit blocks for the user to run.
+Claude Code is the **architecture, scoping, planning, validation, and prompt-building layer**. It designs the approach, decides phase scope, plans the work, reads project state, writes Codex prompts, validates output, and provides commit blocks for the user to run. It has direct local access and self-gathers local evidence.
 
 Claude Code does **not**: implement code, commit, push, run `npm run test:ci`, create branches, or run validation scripts.
 
 **Exception**: Claude Code may implement directly only when explicitly unlocked with the [Implementation Gate](#implementation-gate) phrase.
 
-### Codex (Implementation)
+### Codex (Boosted Implementation)
 
-Codex is the **implementation layer**. It reads docs, edits source files, and summarizes what changed.
+Codex is the **boosted implementation layer**. It reads docs, reads the directly relevant source files, edits source files from Claude Code's prompt, and summarizes what changed.
 
 Codex does **not**: commit, push, run `npm run test:ci`, create branches, run validation scripts, run npm scripts, run graph audit commands, or claim validation results unless the user/controller provided the output.
+
+### ChatGPT (Review)
+
+ChatGPT is the **review layer**: reviewer, weak-point finder, and handoff reviewer. It reviews the approach, plan, and Codex prompts, surfaces risks, gaps, and weak points, and reviews handoffs, working from pushed GitHub state plus pasted local evidence; it has no direct local access. It does not decide phase scope or write Codex prompts - Claude Code owns that. See ChatGPT Reviewer Mode below for the evidence-packet mechanics.
+
+ChatGPT does **not**: read the local working tree directly, run commands, edit files, scope phases, write Codex prompts, or claim local/validation results that were not pasted to it.
 
 ---
 
@@ -40,19 +40,19 @@ Do not duplicate or diverge the startup steps here. See `docs/COMPACT_STRATEGY.m
 
 ---
 
-### ChatGPT Architect Mode
+### ChatGPT Reviewer Mode
 
-ChatGPT architect works from remote GitHub state plus pasted local evidence.
+ChatGPT reviewer works from remote GitHub state plus pasted local evidence.
 Remote master is authoritative only after push. The local working tree is
 authoritative for uncommitted work, active branch edits, local validation
 output, and regenerated graph output.
 
-Before source-heavy scoping, the user/controller must paste a Local Evidence
+Before source-heavy review, the user/controller must paste a Local Evidence
 Packet into ChatGPT chat. For docs-only roadmap/workflow phases, remote GitHub
 reads plus pasted validation output are usually sufficient. For product/source
-phases, ChatGPT must not scope from stale remote-only context when local changes
+phases, ChatGPT must not review from stale remote-only context when local changes
 matter. If the Local Evidence Packet is absent, ChatGPT must state whether the
-scope is remote-only.
+review is remote-only.
 
 LOCAL EVIDENCE PACKET TEMPLATE:
 
@@ -75,7 +75,7 @@ When Claude Code is about to scope a source-heavy or local-sensitive phase, the
 Local Evidence Packet's evidence must exist first, scoped by actor: a LOCAL
 Claude Code session self-gathers it with its own tools and then scopes, rather
 than emitting the packet for the user to paste back; the emit-and-wait form is
-reserved for ChatGPT architect scoping or a Claude session without local access.
+reserved for providing ChatGPT reviewer context or a Claude session without local access.
 This pre-scope evidence step is separate from, and must not be conflated with,
 the Section 2 `npm run graph:codebase` refresh that precedes `validate.ps1` for
 any phase that edits tracked files.

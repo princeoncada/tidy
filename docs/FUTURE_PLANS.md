@@ -237,12 +237,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.12 - Agent Role-Model Realignment (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.12 - Agent Role-Model Realignment
-- **Status:** Open | Priority: P1 workflow correction
+- **Status:** In progress | Priority: P1 workflow correction
 - **Type:** docs/workflow + scripts
 - **Files:** AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, .claude/skills/*, scripts/validate.ps1, scripts/export-chatgpt-architect-context.ps1
 - **Implementation goal:** realign the documented role model to the real workflow (Claude Code = architect/scoper/planner/validator/prompt-builder; Codex = boosted implementer; ChatGPT = reviewer/weak-point finder/handoff reviewer) and update the validate.ps1 ChatGPT gates plus the export script in lockstep.

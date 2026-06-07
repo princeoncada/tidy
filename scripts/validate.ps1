@@ -445,11 +445,11 @@ if ($promptFenceErrors.Count -eq 0) {
     Add-Result "prompt fence safety" $false ($promptFenceErrors -join "; ")
 }
 
-# ChatGPT architect documentation guard - ensure local evidence boundaries remain documented.
+# ChatGPT reviewer documentation guard - ensure local evidence boundaries remain documented.
 $chatGptArchitectRequirements = @(
     @{
         Path = "AGENTS.md"
-        Phrase = "ChatGPT Architect Mode"
+        Phrase = "ChatGPT Reviewer Mode"
     },
     @{
         Path = "docs/WORKFLOW.md"
@@ -457,15 +457,15 @@ $chatGptArchitectRequirements = @(
     },
     @{
         Path = "docs/COMPACT_STRATEGY.md"
-        Phrase = "ChatGPT architect"
+        Phrase = "ChatGPT reviewer"
     },
     @{
         Path = "docs/CODEX_RULES.md"
-        Phrase = "ChatGPT Architect Evidence Boundary"
+        Phrase = "ChatGPT Reviewer Evidence Boundary"
     },
     @{
         Path = "docs/AI_HANDOFF.md"
-        Phrase = "ChatGPT architect sees pushed GitHub state plus pasted evidence only"
+        Phrase = "ChatGPT reviewer sees pushed GitHub state plus pasted evidence only"
     },
     @{
         Path = "docs/VERSIONING.md"
@@ -484,15 +484,15 @@ foreach ($requirement in $chatGptArchitectRequirements) {
     }
 }
 if ($chatGptArchitectErrors.Count -eq 0) {
-    Add-Result "chatgpt architect docs" $true "documentation present"
+    Add-Result "chatgpt reviewer docs" $true "documentation present"
 } else {
-    Add-Result "chatgpt architect docs" $false ($chatGptArchitectErrors -join "; ")
+    Add-Result "chatgpt reviewer docs" $false ($chatGptArchitectErrors -join "; ")
 }
 
-# ChatGPT architect workflow test guard - ensure the real export packet remains usable.
-$workflowTestScript = "scripts/export-chatgpt-architect-context.ps1"
+# ChatGPT reviewer workflow test guard - ensure the real export packet remains usable.
+$workflowTestScript = "scripts/export-chatgpt-review-context.ps1"
 $workflowTestSections = @(
-    "CHATGPT ARCHITECT CONTEXT PACKET",
+    "CHATGPT REVIEW CONTEXT PACKET",
     "WHAT CHANGED IN 1.3.0",
     "CURRENT LOCAL STATE",
     "REMOTE VS LOCAL AUTHORITY",
@@ -518,9 +518,9 @@ if (-not (Test-Path $workflowTestScript)) {
     }
 }
 if ($workflowTestErrors.Count -eq 0) {
-    Add-Result "chatgpt architect workflow test" $true "export packet layout present"
+    Add-Result "chatgpt reviewer workflow test" $true "export packet layout present"
 } else {
-    Add-Result "chatgpt architect workflow test" $false ($workflowTestErrors -join "; ")
+    Add-Result "chatgpt reviewer workflow test" $false ($workflowTestErrors -join "; ")
 }
 
 # Docs surface rebaseline guard - ensure PHASE_LOG stays historical and roadmap is test-backed.

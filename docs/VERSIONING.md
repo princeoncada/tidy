@@ -67,7 +67,7 @@ Rules:
   validation, and optional commit/promotion blocks. When a section itself is
   fenced, examples inside it must be unfenced or indented.
 - Repo state questions are answered from pushed GitHub state or local repo state
-  depending on execution context. ChatGPT architect mode uses pushed GitHub
+  depending on execution context. ChatGPT reviewer mode uses pushed GitHub
   state plus pasted local evidence; local-only facts are not visible to ChatGPT
   until pasted or pushed. The Local Evidence Packet is the bridge for local
   ChromaDB, graph output, git diff/status, and validation output. This does not
@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.11
-- **Current phase:** 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline
-- **Next phase:** 1.9.12 - Agent Role-Model Realignment
+- **Current version:** 1.9.12-alpha
+- **Current phase:** 1.9.12 - Agent Role-Model Realignment
+- **Next phase:** 1.9.13 - Stale Doc Content Sweep
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.9.12 | alpha | 2026-06-07 | Agent Role-Model Realignment | (in progress) |
 | 1.9.11 | stable | 2026-06-07 | Product-First Planning Contract and Roadmap Rebaseline | (in progress) |
 | 1.9.10 | stable | 2026-06-06 | Local DB Source-of-Truth Decision | (in progress) |
 | 1.9.9 | stable | 2026-06-06 | Offline Conflict Resolution Rules | (in progress) |

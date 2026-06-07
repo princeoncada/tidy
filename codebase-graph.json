@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.11",
+  "version": "1.9.12-alpha",
   "generatedAt": "2026-06-07",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1848,7 +1848,7 @@
       "imports": []
     },
     {
-      "path": "scripts/export-chatgpt-architect-context.ps1",
+      "path": "scripts/export-chatgpt-review-context.ps1",
       "kind": "script",
       "extension": ".ps1",
       "symbols": [],
