@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.13 -->
+<!-- Current Version: 1.9.14-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.13 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.13 - Stale Doc Content Sweep
-**Next**: 1.9.14 - Version-History Ownership De-Dup
+**Current Version**: 1.9.14-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.14 - Version-History Ownership De-Dup
+**Next**: 1.9.15 - Retire/Compress ai-harness Pointer Surface
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
