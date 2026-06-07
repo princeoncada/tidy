@@ -226,6 +226,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.10 - Local DB Source-of-Truth Decision~~ (stable 2026-06-06)
 
+- ~~1.9.11 - Product-First Planning Contract and Roadmap Rebaseline~~ (stable 2026-06-07)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -235,21 +237,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline
-- **Status:** In progress | Priority: P1 workflow correction
-- **Type:** docs/workflow
-- **Files:** docs/WORKFLOW.md, docs/FUTURE_PLANS.md, docs/CODEX_RULES.md, docs/DECISIONS.md
-- **Implementation goal:** add the Product-First Planning Contract, rebaseline this roadmap into the new declaration format, amend the validation policy to require a manual product proof, and record the product-first/Dexie direction and the workflow-drift finding.
-- **Product impact:** none - workflow/docs only.
-- **Runtime integration target:** none - governs how later phases are scoped.
-- **Deferral boundary:** role-model realignment -> 1.9.12; AI_HANDOFF/VERSIONING stale-content fixes -> 1.9.13; first Dexie product slice -> 1.9.16.
-- **Validation target:** targeted alpha (Select-String for new contract phrases; full validate.ps1 at the gate); docs-only, no product proof.
-- **Acceptance:** contract documented, roadmap rebaselined, validation policy amended without duplicating CODEX_RULES, decisions recorded.
 
 ### 1.9.12 - Agent Role-Model Realignment
 - **Status:** Open | Priority: P1 workflow correction
