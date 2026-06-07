@@ -243,12 +243,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.15 - Retire/Compress ai-harness Pointer Surface (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.15 - Retire/Compress ai-harness Pointer Surface
-- **Status:** Open | Priority: P2 cleanup
+- **Status:** In progress | Priority: P2 cleanup
 - **Type:** cleanup
 - **Files:** ai-harness/* (confirm against scripts/validate.ps1 first)
 - **Implementation goal:** remove or compress the superseded ai-harness/skills/* and ai-harness/hooks/* pointer surface now that operational skills live in .claude/skills/, only after confirming no validate.ps1 gate depends on ai-harness paths.
