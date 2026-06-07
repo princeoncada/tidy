@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.11-alpha",
-    "state":  "alpha",
+    "version":  "1.9.11",
+    "state":  "stable",
     "phase":  "1.9.11",
     "phaseTitle":  "Product-First Planning Contract and Roadmap Rebaseline",
     "nextPhase":  "1.9.12 - Agent Role-Model Realignment",
