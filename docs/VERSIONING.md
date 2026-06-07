@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.14
-- **Current phase:** 1.9.14 - Version-History Ownership De-Dup
-- **Next phase:** 1.9.15 - Retire/Compress ai-harness Pointer Surface
+- **Current version:** 1.9.15-alpha
+- **Current phase:** 1.9.15 - Retire/Compress ai-harness Pointer Surface
+- **Next phase:** 1.9.16 - Dev-Gated Local-First Create List Slice
 
 ---
 
