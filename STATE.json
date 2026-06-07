@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.12",
-    "state":  "stable",
-    "phase":  "1.9.12",
-    "phaseTitle":  "Agent Role-Model Realignment",
-    "nextPhase":  "1.9.13 - Stale Doc Content Sweep",
+    "version":  "1.9.13-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.13",
+    "phaseTitle":  "Stale Doc Content Sweep",
+    "nextPhase":  "1.9.14 - Version-History Ownership De-Dup",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-07"
 }
