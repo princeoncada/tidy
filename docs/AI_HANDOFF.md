@@ -186,7 +186,7 @@ Do not include nested fenced code blocks inside fenced master prompts. Generated
 
 ## Local Evidence Boundary
 
-ChatGPT architect sees pushed GitHub state plus pasted evidence only. It cannot read local uncommitted files, local git status/diff, local-only branches, or local graph changes unless the user/controller pastes that evidence or pushes it.
+ChatGPT reviewer sees pushed GitHub state plus pasted evidence only. It cannot read local uncommitted files, local git status/diff, local-only branches, or local graph changes unless the user/controller pastes that evidence or pushes it.
 
 For source-heavy or local-sensitive scoping, provide a Local Evidence Packet with:
 - `git status --short`
