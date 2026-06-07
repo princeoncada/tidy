@@ -39,7 +39,7 @@ function Invoke-Capture {
     }
 }
 
-Write-Section "CHATGPT ARCHITECT CONTEXT PACKET"
+Write-Section "CHATGPT REVIEW CONTEXT PACKET"
 Write-Output "Generated locally for paste into ChatGPT."
 Write-Output "This packet contains pushed-state context plus local evidence that ChatGPT cannot read directly."
 
@@ -48,7 +48,7 @@ Write-Output "- ChatGPT Architect Mode was added."
 Write-Output "- Local Evidence Packet was added."
 Write-Output "- Local graph limitations were documented."
 Write-Output "- Codex prompts must state local evidence status."
-Write-Output "- Validation checks confirm ChatGPT architect docs exist."
+Write-Output "- Validation checks confirm ChatGPT reviewer docs exist."
 
 Write-Section "CURRENT LOCAL STATE"
 if (Test-Path "STATE.json") {
@@ -68,10 +68,10 @@ if (Test-Path "STATE.json") {
 }
 
 Write-Section "REMOTE VS LOCAL AUTHORITY"
-Write-Output "- ChatGPT architect sees pushed GitHub state plus pasted evidence only."
+Write-Output "- ChatGPT reviewer sees pushed GitHub state plus pasted evidence only."
 Write-Output "- Remote master is authoritative only after push."
 Write-Output "- Local uncommitted work, branch-only files, validation output, and regenerated graph output are invisible to ChatGPT unless pasted."
-Write-Output "- Anything not pushed or pasted does not exist to ChatGPT architect."
+Write-Output "- Anything not pushed or pasted does not exist to ChatGPT reviewer."
 
 Write-Section "LOCAL EVIDENCE PACKET"
 Write-Output "git status --short"
@@ -107,8 +107,8 @@ if (Test-Path "codebase-graph.json") {
 Write-Section "WORKFLOW PREVIEW"
 Write-Output "1. User/controller runs this export script locally."
 Write-Output "2. User/controller pastes the output into ChatGPT."
-Write-Output "3. ChatGPT scopes using pushed GitHub state plus pasted local evidence."
-Write-Output "4. ChatGPT produces a Codex prompt with LOCAL EVIDENCE PROVIDED."
+Write-Output "3. Claude Code scopes locally and writes the Codex prompt."
+Write-Output "4. ChatGPT reviews the prompt and surfaces weak points from pushed GitHub state plus pasted local evidence."
 Write-Output "5. Codex works locally and reads files directly before editing."
 Write-Output "6. User/controller validates, commits, promotes, and pushes."
 
