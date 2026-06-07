@@ -234,6 +234,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.14 - Version-History Ownership De-Dup~~ (stable 2026-06-07)
 
+- ~~1.9.15 - Retire/Compress ai-harness Pointer Surface~~ (stable 2026-06-07)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -243,21 +245,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.15 - Retire/Compress ai-harness Pointer Surface (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.15 - Retire/Compress ai-harness Pointer Surface
-- **Status:** In progress | Priority: P2 cleanup
-- **Type:** cleanup
-- **Files:** ai-harness/* (confirm against scripts/validate.ps1 first)
-- **Implementation goal:** remove or compress the superseded ai-harness/skills/* and ai-harness/hooks/* pointer surface now that operational skills live in .claude/skills/, only after confirming no validate.ps1 gate depends on ai-harness paths.
-- **Product impact:** none.
-- **Runtime integration target:** none.
-- **Deferral boundary:** retire only what validation does not require; keep any path a gate asserts.
-- **Validation target:** targeted alpha (validate.ps1 skill-surface gate green; grep confirms no remaining reference to removed paths); full validate.ps1 at the gate.
-- **Acceptance:** dead pointer surface removed/compressed with all validate gates green.
 
 ### 1.9.16 - Dev-Gated Local-First Create List Slice
 - **Status:** Open | Priority: P1 product (local-first)
