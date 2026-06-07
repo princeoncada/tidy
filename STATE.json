@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.13-alpha",
-    "state":  "alpha",
+    "version":  "1.9.13",
+    "state":  "stable",
     "phase":  "1.9.13",
     "phaseTitle":  "Stale Doc Content Sweep",
     "nextPhase":  "1.9.14 - Version-History Ownership De-Dup",
