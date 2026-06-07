@@ -228,6 +228,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.11 - Product-First Planning Contract and Roadmap Rebaseline~~ (stable 2026-06-07)
 
+- ~~1.9.12 - Agent Role-Model Realignment~~ (stable 2026-06-07)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -237,21 +239,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.12 - Agent Role-Model Realignment (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.12 - Agent Role-Model Realignment
-- **Status:** In progress | Priority: P1 workflow correction
-- **Type:** docs/workflow + scripts
-- **Files:** AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, .claude/skills/*, scripts/validate.ps1, scripts/export-chatgpt-architect-context.ps1
-- **Implementation goal:** realign the documented role model to the real workflow (Claude Code = architect/scoper/planner/validator/prompt-builder; Codex = boosted implementer; ChatGPT = reviewer/weak-point finder/handoff reviewer) and update the validate.ps1 ChatGPT gates plus the export script in lockstep.
-- **Product impact:** none - workflow/docs/tooling only.
-- **Runtime integration target:** none.
-- **Deferral boundary:** no stale-content/version cleanup (1.9.13/1.9.14); no pointer-surface retirement (1.9.15).
-- **Validation target:** targeted alpha (Select-String for new role phrases; validate.ps1 chatgpt + skill-surface gates green); full validate.ps1 before stable.
-- **Acceptance:** docs describe the real role model; both ChatGPT validate gates and the export script pass under the new phrasing; no architect-as-scoper language remains.
 
 ### 1.9.13 - Stale Doc Content Sweep
 - **Status:** Open | Priority: P2 docs hygiene
