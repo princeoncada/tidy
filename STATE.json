@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.10",
-    "state":  "stable",
-    "phase":  "1.9.10",
-    "phaseTitle":  "Local DB Source-of-Truth Decision",
-    "nextPhase":  "1.10.0 - Deploy Env Documentation",
+    "version":  "1.9.11-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.11",
+    "phaseTitle":  "Product-First Planning Contract and Roadmap Rebaseline",
+    "nextPhase":  "1.9.12 - Agent Role-Model Realignment",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-06"
+    "lastUpdated":  "2026-06-07"
 }

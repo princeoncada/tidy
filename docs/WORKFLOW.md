@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 1.9.10 -->
+<!-- Current Version: 1.9.11-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -159,6 +159,21 @@ Rules:
 Product implementation phases should be small and test-backed. Every product implementation phase must add or update useful tests unless explicitly scoped as docs-only/test-only with a reason.
 
 Product behavior audits should become reproduction tests or roadmap acceptance criteria, not new standalone docs by default. UI/UX polish should stay late unless it blocks correctness or usability.
+
+### Product-First Planning Contract
+
+Tidy's near-term identity is a fast personal todo app with local-first UX, built as a portfolio-grade engineering showcase. Planning prioritizes thin vertical product slices over long horizontal infrastructure chains, and the roadmap stays linear.
+
+Every Planned phase in `docs/FUTURE_PLANS.md` must declare:
+
+- Type (product behavior | infrastructure | decision | refactor | docs/workflow | cleanup)
+- Implementation goal
+- Product impact (the user-visible effect, or none with a reason)
+- Runtime integration target (what actually runs after the phase, or none with a reason)
+- Deferral boundary (what is explicitly not done, naming the follow-up phase or decision)
+- Validation target (targeted-alpha checks plus a manual product proof for product phases; full suite before stable)
+
+Core rule: a phase need not be user-visible, but it must declare its implementation intent, product relationship, runtime integration target, and deferral boundary. No phase may silently defer expected product integration without naming the follow-up phase or decision. Feature-flagged or dev-gated work must declare the flag name, default, dev test path, activation condition, and removal/default-on plan; a flag must not become a hiding place for unfinished work.
 
 ### Roadmap Next-Phase Gate
 

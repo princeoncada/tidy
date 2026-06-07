@@ -93,9 +93,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.10
-- **Current phase:** 1.9.10 - Local DB Source-of-Truth Decision
-- **Next phase:** 1.10.0 - Deploy Env Documentation
+- **Current version:** 1.9.11-alpha
+- **Current phase:** 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline
+- **Next phase:** 1.9.12 - Agent Role-Model Realignment
 
 ---
 
@@ -155,6 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
+| 1.9.11 | alpha | 2026-06-07 | Product-First Planning Contract and Roadmap Rebaseline | (in progress) |
 | 1.9.10 | stable | 2026-06-06 | Local DB Source-of-Truth Decision | (in progress) |
 | 1.9.9 | stable | 2026-06-06 | Offline Conflict Resolution Rules | (in progress) |
 | 1.9.8 | stable | 2026-06-06 | Sync Status UI Surface | (in progress) |

@@ -16,6 +16,19 @@ Inserting a new minor/major pushes later Planned numbers back to stay monotonic
 - `Blocked`: needs an external decision/dependency
 - `Done`: completed (struck through under Completed)
 
+## Phase Declaration Format
+
+Every Planned phase declares these fields in addition to `Status` and `Files`. This is the roadmap surface of the Product-First Planning Contract; the rule itself lives in `docs/WORKFLOW.md` (Product-First Planning Contract).
+
+- **Type:** product behavior | infrastructure | decision | refactor | docs/workflow | cleanup
+- **Implementation goal:** what the phase builds.
+- **Product impact:** the user-visible effect, or `none - <why>`.
+- **Runtime integration target:** what actually runs after the phase, or `none - <why>`.
+- **Deferral boundary:** what is explicitly NOT done, naming the follow-up phase or decision.
+- **Validation target:** targeted-alpha checks (plus a manual product proof for product phases); full suite before stable.
+
+Phases need not be user-visible, but none may silently defer expected product integration without naming the follow-up phase or decision.
+
 ---
 
 ## Completed
@@ -222,57 +235,207 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline (active) - see Planned
 ---
 
 ## Planned
 
+### 1.9.11 - Product-First Planning Contract and Roadmap Rebaseline
+- **Status:** In progress | Priority: P1 workflow correction
+- **Type:** docs/workflow
+- **Files:** docs/WORKFLOW.md, docs/FUTURE_PLANS.md, docs/CODEX_RULES.md, docs/DECISIONS.md
+- **Implementation goal:** add the Product-First Planning Contract, rebaseline this roadmap into the new declaration format, amend the validation policy to require a manual product proof, and record the product-first/Dexie direction and the workflow-drift finding.
+- **Product impact:** none - workflow/docs only.
+- **Runtime integration target:** none - governs how later phases are scoped.
+- **Deferral boundary:** role-model realignment -> 1.9.12; AI_HANDOFF/VERSIONING stale-content fixes -> 1.9.13; first Dexie product slice -> 1.9.16.
+- **Validation target:** targeted alpha (Select-String for new contract phrases; full validate.ps1 at the gate); docs-only, no product proof.
+- **Acceptance:** contract documented, roadmap rebaselined, validation policy amended without duplicating CODEX_RULES, decisions recorded.
+
+### 1.9.12 - Agent Role-Model Realignment
+- **Status:** Open | Priority: P1 workflow correction
+- **Type:** docs/workflow + scripts
+- **Files:** AGENTS.md, docs/WORKFLOW.md, docs/CODEX_RULES.md, .claude/skills/*, scripts/validate.ps1, scripts/export-chatgpt-architect-context.ps1
+- **Implementation goal:** realign the documented role model to the real workflow (Claude Code = architect/scoper/planner/validator/prompt-builder; Codex = boosted implementer; ChatGPT = reviewer/weak-point finder/handoff reviewer) and update the validate.ps1 ChatGPT gates plus the export script in lockstep.
+- **Product impact:** none - workflow/docs/tooling only.
+- **Runtime integration target:** none.
+- **Deferral boundary:** no stale-content/version cleanup (1.9.13/1.9.14); no pointer-surface retirement (1.9.15).
+- **Validation target:** targeted alpha (Select-String for new role phrases; validate.ps1 chatgpt + skill-surface gates green); full validate.ps1 before stable.
+- **Acceptance:** docs describe the real role model; both ChatGPT validate gates and the export script pass under the new phrasing; no architect-as-scoper language remains.
+
+### 1.9.13 - Stale Doc Content Sweep
+- **Status:** Open | Priority: P2 docs hygiene
+- **Type:** docs cleanup
+- **Files:** docs/AI_HANDOFF.md, docs/VERSIONING.md
+- **Implementation goal:** fix AI_HANDOFF lower-section guidance still referencing 1.5.x/1.6.x continuation, and VERSIONING history rows whose Notes still read "(in progress)" on already-stable versions.
+- **Product impact:** none.
+- **Runtime integration target:** none.
+- **Deferral boundary:** historical-version de-duplication -> 1.9.14.
+- **Validation target:** targeted alpha (Select-String confirming stale phrases removed); full validate.ps1 at the gate.
+- **Acceptance:** no stale 1.5.x/1.6.x continuation guidance remains; no stable VERSIONING row reads "(in progress)".
+
+### 1.9.14 - Version-History Ownership De-Dup
+- **Status:** Open | Priority: P2 docs hygiene
+- **Type:** docs/decision
+- **Files:** docs/FUTURE_PLANS.md, docs/VERSIONING.md, docs/DECISIONS.md
+- **Implementation goal:** choose the single owner of historical version info (FUTURE_PLANS Completed vs VERSIONING history table), remove the duplication, and leave a pointer from the non-owner.
+- **Product impact:** none.
+- **Runtime integration target:** none.
+- **Deferral boundary:** does not change versioning rules or the five versioning locations.
+- **Validation target:** targeted alpha (validate.ps1 doc-surface + phase/roadmap gates green); full validate.ps1 at the gate.
+- **Acceptance:** historical version info has one owner with a pointer; validate doc-surface gates still pass.
+
+### 1.9.15 - Retire/Compress ai-harness Pointer Surface
+- **Status:** Open | Priority: P2 cleanup
+- **Type:** cleanup
+- **Files:** ai-harness/* (confirm against scripts/validate.ps1 first)
+- **Implementation goal:** remove or compress the superseded ai-harness/skills/* and ai-harness/hooks/* pointer surface now that operational skills live in .claude/skills/, only after confirming no validate.ps1 gate depends on ai-harness paths.
+- **Product impact:** none.
+- **Runtime integration target:** none.
+- **Deferral boundary:** retire only what validation does not require; keep any path a gate asserts.
+- **Validation target:** targeted alpha (validate.ps1 skill-surface gate green; grep confirms no remaining reference to removed paths); full validate.ps1 at the gate.
+- **Acceptance:** dead pointer surface removed/compressed with all validate gates green.
+
+### 1.9.16 - Dev-Gated Local-First Create List Slice
+- **Status:** Open | Priority: P1 product (local-first)
+- **Type:** product behavior (dev-gated)
+- **Files:** lib/dashboard-cache.ts, lib/local-db/*, create-list mutation site, feature flag, tests
+- **Implementation goal:** make Dexie the local runtime source for the create-list dashboard slice behind a dev-only feature flag (declare name/default/dev path/activation condition/removal plan) without changing default behavior.
+- **Product impact:** none by default; flag-on, created lists render from local state immediately.
+- **Runtime integration target:** flag-on dev builds read the created list from Dexie; flag-off keeps the server/TanStack read path unchanged.
+- **Deferral boundary:** flag stays dev-only until 1.9.17; other CRUD slices -> 1.9.18-1.9.20; the local-db-role-audit guard flips when the read path flips (1.9.17).
+- **Validation target:** targeted alpha (focused slice unit tests + manual product proof of flag-on create-list); full test:ci before stable.
+- **Acceptance:** flag-gated local-first create-list works in dev, default behavior unchanged, tests cover both flag states.
+
+### 1.9.17 - Stabilize and Enable Local-First Create List Slice
+- **Status:** Open | Priority: P1 product (local-first)
+- **Type:** product behavior
+- **Files:** lib/dashboard-cache.ts, lib/local-db/*, tests/unit/local-db-role-audit.test.ts, tests
+- **Implementation goal:** stabilize the create-list local-first slice, enable it by default, and update the local-db-role-audit guard to permit the now-intended Dexie read in dashboard-cache.
+- **Product impact:** create-list renders from local state by default - first user-visible local-first behavior.
+- **Runtime integration target:** dashboard-cache reads Dexie for the create-list slice in default builds; TanStack remains the hydration/sync bridge.
+- **Deferral boundary:** only create-list flips; other slices stay server-read until their phases.
+- **Validation target:** targeted alpha (slice + updated guard tests + manual product proof); full test:ci before stable.
+- **Acceptance:** create-list is local-first by default, the guard reflects the intended read, full regression green.
+
+### 1.9.18 - Local-First List Rename Slice
+- **Status:** Open | Priority: P1 product (local-first)
+- **Type:** product behavior
+- **Files:** lib/dashboard-cache.ts, rename mutation site, tests
+- **Implementation goal:** extend local-first runtime read/write to the list-rename slice (dev-gate then enable per the contract).
+- **Product impact:** list rename reflects from local state immediately.
+- **Runtime integration target:** rename slice reads/writes Dexie at runtime; server sync via replay/TanStack.
+- **Deferral boundary:** item and delete slices -> 1.9.19/1.9.20.
+- **Validation target:** targeted alpha (rename slice tests + manual proof); full test:ci before stable.
+- **Acceptance:** local-first rename works with regression green.
+
+### 1.9.19 - Local-First Item Create and Complete Slice
+- **Status:** Open | Priority: P1 product (local-first)
+- **Type:** product behavior
+- **Files:** lib/dashboard-cache.ts, item create/complete mutation sites, tests
+- **Implementation goal:** extend local-first runtime behavior to item create and complete/uncomplete (dev-gate then enable per the contract).
+- **Product impact:** adding and completing items reflects from local state immediately.
+- **Runtime integration target:** item slices read/write Dexie at runtime; server sync via replay/TanStack.
+- **Deferral boundary:** delete/recovery -> 1.9.20.
+- **Validation target:** targeted alpha (item slice tests + manual proof); full test:ci before stable.
+- **Acceptance:** local-first item create/complete works with regression green.
+
+### 1.9.20 - Local-First Delete and Recovery Slice
+- **Status:** Open | Priority: P1 product (local-first)
+- **Type:** product behavior
+- **Files:** lib/dashboard-cache.ts, delete mutation sites, tests
+- **Implementation goal:** extend local-first runtime behavior to delete with rollback/recovery, preserving optimistic rollback invariants (dev-gate then enable per the contract).
+- **Product impact:** delete and recovery reflect from local state immediately, with rollback on failure preserved.
+- **Runtime integration target:** delete slice reads/writes Dexie at runtime; server sync via replay/TanStack.
+- **Deferral boundary:** full CRUD rebaseline decision -> 1.9.21.
+- **Validation target:** targeted alpha (delete/rollback slice tests + manual proof); full test:ci before stable.
+- **Acceptance:** local-first delete/recovery works, rollback invariant intact, regression green.
+
+### 1.9.21 - Local-First Dashboard CRUD Rebaseline Decision
+- **Status:** Open | Priority: P1 decision
+- **Type:** decision
+- **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
+- **Implementation goal:** evaluate the shipped local-first CRUD slices and record whether Dexie becomes the full local-first dashboard source or stays slice-scoped; set the follow-up direction and whether seriesComplete flips.
+- **Product impact:** none directly - decides the next direction.
+- **Runtime integration target:** none (decision); names the follow-up phase(s).
+- **Deferral boundary:** full-app local-first migration only if this decision proves it correct.
+- **Validation target:** targeted alpha (validate.ps1 + decision recorded); full validate.ps1 at the gate.
+- **Acceptance:** a recorded decision with a named follow-up; no silent deferral.
+
 ### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness
+- **Type:** docs
 - **Files:** README.md, .env.example
-- **Problem:** Deployment environment expectations must be clear before production use.
-- **Scope:** document DATABASE_URL, Supabase env vars, site URL, and local/prod differences.
-- **Acceptance:** new setup can follow docs without guessing.
+- **Implementation goal:** document DATABASE_URL, Supabase env vars, site URL, and local/prod differences so deployment expectations are clear.
+- **Product impact:** none - enables correct deployment.
+- **Runtime integration target:** none.
+- **Deferral boundary:** build/migration path -> 1.10.1.
+- **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
+- **Acceptance:** a new setup can follow the docs without guessing.
 
 ### 1.10.1 - Build/Migration Readiness
 - **Status:** Open | Priority: P2 production readiness
+- **Type:** docs
 - **Files:** README.md, prisma/*, package.json only if needed
-- **Problem:** Build and migration expectations need a repeatable release path.
-- **Scope:** document Prisma generate, migration, and build steps.
-- **Acceptance:** production build/migration flow is clear and repeatable.
+- **Implementation goal:** document Prisma generate, migration, and build steps for a repeatable release path.
+- **Product impact:** none - enables repeatable releases.
+- **Runtime integration target:** none.
+- **Deferral boundary:** smoke checklist -> 1.10.2.
+- **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
+- **Acceptance:** the production build/migration flow is clear and repeatable.
 
 ### 1.10.2 - Production Smoke Checklist
 - **Status:** Open | Priority: P2 production readiness
+- **Type:** docs
 - **Files:** README.md, docs/FUTURE_PLANS.md
-- **Problem:** Production changes need a small smoke checklist after deploy.
-- **Scope:** document login, dashboard load, create list, create item, tag view, reorder, and refresh smoke checks.
-- **Acceptance:** smoke checklist exists and does not duplicate full test docs.
+- **Implementation goal:** document a small post-deploy smoke checklist (login, dashboard load, create list, create item, tag view, reorder, refresh).
+- **Product impact:** none - guards releases.
+- **Runtime integration target:** none.
+- **Deferral boundary:** does not duplicate full test docs.
+- **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
+- **Acceptance:** a smoke checklist exists and does not duplicate full test docs.
 
 ### 1.11.0 - Copy and Metadata Hygiene
 - **Status:** Open | Priority: P3 late polish
+- **Type:** product behavior (polish)
 - **Files:** app/layout.tsx, public/*, README.md if needed
-- **Problem:** Metadata and public assets need cleanup, but this should happen after core behavior is trustworthy.
-- **Scope:** fix missing asset references and metadata consistency.
+- **Implementation goal:** fix missing asset references and metadata consistency.
+- **Product impact:** correct metadata/asset references; no behavior change.
+- **Runtime integration target:** metadata references existing assets.
+- **Deferral boundary:** auth copy -> 1.11.1; landing copy -> 1.11.2.
+- **Validation target:** targeted alpha (asset/metadata checks + manual proof); full test:ci before stable.
 - **Acceptance:** metadata references existing assets; no behavior change.
 
 ### 1.11.1 - Auth Flow Copy Polish
 - **Status:** Open | Priority: P3 late polish
+- **Type:** product behavior (polish)
 - **Files:** components/auth/Register.tsx, auth components if needed
-- **Problem:** Auth copy should be clearer after core behavior is stable.
-- **Scope:** fix misleading copy such as Register submit language.
+- **Implementation goal:** fix misleading auth copy such as the Register submit language.
+- **Product impact:** clearer auth copy; auth behavior unchanged.
+- **Runtime integration target:** none beyond copy.
+- **Deferral boundary:** landing copy -> 1.11.2.
+- **Validation target:** targeted alpha (copy checks + manual proof); full test:ci before stable.
 - **Acceptance:** copy is clear; auth behavior unchanged.
 
 ### 1.11.2 - Landing Page Branding Polish
 - **Status:** Open | Priority: P3 late polish
+- **Type:** product behavior (polish)
 - **Files:** app/page.tsx
-- **Problem:** Landing copy and generic branding can be improved after product correctness.
-- **Scope:** fix typo and improve lightweight Tidy positioning.
+- **Implementation goal:** fix the typo and improve lightweight Tidy positioning on the landing page.
+- **Product impact:** improved landing copy; no behavior change.
+- **Runtime integration target:** none beyond copy.
+- **Deferral boundary:** broader visual review -> 1.11.3.
+- **Validation target:** targeted alpha (copy checks + manual proof); full test:ci before stable.
 - **Acceptance:** copy improves without changing app behavior.
 
 ### 1.11.3 - Visual Review Pass
 - **Status:** Open | Priority: P3 late UI/UX
+- **Type:** product behavior (polish)
 - **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, app/page.tsx
-- **Problem:** Subjective UI/UX polish should be last because correctness matters first.
-- **Scope:** perform a small visual review pass only after state correctness, ownership, optimistic behavior, and tests are stable.
+- **Implementation goal:** perform a small visual review pass only after state correctness, ownership, optimistic behavior, and tests are stable.
+- **Product impact:** small visual improvements; no data behavior change.
+- **Runtime integration target:** none beyond presentation.
+- **Deferral boundary:** none - last polish phase.
+- **Validation target:** targeted alpha (visual review + manual proof); full test:ci before stable.
 - **Acceptance:** visual changes are small, reviewable, and do not alter data behavior.
 
 ---
