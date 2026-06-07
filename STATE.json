@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.13",
-    "state":  "stable",
-    "phase":  "1.9.13",
-    "phaseTitle":  "Stale Doc Content Sweep",
-    "nextPhase":  "1.9.14 - Version-History Ownership De-Dup",
+    "version":  "1.9.14-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.14",
+    "phaseTitle":  "Version-History Ownership De-Dup",
+    "nextPhase":  "1.9.15 - Retire/Compress ai-harness Pointer Surface",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-07"
 }
