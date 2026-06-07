@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.14",
+  "version": "1.9.15-alpha",
   "generatedAt": "2026-06-07",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -172,48 +172,6 @@
     },
     {
       "path": "ai-harness/README.md",
-      "kind": "file",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
-      "path": "ai-harness/skills/tidy-context-budget/SKILL.md",
-      "kind": "file",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
-      "path": "ai-harness/skills/tidy-debug-attempt/SKILL.md",
-      "kind": "file",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
-      "path": "ai-harness/skills/tidy-learning-review/SKILL.md",
-      "kind": "file",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
-      "path": "ai-harness/skills/tidy-phase-scope/SKILL.md",
-      "kind": "file",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
-      "path": "ai-harness/skills/tidy-session-start/SKILL.md",
-      "kind": "file",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
-      "path": "ai-harness/skills/tidy-validation-followup/SKILL.md",
       "kind": "file",
       "extension": ".md",
       "symbols": [],

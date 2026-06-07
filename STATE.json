@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.14",
-    "state":  "stable",
-    "phase":  "1.9.14",
-    "phaseTitle":  "Version-History Ownership De-Dup",
-    "nextPhase":  "1.9.15 - Retire/Compress ai-harness Pointer Surface",
+    "version":  "1.9.15-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.15",
+    "phaseTitle":  "Retire/Compress ai-harness Pointer Surface",
+    "nextPhase":  "1.9.16 - Dev-Gated Local-First Create List Slice",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-07"
 }
