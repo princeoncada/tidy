@@ -11,14 +11,14 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 - `STATE.json` - version, state, phase, phase title, next phase.
 - `docs/FUTURE_PLANS.md` - roadmap and next planned backlog item.
 - `docs/CONTEXT_INDEX.md` - routing/scoping map for the smallest correct read set.
-- `docs/VERSIONING.md` - version rules and version history.
+- `docs/VERSIONING.md` - version rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
 - `docs/PHASE_LOG.md` - historical traceability only, not active implementation guidance.
 
 ---
 
 ## Latest Completed Change
 
-The latest completed change is the stable version recorded in `STATE.json`; read `docs/FUTURE_PLANS.md` Completed (top) and the `docs/VERSIONING.md` history table for the full trail. This is a pointer by design so this section cannot drift - do not restate a frozen "latest" here.
+The latest completed change is the stable version recorded in `STATE.json`; read `docs/FUTURE_PLANS.md` Completed (top) for the full trail. This is a pointer by design so this section cannot drift - do not restate a frozen "latest" here.
 
 Active arc: the 1.9.x product-first cleanup series. 1.9.11 added the Product-First Planning Contract and rebaselined the roadmap; 1.9.12 realigned the agent role model (Claude Code architects/scopes/plans/validates/writes prompts; Codex is the boosted implementer; ChatGPT reviews). The Codex validation boundary and five-location versioning rules are unchanged.
 
