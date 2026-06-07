@@ -124,8 +124,6 @@ $stateJson = $state | ConvertTo-Json -Depth 5
 Write-Host "  Updated: STATE.json" -ForegroundColor Green
 
 # 2. docs/VERSIONING.md
-$baseVer = $stableVer
-Update-FileText "docs/VERSIONING.md" "| $baseVer | alpha |" "| $baseVer | stable |"
 Update-FileText "docs/VERSIONING.md" "**Current version:** $alphaVer" "**Current version:** $stableVer"
 
 # 3. docs/AI_HANDOFF.md
@@ -304,7 +302,6 @@ $postWorkflow = Get-Content "docs/WORKFLOW.md" -Raw -Encoding UTF8
 if ($postWorkflow -notmatch ("<!-- Current Version: " + [regex]::Escape($stableVer) + " -->")) { $verifyErrors += "WORKFLOW.md comment" }
 $postVersioning = Get-Content "docs/VERSIONING.md" -Raw -Encoding UTF8
 if ($postVersioning -notmatch ("Current version:\*\*\s*" + [regex]::Escape($stableVer) + "(\s|$)")) { $verifyErrors += "VERSIONING.md current line" }
-if ($postVersioning -notmatch ("\|\s*" + [regex]::Escape($stableVer) + "\s*\|\s*stable\s*\|")) { $verifyErrors += "VERSIONING.md history row" }
 $postFuturePlans = Get-Content "docs/FUTURE_PLANS.md" -Raw -Encoding UTF8
 if (-not (Test-CompletedPhase $postFuturePlans $completedBullet)) { $verifyErrors += "FUTURE_PLANS.md completed closeout" }
 if (Test-InProgressPhase $postFuturePlans $stableVer $phaseTitle) { $verifyErrors += "FUTURE_PLANS.md still in progress" }

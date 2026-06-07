@@ -187,3 +187,15 @@ The dashboard read authority is the server: the tRPC All-Lists payload (view.get
 **Validation policy**: Targeted validation during alpha, full validation before stable, with a mandatory manual product proof for product phases - referenced from docs/WORKFLOW.md Validation Intensity and amended into docs/CODEX_RULES.md Required Tests, not duplicated.
 
 **Impact**: The roadmap is rebaselined into the new format with the product-first arc inserted as 1.9.11-1.9.21 ahead of the existing 1.10.0-1.11.3 entries (monotonic order preserved; no renumber of existing entries). seriesComplete in STATE.json stays false by decision. The AI_HANDOFF Known Risks realignment for the Dexie direction is handled in 1.9.13, not here.
+
+---
+
+## 2026-06-07: Completed-version history single-owner is FUTURE_PLANS Completed; VERSIONING history table retired (1.9.14)
+
+**Decision**: `docs/FUTURE_PLANS.md` `## Completed` is the single owner of completed-version history (version, title, and stable date for every released phase). The `## Version History` table in `docs/VERSIONING.md` is retired and replaced with a pointer. `docs/VERSIONING.md` now owns the version format, the five-location rules, the Doc Continuity Model, current state, and the pre-versioning baseline only.
+
+**Reason**: The VERSIONING history table duplicated FUTURE_PLANS Completed on version+title+date for ~190 rows; its only unique columns were a `state` field (always "stable" for history) and a `notes` field that promotion never populated (it stayed at the open-phase "(in progress)" placeholder). FUTURE_PLANS Completed already records version+title+stable-date and is the roadmap-closeout owner per the Doc Continuity Model, so it is the natural single owner. Retiring the table also dissolves the stale "(in progress)" notes finding.
+
+**Scripts**: `open-phase.ps1` no longer inserts an alpha history row or self-verifies it; `promote.ps1` no longer flips a history row to stable or self-verifies it. Both still update the VERSIONING current-version line and FUTURE_PLANS roadmap state as before. `validate.ps1` never gated the history table, so no validation change was required.
+
+**Impact**: No information lost - version, title, and date remain in FUTURE_PLANS Completed, and the pre-versioning Phase 1-3 detail stays in VERSIONING. Pointer references in AI_HANDOFF, COMPACT_STRATEGY, CONTEXT_INDEX, and WORKFLOW were updated to stop claiming VERSIONING holds a history table.

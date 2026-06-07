@@ -29,7 +29,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/AI_HANDOFF.md` = current product state, invariants, risks, next-session guidance
 - `docs/CODEX_RULES.md` = implementation rules, validation boundaries, testing rules, commit discipline
 - `docs/WORKFLOW.md` = process and phase workflow
-- `docs/VERSIONING.md` = versioning rules and history table
+- `docs/VERSIONING.md` = versioning rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed
 - `docs/PHASE_LOG.md` = historical traceability only, not active guidance
 - `docs/SESSION_LOG/` = historical audit only (retrospectives, risky-op records); not the continuation mechanism and not active guidance. Normal continuation uses the minimal handoff (`tidy-minimal-handoff`).
 - `docs/SESSION_LOG.md` = session log index/pointer only, not active guidance

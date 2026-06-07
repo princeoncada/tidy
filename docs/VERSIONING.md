@@ -16,7 +16,7 @@ X.Y.Z-[state]
 Every version bump must update **all five** in the same commit:
 
 1. `STATE.json` - `version` + `state` fields (machine-readable oracle; read first every session)
-2. `docs/VERSIONING.md` - version history table + current state (this file)
+2. `docs/VERSIONING.md` - current version state + rules (this file)
 3. `docs/AI_HANDOFF.md` - version comment at top
 4. `package.json` - `version` field
 5. `docs/WORKFLOW.md` - version comment at top
@@ -33,12 +33,13 @@ new place - that is how drift starts.
 
 | Fact | Owner | Where it also appears | Kept in sync by |
 |------|-------|-----------------------|-----------------|
-| Version + state string | `STATE.json` (`version`, `state`) | VERSIONING (current + history), AI_HANDOFF (comment + prose), package.json, WORKFLOW (comment) | Sync: `open-phase.ps1` (alpha) + `promote.ps1` (stable) + Gate: `validate.ps1` |
+| Version + state string | `STATE.json` (`version`, `state`) | VERSIONING (current state), AI_HANDOFF (comment + prose), package.json, WORKFLOW (comment) | Sync: `open-phase.ps1` (alpha) + `promote.ps1` (stable) + Gate: `validate.ps1` |
 | Phase identity (number + title) | `STATE.json` (`phase`, `phaseTitle`) | VERSIONING (Current State), AI_HANDOFF (Current Phase) | Gate: `validate.ps1` checks current VERSIONING and AI_HANDOFF copies against STATE.json |
 | Next phase | `STATE.json` (`nextPhase`) | VERSIONING (Next phase line), AI_HANDOFF (Next line) | Sync: `open-phase.ps1` (alpha) + `promote.ps1` (stable) + Gate: `validate.ps1` checks copies and stable roadmap agreement |
 | Next backlog item | `docs/FUTURE_PLANS.md` (first Planned) | reported at startup; compared with STATE.json nextPhase when stable | Point: read fresh each session + Gate: `validate.ps1` |
-| Roadmap (version-sequenced) | `docs/FUTURE_PLANS.md` (Planned) | VERSIONING holds history only; startup reads it | Point: FUTURE_PLANS is the single roadmap owner |
+| Roadmap (version-sequenced) | `docs/FUTURE_PLANS.md` (Planned) | startup reads it; VERSIONING holds version rules + current state only | Point: FUTURE_PLANS is the single roadmap owner |
 | Roadmap closeout | `docs/FUTURE_PLANS.md` (Completed / In Progress / Planned) | promotion workflow | Sync: `promote.ps1` closes the promoted roadmap item + Gate: `validate.ps1` catches stale phase/backlog drift |
+| Completed-version history (version + title + date) | `docs/FUTURE_PLANS.md` (Completed) | VERSIONING points to it (no history table) | Sync: `promote.ps1` writes the Completed bullet + Gate: `validate.ps1` |
 | Session state snapshot | `STATE.json` + `docs/FUTURE_PLANS.md` | the chathead opener | Point: opener tells the AI to read them; it must NOT embed a snapshot |
 | Project rules / entrypoint | `AGENTS.md` | `CLAUDE.md` (imports it via `@AGENTS.md`) | Point: CLAUDE.md must stay a one-line import and never restate rules |
 
@@ -47,6 +48,9 @@ Rules:
 - `CLAUDE.md` is a thin `@AGENTS.md` import - never add rule text directly to it.
 - The roadmap lives only in `docs/FUTURE_PLANS.md` (Planned). Do not keep a second
   roadmap table in VERSIONING.md.
+- Completed-version history lives only in `docs/FUTURE_PLANS.md` (Completed).
+  VERSIONING.md does not keep a version-history table; its `## Version History`
+  section is a pointer to FUTURE_PLANS Completed.
 - FUTURE_PLANS remains the single owner of the forward roadmap. Promotion may
   close the promoted roadmap item there, but FUTURE_PLANS is roadmap state, not
   a sixth versioning location.
@@ -93,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.13
-- **Current phase:** 1.9.13 - Stale Doc Content Sweep
-- **Next phase:** 1.9.14 - Version-History Ownership De-Dup
+- **Current version:** 1.9.14-alpha
+- **Current phase:** 1.9.14 - Version-History Ownership De-Dup
+- **Next phase:** 1.9.15 - Retire/Compress ai-harness Pointer Surface
 
 ---
 
@@ -153,113 +157,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 ## Version History
 
-| Version | State | Date | Phase | Notes |
-|---------|-------|------|-------|-------|
-| 1.9.13 | stable | 2026-06-07 | Stale Doc Content Sweep | (in progress) |
-| 1.9.12 | stable | 2026-06-07 | Agent Role-Model Realignment | (in progress) |
-| 1.9.11 | stable | 2026-06-07 | Product-First Planning Contract and Roadmap Rebaseline | (in progress) |
-| 1.9.10 | stable | 2026-06-06 | Local DB Source-of-Truth Decision | (in progress) |
-| 1.9.9 | stable | 2026-06-06 | Offline Conflict Resolution Rules | (in progress) |
-| 1.9.8 | stable | 2026-06-06 | Sync Status UI Surface | (in progress) |
-| 1.9.7 | stable | 2026-06-06 | Automatic Replay Worker | (in progress) |
-| 1.9.6 | stable | 2026-06-06 | Durable Pending-Write Integration | (in progress) |
-| 1.9.5 | stable | 2026-06-06 | Dashboard Mutation to Outbox Wiring | (in progress) |
-| 1.9.4 | stable | 2026-06-06 | Extract Tag Mutation Cache Helpers | (in progress) |
-| 1.9.3 | stable | 2026-06-06 | Extract View Mutation Cache Helpers | (in progress) |
-| 1.9.2 | stable | 2026-06-05 | Extract List Mutation Cache Helpers | (in progress) |
-| 1.9.1 | stable | 2026-06-05 | Extract Dashboard Query Key Helper | (in progress) |
-| 1.9.0 | stable | 2026-06-05 | Dashboard Component Responsibility Audit | (in progress) |
-| 1.8.7 | stable | 2026-06-05 | Local-First Status Alignment and Roadmap Correction | (in progress) |
-| 1.8.6 | stable | 2026-06-05 | Offline Write Path Prototype | (in progress) |
-| 1.8.5 | stable | 2026-06-05 | Outbox Replay Integration Test Plan | (in progress) |
-| 1.8.4 | stable | 2026-06-05 | Workflow Source-of-Truth Migration Into Skills | (in progress) |
-| 1.8.3 | stable | 2026-06-05 | Post-Validation Closeout Enforcement | (in progress) |
-| 1.8.2 | stable | 2026-06-05 | Script-Printed Command Re-Emit Hardening | (in progress) |
-| 1.8.1 | stable | 2026-06-05 | Scope-Output Opening-Sequence Template | (in progress) |
-| 1.8.0 | stable | 2026-06-05 | Local DB Role Audit Through Tests | (in progress) |
-| 1.7.3 | stable | 2026-06-05 | Refresh/Crash Pending Work Decision | (in progress) |
-| 1.7.2 | stable | 2026-06-05 | Pending Mutation Cancellation Rules | (in progress) |
-| 1.7.1 | stable | 2026-06-05 | Scope Rollback Rules | (in progress) |
-| 1.7.0 | stable | 2026-06-05 | Optimistic Queue Race Test Baseline | (in progress) |
-| 1.6.6 | stable | 2026-06-05 | Phase Scoping and Opening Workflow Hardening | (in progress) |
-| 1.6.5 | stable | 2026-06-05 | Codebase Graph Generator Stability Fix | (in progress) |
-| 1.6.4 | stable | 2026-06-04 | Workflow Skill Evolution Sweep | (in progress) |
-| 1.6.3 | stable | 2026-06-04 | Ownership Regression Sweep | (in progress) |
-| 1.6.2 | stable | 2026-06-04 | Reorder Target List Ownership Fix | (in progress) |
-| 1.6.1 | stable | 2026-06-04 | List Item Ownership Fixes | (in progress) |
-| 1.6.0 | stable | 2026-06-04 | Ownership Failure Test Baseline | (in progress) |
-| 1.5.8 | stable | 2026-06-04 | Local Evidence Packet Code-Block Contract | (in progress) |
-| 1.5.7 | stable | 2026-06-04 | Consolidated Closeout Packet | (in progress) |
-| 1.5.6 | stable | 2026-06-04 | Phase Eval Artifact Baseline | (in progress) |
-| 1.5.5 | stable | 2026-06-04 | Real Hook Guardrails | (in progress) |
-| 1.5.4 | stable | 2026-06-04 | Session Checkpoint Deprecation | (in progress) |
-| 1.5.3 | stable | 2026-06-04 | Operational Skill Re-Architecture | (in progress) |
-| 1.5.2 | stable | 2026-06-04 | AI Context Budget Audit | (in progress) |
-| 1.5.1 | stable | 2026-06-04 | Local Memory Persistence and Learning Queue | (in progress) |
-| 1.5.0 | stable | 2026-06-04 | Tidy Harness Skills and Hook Contracts | (in progress) |
-| 1.4.31 | stable | 2026-06-04 | Workflow Closeout and Open-Phase Fixes | (in progress) |
-| 1.4.30 | stable | 2026-06-04 | Roadmap Rebaseline for 1.5.x Harness Series | (in progress) |
-| 1.4.29 | stable | 2026-06-03 | Parallel Auth E2E Isolation | (in progress) |
-| 1.4.28 | stable | 2026-06-03 | Promote State-Doc Sync Automation | (in progress) |
-| 1.4.27 | stable | 2026-06-03 | Authenticated E2E Suite Hardening | (in progress) |
-| 1.4.26 | stable | 2026-06-02 | Custom View Reorder E2E Stabilization | (in progress) |
-| 1.4.25 | stable | 2026-06-02 | ChatGPT and Codex Role Formalization | (in progress) |
-| 1.4.24 | stable | 2026-06-01 | Routing Consolidation and CODEX_RULES Trim | (in progress) |
-| 1.4.23 | stable | 2026-06-01 | Open Phase Status Flip Fix | (in progress) |
-| 1.4.22 | stable | 2026-06-01 | Startup Contract Unification | (in progress) |
-| 1.4.21 | stable | 2026-06-01 | Commit Script Deletion Staging | (in progress) |
-| 1.4.20 | stable | 2026-06-01 | Git Artifact Hygiene Hardening | (in progress) |
-| 1.4.19 | stable | 2026-06-01 | In-Alpha Commit-Before-Fix Hardening | (in progress) |
-| 1.4.18 | stable | 2026-06-01 | Retire ChromaDB | (in progress) |
-| 1.4.17 | stable | 2026-05-31 | Session Log Folder Contract Correction | (in progress) |
-| 1.4.16 | stable | 2026-05-31 | Session Checkpoint Output Contract Hardening | (in progress) |
-| 1.4.15 | stable | 2026-05-31 | Closeout Evidence and Validation Efficiency Hardening | (in progress) |
-| 1.4.14 | stable | 2026-05-31 | Phase Branch Commit Workflow Finalization | (in progress) |
-| 1.4.13 | stable | 2026-05-31 | Codex Debugging Discipline Hardening | (in progress) |
-| 1.4.12 | stable | 2026-05-31 | Validation-Gated Assistant Response Hardening | (in progress) |
-| 1.4.11 | stable | 2026-05-31 | AI Handoff Compression | (in progress) |
-| 1.4.10 | stable | 2026-05-31 | Context Index Routing Map | (in progress) |
-| 1.4.9 | stable | 2026-05-31 | Branch-Based Phase Workflow Draft | (in progress) |
-| 1.4.8 | stable | 2026-05-31 | Drag/Reorder Persistence Regression | (in progress) |
-| 1.4.7 | stable | 2026-05-31 | Create List + Create Item Race Regression | (in progress) |
-| 1.4.6 | stable | 2026-05-31 | View Switching Race Regression | (in progress) |
-| 1.4.5 | stable | 2026-05-31 | Tag Mutation Projection Regression | (in progress) |
-| 1.4.4 | stable | 2026-05-31 | Open Phase Roadmap Status Automation | (in progress) |
-| 1.4.3 | stable | 2026-05-31 | Dashboard Cache Projection Contract | (in progress) |
-| 1.4.2 | stable | 2026-05-31 | Backend View Membership Contract | (in progress) |
-| 1.4.1 | stable | 2026-05-31 | AI Handoff Next Session Cleanup | (in progress) |
-| 1.4.0 | stable | 2026-05-30 | View Projection Reproduction Tests | (in progress) |
-| 1.3.3 | stable | 2026-05-30 | Docs Surface and Product Roadmap Rebaseline | (in progress) |
-| 1.3.2 | stable | 2026-05-30 | ChatGPT Architect Real Workflow Test | Replaced the static workflow review doc with a real local export script and validation coverage for the ChatGPT-ready context packet layout. |
-| 1.3.1 | stable | 2026-05-30 | ChatGPT Architect Workflow Proof and Layout Review | Added a static ChatGPT workflow review document and validation coverage; later superseded by 1.3.2's real export script. |
-| 1.3.0 | stable | 2026-05-30 | ChatGPT Architect Local Context Workflow | Added ChatGPT Architect Mode, Local Evidence Packet requirements, ChromaDB/graph local-evidence boundaries, and validation coverage. |
-| 1.2.7 | stable | 2026-05-30 | Prompt Fence Safety Hardening | Documented prompt-fence safety rules and added validation coverage for required prompt-format documentation. |
-| 1.2.6 | stable | 2026-05-30 | Roadmap Next-Phase Gate | Added nextPhase/FUTURE_PLANS drift guards across validation, open-phase, promote, and workflow docs. |
-| 1.2.5 | stable | 2026-05-30 | Phase Routing Guardrail Cleanup | Aligned phase routing guardrails, roadmap movement boundaries, and Phase 3 checkpoint wording. |
-| 1.2.4 | stable | 2026-05-30 | Handoff Drift Cleanup | Removed stale handoff/versioning references and corrected old phase-log promotion wording. |
-| 1.2.3 | stable | 2026-05-30 | Startup Oracle Cleanup | Removed preVersioningBaseline from STATE.json, kept pre-versioning history in VERSIONING/PHASE_LOG, added Planned Phase Capture rules, and inserted 1.2.4/1.2.5 cleanup patches before 1.3.0. |
-| 1.2.2 | stable | 2026-05-30 | Chroma Visibility Fix | Fixed ChromaDB visibility in startup/validation flow and kept fallback behavior explicit when ChromaDB is unavailable. |
-| 1.2.1 | stable | 2026-05-30 | Graph Navigation Doc Consistency | COMPACT_STRATEGY.md graphify section rewritten to the static codebase-graph.json path (removed broken graphify-out/live-CLI steps); validate.ps1 graph-usage guard fails if any doc instructs the unavailable live graphify CLI. |
-| 1.2.0 | stable | 2026-05-30 | ChromaDB Bootstrap | ingest_docs.py BOM-safe + cosine + indexes CODEBASE_GRAPH.md; validate.ps1 auto-starts ChromaDB and ingests or FAILs loudly; chroma-data bootstrapped so query_docs.py returns real chunks. |
-| 1.1.4 | stable | 2026-05-29 | Graph Routing Usage Contract | Requires visible graph-routed file selection in implementation scoping without adding startup-loop overhead or token benchmarking. |
-| 1.1.3 | stable | 2026-05-29 | Codex Validation Boundary Hardening | Clarifies validation is user/controller-run, forbids Codex self-validation claims, and removes contradictory Required Tests wording. |
-| 1.1.2 | stable | 2026-05-29 | Graph Audit Harness | Adds a graph audit harness that proves required nodes, classifications, protected-path exclusions, and routing metadata without adding startup-loop overhead. |
-| 1.1.1 | stable | 2026-05-29 | Graph Stable Refresh Fix | Fixes stable promotion graph freshness by regenerating and verifying codebase-graph.json during promote.ps1. |
-| 1.1.0 | stable | 2026-05-29 | Graphify Integration | Adds Graphify/fallback codebase graph generation, committed codebase-graph.json, startup graph orientation, and validate graph freshness checks. |
-| 1.0.13 | stable | 2026-05-29 | Prompt and Commit Output Format Hardening | Hardens copy-paste-safe output rules for Codex prompts, validation blocks, alpha commit blocks, stable promotion commit blocks, and push blocks. |
-| 1.0.12 | stable | 2026-05-29 | Phase Identity Sync | Adds phase identity and roadmap closeout guards; promote.ps1 closes the promoted roadmap item in FUTURE_PLANS.md; validate.ps1 catches stale phase/backlog drift. |
-| 1.0.11 | stable | 2026-05-29 | Session Continuity and Bounded Initiative | AGENTS.md gains Session Continuity (proactive SESSION_LOG checkpoint) and Working Posture (strict rails + active initiative) sections; WORKFLOW.md checkpoint cross-reference; stale Open->Planned references fixed. |
-| 1.0.10 | stable | 2026-05-29 | Roadmap Consolidation | FUTURE_PLANS.md rewritten as the single version-sequenced roadmap; Planned Phases table removed from VERSIONING.md; Planned Renumber Rule added; all former NOW/NEXT/LATER items assigned target versions. |
-| 1.0.9 | stable | 2026-05-29 | Promote Self-Verify and CLAUDE.md Continuity | promote.ps1 self-verifies the five versioning locations and fixes its commit echo; WORKFLOW.md drops the redundant post-promote validation; Doc Continuity Model now covers CLAUDE.md. |
-| 1.0.8 | stable | 2026-05-29 | Doc Continuity Model | Doc Continuity Model added to VERSIONING.md; opener state snapshot removed and AGENTS.md/WORKFLOW.md updated to point at STATE.json + FUTURE_PLANS; stale PHASE_LOG target-version fixed (1.2.0 -> 1.3.0). |
-| 1.0.7 | stable | 2026-05-29 | Anti-Drift Baseline | Version-consistency gate added to validate.ps1; Drift Guardrails + Startup Report disambiguation in AGENTS.md; 1.1.0/1.2.0 roadmap entries added; stale version markers removed. |
-| 1.0.6 | stable | 2026-05-28 | Mojibake Resolution and Scan | fix-mojibake.ps1 created; AI_HANDOFF.md, VERSIONING.md, WORKFLOW.md repaired; mojibake scan step added to validate.ps1. |
-| 1.0.5 | stable | 2026-05-28 | New Chathead Opener | docs/NEW_CHATHEAD_OPENER.md created with START/END copy-paste format; WORKFLOW.md session checkpoint updated to reference opener file; AGENTS.md command vocabulary extended with handoff command. |
-| 1.0.4 | stable | 2026-05-28 | Validate Script Output Compression | validate.ps1 rewritten to suppress output on pass, surface on fail, add e2e step, fix -Encoding UTF8 on STATE.json read. WORKFLOW.md Section 2 template updated to use validate.ps1. |
-| 1.0.3 | stable | 2026-05-28 | Promote Encoding Fix and Source-of-Truth Hardening | promote.ps1 Get-Content calls fixed with -Encoding UTF8; AGENTS.md repo source-of-truth rule added; FUTURE_PLANS v1.0.2 marked Done. |
-| 1.0.2 | stable | 2026-05-28 | Commit Automation and Prompt Format Hardening | commit.ps1 canonical commit helper; WORKFLOW.md prompt format rewrite; CODEX_RULES.md and AGENTS.md commit discipline updated. |
-| 1.0.1 | stable | 2026-05-28 | AGENTS.md Hardening | Rewrites AGENTS.md startup guidance, removes inline-breaking fenced blocks, documents Claude Code command vocabulary, and tracks the v1.0.2 commit automation patch. |
-| 1.0.0 | stable | 2026-05-28 | AI Workflow Foundation | First versioned release. STATE.json, VERSIONING, WORKFLOW, COMPACT_STRATEGY, ChromaDB scripts, validate/promote automation, AGENTS.md + entrypoint updates. |
+Completed-version history - version, title, and stable date for every released phase - lives in `docs/FUTURE_PLANS.md` under `## Completed`, the single owner. This file no longer maintains a duplicate history table; it keeps the version format, the five-location rules, the Doc Continuity Model, current state, and the pre-versioning baseline only. `promote.ps1` records each promotion as a `## Completed` bullet in `docs/FUTURE_PLANS.md`.
 
 ---
 

@@ -292,28 +292,6 @@ if ($nextPhaseValue -ne $currentNextPhase) {
         "**Next phase:** $nextPhaseValue"
 }
 
-$versioningPath = Resolve-Path "docs/VERSIONING.md"
-$versioningContent = Get-Content $versioningPath -Raw -Encoding UTF8
-$historyRowPattern = "\|\s*" + [regex]::Escape($Version) + "\s*\|\s*alpha\s*\|"
-if ((-not $Repair) -or ($versioningContent -notmatch $historyRowPattern)) {
-    $newRow = "| $Version | alpha | $today | $PhaseTitle | (in progress) |"
-    $historyHeadingIndex = $versioningContent.IndexOf("## Version History")
-    if ($historyHeadingIndex -lt 0) {
-        Write-Warning "Version History section not found in docs/VERSIONING.md; alpha row was not inserted."
-    } else {
-        $historyContent = $versioningContent.Substring($historyHeadingIndex)
-        $separatorMatch = [regex]::Match($historyContent, "(?m)^\|[-| ]+\|\s*$")
-        if ($separatorMatch.Success) {
-            $insertAt = $historyHeadingIndex + $separatorMatch.Index + $separatorMatch.Length
-        $versioningContent = $versioningContent.Insert($insertAt, "`n$newRow")
-        [System.IO.File]::WriteAllText($versioningPath.Path, $versioningContent, $utf8NoBom)
-        Write-Host "  Updated: docs/VERSIONING.md (history row)" -ForegroundColor Green
-        } else {
-            Write-Warning "Version history table separator not found in docs/VERSIONING.md; alpha row was not inserted."
-        }
-    }
-}
-
 # 6. docs/FUTURE_PLANS.md roadmap state
 $futurePlansPath = "docs/FUTURE_PLANS.md"
 if (Test-Path $futurePlansPath) {
@@ -412,7 +390,6 @@ $postWorkflow = Get-Content "docs/WORKFLOW.md" -Raw -Encoding UTF8
 if ($postWorkflow -notmatch ("<!-- Current Version: " + [regex]::Escape($alphaVer) + " -->")) { $verifyErrors += "WORKFLOW.md comment" }
 $postVersioning = Get-Content "docs/VERSIONING.md" -Raw -Encoding UTF8
 if ($postVersioning -notmatch ("Current version:\*\*\s*" + [regex]::Escape($alphaVer) + "(\s|$)")) { $verifyErrors += "VERSIONING.md current line" }
-if ($postVersioning -notmatch ("\|\s*" + [regex]::Escape($Version) + "\s*\|\s*alpha\s*\|")) { $verifyErrors += "VERSIONING.md history row" }
 if ($verifyErrors.Count -gt 0) {
     Write-Error ("Open-phase self-verify FAILED - locations inconsistent: " + ($verifyErrors -join ", "))
     exit 1
