@@ -173,3 +173,17 @@ The dashboard read authority is the server: the tRPC All-Lists payload (view.get
 **Scope and deferral**: This is a recorded decision with no source change. The optional getServerSnapshot provider added to replayOutboxOperations in 1.9.9 remains intentionally unsupplied at runtime: because the server stays the source of truth and the dashboard does not read Dexie, there is no runtime path that applies replayed operations to a local DB and re-reads it. Applying replayed operations server-side (a real /api/sync that mutates the database) and any future local-read mode remain out of scope and would be a new, explicitly-driven phase, not part of this on-ramp.
 
 **Impact**: Discharges the 1.9.10 "Local DB Source-of-Truth Decision" item. The seriesComplete flag in STATE.json stays false by decision (to be flipped in a later explicit step). Dexie/local DB remains the non-source-of-truth local layer characterized by tests/unit/local-db-role-audit.test.ts; that guard stays green and unchanged.
+
+---
+
+## 2026-06-07: Product-first roadmap rebaseline - direction, Dexie local-runtime supersession, and workflow-drift finding (1.9.11)
+
+**Direction**: Tidy's near-term identity is locked as a fast personal todo app with local-first UX, built as a portfolio-grade engineering showcase. Planning shifts to thin vertical product slices over long horizontal infrastructure chains, captured by the Product-First Planning Contract in docs/WORKFLOW.md and the per-phase declaration format in docs/FUTURE_PLANS.md.
+
+**Dexie supersession**: This supersedes the planning stance of the 2026-06-06 "Dashboard source of truth is the server; Dexie is a write-side buffer" decision. Dexie moves forward as the local runtime source for dashboard CRUD, slice by slice (create list first), with TanStack/tRPC retained as the server hydration/sync bridge and PostgreSQL/Supabase as the remote durable source of truth. Full local-first database ownership is pursued later only if the slices prove it correct (1.9.21 decides). Redis stays deferred and is not a substitute for browser local-first UX. This is the explicitly-driven phase the 2026-06-06 decision named as the only way to revisit the server-as-read-authority stance; it is a planning-level direction change only. No runtime read flips in 1.9.11, and the tests/unit/local-db-role-audit.test.ts guard stays green and unchanged until the create-list read path actually flips in 1.9.17.
+
+**Workflow-drift finding (high severity)**: The workflow had no gate preventing infrastructure, gated behavior, and decision-only work from reading as delivered product progress; the 1.9.5-1.9.10 offline arc shipped infrastructure plus a decision with no user-visible local-first behavior. The Product-First Planning Contract (per-phase Type / Product impact / Runtime integration target / Deferral boundary) is the corrective gate.
+
+**Validation policy**: Targeted validation during alpha, full validation before stable, with a mandatory manual product proof for product phases - referenced from docs/WORKFLOW.md Validation Intensity and amended into docs/CODEX_RULES.md Required Tests, not duplicated.
+
+**Impact**: The roadmap is rebaselined into the new format with the product-first arc inserted as 1.9.11-1.9.21 ahead of the existing 1.10.0-1.11.3 entries (monotonic order preserved; no renumber of existing entries). seriesComplete in STATE.json stays false by decision. The AI_HANDOFF Known Risks realignment for the Dexie direction is handled in 1.9.13, not here.
