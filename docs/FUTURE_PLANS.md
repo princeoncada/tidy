@@ -241,12 +241,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.14 - Version-History Ownership De-Dup (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.14 - Version-History Ownership De-Dup
-- **Status:** Open | Priority: P2 docs hygiene
+- **Status:** In progress | Priority: P2 docs hygiene
 - **Type:** docs/decision
 - **Files:** docs/FUTURE_PLANS.md, docs/VERSIONING.md, docs/DECISIONS.md
 - **Implementation goal:** choose the single owner of historical version info (FUTURE_PLANS Completed vs VERSIONING history table), remove the duplication, and leave a pointer from the non-owner.
