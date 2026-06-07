@@ -260,6 +260,10 @@ Every implementation PR must:
 - Not claim validation, test, build, or audit commands passed unless the user/controller provided the output in the same conversation
 - Not mark complete if tests were not added or updated unless clearly justified with a documented reason
 
+Validation policy (product phases):
+- Targeted validation during alpha; full validation before stable. The targeted-vs-full intensity rule itself lives in `docs/WORKFLOW.md` (Validation Intensity) - follow it, do not restate it here.
+- Every product implementation phase must include a manual product proof of the user-visible behavior it claims, summarized for the user/controller to run during alpha. A phase that defers product proof must name the follow-up phase per the Product-First Planning Contract.
+
 Test commands:
 - `npm run test`  -  Vitest unit tests
 - `npm run test:e2e`  -  non-authenticated Playwright E2E
