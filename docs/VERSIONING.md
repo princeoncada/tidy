@@ -67,7 +67,7 @@ Rules:
   validation, and optional commit/promotion blocks. When a section itself is
   fenced, examples inside it must be unfenced or indented.
 - Repo state questions are answered from pushed GitHub state or local repo state
-  depending on execution context. ChatGPT architect mode uses pushed GitHub
+  depending on execution context. ChatGPT reviewer mode uses pushed GitHub
   state plus pasted local evidence; local-only facts are not visible to ChatGPT
   until pasted or pushed. The Local Evidence Packet is the bridge for local
   ChromaDB, graph output, git diff/status, and validation output. This does not
