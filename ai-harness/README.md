@@ -6,10 +6,11 @@ read set.
 
 ## What this is
 
-- skills/ - RETIRED. Operational skills now live as real Claude Code skills
-  under `.claude/skills/`. Each file here is a one-line pointer to its
-  replacement. See docs/WORKFLOW.md "Skill Surface" for the registry.
 - hooks/ - opt-in, profile-gated hook templates that are inactive by default.
+
+Operational skills live as real Claude Code skills under `.claude/skills/`
+(see docs/WORKFLOW.md "Skill Surface" for the registry); this harness no
+longer keeps skill pointers.
 
 ## Hard rules
 
