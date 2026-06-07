@@ -48,11 +48,11 @@ Do not open `docs/VERSIONING.md` just to check the version. STATE.json is author
 
 ---
 
-## ChatGPT Architect Context Boundary
+## ChatGPT Reviewer Context Boundary
 
-The ChatGPT architect works from pushed GitHub state plus pasted local evidence
+The ChatGPT reviewer works from pushed GitHub state plus pasted local evidence
 only. Local uncommitted work, branch-only files, local validation output, and
-regenerated graph output are invisible to the ChatGPT architect until pushed or
+regenerated graph output are invisible to the ChatGPT reviewer until pushed or
 pasted.
 
 Committed `codebase-graph.json` is available to ChatGPT after push through
