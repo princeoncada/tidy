@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.13-alpha -->
+<!-- Current Version: 1.9.13 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.13-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.13 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.13 - Stale Doc Content Sweep
 **Next**: 1.9.14 - Version-History Ownership De-Dup
 
