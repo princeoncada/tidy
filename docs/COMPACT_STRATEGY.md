@@ -44,7 +44,7 @@ Read `STATE.json` at session start. It contains everything needed to orient befo
 - `phaseTitle`  -  what the current phase is about
 - `nextPhase`  -  what comes after
 
-Do not open `docs/VERSIONING.md` just to check the version. STATE.json is authoritative. Only read VERSIONING.md when you need the full history table or planned phases.
+Do not open `docs/VERSIONING.md` just to check the version. STATE.json is authoritative. Only read VERSIONING.md when you need the version rules or the pre-versioning baseline; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
 
 ---
 
