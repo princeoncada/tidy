@@ -230,6 +230,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.12 - Agent Role-Model Realignment~~ (stable 2026-06-07)
 
+- ~~1.9.13 - Stale Doc Content Sweep~~ (stable 2026-06-07)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -239,21 +241,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.13 - Stale Doc Content Sweep (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.13 - Stale Doc Content Sweep
-- **Status:** In progress | Priority: P2 docs hygiene
-- **Type:** docs cleanup
-- **Files:** docs/AI_HANDOFF.md, docs/VERSIONING.md
-- **Implementation goal:** fix AI_HANDOFF lower-section guidance still referencing 1.5.x/1.6.x continuation, and VERSIONING history rows whose Notes still read "(in progress)" on already-stable versions.
-- **Product impact:** none.
-- **Runtime integration target:** none.
-- **Deferral boundary:** historical-version de-duplication -> 1.9.14.
-- **Validation target:** targeted alpha (Select-String confirming stale phrases removed); full validate.ps1 at the gate.
-- **Acceptance:** no stale 1.5.x/1.6.x continuation guidance remains; no stable VERSIONING row reads "(in progress)".
 
 ### 1.9.14 - Version-History Ownership De-Dup
 - **Status:** Open | Priority: P2 docs hygiene
