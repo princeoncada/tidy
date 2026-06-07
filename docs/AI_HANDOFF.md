@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.12-alpha -->
+<!-- Current Version: 1.9.12 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.12-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.12 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.12 - Agent Role-Model Realignment
 **Next**: 1.9.13 - Stale Doc Content Sweep
 
