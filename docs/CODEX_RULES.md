@@ -151,9 +151,9 @@ AGENTS.md owns the graph routing and audit rules. For Codex implementation:
 - Do not run graph audit unless explicitly asked, and do not claim token savings from graph routing alone.
 - If modifying graph scripts/tooling, list `scripts/` first and keep protected/generated paths excluded.
 
-## ChatGPT Architect Evidence Boundary
+## ChatGPT Reviewer Evidence Boundary
 
-- Codex prompts written by ChatGPT architect must state whether they were scoped
+- Codex prompts (written by Claude Code, optionally reviewed by ChatGPT) must state whether they were scoped
   from pushed remote state, pasted local evidence, or both.
 - For source-heavy prompts, include the Local Evidence Packet in the prompt
   context or require Codex to read local files directly before editing.
@@ -164,7 +164,7 @@ AGENTS.md owns the graph routing and audit rules. For Codex implementation:
   EVIDENCE PROVIDED" section.
 - If no local evidence was provided, list "LOCAL EVIDENCE PROVIDED: none,
   scoped from pushed remote state only."
-- ChatGPT architect prompts must remain prompt-fence safe and must not nest
+- Codex prompts must remain prompt-fence safe and must not nest
   markdown fences inside master prompts.
 
 ## Validation Boundary
