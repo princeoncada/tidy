@@ -232,6 +232,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.13 - Stale Doc Content Sweep~~ (stable 2026-06-07)
 
+- ~~1.9.14 - Version-History Ownership De-Dup~~ (stable 2026-06-07)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -241,21 +243,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.14 - Version-History Ownership De-Dup (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.14 - Version-History Ownership De-Dup
-- **Status:** In progress | Priority: P2 docs hygiene
-- **Type:** docs/decision
-- **Files:** docs/FUTURE_PLANS.md, docs/VERSIONING.md, docs/DECISIONS.md
-- **Implementation goal:** choose the single owner of historical version info (FUTURE_PLANS Completed vs VERSIONING history table), remove the duplication, and leave a pointer from the non-owner.
-- **Product impact:** none.
-- **Runtime integration target:** none.
-- **Deferral boundary:** does not change versioning rules or the five versioning locations.
-- **Validation target:** targeted alpha (validate.ps1 doc-surface + phase/roadmap gates green); full validate.ps1 at the gate.
-- **Acceptance:** historical version info has one owner with a pointer; validate doc-surface gates still pass.
 
 ### 1.9.15 - Retire/Compress ai-harness Pointer Surface
 - **Status:** Open | Priority: P2 cleanup
