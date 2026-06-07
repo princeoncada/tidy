@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.15-alpha",
-    "state":  "alpha",
+    "version":  "1.9.15",
+    "state":  "stable",
     "phase":  "1.9.15",
     "phaseTitle":  "Retire/Compress ai-harness Pointer Surface",
     "nextPhase":  "1.9.16 - Dev-Gated Local-First Create List Slice",
