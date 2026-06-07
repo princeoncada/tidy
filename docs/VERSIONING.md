@@ -93,7 +93,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.13-alpha
+- **Current version:** 1.9.13
 - **Current phase:** 1.9.13 - Stale Doc Content Sweep
 - **Next phase:** 1.9.14 - Version-History Ownership De-Dup
 
@@ -155,7 +155,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 
 | Version | State | Date | Phase | Notes |
 |---------|-------|------|-------|-------|
-| 1.9.13 | alpha | 2026-06-07 | Stale Doc Content Sweep | (in progress) |
+| 1.9.13 | stable | 2026-06-07 | Stale Doc Content Sweep | (in progress) |
 | 1.9.12 | stable | 2026-06-07 | Agent Role-Model Realignment | (in progress) |
 | 1.9.11 | stable | 2026-06-07 | Product-First Planning Contract and Roadmap Rebaseline | (in progress) |
 | 1.9.10 | stable | 2026-06-06 | Local DB Source-of-Truth Decision | (in progress) |
