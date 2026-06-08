@@ -245,12 +245,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.16 - Dev-Gated Local-First Create List Slice (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.16 - Dev-Gated Local-First Create List Slice
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior (dev-gated)
 - **Files:** lib/dashboard-cache.ts, lib/local-db/*, create-list mutation site, feature flag, tests
 - **Implementation goal:** make Dexie the local runtime source for the create-list dashboard slice behind a dev-only feature flag (declare name/default/dev path/activation condition/removal plan) without changing default behavior.
