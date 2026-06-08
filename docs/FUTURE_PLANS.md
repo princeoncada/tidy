@@ -236,6 +236,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.15 - Retire/Compress ai-harness Pointer Surface~~ (stable 2026-06-07)
 
+- ~~1.9.16 - Dev-Gated Local-First Create List Slice~~ (stable 2026-06-08)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -245,21 +247,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.16 - Dev-Gated Local-First Create List Slice (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.16 - Dev-Gated Local-First Create List Slice
-- **Status:** In progress | Priority: P1 product (local-first)
-- **Type:** product behavior (dev-gated)
-- **Files:** lib/dashboard-cache.ts, lib/local-db/*, create-list mutation site, feature flag, tests
-- **Implementation goal:** make Dexie the local runtime source for the create-list dashboard slice behind a dev-only feature flag (declare name/default/dev path/activation condition/removal plan) without changing default behavior.
-- **Product impact:** none by default; flag-on, created lists render from local state immediately.
-- **Runtime integration target:** flag-on dev builds read the created list from Dexie; flag-off keeps the server/TanStack read path unchanged.
-- **Deferral boundary:** flag stays dev-only until 1.9.17; other CRUD slices -> 1.9.18-1.9.20; the local-db-role-audit guard flips when the read path flips (1.9.17).
-- **Validation target:** targeted alpha (focused slice unit tests + manual product proof of flag-on create-list); full test:ci before stable.
-- **Acceptance:** flag-gated local-first create-list works in dev, default behavior unchanged, tests cover both flag states.
 
 ### 1.9.17 - Stabilize and Enable Local-First Create List Slice
 - **Status:** Open | Priority: P1 product (local-first)
