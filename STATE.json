@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.16-alpha",
-    "state":  "alpha",
+    "version":  "1.9.16",
+    "state":  "stable",
     "phase":  "1.9.16",
     "phaseTitle":  "Dev-Gated Local-First Create List Slice",
     "nextPhase":  "1.9.17 - Stabilize and Enable Local-First Create List Slice",
