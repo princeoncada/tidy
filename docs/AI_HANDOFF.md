@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.15 -->
+<!-- Current Version: 1.9.16-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.15 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.15 - Retire/Compress ai-harness Pointer Surface
-**Next**: 1.9.16 - Dev-Gated Local-First Create List Slice
+**Current Version**: 1.9.16-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.16 - Dev-Gated Local-First Create List Slice
+**Next**: 1.9.17 - Stabilize and Enable Local-First Create List Slice
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
