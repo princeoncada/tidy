@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.15",
-  "generatedAt": "2026-06-07",
+  "version": "1.9.16-alpha",
+  "generatedAt": "2026-06-08",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -444,6 +444,7 @@
         "lucide-react",
         "@/lib/dashboard-cache",
         "@/lib/sync/offline-write-prototype",
+        "@/lib/sync/local-first-create-list",
         "../ui/skeleton"
       ]
     },
@@ -1612,6 +1613,22 @@
       ]
     },
     {
+      "path": "lib/sync/local-first-create-list.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "LocalFirstCreateListInput",
+        "LocalFirstCreatedListView",
+        "LocalListRepositoryDatabase",
+        "isLocalFirstCreateListEnabled",
+        "readLocalFirstCreatedList"
+      ],
+      "imports": [
+        "@/lib/local-db/local-repositories",
+        "@/lib/local-db/local-schema"
+      ]
+    },
+    {
       "path": "lib/sync/offline-write-prototype.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2170,6 +2187,17 @@
         "node:path",
         "vitest",
         "@/lib/local-db/metadata-repository",
+        "@/lib/local-db/local-schema"
+      ]
+    },
+    {
+      "path": "tests/unit/local-first-create-list.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/local-first-create-list",
         "@/lib/local-db/local-schema"
       ]
     },
@@ -2996,6 +3024,12 @@
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
+      "to": "lib/sync/local-first-create-list.ts",
+      "type": "imports",
+      "import": "@/lib/sync/local-first-create-list"
     },
     {
       "from": "components/list/ListAdder.tsx",
@@ -3862,6 +3896,18 @@
       "import": "@/lib/local-db/outbox-schema"
     },
     {
+      "from": "lib/sync/local-first-create-list.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "lib/sync/local-first-create-list.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
       "from": "lib/sync/offline-write-prototype.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -4148,6 +4194,18 @@
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
       "import": "@/lib/local-db/metadata-repository"
+    },
+    {
+      "from": "tests/unit/local-first-create-list.test.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/local-first-create-list.test.ts",
+      "to": "lib/sync/local-first-create-list.ts",
+      "type": "imports",
+      "import": "@/lib/sync/local-first-create-list"
     },
     {
       "from": "tests/unit/local-repositories.test.ts",

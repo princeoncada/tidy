@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.15
-- **Current phase:** 1.9.15 - Retire/Compress ai-harness Pointer Surface
-- **Next phase:** 1.9.16 - Dev-Gated Local-First Create List Slice
+- **Current version:** 1.9.16-alpha
+- **Current phase:** 1.9.16 - Dev-Gated Local-First Create List Slice
+- **Next phase:** 1.9.17 - Stabilize and Enable Local-First Create List Slice
 
 ---
 

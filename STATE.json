@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.15",
-    "state":  "stable",
-    "phase":  "1.9.15",
-    "phaseTitle":  "Retire/Compress ai-harness Pointer Surface",
-    "nextPhase":  "1.9.16 - Dev-Gated Local-First Create List Slice",
+    "version":  "1.9.16-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.16",
+    "phaseTitle":  "Dev-Gated Local-First Create List Slice",
+    "nextPhase":  "1.9.17 - Stabilize and Enable Local-First Create List Slice",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-07"
+    "lastUpdated":  "2026-06-08"
 }
