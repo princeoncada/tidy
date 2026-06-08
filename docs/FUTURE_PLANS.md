@@ -247,12 +247,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.17 - Stabilize and Enable Local-First Create List Slice (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.17 - Stabilize and Enable Local-First Create List Slice
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/dashboard-cache.ts, lib/local-db/*, tests/unit/local-db-role-audit.test.ts, tests
 - **Implementation goal:** stabilize the create-list local-first slice, enable it by default, and update the local-db-role-audit guard to permit the now-intended Dexie read in dashboard-cache.
