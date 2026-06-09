@@ -238,6 +238,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.16 - Dev-Gated Local-First Create List Slice~~ (stable 2026-06-08)
 
+- ~~1.9.17 - Stabilize and Enable Local-First Create List Slice~~ (stable 2026-06-08)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -247,21 +249,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.17 - Stabilize and Enable Local-First Create List Slice (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.17 - Stabilize and Enable Local-First Create List Slice
-- **Status:** In progress | Priority: P1 infrastructure
-- **Type:** infrastructure
-- **Files:** lib/dashboard-cache.ts, lib/local-db/*, tests/unit/local-db-role-audit.test.ts, tests
-- **Implementation goal:** relocate the create-list Dexie write-through + read-back into `lib/dashboard-cache.ts`, flip the `local-db-role-audit` guard to permit the sanctioned `local-db/local-repositories` import, and retire the dev-gated bridge `lib/sync/local-first-create-list.ts` and its flag.
-- **Product impact:** none - the dashboard still reads from the SERVER; the Dexie read-back is value-identical to the server payload, so there is no user-visible local-first behavior. This phase only relocates plumbing and enables the views+hydration read path.
-- **Runtime integration target:** `lib/dashboard-cache.ts` owns the create-list write-through + read-back, but the dashboard still hydrates from the server (no user-visible change).
-- **Deferral boundary:** genuine offline local-first render (create a list, go offline, reload, still renders from Dexie) is gated on the views/dashboard render boot and deferred to 1.9.18 - Local-First Views/Dashboard Scaffold.
-- **Validation target:** full validate.ps1 consistency gates + unit/e2e suite (already green); no manual product proof since there is no user-visible change.
-- **Acceptance:** plumbing relocated, guard reflects the sanctioned read, bridge retired, full regression green; reclassified as honest infrastructure with no product over-claim.
 
 ### 1.9.18 - Local-First Views/Dashboard Scaffold
 - **Status:** Open | Priority: P1 product (local-first)
