@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.17-alpha -->
+<!-- Current Version: 1.9.17 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.17-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.17 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.17 - Stabilize and Enable Local-First Create List Slice
 **Next**: 1.9.18 - Local-First Views/Dashboard Scaffold
 
