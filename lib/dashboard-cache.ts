@@ -1,5 +1,10 @@
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import type { RouterOutputs } from "@/lib/trpc";
+import {
+  createLocalEntityBase,
+  getLocalDbOrThrow,
+} from "@/lib/local-db/local-repositories";
+import type { LocalList } from "@/lib/local-db/local-schema";
 
 export type ViewsCache = RouterOutputs["view"]["getAll"];
 export type ViewCacheItem = ViewsCache[number];
@@ -243,15 +248,75 @@ export function insertOptimisticListIntoDashboardCaches(
   setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.selectedView, prependWhenVisible);
 }
 
-export function reconcileCreatedListInDashboardCaches(
+export type LocalFirstCreateListDb = {
+  lists: {
+    put(list: LocalList): Promise<string>;
+    get(clientId: string): Promise<LocalList | undefined>;
+  };
+};
+
+function toLocalIsoTimestamp(value: Date | string): string {
+  return typeof value === "string" ? value : value.toISOString();
+}
+
+async function readBackCreatedListFromLocalDb(
+  savedList: CreatedListPayload,
+  optimisticListId: string,
+  db?: LocalFirstCreateListDb
+): Promise<CreatedListPayload> {
+  try {
+    const localDb =
+      db ?? (getLocalDbOrThrow() as unknown as LocalFirstCreateListDb);
+    const createdAt = toLocalIsoTimestamp(savedList.createdAt);
+    const updatedAt = toLocalIsoTimestamp(savedList.updatedAt);
+    const localList: LocalList = {
+      ...createLocalEntityBase({
+        clientId: optimisticListId,
+        serverId: savedList.id,
+        userId: savedList.userId,
+        syncStatus: "synced",
+        createdAt,
+        updatedAt,
+        lastSyncedAt: updatedAt,
+      }),
+      name: savedList.name,
+    };
+
+    await localDb.lists.put(localList);
+    const stored = await localDb.lists.get(optimisticListId);
+    if (!stored) {
+      return savedList;
+    }
+
+    return {
+      ...savedList,
+      id: stored.serverId ?? stored.clientId,
+      userId: stored.userId,
+      name: stored.name,
+      createdAt: new Date(stored.createdAt),
+      updatedAt: new Date(stored.updatedAt),
+    };
+  } catch (error) {
+    console.error("Failed to read local-first created list", error);
+    return savedList;
+  }
+}
+
+export async function reconcileCreatedListInDashboardCaches(
   queryClient: QueryClient,
   keys: DashboardKeys,
   savedList: CreatedListPayload,
-  optimisticListId: string
+  optimisticListId: string,
+  options: { localDb?: LocalFirstCreateListDb } = {}
 ) {
+  const reconciledList = await readBackCreatedListFromLocalDb(
+    savedList,
+    optimisticListId,
+    options.localDb
+  );
   const updatedKeys = new Set<string>();
   const replaceOptimisticList = (snapshot: DashboardSnapshot | undefined) =>
-    reconcileCreatedListInSnapshot(snapshot, savedList, optimisticListId);
+    reconcileCreatedListInSnapshot(snapshot, reconciledList, optimisticListId);
 
   setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.allLists, replaceOptimisticList);
   setDashboardQueryDataOnce<DashboardSnapshot>(queryClient, updatedKeys, keys.currentView, replaceOptimisticList);

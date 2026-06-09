@@ -247,55 +247,67 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.17 - Stabilize and Enable Local-First Create List Slice (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.17 - Stabilize and Enable Local-First Create List Slice
+- **Status:** In progress | Priority: P1 infrastructure
+- **Type:** infrastructure
+- **Files:** lib/dashboard-cache.ts, lib/local-db/*, tests/unit/local-db-role-audit.test.ts, tests
+- **Implementation goal:** relocate the create-list Dexie write-through + read-back into `lib/dashboard-cache.ts`, flip the `local-db-role-audit` guard to permit the sanctioned `local-db/local-repositories` import, and retire the dev-gated bridge `lib/sync/local-first-create-list.ts` and its flag.
+- **Product impact:** none - the dashboard still reads from the SERVER; the Dexie read-back is value-identical to the server payload, so there is no user-visible local-first behavior. This phase only relocates plumbing and enables the views+hydration read path.
+- **Runtime integration target:** `lib/dashboard-cache.ts` owns the create-list write-through + read-back, but the dashboard still hydrates from the server (no user-visible change).
+- **Deferral boundary:** genuine offline local-first render (create a list, go offline, reload, still renders from Dexie) is gated on the views/dashboard render boot and deferred to 1.9.18 - Local-First Views/Dashboard Scaffold.
+- **Validation target:** full validate.ps1 consistency gates + unit/e2e suite (already green); no manual product proof since there is no user-visible change.
+- **Acceptance:** plumbing relocated, guard reflects the sanctioned read, bridge retired, full regression green; reclassified as honest infrastructure with no product over-claim.
+
+### 1.9.18 - Local-First Views/Dashboard Scaffold
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
-- **Files:** lib/dashboard-cache.ts, lib/local-db/*, tests/unit/local-db-role-audit.test.ts, tests
-- **Implementation goal:** stabilize the create-list local-first slice, enable it by default, and update the local-db-role-audit guard to permit the now-intended Dexie read in dashboard-cache.
-- **Product impact:** create-list renders from local state by default - first user-visible local-first behavior.
-- **Runtime integration target:** dashboard-cache reads Dexie for the create-list slice in default builds; TanStack remains the hydration/sync bridge.
-- **Deferral boundary:** only create-list flips; other slices stay server-read until their phases.
-- **Validation target:** targeted alpha (slice + updated guard tests + manual product proof); full test:ci before stable.
-- **Acceptance:** create-list is local-first by default, the guard reflects the intended read, full regression green.
+- **Files:** lib/dashboard-cache.ts, components/list/ListsContainer.tsx, lib/local-db/local-repositories.ts, lib/local-db/*, tests
+- **Implementation goal:** build the local-first views/dashboard boot path so the dashboard can render from Dexie when the server is unavailable - add a local "list all" reader (mirroring outbox-repository's userId-scoped read) plus a local views/selected-view boot so the render gate (isLatestSelectedView exact-match in lib/dashboard-cache.ts) resolves offline. Design-heavy: produce a full implementation plan before any Codex prompt.
+- **Product impact:** first genuine user-visible local-first behavior - create a list, go offline, reload, and the dashboard still renders from Dexie (folds in the genuine create-list offline hydration read).
+- **Runtime integration target:** Dexie becomes a runtime READ source on the offline/seed path and the views+selected-view boot resolves locally; TanStack/tRPC remains the online hydration/sync bridge.
+- **Deferral boundary:** rename/item/delete local-first slices -> 1.9.19/1.9.20/1.9.21; full CRUD rebaseline decision -> 1.9.22.
+- **Validation target:** targeted alpha (local boot + offline-reload render tests + manual offline product proof); full test:ci before stable.
+- **Acceptance:** with the server unreachable, a created list still renders on reload from Dexie; online behavior and existing invariants unchanged; regression green.
 
-### 1.9.18 - Local-First List Rename Slice
+### 1.9.19 - Local-First List Rename Slice
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/dashboard-cache.ts, rename mutation site, tests
 - **Implementation goal:** extend local-first runtime read/write to the list-rename slice (dev-gate then enable per the contract).
 - **Product impact:** list rename reflects from local state immediately.
 - **Runtime integration target:** rename slice reads/writes Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** item and delete slices -> 1.9.19/1.9.20.
+- **Deferral boundary:** item and delete slices -> 1.9.20/1.9.21.
 - **Validation target:** targeted alpha (rename slice tests + manual proof); full test:ci before stable.
 - **Acceptance:** local-first rename works with regression green.
 
-### 1.9.19 - Local-First Item Create and Complete Slice
+### 1.9.20 - Local-First Item Create and Complete Slice
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/dashboard-cache.ts, item create/complete mutation sites, tests
 - **Implementation goal:** extend local-first runtime behavior to item create and complete/uncomplete (dev-gate then enable per the contract).
 - **Product impact:** adding and completing items reflects from local state immediately.
 - **Runtime integration target:** item slices read/write Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** delete/recovery -> 1.9.20.
+- **Deferral boundary:** delete/recovery -> 1.9.21.
 - **Validation target:** targeted alpha (item slice tests + manual proof); full test:ci before stable.
 - **Acceptance:** local-first item create/complete works with regression green.
 
-### 1.9.20 - Local-First Delete and Recovery Slice
+### 1.9.21 - Local-First Delete and Recovery Slice
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/dashboard-cache.ts, delete mutation sites, tests
 - **Implementation goal:** extend local-first runtime behavior to delete with rollback/recovery, preserving optimistic rollback invariants (dev-gate then enable per the contract).
 - **Product impact:** delete and recovery reflect from local state immediately, with rollback on failure preserved.
 - **Runtime integration target:** delete slice reads/writes Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** full CRUD rebaseline decision -> 1.9.21.
+- **Deferral boundary:** full CRUD rebaseline decision -> 1.9.22.
 - **Validation target:** targeted alpha (delete/rollback slice tests + manual proof); full test:ci before stable.
 - **Acceptance:** local-first delete/recovery works, rollback invariant intact, regression green.
 
-### 1.9.21 - Local-First Dashboard CRUD Rebaseline Decision
+### 1.9.22 - Local-First Dashboard CRUD Rebaseline Decision
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
