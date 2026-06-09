@@ -3,7 +3,7 @@
     "state":  "alpha",
     "phase":  "1.9.17",
     "phaseTitle":  "Stabilize and Enable Local-First Create List Slice",
-    "nextPhase":  "1.9.18 - Local-First List Rename Slice",
+    "nextPhase":  "1.9.18 - Local-First Views/Dashboard Scaffold",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-08"
 }
