@@ -43,9 +43,19 @@ describe("local db role audit (1.8.0 characterization)", () => {
     });
   });
 
-  describe("dashboard write path does not depend on the local DB", () => {
-    it("dashboard cache does not import lib/local-db", () => {
-      expect(readSource("lib/dashboard-cache.ts")).not.toMatch(/local-db/);
+  describe("dashboard write path reads the local DB only for the sanctioned create-list slice", () => {
+    it("imports the create-list local read-back from local-repositories", () => {
+      expect(readSource("lib/dashboard-cache.ts")).toMatch(
+        /from "@\/lib\/local-db\/local-repositories"/,
+      );
+    });
+
+    it("does not couple to outbox, replay, sync worker, metadata, or direct Dexie construction", () => {
+      const source = readSource("lib/dashboard-cache.ts");
+      expect(source).not.toMatch(/outbox/);
+      expect(source).not.toMatch(/sync-replay/);
+      expect(source).not.toMatch(/metadata-repository/);
+      expect(source).not.toMatch(/tidy-db/);
     });
   });
 
