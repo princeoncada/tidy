@@ -19,7 +19,6 @@ import {
   selectedViewFromCache,
 } from "@/lib/dashboard-cache";
 import { captureDashboardMutationOutbox } from "@/lib/sync/offline-write-prototype";
-import { readLocalFirstCreatedList } from "@/lib/sync/local-first-create-list";
 import { Skeleton } from "../ui/skeleton";
 
 
@@ -108,18 +107,10 @@ const ListAdder = () => {
       return { previousAllLists, previousCurrentView, previousSelectedView };
     },
     async onSuccess(createdList, variables) {
-      const localFirstList = await readLocalFirstCreatedList({
-        clientId: variables.id,
-        serverId: createdList.id,
-        userId: createdList.userId,
-        name: createdList.name,
-        createdAt: createdList.createdAt,
-        updatedAt: createdList.updatedAt,
-      });
-      reconcileCreatedListInDashboardCaches(
+      await reconcileCreatedListInDashboardCaches(
         queryClient,
         dashboardKeys,
-        localFirstList ? { ...createdList, ...localFirstList } : createdList,
+        createdList,
         variables.id
       );
       void captureDashboardMutationOutbox({
