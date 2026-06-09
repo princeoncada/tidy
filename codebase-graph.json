@@ -444,7 +444,6 @@
         "lucide-react",
         "@/lib/dashboard-cache",
         "@/lib/sync/offline-write-prototype",
-        "@/lib/sync/local-first-create-list",
         "../ui/skeleton"
       ]
     },
@@ -1305,6 +1304,7 @@
         "DashboardList",
         "DashboardSnapshot",
         "DashboardTag",
+        "LocalFirstCreateListDb",
         "PersistedItemOrderPayload",
         "PersistedOrderPayload",
         "SavedListTags",
@@ -1315,12 +1315,13 @@
         "applyDeletedTagToDashboardCaches",
         "applySelectedViewPayloadToCurrentView",
         "applyTagChangeToCaches",
-        "applyTagMetadataToDashboardCaches",
-        "applyViewFilterUpdateToCaches"
+        "applyTagMetadataToDashboardCaches"
       ],
       "imports": [
         "@tanstack/react-query",
-        "@/lib/trpc"
+        "@/lib/trpc",
+        "@/lib/local-db/local-repositories",
+        "@/lib/local-db/local-schema"
       ]
     },
     {
@@ -1610,22 +1611,6 @@
       ],
       "imports": [
         "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "lib/sync/local-first-create-list.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "LocalFirstCreateListInput",
-        "LocalFirstCreatedListView",
-        "LocalListRepositoryDatabase",
-        "isLocalFirstCreateListEnabled",
-        "readLocalFirstCreatedList"
-      ],
-      "imports": [
-        "@/lib/local-db/local-repositories",
-        "@/lib/local-db/local-schema"
       ]
     },
     {
@@ -2152,7 +2137,8 @@
       "imports": [
         "vitest",
         "@tanstack/react-query",
-        "@/lib/dashboard-cache"
+        "@/lib/dashboard-cache",
+        "@/lib/local-db/local-schema"
       ]
     },
     {
@@ -2187,17 +2173,6 @@
         "node:path",
         "vitest",
         "@/lib/local-db/metadata-repository",
-        "@/lib/local-db/local-schema"
-      ]
-    },
-    {
-      "path": "tests/unit/local-first-create-list.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/sync/local-first-create-list",
         "@/lib/local-db/local-schema"
       ]
     },
@@ -3027,12 +3002,6 @@
     },
     {
       "from": "components/list/ListAdder.tsx",
-      "to": "lib/sync/local-first-create-list.ts",
-      "type": "imports",
-      "import": "@/lib/sync/local-first-create-list"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
       "to": "lib/sync/offline-write-prototype.ts",
       "type": "imports",
       "import": "@/lib/sync/offline-write-prototype"
@@ -3753,6 +3722,18 @@
     },
     {
       "from": "lib/dashboard-cache.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "lib/dashboard-cache.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "lib/dashboard-cache.ts",
       "to": "lib/trpc.ts",
       "type": "imports",
       "import": "@/lib/trpc"
@@ -3894,18 +3875,6 @@
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "lib/sync/local-first-create-list.ts",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-repositories"
-    },
-    {
-      "from": "lib/sync/local-first-create-list.ts",
-      "to": "lib/local-db/local-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-schema"
     },
     {
       "from": "lib/sync/offline-write-prototype.ts",
@@ -4160,6 +4129,12 @@
       "import": "@/lib/dashboard-cache"
     },
     {
+      "from": "tests/unit/dashboard-cache.test.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
       "from": "tests/unit/local-db-diagnostics.test.ts",
       "to": "lib/local-db/local-db-diagnostics.ts",
       "type": "imports",
@@ -4194,18 +4169,6 @@
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
       "import": "@/lib/local-db/metadata-repository"
-    },
-    {
-      "from": "tests/unit/local-first-create-list.test.ts",
-      "to": "lib/local-db/local-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-schema"
-    },
-    {
-      "from": "tests/unit/local-first-create-list.test.ts",
-      "to": "lib/sync/local-first-create-list.ts",
-      "type": "imports",
-      "import": "@/lib/sync/local-first-create-list"
     },
     {
       "from": "tests/unit/local-repositories.test.ts",
