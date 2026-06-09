@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.17-alpha",
-    "state":  "alpha",
+    "version":  "1.9.17",
+    "state":  "stable",
     "phase":  "1.9.17",
     "phaseTitle":  "Stabilize and Enable Local-First Create List Slice",
     "nextPhase":  "1.9.18 - Local-First Views/Dashboard Scaffold",
