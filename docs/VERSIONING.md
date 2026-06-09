@@ -99,7 +99,7 @@ Rules:
 
 - **Current version:** 1.9.17-alpha
 - **Current phase:** 1.9.17 - Stabilize and Enable Local-First Create List Slice
-- **Next phase:** 1.9.18 - Local-First List Rename Slice
+- **Next phase:** 1.9.18 - Local-First Views/Dashboard Scaffold
 
 ---
 
