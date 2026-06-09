@@ -21,6 +21,7 @@ import {
   insertOptimisticListIntoDashboardCaches,
   insertOptimisticViewIntoDashboardCaches,
   type DashboardSnapshot,
+  type LocalFirstCreateListDb,
   listMatchesView,
   projectView,
   reconcileCreatedListInSnapshot,
@@ -38,6 +39,7 @@ import {
   updateListInDashboardCaches,
   type ViewsCache,
 } from "@/lib/dashboard-cache";
+import type { LocalList } from "@/lib/local-db/local-schema";
 
 const tag = (id: string, name = id) => ({
   id,
@@ -640,6 +642,21 @@ describe("list mutation cache helpers", () => {
     selectedView: ["selected-view"],
   };
 
+  function createInMemoryLocalListDb(): LocalFirstCreateListDb {
+    const store = new Map<string, LocalList>();
+    return {
+      lists: {
+        async put(list) {
+          store.set(list.clientId, list);
+          return list.clientId;
+        },
+        async get(clientId) {
+          return store.get(clientId);
+        },
+      },
+    };
+  }
+
   it("prepends optimistic lists to all dashboard snapshots when no custom view guard applies", () => {
     const queryClient = new QueryClient();
     const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
@@ -743,7 +760,7 @@ describe("list mutation cache helpers", () => {
     ).toEqual(["other-existing"]);
   });
 
-  it("reconciles created lists across all dashboard snapshots", () => {
+  it("reconciles created lists across all dashboard snapshots", async () => {
     const queryClient = new QueryClient();
     const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
     const customView = view({ id: "custom" });
@@ -767,7 +784,9 @@ describe("list mutation cache helpers", () => {
       lists: [optimisticList],
     });
 
-    reconcileCreatedListInDashboardCaches(queryClient, keys, savedList, "list-1");
+    await reconcileCreatedListInDashboardCaches(queryClient, keys, savedList, "list-1", {
+      localDb: createInMemoryLocalListDb(),
+    });
 
     expect(queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists[0]).toMatchObject({
       id: "list-1",
@@ -787,6 +806,62 @@ describe("list mutation cache helpers", () => {
       order: -1,
       listItems: [optimisticItem],
     });
+  });
+
+  it("writes the created list through to the local DB and reconciles from the read-back", async () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const optimisticList = list("list-1", [], -1, { isOptimistic: true });
+    const savedList = list("list-1", [], 5, { name: "Saved list" });
+    queryClient.setQueryData(keys.allLists, { view: allListsView, lists: [optimisticList] });
+    queryClient.setQueryData(keys.currentView, { view: allListsView, lists: [optimisticList] });
+    queryClient.setQueryData(keys.selectedView, { view: allListsView, lists: [optimisticList] });
+
+    const localDb = createInMemoryLocalListDb();
+    const putSpy = vi.spyOn(localDb.lists, "put");
+
+    await reconcileCreatedListInDashboardCaches(queryClient, keys, savedList, "list-1", { localDb });
+
+    expect(putSpy).toHaveBeenCalledTimes(1);
+    expect(putSpy.mock.calls[0][0]).toMatchObject({
+      clientId: "list-1",
+      serverId: "list-1",
+      name: "Saved list",
+      syncStatus: "synced",
+    });
+    expect(queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists[0]).toMatchObject({
+      id: "list-1",
+      name: "Saved list",
+    });
+  });
+
+  it("falls back to the server payload when the local DB read fails", async () => {
+    const queryClient = new QueryClient();
+    const allListsView = view({ id: "all", type: "ALL_LISTS" as const, viewTags: [] });
+    const optimisticList = list("list-1", [], -1, { isOptimistic: true });
+    const savedList = list("list-1", [], 5, { name: "Saved list" });
+    queryClient.setQueryData(keys.allLists, { view: allListsView, lists: [optimisticList] });
+    queryClient.setQueryData(keys.currentView, { view: allListsView, lists: [optimisticList] });
+    queryClient.setQueryData(keys.selectedView, { view: allListsView, lists: [optimisticList] });
+
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const failingDb: LocalFirstCreateListDb = {
+      lists: {
+        put: async () => {
+          throw new Error("boom");
+        },
+        get: async () => undefined,
+      },
+    };
+
+    await reconcileCreatedListInDashboardCaches(queryClient, keys, savedList, "list-1", { localDb: failingDb });
+
+    expect(queryClient.getQueryData<DashboardSnapshot>(keys.allLists)?.lists[0]).toMatchObject({
+      id: "list-1",
+      name: "Saved list",
+    });
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 
   it("removes a list item from every list across dashboard snapshots", () => {
