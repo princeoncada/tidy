@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.19-alpha -->
+<!-- Current Version: 1.9.19 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.19-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.19 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.19 - Offline App-Shell (Service Worker)
 **Next**: 1.9.20 - Dexie Read Fallback (API-Unavailable)
 
