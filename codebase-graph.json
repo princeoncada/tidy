@@ -571,6 +571,8 @@
         "@/hooks/useOptimisticSync",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/lib/local-first-dashboard",
+        "@/lib/local-first-reconcile",
+        "@/lib/local-db/local-repositories",
         "@/trpc/client",
         "@dnd-kit/react",
         "@tanstack/react-query",
@@ -1429,11 +1431,17 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "applyLocalGraphReconcilePlan",
         "createLocalEntityBase",
         "createLocalTimestamp",
         "createOutboxOperation",
         "getLocalDbOrThrow",
+        "listLocalListItemsForUser",
+        "listLocalListTagsForUser",
         "listLocalListsForUser",
+        "listLocalTagsForUser",
+        "listLocalViewListsForUser",
+        "listLocalViewTagsForUser",
         "listLocalViewsForUser",
         "markEntityFailed",
         "markEntityPending",
@@ -1442,11 +1450,11 @@
         "putLocalListItem",
         "putLocalLists",
         "putLocalView",
-        "putLocalViews",
-        "putOutboxOperation"
+        "putLocalViews"
       ],
       "imports": [
         "./tidy-db",
+        "../local-first-reconcile",
         "./local-schema",
         "./outbox-schema"
       ]
@@ -1608,13 +1616,34 @@
         "buildLocalDashboardSnapshot",
         "mapLocalListToDashboardList",
         "mapLocalViewToViewCacheItem",
+        "mapServerGraphToLocalTags",
+        "mapServerSnapshotToLocalListItems",
+        "mapServerSnapshotToLocalListTags",
         "mapServerSnapshotToLocalLists",
+        "mapServerViewsToLocalViewLists",
+        "mapServerViewsToLocalViewTags",
         "mapServerViewsToLocalViews",
         "resolveDashboardCurrentView",
         "synthesizeAllListsView"
       ],
       "imports": [
         "@/lib/dashboard-cache",
+        "@/lib/local-db/local-schema"
+      ]
+    },
+    {
+      "path": "lib/local-first-reconcile.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "LocalGraphEntityReconcilePlan",
+        "LocalGraphReconcileArgs",
+        "LocalGraphReconcilePlan",
+        "reconcileServerGraphIntoLocalPlan"
+      ],
+      "imports": [
+        "@/lib/dashboard-cache",
+        "@/lib/local-first-dashboard",
         "@/lib/local-db/local-schema"
       ]
     },
@@ -2086,7 +2115,8 @@
         "./utils/app",
         "./utils/assertions",
         "./utils/fixtures",
-        "./utils/seed"
+        "./utils/seed",
+        "./utils/test-ids"
       ]
     },
     {
@@ -2285,6 +2315,17 @@
       ]
     },
     {
+      "path": "tests/unit/lists-container-local-fallback.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "node:fs",
+        "node:path",
+        "vitest"
+      ]
+    },
+    {
       "path": "tests/unit/local-db-diagnostics.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2332,6 +2373,18 @@
       ]
     },
     {
+      "path": "tests/unit/local-first-reconcile.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/dashboard-cache",
+        "@/lib/local-first-reconcile",
+        "@/lib/local-db/local-schema"
+      ]
+    },
+    {
       "path": "tests/unit/local-repositories.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2339,6 +2392,7 @@
       "imports": [
         "vitest",
         "@/lib/local-db/local-repositories",
+        "@/lib/local-first-reconcile",
         "@/lib/local-db/local-schema",
         "@/lib/local-db/tidy-db"
       ]
@@ -3434,9 +3488,21 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
       "to": "lib/local-first-dashboard.ts",
       "type": "imports",
       "import": "@/lib/local-first-dashboard"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/local-first-reconcile.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-reconcile"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -4009,6 +4075,12 @@
       "import": "./tidy-db"
     },
     {
+      "from": "lib/local-db/local-repositories.ts",
+      "to": "lib/local-first-reconcile.ts",
+      "type": "imports",
+      "import": "../local-first-reconcile"
+    },
+    {
       "from": "lib/local-db/metadata-repository.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -4115,6 +4187,24 @@
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "lib/local-first-reconcile.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "lib/local-first-reconcile.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "lib/local-first-reconcile.ts",
+      "to": "lib/local-first-dashboard.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-dashboard"
     },
     {
       "from": "lib/supabase/auth-confirm.ts",
@@ -4303,6 +4393,12 @@
       "import": "./utils/seed"
     },
     {
+      "from": "tests/e2e/local-first-dashboard.spec.ts",
+      "to": "tests/e2e/utils/test-ids.ts",
+      "type": "imports",
+      "import": "./utils/test-ids"
+    },
+    {
       "from": "tests/e2e/regression.spec.ts",
       "to": "tests/e2e/utils/app.ts",
       "type": "imports",
@@ -4471,6 +4567,24 @@
       "import": "@/lib/local-first-dashboard"
     },
     {
+      "from": "tests/unit/local-first-reconcile.test.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "tests/unit/local-first-reconcile.test.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/local-first-reconcile.test.ts",
+      "to": "lib/local-first-reconcile.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-reconcile"
+    },
+    {
       "from": "tests/unit/local-repositories.test.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -4487,6 +4601,12 @@
       "to": "lib/local-db/tidy-db.ts",
       "type": "imports",
       "import": "@/lib/local-db/tidy-db"
+    },
+    {
+      "from": "tests/unit/local-repositories.test.ts",
+      "to": "lib/local-first-reconcile.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-reconcile"
     },
     {
       "from": "tests/unit/offline-write-prototype.test.ts",
