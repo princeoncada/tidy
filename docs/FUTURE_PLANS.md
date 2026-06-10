@@ -248,6 +248,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.21 - Dexie<->Server Reconciliation & Lifecycle~~ (stable 2026-06-10)
 
+- ~~1.9.22 - Bounded Batch Sync Endpoint & Server Apply~~ (stable 2026-06-10)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -257,21 +259,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.22 - Bounded Batch Sync Endpoint & Server Apply (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
-- **Status:** In progress | Priority: P1 infrastructure (local-first)
-- **Type:** infrastructure
-- **Files:** app/api/sync/route.ts, lib/sync/sync-endpoint-contract.ts, lib/local-db/sync-replay-client.ts, trpc/routers/* or dedicated server sync modules, tests
-- **Implementation goal:** replace the acknowledge-only, one-operation transport with a real authenticated batch contract accepting `operations[]` in one bounded request. Validate user scope, ownership, dependency order, payload count/bytes, idempotency keys, and operation types; apply accepted mutations to PostgreSQL; and return a result for every submitted operation.
-- **Product impact:** none by itself - this is the required server half of the Dexie-first write path and prevents local operations from being marked synced when the database was never changed.
-- **Runtime integration target:** one flush sends one HTTP request containing a bounded coalesced operation batch. The endpoint actually applies the batch, preserves existing short-transaction and batch-SQL invariants, and acknowledges only operations durably applied or already applied idempotently.
-- **Deferral boundary:** dashboard components still use their existing mutation paths until the local write migrations in 1.9.23-1.9.25. Flush scheduling and full direct-tRPC retirement finish in 1.9.26.
-- **Validation target:** targeted alpha (contract limits, auth/ownership, idempotency, dependency ordering, atomic failure behavior, database-apply integration, and request-count tests); full test:ci before stable.
-- **Acceptance:** several queued operations are persisted by one `/api/sync` request; the database reflects them; replay cannot report success for an unapplied operation; rejected operations remain retryable or surface a permanent error explicitly.
 
 ### 1.9.23 - Dexie-First List & Item CRUD
 - **Status:** Open | Priority: P1 product (local-first)
