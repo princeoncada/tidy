@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:ci": "npm run typecheck && npm run lint && npm run test && npm run test:e2e",
-    "test:e2e": "playwright test --project=smoke --project=dashboard",
+    "test:e2e": "playwright test --project=smoke --project=dashboard --project=offline-shell",
     "test:e2e:smoke": "playwright test --project=smoke",
     "test:e2e:auth": "node tests/e2e/check-auth-state.mjs && playwright test --project=authenticated-dashboard --workers=2",
     "test:e2e:dashboard": "npm run test:e2e:auth",
