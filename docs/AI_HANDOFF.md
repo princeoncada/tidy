@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.21-alpha -->
+<!-- Current Version: 1.9.21 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.21-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.21 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
 **Next**: 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
 
