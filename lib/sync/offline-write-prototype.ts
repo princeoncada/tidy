@@ -5,7 +5,9 @@ import {
   type LocalOutboxRepositoryDatabase,
 } from "@/lib/local-db/outbox-repository";
 import {
-  replayOutboxOperations,
+  flushOutboxOperationsBatch,
+  type SyncBatchOperationResult,
+  type SyncBatchTransport,
   type SyncReplayRepository,
   type SyncReplayResult,
   type SyncReplayTransport,
@@ -21,6 +23,7 @@ import type {
   LocalOutboxOperation,
   LocalOutboxOperationType,
 } from "@/lib/local-db/outbox-schema";
+import type { SyncBatchRequest } from "@/lib/sync/sync-batch-contract";
 
 export function isOfflineWriteCaptureEnabled(): boolean {
   return process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED === "true";
@@ -96,6 +99,60 @@ export function createHttpSyncReplayTransport(
   };
 }
 
+export function createHttpSyncBatchTransport(
+  args: CreateHttpSyncReplayTransportArgs = {},
+): SyncBatchTransport {
+  const endpoint = args.endpoint ?? "/api/sync";
+  const fetchImpl = args.fetchImpl ?? getDefaultFetch();
+
+  return async (request: SyncBatchRequest) => {
+    const response = await fetchImpl(endpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const responseText = await response.text();
+      throw new Error(`Sync batch HTTP ${response.status}: ${responseText}`);
+    }
+
+    const body = await response.json() as {
+      ok?: unknown;
+      results?: unknown;
+    };
+
+    if (
+      body.ok !== true ||
+      !Array.isArray(body.results) ||
+      !body.results.every(isSyncBatchOperationResult)
+    ) {
+      throw new Error("Sync batch response is invalid.");
+    }
+
+    return body.results;
+  };
+}
+
+function isSyncBatchOperationResult(
+  value: unknown,
+): value is SyncBatchOperationResult {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const result = value as Record<string, unknown>;
+  return (
+    typeof result.operationId === "string" &&
+    ["applied", "already-applied", "rejected", "failed"].includes(
+      String(result.status),
+    ) &&
+    (result.errorMessage === null || typeof result.errorMessage === "string")
+  );
+}
+
 export type FlushOfflineWritesArgs = {
   userId: string;
   endpoint?: string;
@@ -116,7 +173,7 @@ export async function flushOfflineWrites(args: FlushOfflineWritesArgs): Promise<
     transportArgs.fetchImpl = args.fetchImpl;
   }
 
-  const transport = createHttpSyncReplayTransport(transportArgs);
+  const transport = createHttpSyncBatchTransport(transportArgs);
   const replayArgs = {
     userId: args.userId,
     transport,
@@ -134,7 +191,7 @@ export async function flushOfflineWrites(args: FlushOfflineWritesArgs): Promise<
     Object.assign(replayArgs, { repository: args.repository });
   }
 
-  return replayOutboxOperations(replayArgs);
+  return flushOutboxOperationsBatch(replayArgs);
 }
 
 export type ReconcilePendingWritesArgs = {

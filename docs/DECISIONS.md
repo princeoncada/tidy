@@ -322,3 +322,29 @@ the target is Dexie-first dashboard state plus bounded batch synchronization.
 
 The 1.9.x series cannot be declared complete until both outcomes have end-to-end request-count and persistence
 proof.
+
+---
+
+## 2026-06-10: Implement bounded batch apply with semantic idempotency
+
+**Decision.** Phase 1.9.22 implements the full authenticated server apply matrix behind one bounded
+`operations[]` request. The endpoint validates the envelope, user scope, operation matrix, duplicate
+idempotency keys, payload limits, and parent-before-child dependencies. Accepted operations run in submitted
+order inside one PostgreSQL transaction and return `applied`, `already-applied`, or an explicit permanent
+`rejected` result. An unexpected transaction failure leaves the accepted batch unapplied and returns
+retryable `failed` results for those operations.
+
+**Idempotency.** No persistent idempotency-key ledger or Prisma model is added in this phase. Duplicate safety
+comes from operation semantics: client UUID creates detect existing rows, updates and movement write desired
+state, absent deletes are already applied, and relationship writes use upsert/delete-many behavior. A
+persistent ledger remains a follow-up if stronger duplicate-request auditability or retention is required.
+
+**Transaction boundary.** The accepted write set is atomic. Custom-view recompute remains outside the short
+write transaction, matching the existing router timeout boundary. If post-commit recompute fails, the
+underlying writes remain durable and their operation results remain applied; the failure is logged and the
+projection can be repaired by a later recompute.
+
+**Runtime boundary.** `flushOfflineWrites` now coalesces pending work and sends one count/byte-bounded request
+per flush, then consumes the per-operation results. The existing public prototype gate remains off by default.
+Dashboard component migration, flush scheduling/backoff, concurrent-flush control, and stranded-operation
+recovery remain assigned to phases 1.9.23-1.9.26.

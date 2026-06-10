@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.21",
-    "state":  "stable",
-    "phase":  "1.9.21",
-    "phaseTitle":  "Dexie\u003c-\u003eServer Reconciliation \u0026 Lifecycle",
-    "nextPhase":  "1.9.22 - Bounded Batch Sync Endpoint \u0026 Server Apply",
+    "version":  "1.9.22-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.22",
+    "phaseTitle":  "Bounded Batch Sync Endpoint \u0026 Server Apply",
+    "nextPhase":  "1.9.23 - Dexie-First List \u0026 Item CRUD",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-10"
 }
