@@ -59,6 +59,25 @@ describe("local db role audit (1.8.0 characterization)", () => {
     });
   });
 
+  describe("local-first dashboard boot is the only sanctioned runtime local read surface", () => {
+    it("boot hook reads local repositories without coupling to outbox, replay, or metadata", () => {
+      const source = readSource("hooks/useLocalFirstDashboardBoot.ts");
+      expect(source).toMatch(/@\/lib\/local-db\/local-repositories/);
+      expect(source).not.toMatch(/outbox/);
+      expect(source).not.toMatch(/sync-replay/);
+      expect(source).not.toMatch(/metadata-repository/);
+    });
+
+    it("local-first dashboard mappers use local schema only, not Dexie or replay plumbing", () => {
+      const source = readSource("lib/local-first-dashboard.ts");
+      expect(source).toMatch(/@\/lib\/local-db\/local-schema/);
+      expect(source).not.toMatch(/outbox/);
+      expect(source).not.toMatch(/sync-replay/);
+      expect(source).not.toMatch(/metadata-repository/);
+      expect(source).not.toMatch(/tidy-db/);
+    });
+  });
+
   describe("no sync worker or outbox replay is wired into runtime", () => {
     it("trpc client wires only the metadata health-check from local-db", () => {
       const client = readSource("trpc/client.tsx");
