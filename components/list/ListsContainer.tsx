@@ -687,6 +687,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                 key={list.id}
                 listValues={list}
                 index={index}
+                userId={boot.userId}
                 enqueue={optimisticSync.enqueue}
                 activeDropTarget={activeDropTarget}
                 dashboardKeys={dashboardKeys}
@@ -701,6 +702,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                       key={item.id}
                       listItem={item}
                       index={index}
+                      userId={boot.userId}
                       enqueue={optimisticSync.enqueue}
                       dashboardKeys={dashboardKeys}
                       shouldRevealOnMount={
