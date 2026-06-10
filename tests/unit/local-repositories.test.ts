@@ -1,18 +1,34 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
+  applyLocalGraphReconcilePlan,
   createLocalEntityBase,
   createLocalTimestamp,
   createOutboxOperation,
+  listLocalListItemsForUser,
   listLocalListsForUser,
+  listLocalListTagsForUser,
+  listLocalTagsForUser,
+  listLocalViewListsForUser,
   listLocalViewsForUser,
+  listLocalViewTagsForUser,
   markEntityFailed,
   markEntityPending,
   markEntitySynced,
   putLocalLists,
   putLocalViews,
 } from "@/lib/local-db/local-repositories";
-import type { LocalEntityBase, LocalList, LocalView } from "@/lib/local-db/local-schema";
+import type { LocalGraphReconcilePlan } from "@/lib/local-first-reconcile";
+import type {
+  LocalEntityBase,
+  LocalList,
+  LocalListItem,
+  LocalListTag,
+  LocalTag,
+  LocalView,
+  LocalViewList,
+  LocalViewTag,
+} from "@/lib/local-db/local-schema";
 import type { TidyLocalDatabase } from "@/lib/local-db/tidy-db";
 
 const baseEntity = (overrides: Partial<LocalEntityBase> = {}): LocalEntityBase => ({
@@ -47,22 +63,92 @@ function localView(overrides: Partial<LocalView> = {}): LocalView {
   };
 }
 
+function localListItem(overrides: Partial<LocalListItem> = {}): LocalListItem {
+  return {
+    ...baseEntity({ clientId: "local-item-1" }),
+    name: "Item",
+    completed: false,
+    order: 0,
+    notes: null,
+    listClientId: "local-list-1",
+    listServerId: null,
+    ...overrides,
+  };
+}
+
+function localTag(overrides: Partial<LocalTag> = {}): LocalTag {
+  return {
+    ...baseEntity({ clientId: "local-tag-1" }),
+    name: "Focus",
+    color: "blue",
+    ...overrides,
+  };
+}
+
+function localListTag(overrides: Partial<LocalListTag> = {}): LocalListTag {
+  return {
+    ...baseEntity({ clientId: "local-list-1::local-tag-1" }),
+    listClientId: "local-list-1",
+    listServerId: null,
+    tagClientId: "local-tag-1",
+    tagServerId: null,
+    ...overrides,
+  };
+}
+
+function localViewList(overrides: Partial<LocalViewList> = {}): LocalViewList {
+  return {
+    ...baseEntity({ clientId: "local-view-1::local-list-1" }),
+    viewClientId: "local-view-1",
+    viewServerId: null,
+    listClientId: "local-list-1",
+    listServerId: null,
+    order: 0,
+    ...overrides,
+  };
+}
+
+function localViewTag(overrides: Partial<LocalViewTag> = {}): LocalViewTag {
+  return {
+    ...baseEntity({ clientId: "local-view-1::local-tag-1" }),
+    viewClientId: "local-view-1",
+    viewServerId: null,
+    tagClientId: "local-tag-1",
+    tagServerId: null,
+    ...overrides,
+  };
+}
+
 function createFakeLocalDb(args: {
   lists?: LocalList[];
   views?: LocalView[];
+  listItems?: LocalListItem[];
+  tags?: LocalTag[];
+  listTags?: LocalListTag[];
+  viewLists?: LocalViewList[];
+  viewTags?: LocalViewTag[];
 } = {}) {
   const lists = new Map<string, LocalList>();
   const views = new Map<string, LocalView>();
+  const listItems = new Map<string, LocalListItem>();
+  const tags = new Map<string, LocalTag>();
+  const listTags = new Map<string, LocalListTag>();
+  const viewLists = new Map<string, LocalViewList>();
+  const viewTags = new Map<string, LocalViewTag>();
 
-  for (const list of args.lists ?? []) {
-    lists.set(list.clientId, list);
-  }
+  const seed = <T extends LocalEntityBase>(store: Map<string, T>, rows: T[]) => {
+    for (const row of rows) store.set(row.clientId, row);
+  };
 
-  for (const view of args.views ?? []) {
-    views.set(view.clientId, view);
-  }
+  seed(lists, args.lists ?? []);
+  seed(views, args.views ?? []);
+  seed(listItems, args.listItems ?? []);
+  seed(tags, args.tags ?? []);
+  seed(listTags, args.listTags ?? []);
+  seed(viewLists, args.viewLists ?? []);
+  seed(viewTags, args.viewTags ?? []);
 
-  const table = <T extends LocalList | LocalView>(store: Map<string, T>) => ({
+  const table = <T extends LocalEntityBase>(store: Map<string, T>) => ({
     where: (indexName: string) => ({
       equals: (value: unknown) => ({
         toArray: async () =>
@@ -76,15 +162,36 @@ function createFakeLocalDb(args: {
         store.set(row.clientId, row);
       }
     },
+    bulkDelete: async (clientIds: string[]) => {
+      for (const clientId of clientIds) {
+        store.delete(clientId);
+      }
+    },
+  });
+  const transaction = vi.fn(async (...transactionArgs: unknown[]) => {
+    const callback = transactionArgs[transactionArgs.length - 1] as () => Promise<void>;
+    await callback();
   });
 
   return {
     db: {
       lists: table(lists),
       views: table(views),
+      listItems: table(listItems),
+      tags: table(tags),
+      listTags: table(listTags),
+      viewLists: table(viewLists),
+      viewTags: table(viewTags),
+      transaction,
     } as unknown as TidyLocalDatabase,
     lists,
     views,
+    listItems,
+    tags,
+    listTags,
+    viewLists,
+    viewTags,
+    transaction,
   };
 }
 
@@ -250,6 +357,52 @@ describe("local repository helpers", () => {
     ]);
   });
 
+  it("lists every local graph table by user and filters deleted rows", async () => {
+    const active = { userId: "user-1" };
+    const deleted = {
+      userId: "user-1",
+      deletedAt: "2026-05-10T12:00:00.000Z",
+    };
+    const { db } = createFakeLocalDb({
+      listItems: [
+        localListItem({ clientId: "item-active", ...active }),
+        localListItem({ clientId: "item-deleted", ...deleted }),
+      ],
+      tags: [
+        localTag({ clientId: "tag-active", ...active }),
+        localTag({ clientId: "tag-deleted", ...deleted }),
+      ],
+      listTags: [
+        localListTag({ clientId: "list-tag-active", ...active }),
+        localListTag({ clientId: "list-tag-deleted", ...deleted }),
+      ],
+      viewLists: [
+        localViewList({ clientId: "view-list-active", ...active }),
+        localViewList({ clientId: "view-list-deleted", ...deleted }),
+      ],
+      viewTags: [
+        localViewTag({ clientId: "view-tag-active", ...active }),
+        localViewTag({ clientId: "view-tag-deleted", ...deleted }),
+      ],
+    });
+
+    await expect(listLocalListItemsForUser("user-1", db)).resolves.toEqual([
+      expect.objectContaining({ clientId: "item-active" }),
+    ]);
+    await expect(listLocalTagsForUser("user-1", db)).resolves.toEqual([
+      expect.objectContaining({ clientId: "tag-active" }),
+    ]);
+    await expect(listLocalListTagsForUser("user-1", db)).resolves.toEqual([
+      expect.objectContaining({ clientId: "list-tag-active" }),
+    ]);
+    await expect(listLocalViewListsForUser("user-1", db)).resolves.toEqual([
+      expect.objectContaining({ clientId: "view-list-active" }),
+    ]);
+    await expect(listLocalViewTagsForUser("user-1", db)).resolves.toEqual([
+      expect.objectContaining({ clientId: "view-tag-active" }),
+    ]);
+  });
+
   it("bulk writes local lists and views", async () => {
     const { db, lists, views } = createFakeLocalDb();
 
@@ -258,5 +411,49 @@ describe("local repository helpers", () => {
 
     expect([...lists.keys()]).toEqual(["list-a", "list-b"]);
     expect([...views.keys()]).toEqual(["view-a", "view-b"]);
+  });
+
+  it("applies graph upserts and stale deletes in one transaction", async () => {
+    const staleList = localList({
+      clientId: "stale-list",
+      serverId: "stale-server-list",
+      syncStatus: "synced",
+    });
+    const { db, lists, tags, transaction } = createFakeLocalDb({
+      lists: [staleList],
+    });
+    const plan: LocalGraphReconcilePlan = {
+      views: { upserts: [], deleteClientIds: [] },
+      lists: {
+        upserts: [
+          localList({
+            clientId: "current-list",
+            serverId: "server-list",
+            syncStatus: "synced",
+          }),
+        ],
+        deleteClientIds: ["stale-list"],
+      },
+      listItems: { upserts: [], deleteClientIds: [] },
+      tags: {
+        upserts: [
+          localTag({
+            clientId: "current-tag",
+            serverId: "server-tag",
+            syncStatus: "synced",
+          }),
+        ],
+        deleteClientIds: [],
+      },
+      listTags: { upserts: [], deleteClientIds: [] },
+      viewLists: { upserts: [], deleteClientIds: [] },
+      viewTags: { upserts: [], deleteClientIds: [] },
+    };
+
+    await applyLocalGraphReconcilePlan(plan, db);
+
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect([...lists.keys()]).toEqual(["current-list"]);
+    expect([...tags.keys()]).toEqual(["current-tag"]);
   });
 });
