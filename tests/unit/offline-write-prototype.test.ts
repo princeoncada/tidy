@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   captureDashboardMutationOutbox,
   captureOfflineWrite,
+  createHttpSyncBatchTransport,
   createHttpSyncReplayTransport,
   flushOfflineWrites,
   isOfflineWriteCaptureEnabled,
@@ -15,7 +16,7 @@ import {
   markOutboxOperationSynced,
   type LocalOutboxRepositoryDatabase,
 } from "@/lib/local-db/outbox-repository";
-import { validateSyncEndpointRequest } from "@/lib/sync/sync-endpoint-contract";
+import { validateSyncBatchRequest } from "@/lib/sync/sync-batch-contract";
 
 type StoredOperation = LocalOutboxOperation;
 
@@ -63,21 +64,54 @@ function createOkResponse(): Response {
   });
 }
 
+function createOperationForTransport(): LocalOutboxOperation {
+  return {
+    operationId: "op-1",
+    userId: "user-1",
+    entityType: "list",
+    entityClientId: "local-list-1",
+    entityServerId: "server-list-1",
+    operationType: "update",
+    payload: { name: "Inbox" },
+    status: "syncing",
+    retryCount: 0,
+    errorMessage: null,
+    createdAt: "2026-05-10T10:00:00.000Z",
+    updatedAt: "2026-05-10T10:00:00.000Z",
+    lastAttemptedAt: "2026-05-10T10:00:00.000Z",
+    idempotencyKey: "op-1",
+  };
+}
+
 function createEndpointFetch(authenticatedUserId: string): typeof fetch {
   return vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
     const requestBody = typeof init?.body === "string" ? init.body : "{}";
     const request = JSON.parse(requestBody) as unknown;
-    const result = validateSyncEndpointRequest(request, {
+    const result = validateSyncBatchRequest(request, {
       authenticatedUserId,
     });
 
     if (!result.ok) {
       return new Response(result.errors.join("; "), {
-        status: 400,
+        status: 422,
       });
     }
 
-    return createOkResponse();
+    return Response.json({
+      ok: true,
+      results: result.decisions.map((decision) =>
+        decision.accepted
+          ? {
+              operationId: decision.operationId,
+              status: "applied",
+              errorMessage: null,
+            }
+          : {
+              operationId: decision.operationId,
+              status: "rejected",
+              errorMessage: decision.errors.join("; "),
+            }),
+    });
   });
 }
 
@@ -261,6 +295,42 @@ describe("offline write prototype", () => {
     ).rejects.toThrow("Sync replay HTTP 422: Bad sync request");
   });
 
+  it("posts a whole batch once and parses per-operation results", async () => {
+    const operation = createOperationForTransport();
+    const fetchImpl = vi.fn(async () => Response.json({
+      ok: true,
+      results: [{
+        operationId: operation.operationId,
+        status: "already-applied",
+        errorMessage: null,
+      }],
+    }));
+    const transport = createHttpSyncBatchTransport({
+      endpoint: "/custom-sync",
+      fetchImpl,
+    });
+    const request = {
+      operations: [{
+        operation,
+        idempotencyKey: operation.idempotencyKey,
+      }],
+    };
+
+    await expect(transport(request)).resolves.toEqual([{
+      operationId: operation.operationId,
+      status: "already-applied",
+      errorMessage: null,
+    }]);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledWith("/custom-sync", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+  });
+
   it("captures and flushes valid writes through the endpoint-backed HTTP transport", async () => {
     const { db } = createFakeOutboxDb();
     const fetchImpl = createEndpointFetch("user-1");
@@ -282,7 +352,7 @@ describe("offline write prototype", () => {
         entityClientId: "local-item-1",
         entityServerId: "server-item-1",
         operationType: "move",
-        payload: { toListClientId: "local-list-2" },
+        payload: { toListClientId: "local-list-2", order: 0 },
       },
       { db },
     );
@@ -297,6 +367,7 @@ describe("offline write prototype", () => {
       syncedCount: 2,
       failedCount: 0,
     });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
   it("marks endpoint-rejected writes failed without blocking later valid writes", async () => {
@@ -336,7 +407,7 @@ describe("offline write prototype", () => {
     });
     expect(result.results[0]).toMatchObject({
       status: "failed",
-      errorMessage: "Sync replay HTTP 400: Operation type is not allowed for entity type.",
+      errorMessage: "Operation type is not allowed for entity type.",
     });
     expect(result.results[1]).toMatchObject({
       status: "synced",
