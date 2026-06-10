@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.22",
-    "state":  "stable",
-    "phase":  "1.9.22",
-    "phaseTitle":  "Bounded Batch Sync Endpoint \u0026 Server Apply",
-    "nextPhase":  "1.9.23 - Dexie-First List \u0026 Item CRUD",
+    "version":  "1.9.23-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.23",
+    "phaseTitle":  "Dexie-First List \u0026 Item CRUD",
+    "nextPhase":  "1.9.24 - Dexie-First Movement, Ordering \u0026 View-Switch Consistency",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-10"
 }
