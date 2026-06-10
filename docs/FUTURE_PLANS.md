@@ -262,57 +262,79 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ### 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
-- **Files:** lib/local-first-dashboard.ts, lib/local-db/*, lib/dashboard-cache.ts, tests
-- **Implementation goal:** make the Dexie read path correct under churn - dedup duplicate local rows, clean up stale rows, and seed Dexie correctly on every load. Fix the dup React keys + undefined list.listItems failures observed under rapid-create + reload on wip/local-first-dexie-read (the 3 remaining e2e failures).
-- **Product impact:** the local-first read path is stable under rapid create + reload - no duplicate/empty lists, no React key collisions.
-- **Runtime integration target:** Dexie read/seed lifecycle is reconciled with the server payload so local and server state converge deterministically.
-- **Deferral boundary:** per-slice local-first writes (rename/item/delete) -> 1.9.22-1.9.24; full CRUD rebaseline decision -> 1.9.25.
-- **Validation target:** targeted alpha (reconciliation/dedup + rapid-create-reload regression tests + manual proof); full test:ci before stable.
-- **Acceptance:** rapid create + reload yields stable, deduplicated local rendering with no undefined listItems; regression green.
+- **Files:** hooks/useLocalFirstDashboardBoot.ts, lib/local-first-dashboard.ts, lib/local-db/*, components/list/ListsContainer.tsx, tests
+- **Implementation goal:** make the local dashboard graph complete and deterministic before it is rendered. Seed and reconcile views, lists, list items, tags, list-tags, view-tags, view-list membership, and ordering; deduplicate client/server identities; remove stale synced rows without deleting pending local work; and activate the fallback only after API unavailability is known instead of during normal query loading.
+- **Product impact:** list cards and their items render in the correct list immediately. Normal online loading no longer flashes empty, duplicated, stale, or temporarily misplaced list items before the server response settles.
+- **Runtime integration target:** one reconciled Dexie dashboard graph produces structurally complete snapshots (`listItems`, tags, membership, and order always defined), while pending local rows survive server seeding and the server payload refreshes only acknowledged/synced rows.
+- **Deferral boundary:** this phase fixes read correctness and lifecycle only. The real batch server-apply contract is 1.9.22; Dexie-first writes begin in 1.9.23.
+- **Validation target:** targeted alpha (graph reconciliation/dedup, pending-row preservation, API-loading-vs-unavailable state tests, rapid-create/reload E2E, and screenshot-sequence manual proof); full test:ci before stable.
+- **Acceptance:** rapid create, item movement, view switching, reload, and delayed API responses never show duplicate keys, undefined/empty item collections, or an item under the wrong list; API-unavailable fallback still renders the complete local graph.
 
-### 1.9.22 - Local-First List Rename Slice
+### 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
+- **Status:** Open | Priority: P1 infrastructure (local-first)
+- **Type:** infrastructure
+- **Files:** app/api/sync/route.ts, lib/sync/sync-endpoint-contract.ts, lib/local-db/sync-replay-client.ts, trpc/routers/* or dedicated server sync modules, tests
+- **Implementation goal:** replace the acknowledge-only, one-operation transport with a real authenticated batch contract accepting `operations[]` in one bounded request. Validate user scope, ownership, dependency order, payload count/bytes, idempotency keys, and operation types; apply accepted mutations to PostgreSQL; and return a result for every submitted operation.
+- **Product impact:** none by itself - this is the required server half of the Dexie-first write path and prevents local operations from being marked synced when the database was never changed.
+- **Runtime integration target:** one flush sends one HTTP request containing a bounded coalesced operation batch. The endpoint actually applies the batch, preserves existing short-transaction and batch-SQL invariants, and acknowledges only operations durably applied or already applied idempotently.
+- **Deferral boundary:** dashboard components still use their existing mutation paths until the local write migrations in 1.9.23-1.9.25. Flush scheduling and full direct-tRPC retirement finish in 1.9.26.
+- **Validation target:** targeted alpha (contract limits, auth/ownership, idempotency, dependency ordering, atomic failure behavior, database-apply integration, and request-count tests); full test:ci before stable.
+- **Acceptance:** several queued operations are persisted by one `/api/sync` request; the database reflects them; replay cannot report success for an unapplied operation; rejected operations remain retryable or surface a permanent error explicitly.
+
+### 1.9.23 - Dexie-First List & Item CRUD
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
-- **Files:** lib/dashboard-cache.ts, rename mutation site, tests
-- **Implementation goal:** extend local-first runtime read/write to the list-rename slice (dev-gate then enable per the contract).
-- **Product impact:** list rename reflects from local state immediately.
-- **Runtime integration target:** rename slice reads/writes Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** item and delete slices -> 1.9.23/1.9.24.
-- **Validation target:** targeted alpha (rename slice tests + manual proof); full test:ci before stable.
-- **Acceptance:** local-first rename works with regression green.
+- **Files:** lib/local-db/*, lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListItemComponent.tsx, tests
+- **Implementation goal:** route list and item create, rename, complete/uncomplete, notes, and delete through one atomic local transaction that updates the Dexie entity graph and appends/coalesces an outbox operation before the UI treats the action as committed.
+- **Product impact:** list and item changes are immediate, survive refresh/offline use, and no longer wait on or emit a direct tRPC mutation per action.
+- **Runtime integration target:** Dexie is the runtime authority for migrated list/item CRUD; TanStack is a projection/render cache; the batch sync worker is the only remote persistence path for these migrated operations.
+- **Deferral boundary:** list/item movement and ordering are 1.9.24; tags and custom views are 1.9.25; final removal of legacy direct writes and lifecycle proof is 1.9.26.
+- **Validation target:** targeted alpha (local transaction/outbox atomicity, create-parent/create-child dependency, refresh/offline durability, delete recovery, and network request-count E2E); full test:ci before stable.
+- **Acceptance:** multiple list/item edits produce local state immediately and reach PostgreSQL through a later single batch request, with no component-level tRPC mutation for migrated actions.
 
-### 1.9.23 - Local-First Item Create and Complete Slice
+### 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
-- **Files:** lib/dashboard-cache.ts, item create/complete mutation sites, tests
-- **Implementation goal:** extend local-first runtime behavior to item create and complete/uncomplete (dev-gate then enable per the contract).
-- **Product impact:** adding and completing items reflects from local state immediately.
-- **Runtime integration target:** item slices read/write Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** delete/recovery -> 1.9.24.
-- **Validation target:** targeted alpha (item slice tests + manual proof); full test:ci before stable.
-- **Acceptance:** local-first item create/complete works with regression green.
+- **Files:** components/list/ListsContainer.tsx, components/views/ViewsSidebarPreview.tsx, lib/local-db/*, lib/dashboard-cache.ts, tests
+- **Implementation goal:** persist committed list, item, and custom-view reorder/move operations to Dexie/outbox instead of calling tRPC after each drop. Preserve local-only drag hover, coalesce newest-state-wins reorder intents, and overlay pending local movement during view fetch/reconciliation so stale server projections cannot temporarily move an item back.
+- **Product impact:** moving an item or list remains correct while switching views, waiting for sync, going offline, or reloading. A completed drop does not immediately create its own network request.
+- **Runtime integration target:** each drop creates one local reorder/move intent; repeated movement coalesces locally; the next batch flush persists the final state with existing ownership and batch-SQL protections.
+- **Deferral boundary:** tags/custom views CRUD are 1.9.25; lifecycle triggers and final request-spam proof are 1.9.26.
+- **Validation target:** targeted alpha (same-list reorder, cross-list move, empty-list move, rapid repeated drops, view-switch-before-flush, reload-before-flush, and request-count E2E); full test:ci before stable.
+- **Acceptance:** movement is immediately and durably correct from Dexie, stale server payloads cannot repaint old placement, and several drops are represented by coalesced operations in one later sync request.
 
-### 1.9.24 - Local-First Delete and Recovery Slice
+### 1.9.25 - Dexie-First Tags, Views & Relationships
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
-- **Files:** lib/dashboard-cache.ts, delete mutation sites, tests
-- **Implementation goal:** extend local-first runtime behavior to delete with rollback/recovery, preserving optimistic rollback invariants (dev-gate then enable per the contract).
-- **Product impact:** delete and recovery reflect from local state immediately, with rollback on failure preserved.
-- **Runtime integration target:** delete slice reads/writes Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** full CRUD rebaseline decision -> 1.9.25.
-- **Validation target:** targeted alpha (delete/rollback slice tests + manual proof); full test:ci before stable.
-- **Acceptance:** local-first delete/recovery works, rollback invariant intact, regression green.
+- **Files:** components/list/ListTagPicker.tsx, components/views/ViewsSidebarPreview.tsx, lib/local-db/*, lib/dashboard-cache.ts, tests
+- **Implementation goal:** migrate tag, list-tag, view, view-tag, selected-view, and view-list relationship writes to the same Dexie/outbox transaction contract, preserving custom-view projection and latest-selection invariants.
+- **Product impact:** the remaining dashboard actions are immediate and durable locally instead of generating direct per-action tRPC writes.
+- **Runtime integration target:** all persisted dashboard entities and relationships use Dexie-first writes and the bounded batch endpoint.
+- **Deferral boundary:** final worker lifecycle, retry policy, legacy direct-write removal, and full end-to-end proof are 1.9.26.
+- **Validation target:** targeted alpha (tag/view CRUD, rapid tag toggles, custom-view projection, selected-view races, offline refresh, and request-count E2E); full test:ci before stable.
+- **Acceptance:** list/tag/view workflows remain correct while their remote persistence is performed only through batched sync.
 
-### 1.9.25 - Local-First Dashboard CRUD Rebaseline Decision
+### 1.9.26 - Batch Sync Lifecycle, Retry & Direct-Write Retirement
+- **Status:** Open | Priority: P1 product (local-first)
+- **Type:** product behavior
+- **Files:** hooks/use-offline-replay-trigger.ts, lib/sync/*, lib/local-db/*, dashboard mutation components, tests
+- **Implementation goal:** finish the production sync lifecycle: flush after a bounded quiet window or batch-size threshold, on reconnect, and on safe lifecycle opportunities; prevent concurrent flushes; retry transient failures with backoff; recover stranded `syncing`/`failed` operations; and remove remaining component-level direct tRPC persistence for dashboard mutations.
+- **Product impact:** normal interaction produces local updates without request spam, then synchronizes multiple changes in one bounded request with visible pending/error state.
+- **Runtime integration target:** Dexie is the primary local dashboard source, PostgreSQL/Supabase is the remote durable source, and `/api/sync` batch flushes are the single remote write path for dashboard state.
+- **Deferral boundary:** no dashboard CRUD or movement slice may remain on direct tRPC persistence. The architecture closeout decision is 1.9.27.
+- **Validation target:** targeted alpha (flush timing/thresholds, retry/backoff, crash/reload recovery, concurrent-trigger suppression, request-count assertions, and full manual multi-action proof); full test:ci before stable.
+- **Acceptance:** a representative multi-action session updates instantly from Dexie and reaches the server in bounded batch requests rather than one request per action; all acknowledged operations survive reload and match PostgreSQL.
+
+### 1.9.27 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
-- **Implementation goal:** evaluate the shipped local-first CRUD slices and record whether Dexie becomes the full local-first dashboard source or stays slice-scoped; set the follow-up direction and whether seriesComplete flips.
-- **Product impact:** none directly - decides the next direction.
-- **Runtime integration target:** none (decision); names the follow-up phase(s).
-- **Deferral boundary:** full-app local-first migration only if this decision proves it correct.
+- **Implementation goal:** evaluate the shipped reconciled read graph, Dexie-first dashboard writes, and bounded server batch sync; record residual limitations and whether the 1.9.x local-first series is complete.
+- **Product impact:** none directly - closes the architecture only after both requested product outcomes have shipped and been proven.
+- **Runtime integration target:** none (decision); records the delivered runtime contract and names any follow-up outside dashboard local-first behavior.
+- **Deferral boundary:** production-readiness work remains in 1.10.x; no missing dashboard mutation may be silently deferred through this decision.
 - **Validation target:** targeted alpha (validate.ps1 + decision recorded); full validate.ps1 at the gate.
-- **Acceptance:** a recorded decision with a named follow-up; no silent deferral.
+- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps `seriesComplete` false with an explicitly versioned remaining product phase.
 
 ### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness
@@ -418,9 +440,10 @@ Assigned a version only when scoped.
 ## Known Cross-Cutting Risks
 
 - Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
-- PWA/offline is not implemented despite product goals.
-- In-memory queues can lose pending writes on refresh or crash. Accepted as temporary per `docs/DECISIONS.md` (2026-06-05); durable pending-write persistence deferred to the 1.8.x local-first series.
+- The 1.9.20 local fallback is structurally incomplete (views/lists only, empty mapped `listItems`) and can activate during ordinary API loading; 1.9.21 owns this correctness gate.
+- Most dashboard actions still persist through direct tRPC mutations, so the app does not yet satisfy Dexie-first writes or bounded multi-action synchronization.
+- The current replay transport sends one request per operation, while `/api/sync` acknowledges without applying database changes. It must not be treated as production sync before 1.9.22.
+- Failed replay operations can become stranded because replay selects `pending` rows while failures are marked `failed`; lifecycle recovery is required by 1.9.26.
 - Large components increase risk for focused changes.
-- API ownership gaps should land in 1.6.x before expanding API surface area.
 - Frontend projection and backend refresh must agree before UI/UX polish.
 
