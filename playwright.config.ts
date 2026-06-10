@@ -22,6 +22,10 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      ...(process.env as Record<string, string>),
+      NEXT_PUBLIC_OFFLINE_APP_SHELL_ENABLED: "true",
+    },
   },
   projects: [
     {
@@ -40,13 +44,24 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      name: "offline-shell",
+      testMatch: /offline-shell\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       name: "e2e-reset",
       testMatch: /data-reset\.setup\.ts/,
       use: { ...devices["Desktop Chrome"] },
     },
     {
       name: "authenticated-dashboard",
-      testIgnore: [/smoke\.spec\.ts/, /dashboard-public\.spec\.ts/, /auth\.setup\.ts/, /data-reset\.setup\.ts/],
+      testIgnore: [
+        /smoke\.spec\.ts/,
+        /dashboard-public\.spec\.ts/,
+        /offline-shell\.spec\.ts/,
+        /auth\.setup\.ts/,
+        /data-reset\.setup\.ts/,
+      ],
       dependencies: ["e2e-reset"],
       use: {
         ...devices["Desktop Chrome"],
