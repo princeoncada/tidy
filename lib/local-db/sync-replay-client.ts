@@ -13,6 +13,11 @@ import {
   resolveOutboxOperationConflict,
   type SyncServerEntitySnapshot,
 } from "@/lib/sync/conflict-resolution";
+import {
+  SYNC_BATCH_MAX_OPERATIONS,
+  SYNC_BATCH_MAX_TOTAL_BYTES,
+  type SyncBatchRequest,
+} from "@/lib/sync/sync-batch-contract";
 
 export type SyncReplayTransportRequest = {
   operation: LocalOutboxOperation;
@@ -20,6 +25,16 @@ export type SyncReplayTransportRequest = {
 };
 
 export type SyncReplayTransport = (request: SyncReplayTransportRequest) => Promise<void>;
+
+export type SyncBatchOperationResult = {
+  operationId: string;
+  status: "applied" | "already-applied" | "rejected" | "failed";
+  errorMessage: string | null;
+};
+
+export type SyncBatchTransport = (
+  request: SyncBatchRequest,
+) => Promise<SyncBatchOperationResult[]>;
 
 export type SyncReplayOperationResult = {
   operationId: string;
@@ -60,6 +75,14 @@ export type ReplayOutboxOperationsArgs = {
   db?: LocalOutboxRepositoryDatabase;
   repository?: SyncReplayRepository;
   getServerSnapshot?: SyncServerSnapshotProvider;
+};
+
+export type FlushOutboxOperationsBatchArgs = {
+  userId: string;
+  transport: SyncBatchTransport;
+  limit?: number;
+  db?: LocalOutboxRepositoryDatabase;
+  repository?: SyncReplayRepository;
 };
 
 function getErrorMessage(error: unknown): string {
@@ -184,6 +207,167 @@ export async function replayOutboxOperations({
         errorMessage,
       });
     }
+  }
+
+  return summarizeReplayResults(results);
+}
+
+export async function flushOutboxOperationsBatch({
+  userId,
+  transport,
+  limit,
+  db,
+  repository = createDefaultSyncReplayRepository(db),
+}: FlushOutboxOperationsBatchArgs): Promise<SyncReplayResult> {
+  const boundedLimit = Math.min(
+    limit ?? SYNC_BATCH_MAX_OPERATIONS,
+    SYNC_BATCH_MAX_OPERATIONS,
+  );
+  const pendingOperations = await repository.getPendingOutboxOperations({
+    userId,
+    limit: boundedLimit,
+  });
+  const { operations: coalescedOperations, discardedOperationIds } =
+    coalesceOutboxOperations(pendingOperations);
+  const operations: LocalOutboxOperation[] = [];
+  let totalPayloadBytes = 0;
+
+  for (const operation of coalescedOperations) {
+    if (operations.length >= SYNC_BATCH_MAX_OPERATIONS) {
+      break;
+    }
+
+    const payloadBytes = new TextEncoder().encode(
+      JSON.stringify(operation.payload),
+    ).byteLength;
+
+    if (
+      operations.length > 0 &&
+      totalPayloadBytes + payloadBytes > SYNC_BATCH_MAX_TOTAL_BYTES
+    ) {
+      break;
+    }
+
+    operations.push(operation);
+    totalPayloadBytes += payloadBytes;
+  }
+  const results: SyncReplayOperationResult[] = [];
+
+  for (const operationId of discardedOperationIds) {
+    const discardedOperation = await repository.markOutboxOperationDiscarded({
+      operationId,
+    });
+
+    results.push({
+      operationId,
+      status: discardedOperation ? "discarded" : "missing",
+      errorMessage: discardedOperation
+        ? null
+        : "Outbox operation was not found while discarding.",
+    });
+  }
+
+  const syncingOperations: LocalOutboxOperation[] = [];
+
+  for (const operation of operations) {
+    const syncingOperation = await repository.markOutboxOperationSyncing({
+      operationId: operation.operationId,
+    });
+
+    if (!syncingOperation) {
+      results.push({
+        operationId: operation.operationId,
+        status: "missing",
+        errorMessage: "Outbox operation was not found before batch replay.",
+      });
+      continue;
+    }
+
+    syncingOperations.push(syncingOperation);
+  }
+
+  if (syncingOperations.length === 0) {
+    return summarizeReplayResults(results);
+  }
+
+  let serverResults: SyncBatchOperationResult[];
+  try {
+    serverResults = await transport({
+      operations: syncingOperations.map((operation) => ({
+        operation,
+        idempotencyKey: operation.idempotencyKey,
+      })),
+    });
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+
+    for (const operation of syncingOperations) {
+      await repository.incrementRetryCount({
+        operationId: operation.operationId,
+      });
+      await repository.markOutboxOperationFailed({
+        operationId: operation.operationId,
+        errorMessage,
+      });
+      results.push({
+        operationId: operation.operationId,
+        status: "failed",
+        errorMessage,
+      });
+    }
+
+    return summarizeReplayResults(results);
+  }
+
+  const serverResultByOperationId = new Map(
+    serverResults.map((serverResult) => [
+      serverResult.operationId,
+      serverResult,
+    ]),
+  );
+
+  for (const operation of syncingOperations) {
+    const serverResult = serverResultByOperationId.get(operation.operationId);
+
+    if (
+      serverResult?.status === "applied" ||
+      serverResult?.status === "already-applied"
+    ) {
+      const syncedOperation = await repository.markOutboxOperationSynced({
+        operationId: operation.operationId,
+      });
+      results.push({
+        operationId: operation.operationId,
+        status: syncedOperation ? "synced" : "missing",
+        errorMessage: syncedOperation
+          ? null
+          : "Outbox operation was not found after batch replay.",
+      });
+      continue;
+    }
+
+    const isTransientFailure =
+      !serverResult || serverResult.status === "failed";
+    const errorMessage =
+      serverResult?.errorMessage ??
+      (serverResult
+        ? "Sync operation was rejected without an error message."
+        : "Sync endpoint did not return a result for this operation.");
+
+    if (isTransientFailure) {
+      await repository.incrementRetryCount({
+        operationId: operation.operationId,
+      });
+    }
+    await repository.markOutboxOperationFailed({
+      operationId: operation.operationId,
+      errorMessage,
+    });
+    results.push({
+      operationId: operation.operationId,
+      status: "failed",
+      errorMessage,
+    });
   }
 
   return summarizeReplayResults(results);
