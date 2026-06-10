@@ -250,6 +250,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.22 - Bounded Batch Sync Endpoint & Server Apply~~ (stable 2026-06-10)
 
+- ~~1.9.23 - Dexie-First List & Item CRUD~~ (stable 2026-06-10)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -259,21 +261,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.23 - Dexie-First List & Item CRUD (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.23 - Dexie-First List & Item CRUD
-- **Status:** In progress | Priority: P1 product (local-first)
-- **Type:** product behavior
-- **Files:** lib/local-db/*, lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListItemComponent.tsx, tests
-- **Implementation goal:** route list and item create, rename, complete/uncomplete, notes, and delete through one atomic local transaction that updates the Dexie entity graph and appends/coalesces an outbox operation before the UI treats the action as committed.
-- **Product impact:** list and item changes are immediate, survive refresh/offline use, and no longer wait on or emit a direct tRPC mutation per action.
-- **Runtime integration target:** Dexie is the runtime authority for migrated list/item CRUD; TanStack is a projection/render cache; the batch sync worker is the only remote persistence path for these migrated operations.
-- **Deferral boundary:** list/item movement and ordering are 1.9.24; tags and custom views are 1.9.25; final removal of legacy direct writes and lifecycle proof is 1.9.26.
-- **Validation target:** targeted alpha (local transaction/outbox atomicity, create-parent/create-child dependency, refresh/offline durability, delete recovery, and network request-count E2E); full test:ci before stable.
-- **Acceptance:** multiple list/item edits produce local state immediately and reach PostgreSQL through a later single batch request, with no component-level tRPC mutation for migrated actions.
 
 ### 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
 - **Status:** Open | Priority: P1 product (local-first)
