@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.21-alpha",
-    "state":  "alpha",
+    "version":  "1.9.21",
+    "state":  "stable",
     "phase":  "1.9.21",
     "phaseTitle":  "Dexie\u003c-\u003eServer Reconciliation \u0026 Lifecycle",
     "nextPhase":  "1.9.22 - Bounded Batch Sync Endpoint \u0026 Server Apply",
