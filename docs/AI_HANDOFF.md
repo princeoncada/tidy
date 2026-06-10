@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.17 -->
+<!-- Current Version: 1.9.18-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.17 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.17 - Stabilize and Enable Local-First Create List Slice
-**Next**: 1.9.18 - Local-First Views/Dashboard Scaffold
+**Current Version**: 1.9.18-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)
+**Next**: 1.9.19 - Offline App-Shell (Service Worker)
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
