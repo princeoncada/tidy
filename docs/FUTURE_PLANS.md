@@ -251,12 +251,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.19 - Offline App-Shell (Service Worker) (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.19 - Offline App-Shell (Service Worker)
-- **Status:** Open | Priority: P1 product (local-first prerequisite)
+- **Status:** In progress | Priority: P1 product (local-first prerequisite)
 - **Type:** product behavior (infrastructure-enabling)
 - **Files:** app/layout.tsx, trpc/client.tsx, next.config.ts, public/* (manifest + service worker), a registration entry point, tests
 - **Implementation goal:** add an offline app-shell via a service worker so an offline full reload serves the cached shell + dashboard route + JS/CSS chunks instead of dying with ERR_INTERNET_DISCONNECTED before any JS runs. Design-heavy: produce a full implementation plan first (Next 16 SW/PWA approach, precache set, dev-vs-prod SW behavior, registration point) before any Codex prompt.

@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.18",
-    "state":  "stable",
-    "phase":  "1.9.18",
-    "phaseTitle":  "Roadmap Re-Plan Correction (SW-First Re-Sequence)",
-    "nextPhase":  "1.9.19 - Offline App-Shell (Service Worker)",
+    "version":  "1.9.19-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.19",
+    "phaseTitle":  "Offline App-Shell (Service Worker)",
+    "nextPhase":  "1.9.20 - Dexie Read Fallback (API-Unavailable)",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-09"
 }

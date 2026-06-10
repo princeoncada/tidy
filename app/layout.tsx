@@ -1,3 +1,4 @@
+import { AppShellServiceWorker } from "@/components/AppShellServiceWorker";
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCReactProvider } from "@/trpc/client";
 import type { Metadata } from "next";
@@ -84,6 +85,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased font-extralight`}
     >
       <body className="min-h-full flex justify-center font-normal">
+        <AppShellServiceWorker />
         <TRPCReactProvider>
           {children}
           <Toaster

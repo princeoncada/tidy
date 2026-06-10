@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.18 -->
+<!-- Current Version: 1.9.19-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.18 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)
-**Next**: 1.9.19 - Offline App-Shell (Service Worker)
+**Current Version**: 1.9.19-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.19 - Offline App-Shell (Service Worker)
+**Next**: 1.9.20 - Dexie Read Fallback (API-Unavailable)
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -44,6 +44,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `/dashboard` - authenticated app guarded by `proxy.ts`.
 
 **Key files**:
+- `app/manifest.ts`, `public/sw.js` - native manifest and hand-written offline app-shell worker.
+- `components/AppShellServiceWorker.tsx`, `hooks/use-app-shell-service-worker.ts`, `lib/sw/*` - service-worker mount, registration gate, and testable strategy contract.
 - `app/dashboard/page.tsx` -> `components/Dashboard.tsx` -> `components/list/ListsContainer.tsx`.
 - `components/views/ViewsSidebarPreview.tsx` - custom view UI and view selection/reorder behavior.
 - `components/list/ListAdder.tsx`, `ListComponent.tsx`, `ListItemComponent.tsx`, `ListTagPicker.tsx` - dashboard list/item/tag workflows.
@@ -119,7 +121,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Performance and local-first boundary:**
 - Reorder endpoints use batch raw SQL (`UPDATE ... FROM (VALUES ...)`) because individual Prisma updates timed out.
 - Heavy custom view recompute should stay outside short Prisma interactive transactions unless proven safe.
-- Dexie/local DB is a tested local layer plus an isolated prototype - still NOT the dashboard read authority (the dashboard hydrates from the server). Runtime Dexie touchpoints are now: (1) the health-metadata heartbeat (`hooks/use-local-db-health-check.ts` -> `metadata-repository`, mounted in `trpc/client.tsx`), and (2) the sanctioned create-list write-through + read-back inside `lib/dashboard-cache.ts` (1.9.16-1.9.17), which is value-identical to the server payload and does NOT change what the dashboard renders. No other list/item/tag/view is read from or written to Dexie at runtime, and offline render is not yet possible: a full offline reload first needs the offline app-shell service worker (1.9.19), then a Dexie read fallback (1.9.20) and reconciliation (1.9.21).
+- The offline app-shell landed in 1.9.19: `public/sw.js` is registered through `AppShellServiceWorker` when `NODE_ENV=production` or `NEXT_PUBLIC_OFFLINE_APP_SHELL_ENABLED=true`; navigations are network-first with a cached shell fallback, while only `/_next/static/` assets are cache-first. `app/manifest.ts` provides the native Next manifest.
+- Dexie/local DB is a tested local layer plus an isolated prototype - still NOT the dashboard read authority (the dashboard hydrates from the server). Runtime Dexie touchpoints are now: (1) the health-metadata heartbeat (`hooks/use-local-db-health-check.ts` -> `metadata-repository`, mounted in `trpc/client.tsx`), and (2) the sanctioned create-list write-through + read-back inside `lib/dashboard-cache.ts` (1.9.16-1.9.17), which is value-identical to the server payload and does NOT change what the dashboard renders. No other list/item/tag/view is read from or written to Dexie at runtime. The app shell can now boot on an offline reload, but rendering dashboard data from Dexie is deferred to 1.9.20 and reconciliation is deferred to 1.9.21.
 - No auto-running sync worker is mounted.
 - No outbox replay is wired to dashboard mutations yet.
 - Dashboard data still flows through server/TanStack/tRPC.
@@ -148,7 +151,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
 
 **Local-first and sync:**
-- PWA/offline behavior is not implemented despite product goals; the offline app-shell service worker is the next planned step (1.9.19), the prerequisite for any offline reload.
+- The 1.9.19 offline app-shell can serve the cached client shell on reload, but it does not yet provide offline dashboard data: the Dexie read fallback remains deferred to 1.9.20 and dedup/lifecycle reconciliation to 1.9.21.
 - The offline replay conflict policy is recorded and implemented as deterministic timestamp last-write-wins, server-authoritative on equal/missing timestamps (1.9.9, `lib/sync/conflict-resolution.ts`; see `docs/DECISIONS.md`). It is wired into `replayOutboxOperations` behind an optional `getServerSnapshot` provider that no runtime caller supplies. 1.9.10 recorded the Local DB Source-of-Truth Decision: the server remains the dashboard read authority and Dexie is a write-side buffer only, so the provider stays intentionally unsupplied and no runtime DB application of the policy is adopted; server-side application would be a new, explicitly-driven phase (see `docs/DECISIONS.md`).
 - Outbox replay helpers exist but are not generally connected to runtime dashboard mutations. 1.9.5 wires only create-list capture behind the off-by-default `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate; no list-item capture, replay worker, durable persistence, or dashboard replay is wired yet. The exception is the create-list slice's sanctioned runtime Dexie write-through + read-back, landed in 1.9.16-1.9.17 inside `lib/dashboard-cache.ts`; it is value-identical to the server payload and does NOT change the dashboard read (the dashboard still hydrates from the server), so it is not yet user-visible local-first behavior. Genuine offline local-first render is gated on the offline app-shell service worker (1.9.19), then the Dexie read fallback (1.9.20) and reconciliation (1.9.21) (see the Optimistic updates section).
 - The replay-to-endpoint integration CONTRACT (transport request shape, syncing-status acceptance, idempotency-key threading, coalesced-survivor validity, endpoint-rejection-as-failure without queue blocking, and user-scope authority) is characterized by `tests/unit/sync-replay-endpoint-integration.test.ts` (1.8.5).

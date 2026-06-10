@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.18",
+  "version": "1.9.19-alpha",
   "generatedAt": "2026-06-09",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -263,6 +263,7 @@
         "RootLayout"
       ],
       "imports": [
+        "@/components/AppShellServiceWorker",
         "@/components/ui/sonner",
         "@/trpc/client",
         "next",
@@ -277,6 +278,17 @@
       "symbols": [],
       "imports": [
         "@/components/auth/Login"
+      ]
+    },
+    {
+      "path": "app/manifest.ts",
+      "kind": "file",
+      "extension": ".ts",
+      "symbols": [
+        "manifest"
+      ],
+      "imports": [
+        "next"
       ]
     },
     {
@@ -326,6 +338,17 @@
       "extension": ".json",
       "symbols": [],
       "imports": []
+    },
+    {
+      "path": "components/AppShellServiceWorker.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "AppShellServiceWorker"
+      ],
+      "imports": [
+        "@/hooks/use-app-shell-service-worker"
+      ]
     },
     {
       "path": "components/auth/Login.tsx",
@@ -1225,6 +1248,18 @@
       ]
     },
     {
+      "path": "hooks/use-app-shell-service-worker.ts",
+      "kind": "hook",
+      "extension": ".ts",
+      "symbols": [
+        "useAppShellServiceWorker"
+      ],
+      "imports": [
+        "react",
+        "@/lib/sw/register-service-worker"
+      ]
+    },
+    {
       "path": "hooks/use-local-db-health-check.ts",
       "kind": "hook",
       "extension": ".ts",
@@ -1601,6 +1636,29 @@
       ]
     },
     {
+      "path": "lib/sw/app-shell-strategy.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "APP_SHELL_CACHE_NAME",
+        "APP_SHELL_FALLBACK_KEY",
+        "isNavigationRequest",
+        "isPrecachableStaticAsset",
+        "shouldBypassRequest"
+      ],
+      "imports": []
+    },
+    {
+      "path": "lib/sw/register-service-worker.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "isAppShellServiceWorkerEnabled",
+        "registerAppShellServiceWorker"
+      ],
+      "imports": []
+    },
+    {
       "path": "lib/sync/conflict-resolution.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1771,6 +1829,13 @@
         "next/server",
         "@/lib/supabase/proxy"
       ]
+    },
+    {
+      "path": "public/sw.js",
+      "kind": "file",
+      "extension": ".js",
+      "symbols": [],
+      "imports": []
     },
     {
       "path": "README.md",
@@ -1966,6 +2031,15 @@
       ]
     },
     {
+      "path": "tests/e2e/offline-shell.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@playwright/test"
+      ]
+    },
+    {
       "path": "tests/e2e/regression.spec.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2117,6 +2191,16 @@
       "symbols": [],
       "imports": [
         "@testing-library/jest-dom/vitest"
+      ]
+    },
+    {
+      "path": "tests/unit/app-shell-strategy.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sw/app-shell-strategy"
       ]
     },
     {
@@ -2738,6 +2822,12 @@
     },
     {
       "from": "app/layout.tsx",
+      "to": "components/AppShellServiceWorker.tsx",
+      "type": "imports",
+      "import": "@/components/AppShellServiceWorker"
+    },
+    {
+      "from": "app/layout.tsx",
       "to": "components/ui/sonner.tsx",
       "type": "imports",
       "import": "@/components/ui/sonner"
@@ -2783,6 +2873,12 @@
       "to": "components/auth/ResetPassword.tsx",
       "type": "imports",
       "import": "@/components/auth/ResetPassword"
+    },
+    {
+      "from": "components/AppShellServiceWorker.tsx",
+      "to": "hooks/use-app-shell-service-worker.ts",
+      "type": "imports",
+      "import": "@/hooks/use-app-shell-service-worker"
     },
     {
       "from": "components/auth/Login.tsx",
@@ -3667,6 +3763,12 @@
       "import": "@/trpc/client"
     },
     {
+      "from": "hooks/use-app-shell-service-worker.ts",
+      "to": "lib/sw/register-service-worker.ts",
+      "type": "imports",
+      "import": "@/lib/sw/register-service-worker"
+    },
+    {
       "from": "hooks/use-local-db-health-check.ts",
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
@@ -4115,6 +4217,12 @@
       "to": "tests/e2e/utils/seed.ts",
       "type": "imports",
       "import": "./utils/seed"
+    },
+    {
+      "from": "tests/unit/app-shell-strategy.test.ts",
+      "to": "lib/sw/app-shell-strategy.ts",
+      "type": "imports",
+      "import": "@/lib/sw/app-shell-strategy"
     },
     {
       "from": "tests/unit/conflict-resolution.test.ts",
