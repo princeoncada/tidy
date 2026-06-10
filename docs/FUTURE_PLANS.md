@@ -254,51 +254,84 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
-### 1.9.18 - Local-First Views/Dashboard Scaffold
+### 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)
+- **Status:** In progress | Priority: P1 workflow correction
+- **Type:** docs/workflow
+- **Files:** docs/DECISIONS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md
+- **Implementation goal:** record the 2026-06-09 service-worker-first re-plan into the roadmap docs - append the DECISIONS.md decision (two blocking findings + re-sequence, superseding the 2026-06-08 views-first decision), re-sequence this Planned arc SW-first, and correct the AI_HANDOFF offline claims that named the old views/dashboard scaffold as the offline unlock.
+- **Product impact:** none - roadmap/docs correction only; no source or test behavior changes.
+- **Runtime integration target:** none - documentation only.
+- **Deferral boundary:** the service worker itself -> 1.9.19; the Dexie read fallback -> 1.9.20; reconciliation/dedup -> 1.9.21. This phase writes no app code.
+- **Validation target:** targeted alpha (validate.ps1 version/consistency green); full validate.ps1 before stable. No graph refresh needed (docs-only, no source export/import change).
+- **Acceptance:** DECISIONS.md records the re-plan; FUTURE_PLANS reflects the SW-first sequence; AI_HANDOFF no longer claims the views/dashboard scaffold delivers offline reload; validate.ps1 green.
+
+### 1.9.19 - Offline App-Shell (Service Worker)
+- **Status:** Open | Priority: P1 product (local-first prerequisite)
+- **Type:** product behavior (infrastructure-enabling)
+- **Files:** app/layout.tsx, trpc/client.tsx, next.config.ts, public/* (manifest + service worker), a registration entry point, tests
+- **Implementation goal:** add an offline app-shell via a service worker so an offline full reload serves the cached shell + dashboard route + JS/CSS chunks instead of dying with ERR_INTERNET_DISCONNECTED before any JS runs. Design-heavy: produce a full implementation plan first (Next 16 SW/PWA approach, precache set, dev-vs-prod SW behavior, registration point) before any Codex prompt.
+- **Product impact:** an offline full reload renders the app shell and boots the client instead of the browser offline-error page; the hard prerequisite for any "go offline -> reload -> renders from Dexie" proof.
+- **Runtime integration target:** a registered service worker precaches and serves the app shell + dashboard route assets; online behavior unchanged; dev SW behavior decided in the plan.
+- **Deferral boundary:** rendering dashboard data from Dexie on that shell -> 1.9.20; reconciliation/dedup -> 1.9.21.
+- **Validation target:** targeted alpha (SW registration + offline-shell-serves tests + manual offline reload proof: offline reload shows the shell, not ERR_INTERNET_DISCONNECTED); full test:ci before stable.
+- **Acceptance:** with the network offline, a full reload serves the cached shell and runs client JS; online behavior and existing invariants unchanged; regression green.
+
+### 1.9.20 - Dexie Read Fallback (API-Unavailable)
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
-- **Files:** lib/dashboard-cache.ts, components/list/ListsContainer.tsx, lib/local-db/local-repositories.ts, lib/local-db/*, tests
-- **Implementation goal:** build the local-first views/dashboard boot path so the dashboard can render from Dexie when the server is unavailable - add a local "list all" reader (mirroring outbox-repository's userId-scoped read) plus a local views/selected-view boot so the render gate (isLatestSelectedView exact-match in lib/dashboard-cache.ts) resolves offline. Design-heavy: produce a full implementation plan before any Codex prompt.
-- **Product impact:** first genuine user-visible local-first behavior - create a list, go offline, reload, and the dashboard still renders from Dexie (folds in the genuine create-list offline hydration read).
-- **Runtime integration target:** Dexie becomes a runtime READ source on the offline/seed path and the views+selected-view boot resolves locally; TanStack/tRPC remains the online hydration/sync bridge.
-- **Deferral boundary:** rename/item/delete local-first slices -> 1.9.19/1.9.20/1.9.21; full CRUD rebaseline decision -> 1.9.22.
-- **Validation target:** targeted alpha (local boot + offline-reload render tests + manual offline product proof); full test:ci before stable.
-- **Acceptance:** with the server unreachable, a created list still renders on reload from Dexie; online behavior and existing invariants unchanged; regression green.
+- **Files:** lib/local-first-dashboard.ts (readers/mappers), hooks/useLocalFirstDashboardBoot.ts, lib/dashboard-cache.ts (render-gate fallback), components/list/ListAdder.tsx (offline path), tests; seeded by branch wip/local-first-dexie-read
+- **Implementation goal:** render the dashboard from Dexie when tRPC is unreachable but the app is already loaded (server authoritative; fallback inert when online). Proof by BLOCKING tRPC (Playwright route.abort), NOT a full offline reload (that path is the 1.9.19 app-shell's job). Port the preserved readers/mappers, boot hook, render-gate fallback, offline ListAdder, and loop fix from wip/local-first-dexie-read.
+- **Product impact:** with the app loaded and the API blocked, the dashboard still renders lists/items from Dexie instead of an empty/error state.
+- **Runtime integration target:** Dexie becomes a runtime READ source on the API-unavailable fallback path; TanStack/tRPC remains the authoritative online hydration/sync bridge and the fallback is inert online.
+- **Deferral boundary:** dedup, stale-row cleanup, and correct every-load seeding -> 1.9.21 (the known dup-React-keys / undefined list.listItems bug under rapid-create + reload is fixed there, not here).
+- **Validation target:** targeted alpha (route.abort fallback render tests + manual API-blocked proof); full test:ci before stable.
+- **Acceptance:** with tRPC blocked and the app loaded, the dashboard renders from Dexie; online behavior unchanged; regression green.
 
-### 1.9.19 - Local-First List Rename Slice
+### 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
+- **Status:** Open | Priority: P1 product (local-first)
+- **Type:** product behavior
+- **Files:** lib/local-first-dashboard.ts, lib/local-db/*, lib/dashboard-cache.ts, tests
+- **Implementation goal:** make the Dexie read path correct under churn - dedup duplicate local rows, clean up stale rows, and seed Dexie correctly on every load. Fix the dup React keys + undefined list.listItems failures observed under rapid-create + reload on wip/local-first-dexie-read (the 3 remaining e2e failures).
+- **Product impact:** the local-first read path is stable under rapid create + reload - no duplicate/empty lists, no React key collisions.
+- **Runtime integration target:** Dexie read/seed lifecycle is reconciled with the server payload so local and server state converge deterministically.
+- **Deferral boundary:** per-slice local-first writes (rename/item/delete) -> 1.9.22-1.9.24; full CRUD rebaseline decision -> 1.9.25.
+- **Validation target:** targeted alpha (reconciliation/dedup + rapid-create-reload regression tests + manual proof); full test:ci before stable.
+- **Acceptance:** rapid create + reload yields stable, deduplicated local rendering with no undefined listItems; regression green.
+
+### 1.9.22 - Local-First List Rename Slice
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/dashboard-cache.ts, rename mutation site, tests
 - **Implementation goal:** extend local-first runtime read/write to the list-rename slice (dev-gate then enable per the contract).
 - **Product impact:** list rename reflects from local state immediately.
 - **Runtime integration target:** rename slice reads/writes Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** item and delete slices -> 1.9.20/1.9.21.
+- **Deferral boundary:** item and delete slices -> 1.9.23/1.9.24.
 - **Validation target:** targeted alpha (rename slice tests + manual proof); full test:ci before stable.
 - **Acceptance:** local-first rename works with regression green.
 
-### 1.9.20 - Local-First Item Create and Complete Slice
+### 1.9.23 - Local-First Item Create and Complete Slice
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/dashboard-cache.ts, item create/complete mutation sites, tests
 - **Implementation goal:** extend local-first runtime behavior to item create and complete/uncomplete (dev-gate then enable per the contract).
 - **Product impact:** adding and completing items reflects from local state immediately.
 - **Runtime integration target:** item slices read/write Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** delete/recovery -> 1.9.21.
+- **Deferral boundary:** delete/recovery -> 1.9.24.
 - **Validation target:** targeted alpha (item slice tests + manual proof); full test:ci before stable.
 - **Acceptance:** local-first item create/complete works with regression green.
 
-### 1.9.21 - Local-First Delete and Recovery Slice
+### 1.9.24 - Local-First Delete and Recovery Slice
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/dashboard-cache.ts, delete mutation sites, tests
 - **Implementation goal:** extend local-first runtime behavior to delete with rollback/recovery, preserving optimistic rollback invariants (dev-gate then enable per the contract).
 - **Product impact:** delete and recovery reflect from local state immediately, with rollback on failure preserved.
 - **Runtime integration target:** delete slice reads/writes Dexie at runtime; server sync via replay/TanStack.
-- **Deferral boundary:** full CRUD rebaseline decision -> 1.9.22.
+- **Deferral boundary:** full CRUD rebaseline decision -> 1.9.25.
 - **Validation target:** targeted alpha (delete/rollback slice tests + manual proof); full test:ci before stable.
 - **Acceptance:** local-first delete/recovery works, rollback invariant intact, regression green.
 
-### 1.9.22 - Local-First Dashboard CRUD Rebaseline Decision
+### 1.9.25 - Local-First Dashboard CRUD Rebaseline Decision
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
