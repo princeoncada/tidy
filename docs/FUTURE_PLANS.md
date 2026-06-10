@@ -412,6 +412,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 Assigned a version only when scoped.
 - Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
 - Rate limiting and abuse controls
+- Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency
 - Observability
 - Scale/performance profiling
 - Order compaction
@@ -432,9 +433,9 @@ Assigned a version only when scoped.
 ## Known Cross-Cutting Risks
 
 - Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
-- The 1.9.20 local fallback is structurally incomplete (views/lists only, empty mapped `listItems`) and can activate during ordinary API loading; 1.9.21 owns this correctness gate.
+- The reconciled Dexie fallback is structurally complete, but offline freshness is bounded by the last successful server seed and pending local work.
 - Most dashboard actions still persist through direct tRPC mutations, so the app does not yet satisfy Dexie-first writes or bounded multi-action synchronization.
-- The current replay transport sends one request per operation, while `/api/sync` acknowledges without applying database changes. It must not be treated as production sync before 1.9.22.
+- The bounded batch endpoint applies accepted operations, but the path remains gated off by default and dashboard actions still use transitional direct tRPC persistence until 1.9.23-1.9.26.
 - Failed replay operations can become stranded because replay selects `pending` rows while failures are marked `failed`; lifecycle recovery is required by 1.9.26.
 - Large components increase risk for focused changes.
 - Frontend projection and backend refresh must agree before UI/UX polish.
