@@ -249,6 +249,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence) (active) - see Planned
 ---
 
 ## Planned
