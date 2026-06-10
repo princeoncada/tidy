@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.17",
-    "state":  "stable",
-    "phase":  "1.9.17",
-    "phaseTitle":  "Stabilize and Enable Local-First Create List Slice",
-    "nextPhase":  "1.9.18 - Local-First Views/Dashboard Scaffold",
+    "version":  "1.9.18-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.18",
+    "phaseTitle":  "Roadmap Re-Plan Correction (SW-First Re-Sequence)",
+    "nextPhase":  "1.9.19 - Offline App-Shell (Service Worker)",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-08"
+    "lastUpdated":  "2026-06-09"
 }
