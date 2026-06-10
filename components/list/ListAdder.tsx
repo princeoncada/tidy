@@ -21,7 +21,11 @@ import {
 } from "@/lib/dashboard-cache";
 import { LOCAL_ALL_LISTS_VIEW_ID } from "@/lib/local-first-dashboard";
 import { createLocalEntityBase, putLocalList } from "@/lib/local-db/local-repositories";
-import { captureDashboardMutationOutbox } from "@/lib/sync/offline-write-prototype";
+import { commitLocalListCreate } from "@/lib/local-db/local-write";
+import {
+  captureDashboardMutationOutbox,
+  isOfflineWriteCaptureEnabled,
+} from "@/lib/sync/offline-write-prototype";
 import { Skeleton } from "../ui/skeleton";
 
 
@@ -174,8 +178,46 @@ const ListAdder = ({ boot }: ListAdderProps) => {
 
     if (!name || createListPending) return;
 
+    const newListId = crypto.randomUUID();
+
+    if (isOfflineWriteCaptureEnabled() && boot.userId) {
+      const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
+      const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
+      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+      const baseLists = previousCurrentView?.lists ?? previousAllLists?.lists ?? [];
+      const optimisticList: OptimisticList = {
+        id: newListId,
+        userId: "optimistic",
+        name,
+        order: baseLists.length > 0
+          ? Math.min(...baseLists.map((list) => list.order)) - 1
+          : 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        listTags: [],
+        listItems: [],
+        isOptimistic: true,
+      };
+
+      insertOptimisticListIntoDashboardCaches(
+        queryClient,
+        dashboardKeys,
+        optimisticList,
+        activeView,
+      );
+      void commitLocalListCreate({
+        userId: boot.userId,
+        listId: newListId,
+        name,
+      }).catch(() => {
+        // Local-first commit is best-effort and must not block the UI.
+      });
+      setCreateListName('');
+      return;
+    }
+
     createList({
-      id: crypto.randomUUID(),
+      id: newListId,
       name,
       viewId: selectedView?.id === LOCAL_ALL_LISTS_VIEW_ID ? undefined : selectedView?.id,
     });
