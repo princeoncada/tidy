@@ -255,12 +255,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.21 - Dexie<->Server Reconciliation & Lifecycle (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** hooks/useLocalFirstDashboardBoot.ts, lib/local-first-dashboard.ts, lib/local-db/*, components/list/ListsContainer.tsx, tests
 - **Implementation goal:** make the local dashboard graph complete and deterministic before it is rendered. Seed and reconcile views, lists, list items, tags, list-tags, view-tags, view-list membership, and ordering; deduplicate client/server identities; remove stale synced rows without deleting pending local work; and activate the fallback only after API unavailability is known instead of during normal query loading.
