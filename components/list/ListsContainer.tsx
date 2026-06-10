@@ -17,6 +17,8 @@ import {
   useRenderMeasure,
 } from '@/lib/optimistic-debug';
 import { useOptimisticSync } from '@/hooks/useOptimisticSync';
+import type { LocalFirstDashboardBoot } from '@/hooks/useLocalFirstDashboardBoot';
+import { LOCAL_ALL_LISTS_VIEW_ID, resolveDashboardCurrentView } from '@/lib/local-first-dashboard';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -28,6 +30,9 @@ import { CurrentView, List, Lists, OptimisticList, OptimisticListItem } from './
 import ListEmpty from './ListEmpty';
 
 type DragPreviewLists = Lists;
+type ListsContainerProps = {
+  boot: LocalFirstDashboardBoot;
+};
 
 function reorderListsForDrag(
   baseLists: Lists,
@@ -173,7 +178,9 @@ function itemPlacementMatches(left: Lists, right: Lists) {
     );
 }
 
-const ListsContainer = () => {
+const EMPTY_VIEW_ID = "00000000-0000-0000-0000-000000000000";
+
+const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -182,8 +189,14 @@ const ListsContainer = () => {
     trpc.view.getAll.queryOptions()
   );
 
-  const allListsView = views?.find((view) => view.type === "ALL_LISTS");
-  const selectedView = selectedViewFromCache(views);
+  const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
+    ? undefined
+    : views;
+  const effectiveViews = views ?? boot.localViews;
+  const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
+  const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
+  const selectedView = selectedViewFromCache(effectiveViews);
+  const serverSelectedView = selectedViewFromCache(serverViews);
   const selectedViewId = selectedView?.id;
 
   const dashboardKeys = buildDashboardKeys(trpc, {
@@ -217,15 +230,15 @@ const ListsContainer = () => {
 
   const { isLoading: allListsLoading, isError: allListsError } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
-      { enabled: Boolean(allListsView?.id) }
+      { viewId: serverAllListsView?.id ?? EMPTY_VIEW_ID },
+      { enabled: Boolean(serverAllListsView?.id) }
     )
   );
 
   const { data: selectedViewSnapshot, isLoading: selectedViewLoading, isError: selectedViewError } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: selectedViewId ?? "00000000-0000-0000-0000-000000000000" },
-      { enabled: Boolean(selectedViewId) }
+      { viewId: serverSelectedView?.id ?? EMPTY_VIEW_ID },
+      { enabled: Boolean(serverSelectedView?.id) }
     )
   );
 
@@ -239,13 +252,14 @@ const ListsContainer = () => {
     queryClient.setQueryData(currentViewQueryKey, selectedViewSnapshot);
   }, [currentViewQueryKey, queryClient, selectedViewId, selectedViewSnapshot]);
 
-  const currentView =
-    (canApplySelectedViewPayload(selectedViewId, selectedViewSnapshot)
-      ? selectedViewSnapshot
-      : undefined) ??
-    (canApplySelectedViewPayload(selectedViewId, bootCurrentView)
-      ? bootCurrentView
-      : undefined);
+  const currentView = resolveDashboardCurrentView({
+    selectedViewId,
+    selectedViewSnapshot,
+    bootCurrentView,
+    localCurrentView: boot.localCurrentView,
+    previousCurrentView: undefined,
+  });
+
   const lists = currentView?.lists ?? [];
   const visibleLists = dragPreviewLists ?? lists;
 
@@ -410,7 +424,13 @@ const ListsContainer = () => {
     setRevealedItemIds((currentIds) => new Set(currentIds).add(itemId));
   }, []);
 
-  if (viewsLoading || !allListsView || bootListsLoading || allListsLoading || selectedViewLoading) {
+  const serverStillLoading = viewsLoading || bootListsLoading || allListsLoading || selectedViewLoading;
+  const hasLocalFallback = Boolean(effectiveViews && currentView);
+  const shouldShowSkeleton =
+    !effectiveViews ||
+    (!currentView && !boot.localBootReady && serverStillLoading);
+
+  if (shouldShowSkeleton) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
       <ListSkeleton />
       <ListSkeleton />
@@ -422,13 +442,13 @@ const ListsContainer = () => {
   }
 
 
-  if (viewsError || bootListsError || allListsError || selectedViewError) {
+  if ((viewsError || bootListsError || allListsError || selectedViewError) && !hasLocalFallback) {
     return <>Something went wrong...</>;
   }
 
   if (visibleLists.length === 0) {
     return <div className='w-full h-full'>
-      <ListEmpty />
+      <ListEmpty boot={boot} />
     </div>;
   }
 
