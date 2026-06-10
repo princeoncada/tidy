@@ -253,12 +253,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.20 - Dexie Read Fallback (API-Unavailable) (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.20 - Dexie Read Fallback (API-Unavailable)
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/local-first-dashboard.ts (readers/mappers), hooks/useLocalFirstDashboardBoot.ts, lib/dashboard-cache.ts (render-gate fallback), components/list/ListAdder.tsx (offline path), tests; seeded by branch wip/local-first-dexie-read
 - **Implementation goal:** render the dashboard from Dexie when tRPC is unreachable but the app is already loaded (server authoritative; fallback inert when online). Proof by BLOCKING tRPC (Playwright route.abort), NOT a full offline reload (that path is the 1.9.19 app-shell's job). Port the preserved readers/mappers, boot hook, render-gate fallback, offline ListAdder, and loop fix from wip/local-first-dexie-read.

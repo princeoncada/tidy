@@ -1,6 +1,7 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
+import type { LocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Input } from "../ui/input";
@@ -18,11 +19,19 @@ import {
   rollbackDashboardCaches,
   selectedViewFromCache,
 } from "@/lib/dashboard-cache";
+import { LOCAL_ALL_LISTS_VIEW_ID } from "@/lib/local-first-dashboard";
+import { createLocalEntityBase, putLocalList } from "@/lib/local-db/local-repositories";
 import { captureDashboardMutationOutbox } from "@/lib/sync/offline-write-prototype";
 import { Skeleton } from "../ui/skeleton";
 
 
-const ListAdder = () => {
+type ListAdderProps = {
+  boot: LocalFirstDashboardBoot;
+};
+
+const EMPTY_VIEW_ID = "00000000-0000-0000-0000-000000000000";
+
+const ListAdder = ({ boot }: ListAdderProps) => {
 
   const [createListName, setCreateListName] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -30,8 +39,14 @@ const ListAdder = () => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { data: views, isLoading: viewsLoading } = useQuery(trpc.view.getAll.queryOptions());
-  const allListsView = views?.find((view) => view.type === "ALL_LISTS");
-  const selectedView = selectedViewFromCache(views);
+  const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
+    ? undefined
+    : views;
+  const effectiveViews = views ?? boot.localViews;
+  const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
+  const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
+  const selectedView = selectedViewFromCache(effectiveViews);
+  const serverSelectedView = selectedViewFromCache(serverViews);
   const selectedViewId = selectedView?.id;
   const dashboardKeys = buildDashboardKeys(trpc, {
     allListsViewId: allListsView?.id,
@@ -45,15 +60,15 @@ const ListAdder = () => {
 
   const { isLoading: allListsLoading } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
-      { enabled: Boolean(allListsView?.id) }
+      { viewId: serverAllListsView?.id ?? EMPTY_VIEW_ID },
+      { enabled: Boolean(serverAllListsView?.id) }
     )
   );
 
   const { isLoading: selectedViewLoading } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: selectedViewId ?? "00000000-0000-0000-0000-000000000000" },
-      { enabled: Boolean(selectedViewId) }
+      { viewId: serverSelectedView?.id ?? EMPTY_VIEW_ID },
+      { enabled: Boolean(serverSelectedView?.id) }
     )
   );
 
@@ -104,6 +119,24 @@ const ListAdder = () => {
         activeView
       );
 
+      if (boot.userId) {
+        try {
+          const createdAt = optimisticList.createdAt.toISOString();
+          await putLocalList({
+            ...createLocalEntityBase({
+              clientId: variables.id,
+              userId: boot.userId,
+              syncStatus: "local",
+              createdAt,
+              updatedAt: createdAt,
+            }),
+            name: variables.name,
+          });
+        } catch {
+          // Local persistence is best-effort and must not block the optimistic insert.
+        }
+      }
+
       return { previousAllLists, previousCurrentView, previousSelectedView };
     },
     async onSuccess(createdList, variables) {
@@ -144,7 +177,7 @@ const ListAdder = () => {
     createList({
       id: crypto.randomUUID(),
       name,
-      viewId: selectedView?.id,
+      viewId: selectedView?.id === LOCAL_ALL_LISTS_VIEW_ID ? undefined : selectedView?.id,
     });
     setCreateListName('');
   };
@@ -155,13 +188,8 @@ const ListAdder = () => {
     }, 200);
   };
 
-  if (
-    viewsLoading ||
-    !allListsView ||
-    bootListsLoading ||
-    allListsLoading ||
-    selectedViewLoading
-  ) {
+  const serverStillLoading = viewsLoading || bootListsLoading || allListsLoading || selectedViewLoading;
+  if (!effectiveViews || !allListsView || (!boot.localBootReady && serverStillLoading)) {
     return (
       <div className="h-full flex items-end">
         <Skeleton className="hidden h-8 w-24 md:block" />

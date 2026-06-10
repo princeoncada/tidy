@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.19 -->
+<!-- Current Version: 1.9.20-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.19 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.19 - Offline App-Shell (Service Worker)
-**Next**: 1.9.20 - Dexie Read Fallback (API-Unavailable)
+**Current Version**: 1.9.20-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.20 - Dexie Read Fallback (API-Unavailable)
+**Next**: 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -123,6 +123,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Heavy custom view recompute should stay outside short Prisma interactive transactions unless proven safe.
 - The offline app-shell landed in 1.9.19: `public/sw.js` is registered through `AppShellServiceWorker` when `NODE_ENV=production` or `NEXT_PUBLIC_OFFLINE_APP_SHELL_ENABLED=true`; navigations are network-first with a cached shell fallback, while only `/_next/static/` assets are cache-first. `app/manifest.ts` provides the native Next manifest.
 - Dexie/local DB is a tested local layer plus an isolated prototype - still NOT the dashboard read authority (the dashboard hydrates from the server). Runtime Dexie touchpoints are now: (1) the health-metadata heartbeat (`hooks/use-local-db-health-check.ts` -> `metadata-repository`, mounted in `trpc/client.tsx`), and (2) the sanctioned create-list write-through + read-back inside `lib/dashboard-cache.ts` (1.9.16-1.9.17), which is value-identical to the server payload and does NOT change what the dashboard renders. No other list/item/tag/view is read from or written to Dexie at runtime. The app shell can now boot on an offline reload, but rendering dashboard data from Dexie is deferred to 1.9.20 and reconciliation is deferred to 1.9.21.
+- As of 1.9.20, Dexie is a runtime READ fallback for the dashboard when tRPC is unreachable after the app has loaded: `useLocalFirstDashboardBoot` reads local views/lists and `ListsContainer` falls back through `resolveDashboardCurrentView`. The fallback is inert while the API is reachable and the server remains authoritative; server-to-Dexie seeding, dedup, and stale-row cleanup remain deferred to 1.9.21.
 - No auto-running sync worker is mounted.
 - No outbox replay is wired to dashboard mutations yet.
 - Dashboard data still flows through server/TanStack/tRPC.

@@ -148,3 +148,33 @@ export async function putOutboxOperation(
 ): Promise<string> {
   return db.outboxOperations.put(operation);
 }
+
+export async function listLocalListsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalList[]> {
+  const rows = await db.lists.where("userId").equals(userId).toArray();
+  return rows.filter((row) => row.deletedAt === null);
+}
+
+export async function listLocalViewsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalView[]> {
+  const rows = await db.views.where("userId").equals(userId).toArray();
+  return rows.filter((row) => row.deletedAt === null);
+}
+
+export async function putLocalViews(
+  views: LocalView[],
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<void> {
+  await db.views.bulkPut(views);
+}
+
+export async function putLocalLists(
+  lists: LocalList[],
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<void> {
+  await db.lists.bulkPut(lists);
+}

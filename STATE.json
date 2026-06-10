@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.19",
-    "state":  "stable",
-    "phase":  "1.9.19",
-    "phaseTitle":  "Offline App-Shell (Service Worker)",
-    "nextPhase":  "1.9.20 - Dexie Read Fallback (API-Unavailable)",
+    "version":  "1.9.20-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.20",
+    "phaseTitle":  "Dexie Read Fallback (API-Unavailable)",
+    "nextPhase":  "1.9.21 - Dexie\u003c-\u003eServer Reconciliation \u0026 Lifecycle",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-09"
 }

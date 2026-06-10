@@ -12,6 +12,7 @@ import UserAccountNav from "./UserAccountNav";
 import { useQueryClient } from "@tanstack/react-query";
 import ViewsSidebarPreview from "./views/ViewsSidebarPreview";
 import SyncStatusBadge from "./SyncStatusBadge";
+import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 
 const supabase = createClient();
 
@@ -21,6 +22,7 @@ const Dashboard = () => {
 
   const queryClient = useQueryClient();
   const router = useRouter();
+  const localFirstBoot = useLocalFirstDashboardBoot();
 
   function handleLogout() {
     setLoggingOut(true);
@@ -50,7 +52,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <SyncStatusBadge />
-                  <ListAdder />
+                  <ListAdder boot={localFirstBoot} />
                 </div>
               </div>
             </div>
@@ -62,7 +64,7 @@ const Dashboard = () => {
             <Separator className="bg-zinc-200 md:bg-zinc-200/30" />
           </div>
 
-          <ListsContainer />
+          <ListsContainer boot={localFirstBoot} />
         </main>
 
         <aside className="hidden lg:block w-64 shrink-0 py-11">
