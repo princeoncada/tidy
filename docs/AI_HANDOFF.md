@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.23-alpha -->
+<!-- Current Version: 1.9.23 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.23-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.23 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.23 - Dexie-First List & Item CRUD
 **Next**: 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
 
