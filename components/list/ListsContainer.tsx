@@ -252,11 +252,13 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     queryClient.setQueryData(currentViewQueryKey, selectedViewSnapshot);
   }, [currentViewQueryKey, queryClient, selectedViewId, selectedViewSnapshot]);
 
+  const usingLocalFallback = !views && boot.localBootReady;
+
   const currentView = resolveDashboardCurrentView({
     selectedViewId,
     selectedViewSnapshot,
     bootCurrentView,
-    localCurrentView: boot.localCurrentView,
+    localCurrentView: usingLocalFallback ? boot.localCurrentView : undefined,
     previousCurrentView: undefined,
   });
 
@@ -424,13 +426,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     setRevealedItemIds((currentIds) => new Set(currentIds).add(itemId));
   }, []);
 
-  const serverStillLoading = viewsLoading || bootListsLoading || allListsLoading || selectedViewLoading;
-  const hasLocalFallback = Boolean(effectiveViews && currentView);
-  const shouldShowSkeleton =
-    !effectiveViews ||
-    (!currentView && !boot.localBootReady && serverStillLoading);
-
-  if (shouldShowSkeleton) {
+  if (
+    (viewsLoading || !allListsView || bootListsLoading || allListsLoading || selectedViewLoading) &&
+    !usingLocalFallback
+  ) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
       <ListSkeleton />
       <ListSkeleton />
@@ -442,7 +441,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   }
 
 
-  if ((viewsError || bootListsError || allListsError || selectedViewError) && !hasLocalFallback) {
+  if ((viewsError || bootListsError || allListsError || selectedViewError) && !usingLocalFallback) {
     return <>Something went wrong...</>;
   }
 
