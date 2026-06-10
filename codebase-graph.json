@@ -198,7 +198,8 @@
       ],
       "imports": [
         "@/lib/supabase/server",
-        "@/lib/sync/sync-endpoint-contract"
+        "@/lib/sync/server-apply",
+        "@/lib/sync/sync-batch-contract"
       ]
     },
     {
@@ -1559,20 +1560,25 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "FlushOutboxOperationsBatchArgs",
         "ReplayOutboxOperationsArgs",
+        "SyncBatchOperationResult",
+        "SyncBatchTransport",
         "SyncReplayOperationResult",
         "SyncReplayRepository",
         "SyncReplayResult",
         "SyncReplayTransport",
         "SyncReplayTransportRequest",
         "SyncServerSnapshotProvider",
+        "flushOutboxOperationsBatch",
         "replayOutboxOperations"
       ],
       "imports": [
         "./outbox-coalescing",
         "./outbox-repository",
         "./outbox-schema",
-        "@/lib/sync/conflict-resolution"
+        "@/lib/sync/conflict-resolution",
+        "@/lib/sync/sync-batch-contract"
       ]
     },
     {
@@ -1758,6 +1764,7 @@
         "ReconcilePendingWritesArgs",
         "captureDashboardMutationOutbox",
         "captureOfflineWrite",
+        "createHttpSyncBatchTransport",
         "createHttpSyncReplayTransport",
         "flushOfflineWrites",
         "isOfflineWriteCaptureEnabled",
@@ -1769,7 +1776,42 @@
         "@/lib/local-db/sync-replay-client",
         "@/lib/local-db/local-repositories",
         "@/lib/sync/sync-status-surface",
-        "@/lib/local-db/outbox-schema"
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/sync-batch-contract"
+      ]
+    },
+    {
+      "path": "lib/sync/server-apply.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "SyncApplyOperationResult",
+        "applySyncOperations"
+      ],
+      "imports": [
+        "@/app/generated/prisma/client",
+        "@/lib/db",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/sync-batch-contract",
+        "@/trpc/routers/viewHelpers"
+      ]
+    },
+    {
+      "path": "lib/sync/sync-batch-contract.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "SYNC_BATCH_MAX_OPERATIONS",
+        "SYNC_BATCH_MAX_TOTAL_BYTES",
+        "SyncBatchOperation",
+        "SyncBatchOperationDecision",
+        "SyncBatchRequest",
+        "SyncBatchValidationResult",
+        "validateSyncBatchRequest"
+      ],
+      "imports": [
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/sync-endpoint-contract"
       ]
     },
     {
@@ -2409,7 +2451,7 @@
         "@/lib/sync/offline-write-prototype",
         "@/lib/local-db/outbox-schema",
         "@/lib/local-db/outbox-repository",
-        "@/lib/sync/sync-endpoint-contract"
+        "@/lib/sync/sync-batch-contract"
       ]
     },
     {
@@ -2499,6 +2541,41 @@
       ]
     },
     {
+      "path": "tests/unit/server-apply.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/sync-batch-contract",
+        "@/lib/sync/server-apply"
+      ]
+    },
+    {
+      "path": "tests/unit/sync-batch-client.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/local-db/sync-replay-client",
+        "@/lib/sync/sync-batch-contract"
+      ]
+    },
+    {
+      "path": "tests/unit/sync-batch-contract.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/sync-batch-contract"
+      ]
+    },
+    {
       "path": "tests/unit/sync-endpoint-contract.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2549,8 +2626,9 @@
       "symbols": [],
       "imports": [
         "vitest",
-        "@/lib/local-db/sync-replay-client",
         "@/lib/local-db/outbox-schema",
+        "@/lib/local-db/sync-replay-client",
+        "@/lib/sync/sync-batch-contract",
         "@/lib/sync/sync-endpoint-contract"
       ]
     },
@@ -2870,9 +2948,15 @@
     },
     {
       "from": "app/api/sync/route.ts",
-      "to": "lib/sync/sync-endpoint-contract.ts",
+      "to": "lib/sync/server-apply.ts",
       "type": "imports",
-      "import": "@/lib/sync/sync-endpoint-contract"
+      "import": "@/lib/sync/server-apply"
+    },
+    {
+      "from": "app/api/sync/route.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
     },
     {
       "from": "app/api/trpc/[trpc]/route.ts",
@@ -4153,6 +4237,12 @@
       "import": "@/lib/sync/conflict-resolution"
     },
     {
+      "from": "lib/local-db/sync-replay-client.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
       "from": "lib/local-db/sync-status.ts",
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
@@ -4244,9 +4334,51 @@
     },
     {
       "from": "lib/sync/offline-write-prototype.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
+      "from": "lib/sync/offline-write-prototype.ts",
       "to": "lib/sync/sync-status-surface.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-status-surface"
+    },
+    {
+      "from": "lib/sync/server-apply.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "lib/sync/server-apply.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "lib/sync/server-apply.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
+      "from": "lib/sync/server-apply.ts",
+      "to": "trpc/routers/viewHelpers.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/viewHelpers"
+    },
+    {
+      "from": "lib/sync/sync-batch-contract.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "lib/sync/sync-batch-contract.ts",
+      "to": "lib/sync/sync-endpoint-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-endpoint-contract"
     },
     {
       "from": "lib/sync/sync-endpoint-contract.ts",
@@ -4628,9 +4760,9 @@
     },
     {
       "from": "tests/unit/offline-write-prototype.test.ts",
-      "to": "lib/sync/sync-endpoint-contract.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
       "type": "imports",
-      "import": "@/lib/sync/sync-endpoint-contract"
+      "import": "@/lib/sync/sync-batch-contract"
     },
     {
       "from": "tests/unit/optimistic-sync-baseline.test.ts",
@@ -4729,6 +4861,54 @@
       "import": "@/trpc/routers/viewHelpers"
     },
     {
+      "from": "tests/unit/server-apply.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/server-apply.test.ts",
+      "to": "lib/sync/server-apply.ts",
+      "type": "imports",
+      "import": "@/lib/sync/server-apply"
+    },
+    {
+      "from": "tests/unit/server-apply.test.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
+      "from": "tests/unit/sync-batch-client.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/sync-batch-client.test.ts",
+      "to": "lib/local-db/sync-replay-client.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/sync-replay-client"
+    },
+    {
+      "from": "tests/unit/sync-batch-client.test.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
+      "from": "tests/unit/sync-batch-contract.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/sync-batch-contract.test.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
       "from": "tests/unit/sync-endpoint-contract.test.ts",
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
@@ -4787,6 +4967,12 @@
       "to": "lib/local-db/sync-replay-client.ts",
       "type": "imports",
       "import": "@/lib/local-db/sync-replay-client"
+    },
+    {
+      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
     },
     {
       "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
