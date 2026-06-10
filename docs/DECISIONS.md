@@ -258,3 +258,67 @@ in direction (Dexie advances to a runtime read source on the offline/fallback pa
 **Impact.** seriesComplete in STATE.json stays false by decision. docs/AI_HANDOFF.md claims that named the old
 1.9.18 views/dashboard scaffold as the offline unlock are corrected in this phase to state the offline reload
 requires the service-worker app-shell first. No source or test behavior changes in 1.9.18.
+
+---
+
+## 2026-06-10: Prioritize immediate dashboard correctness and Dexie-first bounded batch sync
+
+The 1.9.20 review found that the current local fallback and outbox prototype do not satisfy the intended
+local-first product behavior:
+
+- The fallback can render during ordinary query loading, before API unavailability is established.
+- The local snapshot contains views and lists only; mapped lists always contain an empty `listItems` array.
+- Most dashboard actions still persist through direct component-level tRPC mutations.
+- Replay sends one HTTP request per operation.
+- `/api/sync` validates and acknowledges an operation but does not apply it to PostgreSQL.
+- Failed replay operations are moved to `failed` while the replay query reads only `pending`, so failures can
+  become stranded.
+
+**Decision 1 - correct the complete local graph before expanding writes.** 1.9.21 owns deterministic
+server-to-Dexie reconciliation for views, lists, list items, tags, relationship rows, and ordering. It must
+preserve pending local work, deduplicate client/server identities, remove stale acknowledged rows, and
+distinguish ordinary API loading from confirmed API unavailability. A structurally incomplete local snapshot
+must never be rendered as if it were authoritative.
+
+**Decision 2 - Dexie becomes the primary local dashboard source.** For migrated dashboard behavior, a user
+action is committed by one atomic local transaction that updates the affected Dexie entity/relationship rows
+and appends or coalesces its outbox intent. TanStack Query remains the render/projection cache and may mirror
+the committed local graph, but it is not the durable local authority. PostgreSQL/Supabase remains the remote
+durable source.
+
+**Decision 3 - remote dashboard persistence uses bounded batch flushes.** The production sync transport accepts
+`operations[]` and sends one HTTP request per flush, bounded by an explicit operation-count and payload-byte
+limit. The server re-derives the authenticated user, validates ownership and operation dependencies, applies
+accepted operations to PostgreSQL with idempotency protection, and returns a result for every operation.
+An operation is marked synced locally only after the server reports it durably applied or already applied.
+An acknowledge-only endpoint is not a valid sync implementation.
+
+**Decision 4 - direct per-action dashboard tRPC persistence is transitional only.** Each migrated slice must
+remove its component-level mutation as the remote persistence path. By 1.9.26, list, item, reorder/move, tag,
+view, selection, and relationship writes must all flow through Dexie/outbox and the batch endpoint. Existing
+tRPC query procedures may remain the online hydration/read bridge.
+
+**Decision 5 - movement remains local during interaction.** Drag hover stays preview-only. A committed drop
+writes one local reorder/move intent, and repeated drops coalesce to the newest required state before a later
+batch flush. Pending local placement overlays server hydration so switching views or receiving a stale server
+payload cannot temporarily move an item back.
+
+**Decision 6 - batch lifecycle is bounded, durable, and retryable.** Flushes may run after a bounded quiet
+window, at a batch-size threshold, on reconnect, and at safe lifecycle opportunities. Only one flush may run
+per user at a time. Transient failures return operations to a retryable state with backoff; reload recovers
+stranded `syncing` work. Permanent validation/ownership failures remain visible and are never silently
+reported as synced.
+
+**Supersession.** This replaces the remaining per-slice roadmap language that said "server sync via
+replay/TanStack" without requiring server application or a multi-operation request. It further specifies the
+2026-06-07 Dexie local-runtime direction: the target is not slice-scoped direct tRPC writes plus a local copy;
+the target is Dexie-first dashboard state plus bounded batch synchronization.
+
+**Impact.** The two priority outcomes now own 1.9.21-1.9.26:
+
+1. Immediate, correct list/item rendering from a complete reconciled local graph.
+2. Dexie-first dashboard writes synchronized to PostgreSQL through bounded multi-operation requests instead
+   of one request per action.
+
+The 1.9.x series cannot be declared complete until both outcomes have end-to-end request-count and persistence
+proof.
