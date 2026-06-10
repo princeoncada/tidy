@@ -210,6 +210,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     isLoading: viewsLoading,
     isError: viewsError,
     isSuccess: viewsSucceeded,
+    failureCount: viewsFailureCount,
   } = useQuery(trpc.view.getAll.queryOptions());
 
   const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
@@ -298,6 +299,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     async function seedServerGraphIntoLocalDb() {
       try {
+        if (!views || !serverAllListsSnapshot) return;
         const confirmedServerViews = views.filter(
           (view) => view.userId === boot.userId,
         );
@@ -370,9 +372,11 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     viewsSucceeded,
   ]);
 
-  // Confirmed API-unavailable, NOT ordinary loading: the server views query must have
-  // settled into an error/unavailable state with no data before local data renders.
-  const apiUnavailable = viewsError && !views;
+  // Confirmed API-unavailable, NOT ordinary loading: at least one server views fetch has
+  // failed (failureCount increments on the first failed attempt, before retry exhaustion)
+  // and there is no server data. Inert online: a successful fetch keeps failureCount at 0
+  // with `views` defined, and ordinary first-load loading has failureCount 0.
+  const apiUnavailable = (viewsError || viewsFailureCount > 0) && !views;
   const usingLocalFallback = apiUnavailable && boot.localBootReady;
 
   const currentView = resolveDashboardCurrentView({
