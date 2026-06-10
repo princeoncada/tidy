@@ -446,7 +446,8 @@
         "./UserAccountNav",
         "@tanstack/react-query",
         "./views/ViewsSidebarPreview",
-        "./SyncStatusBadge"
+        "./SyncStatusBadge",
+        "@/hooks/useLocalFirstDashboardBoot"
       ]
     },
     {
@@ -456,6 +457,7 @@
       "symbols": [],
       "imports": [
         "@/trpc/client",
+        "@/hooks/useLocalFirstDashboardBoot",
         "../ui/button",
         "../ui/dialog",
         "../ui/input",
@@ -466,6 +468,8 @@
         "./types",
         "lucide-react",
         "@/lib/dashboard-cache",
+        "@/lib/local-first-dashboard",
+        "@/lib/local-db/local-repositories",
         "@/lib/sync/offline-write-prototype",
         "../ui/skeleton"
       ]
@@ -508,7 +512,8 @@
         "react",
         "../ui/empty",
         "lucide-react",
-        "./ListAdder"
+        "./ListAdder",
+        "@/hooks/useLocalFirstDashboardBoot"
       ]
     },
     {
@@ -564,6 +569,8 @@
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
         "@/hooks/useOptimisticSync",
+        "@/hooks/useLocalFirstDashboardBoot",
+        "@/lib/local-first-dashboard",
         "@/trpc/client",
         "@dnd-kit/react",
         "@tanstack/react-query",
@@ -1299,6 +1306,22 @@
       ]
     },
     {
+      "path": "hooks/useLocalFirstDashboardBoot.ts",
+      "kind": "hook",
+      "extension": ".ts",
+      "symbols": [
+        "LocalFirstDashboardBoot",
+        "useLocalFirstDashboardBoot"
+      ],
+      "imports": [
+        "react",
+        "@/lib/dashboard-cache",
+        "@/lib/local-first-dashboard",
+        "@/lib/local-db/local-repositories",
+        "@/lib/supabase/client"
+      ]
+    },
+    {
       "path": "hooks/useOptimisticSync.ts",
       "kind": "hook",
       "extension": ".ts",
@@ -1410,12 +1433,16 @@
         "createLocalTimestamp",
         "createOutboxOperation",
         "getLocalDbOrThrow",
+        "listLocalListsForUser",
+        "listLocalViewsForUser",
         "markEntityFailed",
         "markEntityPending",
         "markEntitySynced",
         "putLocalList",
         "putLocalListItem",
+        "putLocalLists",
         "putLocalView",
+        "putLocalViews",
         "putOutboxOperation"
       ],
       "imports": [
@@ -1570,6 +1597,25 @@
         "dexie",
         "./local-schema",
         "./outbox-schema"
+      ]
+    },
+    {
+      "path": "lib/local-first-dashboard.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "LOCAL_ALL_LISTS_VIEW_ID",
+        "buildLocalDashboardSnapshot",
+        "mapLocalListToDashboardList",
+        "mapLocalViewToViewCacheItem",
+        "mapServerSnapshotToLocalLists",
+        "mapServerViewsToLocalViews",
+        "resolveDashboardCurrentView",
+        "synthesizeAllListsView"
+      ],
+      "imports": [
+        "@/lib/dashboard-cache",
+        "@/lib/local-db/local-schema"
       ]
     },
     {
@@ -2031,6 +2077,19 @@
       ]
     },
     {
+      "path": "tests/e2e/local-first-dashboard.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@playwright/test",
+        "./utils/app",
+        "./utils/assertions",
+        "./utils/fixtures",
+        "./utils/seed"
+      ]
+    },
+    {
       "path": "tests/e2e/offline-shell.spec.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2261,6 +2320,18 @@
       ]
     },
     {
+      "path": "tests/unit/local-first-dashboard.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/dashboard-cache",
+        "@/lib/local-first-dashboard",
+        "@/lib/local-db/local-schema"
+      ]
+    },
+    {
       "path": "tests/unit/local-repositories.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2268,7 +2339,8 @@
       "imports": [
         "vitest",
         "@/lib/local-db/local-repositories",
-        "@/lib/local-db/local-schema"
+        "@/lib/local-db/local-schema",
+        "@/lib/local-db/tidy-db"
       ]
     },
     {
@@ -3044,6 +3116,12 @@
     },
     {
       "from": "components/Dashboard.tsx",
+      "to": "hooks/useLocalFirstDashboardBoot.ts",
+      "type": "imports",
+      "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
+      "from": "components/Dashboard.tsx",
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
@@ -3092,9 +3170,27 @@
     },
     {
       "from": "components/list/ListAdder.tsx",
+      "to": "hooks/useLocalFirstDashboardBoot.ts",
+      "type": "imports",
+      "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
+      "to": "lib/local-first-dashboard.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-dashboard"
     },
     {
       "from": "components/list/ListAdder.tsx",
@@ -3211,6 +3307,12 @@
       "import": "../ui/empty"
     },
     {
+      "from": "components/list/ListEmpty.tsx",
+      "to": "hooks/useLocalFirstDashboardBoot.ts",
+      "type": "imports",
+      "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
       "from": "components/list/ListInlineEdit.tsx",
       "to": "components/ui/textarea.tsx",
       "type": "imports",
@@ -3314,6 +3416,12 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
+      "to": "hooks/useLocalFirstDashboardBoot.ts",
+      "type": "imports",
+      "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
       "to": "hooks/useOptimisticSync.ts",
       "type": "imports",
       "import": "@/hooks/useOptimisticSync"
@@ -3323,6 +3431,12 @@
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/local-first-dashboard.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-dashboard"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -3805,6 +3919,30 @@
       "import": "@/lib/sync/sync-status-surface"
     },
     {
+      "from": "hooks/useLocalFirstDashboardBoot.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "hooks/useLocalFirstDashboardBoot.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "hooks/useLocalFirstDashboardBoot.ts",
+      "to": "lib/local-first-dashboard.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-dashboard"
+    },
+    {
+      "from": "hooks/useLocalFirstDashboardBoot.ts",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
       "from": "hooks/useOptimisticSync.ts",
       "to": "lib/local-db/outbox-repository.ts",
       "type": "imports",
@@ -3965,6 +4103,18 @@
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
       "import": "./outbox-schema"
+    },
+    {
+      "from": "lib/local-first-dashboard.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "lib/local-first-dashboard.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
     },
     {
       "from": "lib/supabase/auth-confirm.ts",
@@ -4129,6 +4279,30 @@
       "import": "./utils/seed"
     },
     {
+      "from": "tests/e2e/local-first-dashboard.spec.ts",
+      "to": "tests/e2e/utils/app.ts",
+      "type": "imports",
+      "import": "./utils/app"
+    },
+    {
+      "from": "tests/e2e/local-first-dashboard.spec.ts",
+      "to": "tests/e2e/utils/assertions.ts",
+      "type": "imports",
+      "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/local-first-dashboard.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/local-first-dashboard.spec.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
       "from": "tests/e2e/regression.spec.ts",
       "to": "tests/e2e/utils/app.ts",
       "type": "imports",
@@ -4279,6 +4453,24 @@
       "import": "@/lib/local-db/metadata-repository"
     },
     {
+      "from": "tests/unit/local-first-dashboard.test.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "tests/unit/local-first-dashboard.test.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/local-first-dashboard.test.ts",
+      "to": "lib/local-first-dashboard.ts",
+      "type": "imports",
+      "import": "@/lib/local-first-dashboard"
+    },
+    {
       "from": "tests/unit/local-repositories.test.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -4289,6 +4481,12 @@
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/local-repositories.test.ts",
+      "to": "lib/local-db/tidy-db.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/tidy-db"
     },
     {
       "from": "tests/unit/offline-write-prototype.test.ts",
