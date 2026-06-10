@@ -257,12 +257,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.22 - Bounded Batch Sync Endpoint & Server Apply (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
-- **Status:** Open | Priority: P1 infrastructure (local-first)
+- **Status:** In progress | Priority: P1 infrastructure (local-first)
 - **Type:** infrastructure
 - **Files:** app/api/sync/route.ts, lib/sync/sync-endpoint-contract.ts, lib/local-db/sync-replay-client.ts, trpc/routers/* or dedicated server sync modules, tests
 - **Implementation goal:** replace the acknowledge-only, one-operation transport with a real authenticated batch contract accepting `operations[]` in one bounded request. Validate user scope, ownership, dependency order, payload count/bytes, idempotency keys, and operation types; apply accepted mutations to PostgreSQL; and return a result for every submitted operation.
