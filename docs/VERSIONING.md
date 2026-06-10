@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.22-alpha
+- **Current version:** 1.9.22
 - **Current phase:** 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
 - **Next phase:** 1.9.23 - Dexie-First List & Item CRUD
 
