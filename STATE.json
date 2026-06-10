@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.19-alpha",
-    "state":  "alpha",
+    "version":  "1.9.19",
+    "state":  "stable",
     "phase":  "1.9.19",
     "phaseTitle":  "Offline App-Shell (Service Worker)",
     "nextPhase":  "1.9.20 - Dexie Read Fallback (API-Unavailable)",
