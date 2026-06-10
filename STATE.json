@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.18-alpha",
-    "state":  "alpha",
+    "version":  "1.9.18",
+    "state":  "stable",
     "phase":  "1.9.18",
     "phaseTitle":  "Roadmap Re-Plan Correction (SW-First Re-Sequence)",
     "nextPhase":  "1.9.19 - Offline App-Shell (Service Worker)",
