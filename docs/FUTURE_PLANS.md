@@ -242,6 +242,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)~~ (stable 2026-06-09)
 
+- ~~1.9.19 - Offline App-Shell (Service Worker)~~ (stable 2026-06-09)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -251,21 +253,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.19 - Offline App-Shell (Service Worker) (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.19 - Offline App-Shell (Service Worker)
-- **Status:** In progress | Priority: P1 product (local-first prerequisite)
-- **Type:** product behavior (infrastructure-enabling)
-- **Files:** app/layout.tsx, trpc/client.tsx, next.config.ts, public/* (manifest + service worker), a registration entry point, tests
-- **Implementation goal:** add an offline app-shell via a service worker so an offline full reload serves the cached shell + dashboard route + JS/CSS chunks instead of dying with ERR_INTERNET_DISCONNECTED before any JS runs. Design-heavy: produce a full implementation plan first (Next 16 SW/PWA approach, precache set, dev-vs-prod SW behavior, registration point) before any Codex prompt.
-- **Product impact:** an offline full reload renders the app shell and boots the client instead of the browser offline-error page; the hard prerequisite for any "go offline -> reload -> renders from Dexie" proof.
-- **Runtime integration target:** a registered service worker precaches and serves the app shell + dashboard route assets; online behavior unchanged; dev SW behavior decided in the plan.
-- **Deferral boundary:** rendering dashboard data from Dexie on that shell -> 1.9.20; reconciliation/dedup -> 1.9.21.
-- **Validation target:** targeted alpha (SW registration + offline-shell-serves tests + manual offline reload proof: offline reload shows the shell, not ERR_INTERNET_DISCONNECTED); full test:ci before stable.
-- **Acceptance:** with the network offline, a full reload serves the cached shell and runs client JS; online behavior and existing invariants unchanged; regression green.
 
 ### 1.9.20 - Dexie Read Fallback (API-Unavailable)
 - **Status:** Open | Priority: P1 product (local-first)
