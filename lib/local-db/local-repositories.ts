@@ -1,5 +1,15 @@
 import { tidyLocalDb, type TidyLocalDatabase } from "./tidy-db";
-import type { LocalEntityBase, LocalList, LocalListItem, LocalView } from "./local-schema";
+import type { LocalGraphReconcilePlan } from "../local-first-reconcile";
+import type {
+  LocalEntityBase,
+  LocalList,
+  LocalListItem,
+  LocalListTag,
+  LocalTag,
+  LocalView,
+  LocalViewList,
+  LocalViewTag,
+} from "./local-schema";
 import type {
   LocalJsonValue,
   LocalOutboxEntityType,
@@ -165,6 +175,46 @@ export async function listLocalViewsForUser(
   return rows.filter((row) => row.deletedAt === null);
 }
 
+export async function listLocalListItemsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalListItem[]> {
+  const rows = await db.listItems.where("userId").equals(userId).toArray();
+  return rows.filter((row) => row.deletedAt === null);
+}
+
+export async function listLocalTagsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalTag[]> {
+  const rows = await db.tags.where("userId").equals(userId).toArray();
+  return rows.filter((row) => row.deletedAt === null);
+}
+
+export async function listLocalListTagsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalListTag[]> {
+  const rows = await db.listTags.where("userId").equals(userId).toArray();
+  return rows.filter((row) => row.deletedAt === null);
+}
+
+export async function listLocalViewListsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalViewList[]> {
+  const rows = await db.viewLists.where("userId").equals(userId).toArray();
+  return rows.filter((row) => row.deletedAt === null);
+}
+
+export async function listLocalViewTagsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalViewTag[]> {
+  const rows = await db.viewTags.where("userId").equals(userId).toArray();
+  return rows.filter((row) => row.deletedAt === null);
+}
+
 export async function putLocalViews(
   views: LocalView[],
   db: TidyLocalDatabase = getLocalDbOrThrow(),
@@ -177,4 +227,66 @@ export async function putLocalLists(
   db: TidyLocalDatabase = getLocalDbOrThrow(),
 ): Promise<void> {
   await db.lists.bulkPut(lists);
+}
+
+export async function applyLocalGraphReconcilePlan(
+  plan: LocalGraphReconcilePlan,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<void> {
+  await db.transaction(
+    "rw",
+    [
+      db.views,
+      db.lists,
+      db.listItems,
+      db.tags,
+      db.listTags,
+      db.viewLists,
+      db.viewTags,
+    ],
+    async () => {
+      if (plan.views.upserts.length > 0) {
+        await db.views.bulkPut(plan.views.upserts);
+      }
+      if (plan.views.deleteClientIds.length > 0) {
+        await db.views.bulkDelete(plan.views.deleteClientIds);
+      }
+      if (plan.lists.upserts.length > 0) {
+        await db.lists.bulkPut(plan.lists.upserts);
+      }
+      if (plan.lists.deleteClientIds.length > 0) {
+        await db.lists.bulkDelete(plan.lists.deleteClientIds);
+      }
+      if (plan.listItems.upserts.length > 0) {
+        await db.listItems.bulkPut(plan.listItems.upserts);
+      }
+      if (plan.listItems.deleteClientIds.length > 0) {
+        await db.listItems.bulkDelete(plan.listItems.deleteClientIds);
+      }
+      if (plan.tags.upserts.length > 0) {
+        await db.tags.bulkPut(plan.tags.upserts);
+      }
+      if (plan.tags.deleteClientIds.length > 0) {
+        await db.tags.bulkDelete(plan.tags.deleteClientIds);
+      }
+      if (plan.listTags.upserts.length > 0) {
+        await db.listTags.bulkPut(plan.listTags.upserts);
+      }
+      if (plan.listTags.deleteClientIds.length > 0) {
+        await db.listTags.bulkDelete(plan.listTags.deleteClientIds);
+      }
+      if (plan.viewLists.upserts.length > 0) {
+        await db.viewLists.bulkPut(plan.viewLists.upserts);
+      }
+      if (plan.viewLists.deleteClientIds.length > 0) {
+        await db.viewLists.bulkDelete(plan.viewLists.deleteClientIds);
+      }
+      if (plan.viewTags.upserts.length > 0) {
+        await db.viewTags.bulkPut(plan.viewTags.upserts);
+      }
+      if (plan.viewTags.deleteClientIds.length > 0) {
+        await db.viewTags.bulkDelete(plan.viewTags.deleteClientIds);
+      }
+    },
+  );
 }
