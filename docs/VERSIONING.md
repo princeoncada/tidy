@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.20
-- **Current phase:** 1.9.20 - Dexie Read Fallback (API-Unavailable)
-- **Next phase:** 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
+- **Current version:** 1.9.21-alpha
+- **Current phase:** 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
+- **Next phase:** 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
 
 ---
 
