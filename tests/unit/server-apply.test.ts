@@ -48,7 +48,7 @@ function createTx() {
     list: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
-      findMany: vi.fn(async () => []),
+      findMany: vi.fn(async (): Promise<unknown[]> => []),
       create: vi.fn(),
       updateMany: vi.fn(async () => ({ count: 1 })),
       deleteMany: vi.fn(async () => ({ count: 1 })),
@@ -56,7 +56,7 @@ function createTx() {
     listItem: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
-      findMany: vi.fn(async () => []),
+      findMany: vi.fn(async (): Promise<unknown[]> => []),
       create: vi.fn(),
       updateMany: vi.fn(async () => ({ count: 1 })),
       deleteMany: vi.fn(async () => ({ count: 1 })),
@@ -64,7 +64,7 @@ function createTx() {
     tag: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
-      findMany: vi.fn(async () => []),
+      findMany: vi.fn(async (): Promise<unknown[]> => []),
       create: vi.fn(),
       updateMany: vi.fn(async () => ({ count: 1 })),
       deleteMany: vi.fn(async () => ({ count: 1 })),
@@ -83,7 +83,7 @@ function createTx() {
     view: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
-      findMany: vi.fn(async () => []),
+      findMany: vi.fn(async (): Promise<unknown[]> => []),
       create: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(async () => ({ count: 1 })),
@@ -92,7 +92,7 @@ function createTx() {
     viewList: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
-      findMany: vi.fn(async () => []),
+      findMany: vi.fn(async (): Promise<unknown[]> => []),
       createMany: vi.fn(async () => ({ count: 1 })),
       upsert: vi.fn(),
       deleteMany: vi.fn(async () => ({ count: 1 })),
