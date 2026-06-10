@@ -4,11 +4,16 @@ import {
   createLocalEntityBase,
   createLocalTimestamp,
   createOutboxOperation,
+  listLocalListsForUser,
+  listLocalViewsForUser,
   markEntityFailed,
   markEntityPending,
   markEntitySynced,
+  putLocalLists,
+  putLocalViews,
 } from "@/lib/local-db/local-repositories";
-import type { LocalEntityBase } from "@/lib/local-db/local-schema";
+import type { LocalEntityBase, LocalList, LocalView } from "@/lib/local-db/local-schema";
+import type { TidyLocalDatabase } from "@/lib/local-db/tidy-db";
 
 const baseEntity = (overrides: Partial<LocalEntityBase> = {}): LocalEntityBase => ({
   clientId: "local-list-1",
@@ -21,6 +26,67 @@ const baseEntity = (overrides: Partial<LocalEntityBase> = {}): LocalEntityBase =
   lastSyncedAt: null,
   ...overrides,
 });
+
+function localList(overrides: Partial<LocalList> = {}): LocalList {
+  return {
+    ...baseEntity(),
+    name: "Inbox",
+    ...overrides,
+  };
+}
+
+function localView(overrides: Partial<LocalView> = {}): LocalView {
+  return {
+    ...baseEntity({ clientId: "local-view-1" }),
+    name: "All Lists",
+    order: 0,
+    type: "ALL_LISTS",
+    isDefault: true,
+    matchMode: "ALL",
+    ...overrides,
+  };
+}
+
+function createFakeLocalDb(args: {
+  lists?: LocalList[];
+  views?: LocalView[];
+} = {}) {
+  const lists = new Map<string, LocalList>();
+  const views = new Map<string, LocalView>();
+
+  for (const list of args.lists ?? []) {
+    lists.set(list.clientId, list);
+  }
+
+  for (const view of args.views ?? []) {
+    views.set(view.clientId, view);
+  }
+
+  const table = <T extends LocalList | LocalView>(store: Map<string, T>) => ({
+    where: (indexName: string) => ({
+      equals: (value: unknown) => ({
+        toArray: async () =>
+          indexName === "userId"
+            ? [...store.values()].filter((row) => row.userId === value)
+            : [],
+      }),
+    }),
+    bulkPut: async (rows: T[]) => {
+      for (const row of rows) {
+        store.set(row.clientId, row);
+      }
+    },
+  });
+
+  return {
+    db: {
+      lists: table(lists),
+      views: table(views),
+    } as unknown as TidyLocalDatabase,
+    lists,
+    views,
+  };
+}
 
 describe("local repository helpers", () => {
   it("creates ISO timestamps", () => {
@@ -154,5 +220,43 @@ describe("local repository helpers", () => {
       lastAttemptedAt: "2026-05-10T10:04:00.000Z",
       idempotencyKey: "custom-key",
     });
+  });
+
+  it("lists local lists for one user and filters deleted rows", async () => {
+    const { db } = createFakeLocalDb({
+      lists: [
+        localList({ clientId: "user-1-active", userId: "user-1" }),
+        localList({ clientId: "user-1-deleted", userId: "user-1", deletedAt: "2026-05-10T12:00:00.000Z" }),
+        localList({ clientId: "user-2-active", userId: "user-2" }),
+      ],
+    });
+
+    await expect(listLocalListsForUser("user-1", db)).resolves.toEqual([
+      expect.objectContaining({ clientId: "user-1-active" }),
+    ]);
+  });
+
+  it("lists local views for one user and filters deleted rows", async () => {
+    const { db } = createFakeLocalDb({
+      views: [
+        localView({ clientId: "user-1-active", userId: "user-1" }),
+        localView({ clientId: "user-1-deleted", userId: "user-1", deletedAt: "2026-05-10T12:00:00.000Z" }),
+        localView({ clientId: "user-2-active", userId: "user-2" }),
+      ],
+    });
+
+    await expect(listLocalViewsForUser("user-1", db)).resolves.toEqual([
+      expect.objectContaining({ clientId: "user-1-active" }),
+    ]);
+  });
+
+  it("bulk writes local lists and views", async () => {
+    const { db, lists, views } = createFakeLocalDb();
+
+    await putLocalLists([localList({ clientId: "list-a" }), localList({ clientId: "list-b" })], db);
+    await putLocalViews([localView({ clientId: "view-a" }), localView({ clientId: "view-b" })], db);
+
+    expect([...lists.keys()]).toEqual(["list-a", "list-b"]);
+    expect([...views.keys()]).toEqual(["view-a", "view-b"]);
   });
 });
