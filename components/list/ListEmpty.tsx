@@ -2,8 +2,13 @@ import React from 'react';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../ui/empty';
 import { FolderOpen } from 'lucide-react';
 import ListAdder from './ListAdder';
+import type { LocalFirstDashboardBoot } from '@/hooks/useLocalFirstDashboardBoot';
 
-const ListEmpty = () => {
+type ListEmptyProps = {
+  boot: LocalFirstDashboardBoot;
+};
+
+const ListEmpty = ({ boot }: ListEmptyProps) => {
   return (
     <Empty className='mt-12'>
       <EmptyHeader>
@@ -17,7 +22,7 @@ const ListEmpty = () => {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <ListAdder />
+        <ListAdder boot={boot} />
       </EmptyContent>
     </Empty>
   );
