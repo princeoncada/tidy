@@ -246,6 +246,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.20 - Dexie Read Fallback (API-Unavailable)~~ (stable 2026-06-10)
 
+- ~~1.9.21 - Dexie<->Server Reconciliation & Lifecycle~~ (stable 2026-06-10)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -255,21 +257,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.21 - Dexie<->Server Reconciliation & Lifecycle (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
-- **Status:** In progress | Priority: P1 product (local-first)
-- **Type:** product behavior
-- **Files:** hooks/useLocalFirstDashboardBoot.ts, lib/local-first-dashboard.ts, lib/local-db/*, components/list/ListsContainer.tsx, tests
-- **Implementation goal:** make the local dashboard graph complete and deterministic before it is rendered. Seed and reconcile views, lists, list items, tags, list-tags, view-tags, view-list membership, and ordering; deduplicate client/server identities; remove stale synced rows without deleting pending local work; and activate the fallback only after API unavailability is known instead of during normal query loading.
-- **Product impact:** list cards and their items render in the correct list immediately. Normal online loading no longer flashes empty, duplicated, stale, or temporarily misplaced list items before the server response settles.
-- **Runtime integration target:** one reconciled Dexie dashboard graph produces structurally complete snapshots (`listItems`, tags, membership, and order always defined), while pending local rows survive server seeding and the server payload refreshes only acknowledged/synced rows.
-- **Deferral boundary:** this phase fixes read correctness and lifecycle only. The real batch server-apply contract is 1.9.22; Dexie-first writes begin in 1.9.23.
-- **Validation target:** targeted alpha (graph reconciliation/dedup, pending-row preservation, API-loading-vs-unavailable state tests, rapid-create/reload E2E, and screenshot-sequence manual proof); full test:ci before stable.
-- **Acceptance:** rapid create, item movement, view switching, reload, and delayed API responses never show duplicate keys, undefined/empty item collections, or an item under the wrong list; API-unavailable fallback still renders the complete local graph.
 
 ### 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
 - **Status:** Open | Priority: P1 infrastructure (local-first)
