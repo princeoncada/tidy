@@ -240,6 +240,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.17 - Stabilize and Enable Local-First Create List Slice~~ (stable 2026-06-08)
 
+- ~~1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)~~ (stable 2026-06-09)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -249,21 +251,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence) (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)
-- **Status:** In progress | Priority: P1 workflow correction
-- **Type:** docs/workflow
-- **Files:** docs/DECISIONS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md
-- **Implementation goal:** record the 2026-06-09 service-worker-first re-plan into the roadmap docs - append the DECISIONS.md decision (two blocking findings + re-sequence, superseding the 2026-06-08 views-first decision), re-sequence this Planned arc SW-first, and correct the AI_HANDOFF offline claims that named the old views/dashboard scaffold as the offline unlock.
-- **Product impact:** none - roadmap/docs correction only; no source or test behavior changes.
-- **Runtime integration target:** none - documentation only.
-- **Deferral boundary:** the service worker itself -> 1.9.19; the Dexie read fallback -> 1.9.20; reconciliation/dedup -> 1.9.21. This phase writes no app code.
-- **Validation target:** targeted alpha (validate.ps1 version/consistency green); full validate.ps1 before stable. No graph refresh needed (docs-only, no source export/import change).
-- **Acceptance:** DECISIONS.md records the re-plan; FUTURE_PLANS reflects the SW-first sequence; AI_HANDOFF no longer claims the views/dashboard scaffold delivers offline reload; validate.ps1 green.
 
 ### 1.9.19 - Offline App-Shell (Service Worker)
 - **Status:** Open | Priority: P1 product (local-first prerequisite)
