@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.20-alpha
+- **Current version:** 1.9.20
 - **Current phase:** 1.9.20 - Dexie Read Fallback (API-Unavailable)
 - **Next phase:** 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
 
