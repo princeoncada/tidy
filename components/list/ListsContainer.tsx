@@ -19,6 +19,17 @@ import {
 import { useOptimisticSync } from '@/hooks/useOptimisticSync';
 import type { LocalFirstDashboardBoot } from '@/hooks/useLocalFirstDashboardBoot';
 import { LOCAL_ALL_LISTS_VIEW_ID, resolveDashboardCurrentView } from '@/lib/local-first-dashboard';
+import { reconcileServerGraphIntoLocalPlan } from '@/lib/local-first-reconcile';
+import {
+  applyLocalGraphReconcilePlan,
+  listLocalListItemsForUser,
+  listLocalListsForUser,
+  listLocalListTagsForUser,
+  listLocalTagsForUser,
+  listLocalViewListsForUser,
+  listLocalViewsForUser,
+  listLocalViewTagsForUser,
+} from '@/lib/local-db/local-repositories';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -33,6 +44,15 @@ type DragPreviewLists = Lists;
 type ListsContainerProps = {
   boot: LocalFirstDashboardBoot;
 };
+
+function isOptimisticCacheRow(value: unknown) {
+  return Boolean(
+    value &&
+    typeof value === "object" &&
+    "isOptimistic" in value &&
+    value.isOptimistic
+  );
+}
 
 function reorderListsForDrag(
   baseLists: Lists,
@@ -185,9 +205,13 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: views, isLoading: viewsLoading, isError: viewsError } = useQuery(
-    trpc.view.getAll.queryOptions()
-  );
+  const {
+    data: views,
+    isLoading: viewsLoading,
+    isError: viewsError,
+    isSuccess: viewsSucceeded,
+    failureCount: viewsFailureCount,
+  } = useQuery(trpc.view.getAll.queryOptions());
 
   const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
     ? undefined
@@ -228,7 +252,12 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     trpc.view.getCurrentViewListsWithItems.queryOptions()
   );
 
-  const { isLoading: allListsLoading, isError: allListsError } = useQuery(
+  const {
+    data: serverAllListsSnapshot,
+    isLoading: allListsLoading,
+    isError: allListsError,
+    isSuccess: allListsSucceeded,
+  } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: serverAllListsView?.id ?? EMPTY_VIEW_ID },
       { enabled: Boolean(serverAllListsView?.id) }
@@ -252,7 +281,103 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     queryClient.setQueryData(currentViewQueryKey, selectedViewSnapshot);
   }, [currentViewQueryKey, queryClient, selectedViewId, selectedViewSnapshot]);
 
-  const usingLocalFallback = !views && boot.localBootReady;
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !boot.userId ||
+      !views ||
+      !serverAllListsSnapshot ||
+      !viewsSucceeded ||
+      !allListsSucceeded ||
+      viewsError ||
+      allListsError
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function seedServerGraphIntoLocalDb() {
+      try {
+        if (!views || !serverAllListsSnapshot) return;
+        const confirmedServerViews = views.filter(
+          (view) => view.userId === boot.userId,
+        );
+        const confirmedServerAllLists = {
+          ...serverAllListsSnapshot,
+          lists: serverAllListsSnapshot.lists
+            .filter((list) => !isOptimisticCacheRow(list))
+            .map((list) => ({
+              ...list,
+              listItems: list.listItems.filter(
+                (item) => !isOptimisticCacheRow(item),
+              ),
+            })),
+        };
+        const [
+          localViews,
+          localLists,
+          localListItems,
+          localTags,
+          localListTags,
+          localViewLists,
+          localViewTags,
+        ] = await Promise.all([
+          listLocalViewsForUser(boot.userId!),
+          listLocalListsForUser(boot.userId!),
+          listLocalListItemsForUser(boot.userId!),
+          listLocalTagsForUser(boot.userId!),
+          listLocalListTagsForUser(boot.userId!),
+          listLocalViewListsForUser(boot.userId!),
+          listLocalViewTagsForUser(boot.userId!),
+        ]);
+
+        if (cancelled) return;
+
+        const plan = reconcileServerGraphIntoLocalPlan({
+          userId: boot.userId!,
+          server: {
+            views: confirmedServerViews,
+            allLists: confirmedServerAllLists,
+          },
+          local: {
+            views: localViews,
+            lists: localLists,
+            listItems: localListItems,
+            tags: localTags,
+            listTags: localListTags,
+            viewLists: localViewLists,
+            viewTags: localViewTags,
+          },
+        });
+
+        await applyLocalGraphReconcilePlan(plan);
+      } catch {
+        // Local seeding must never disrupt the online server-backed dashboard.
+      }
+    }
+
+    void seedServerGraphIntoLocalDb();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    allListsError,
+    allListsSucceeded,
+    boot.userId,
+    serverAllListsSnapshot,
+    views,
+    viewsError,
+    viewsSucceeded,
+  ]);
+
+  // Confirmed API-unavailable, NOT ordinary loading: at least one server views fetch has
+  // failed (failureCount increments on the first failed attempt, before retry exhaustion)
+  // and there is no server data. Inert online: a successful fetch keeps failureCount at 0
+  // with `views` defined, and ordinary first-load loading has failureCount 0.
+  const apiUnavailable = (viewsError || viewsFailureCount > 0) && !views;
+  const usingLocalFallback = apiUnavailable && boot.localBootReady;
 
   const currentView = resolveDashboardCurrentView({
     selectedViewId,

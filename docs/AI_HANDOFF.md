@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.20 -->
+<!-- Current Version: 1.9.21-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.20 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.20 - Dexie Read Fallback (API-Unavailable)
-**Next**: 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
+**Current Version**: 1.9.21-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
+**Next**: 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -124,8 +124,9 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Reorder endpoints use batch raw SQL (`UPDATE ... FROM (VALUES ...)`) because individual Prisma updates timed out.
 - Heavy custom view recompute should stay outside short Prisma interactive transactions unless proven safe.
 - The offline app-shell landed in 1.9.19: `public/sw.js` is registered through `AppShellServiceWorker` when `NODE_ENV=production` or `NEXT_PUBLIC_OFFLINE_APP_SHELL_ENABLED=true`; navigations are network-first with a cached shell fallback, while only `/_next/static/` assets are cache-first. `app/manifest.ts` provides the native Next manifest.
-- As of 1.9.20, Dexie is only a partial runtime READ fallback: `useLocalFirstDashboardBoot` reads local views/lists and `ListsContainer` may render them when the tRPC view query has no data. The local mapper currently synthesizes empty `listItems` and omits tags/relationship rows, so this snapshot is not yet complete enough to be the primary dashboard authority.
-- The current fallback gate can become active during ordinary query loading because it is based on missing view data plus `localBootReady`, not a confirmed API-unavailable state. 1.9.21 must separate loading from unavailability and reconcile the complete local dashboard graph before rendering it.
+- The Dexie runtime read fallback now assembles a complete dashboard graph: list items, tags, list-tags, view-tags, view-list membership, and ordering are always defined before rendering. Custom views use the same tag projection and deterministic order semantics as the server-backed dashboard.
+- Successful server views plus the canonical All Lists payload are reconciled into Dexie in one local transaction. Reconciliation preserves local identity for acknowledged optimistic rows, keeps unmatched non-synced work, and removes stale synced rows.
+- The local fallback is inert during ordinary loading and whenever server views data exists. It renders only after the views query has settled into an error state with no server data, so normal online loading remains server-backed.
 - A gated replay trigger is mounted through `OfflineReplayTrigger`, but `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` defaults off. When enabled, the current transport sends one request per operation, and `/api/sync` validates/acknowledges without applying the operation to PostgreSQL.
 - Current dashboard persistence remains mostly direct component-level tRPC mutations. Create-list has limited Dexie/outbox touchpoints; list-item, movement, tag, view, and relationship writes are not yet using Dexie as their durable local authority.
 - Approved target for 1.9.22-1.9.26: one atomic Dexie entity/outbox transaction per committed action, TanStack as the render projection, one bounded `operations[]` request per flush, real authenticated/idempotent server application, retryable failure handling, and no remaining direct dashboard tRPC persistence.
@@ -153,8 +154,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
 
 **Local-first and sync:**
-- The 1.9.19 offline app-shell and 1.9.20 partial Dexie fallback can boot/render locally, but the local graph is incomplete and its loading gate is unsafe. Until 1.9.21 lands, normal API delay can expose empty item collections, and local data lacks complete items/tags/relationships/order reconciliation.
-- The offline replay conflict policy is recorded and implemented as deterministic timestamp last-write-wins, server-authoritative on equal/missing timestamps (1.9.9, `lib/sync/conflict-resolution.ts`; see `docs/DECISIONS.md`). It is wired into `replayOutboxOperations` behind an optional `getServerSnapshot` provider that no runtime caller supplies. 1.9.10 recorded the Local DB Source-of-Truth Decision: the server remains the dashboard read authority and Dexie is a write-side buffer only, so the provider stays intentionally unsupplied and no runtime DB application of the policy is adopted; server-side application would be a new, explicitly-driven phase (see `docs/DECISIONS.md`).
+- The offline app-shell plus reconciled Dexie fallback can render a structurally complete local dashboard graph after confirmed API unavailability. Remaining read risk is lifecycle freshness between the last successful server seed and later offline use; unmatched pending/local/failed rows are intentionally preserved rather than overwritten or deleted.
+- The offline replay conflict policy remains deterministic timestamp last-write-wins, server-authoritative on equal/missing timestamps (`lib/sync/conflict-resolution.ts`). Its optional `getServerSnapshot` provider still has no runtime caller; real server application and per-operation results are owned by the bounded batch endpoint phase.
 - The 2026-06-10 decision supersedes the remaining server-authoritative/per-slice planning stance for future work. The delivery target is a complete Dexie dashboard graph plus bounded batch synchronization; existing direct tRPC persistence is transitional, not the accepted final architecture.
 - Outbox replay helpers are not generally connected to runtime dashboard mutations. Create-list is the only captured slice, capture occurs after server success, and no component currently supplies the durable option on `useOptimisticSync`.
 - The current replay-to-endpoint tests characterize a one-operation request and therefore must be replaced/extended by 1.9.22 request-count, multi-operation, server-apply, ownership, idempotency, and per-operation-result coverage.
