@@ -471,6 +471,7 @@
         "@/lib/dashboard-cache",
         "@/lib/local-first-dashboard",
         "@/lib/local-db/local-repositories",
+        "@/lib/local-db/local-write",
         "@/lib/sync/offline-write-prototype",
         "../ui/skeleton"
       ]
@@ -501,7 +502,9 @@
         "./ListInlineEdit",
         "./ListMenu",
         "./ListTagPicker",
-        "./types"
+        "./types",
+        "@/lib/local-db/local-write",
+        "@/lib/sync/offline-write-prototype"
       ]
     },
     {
@@ -547,7 +550,9 @@
         "@/lib/utils",
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
-        "@/hooks/useOptimisticSync"
+        "@/hooks/useOptimisticSync",
+        "@/lib/local-db/local-write",
+        "@/lib/sync/offline-write-prototype"
       ]
     },
     {
@@ -1480,6 +1485,33 @@
         "LocalViewType"
       ],
       "imports": []
+    },
+    {
+      "path": "lib/local-db/local-write.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "CommitLocalListCreateArgs",
+        "CommitLocalListDeleteArgs",
+        "CommitLocalListItemCompletionArgs",
+        "CommitLocalListItemCreateArgs",
+        "CommitLocalListItemDeleteArgs",
+        "CommitLocalListItemRenameArgs",
+        "CommitLocalListRenameArgs",
+        "commitLocalListCreate",
+        "commitLocalListDelete",
+        "commitLocalListItemCompletion",
+        "commitLocalListItemCreate",
+        "commitLocalListItemDelete",
+        "commitLocalListItemRename",
+        "commitLocalListRename"
+      ],
+      "imports": [
+        "./outbox-coalescing",
+        "./local-repositories",
+        "./outbox-schema",
+        "./tidy-db"
+      ]
     },
     {
       "path": "lib/local-db/metadata-repository.ts",
@@ -2440,6 +2472,19 @@
       ]
     },
     {
+      "path": "tests/unit/local-write.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/local-db/local-schema",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/local-db/tidy-db",
+        "@/lib/local-db/local-write"
+      ]
+    },
+    {
       "path": "tests/unit/offline-write-prototype.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3326,6 +3371,12 @@
     },
     {
       "from": "components/list/ListAdder.tsx",
+      "to": "lib/local-db/local-write.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-write"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
       "to": "lib/local-first-dashboard.ts",
       "type": "imports",
       "import": "@/lib/local-first-dashboard"
@@ -3416,9 +3467,21 @@
     },
     {
       "from": "components/list/ListComponent.tsx",
+      "to": "lib/local-db/local-write.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-write"
+    },
+    {
+      "from": "components/list/ListComponent.tsx",
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
+    },
+    {
+      "from": "components/list/ListComponent.tsx",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/list/ListComponent.tsx",
@@ -3494,9 +3557,21 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
+      "to": "lib/local-db/local-write.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-write"
+    },
+    {
+      "from": "components/list/ListItemComponent.tsx",
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
+    },
+    {
+      "from": "components/list/ListItemComponent.tsx",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/list/ListItemComponent.tsx",
@@ -4165,6 +4240,30 @@
       "import": "../local-first-reconcile"
     },
     {
+      "from": "lib/local-db/local-write.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "./local-repositories"
+    },
+    {
+      "from": "lib/local-db/local-write.ts",
+      "to": "lib/local-db/outbox-coalescing.ts",
+      "type": "imports",
+      "import": "./outbox-coalescing"
+    },
+    {
+      "from": "lib/local-db/local-write.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "./outbox-schema"
+    },
+    {
+      "from": "lib/local-db/local-write.ts",
+      "to": "lib/local-db/tidy-db.ts",
+      "type": "imports",
+      "import": "./tidy-db"
+    },
+    {
       "from": "lib/local-db/metadata-repository.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -4739,6 +4838,30 @@
       "to": "lib/local-first-reconcile.ts",
       "type": "imports",
       "import": "@/lib/local-first-reconcile"
+    },
+    {
+      "from": "tests/unit/local-write.test.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/local-write.test.ts",
+      "to": "lib/local-db/local-write.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-write"
+    },
+    {
+      "from": "tests/unit/local-write.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/local-write.test.ts",
+      "to": "lib/local-db/tidy-db.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/tidy-db"
     },
     {
       "from": "tests/unit/offline-write-prototype.test.ts",
