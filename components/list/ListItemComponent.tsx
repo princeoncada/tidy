@@ -13,6 +13,12 @@ import { cn } from "@/lib/utils";
 import { DashboardKeys, updateListInDashboardCaches } from "@/lib/dashboard-cache";
 import { measureCacheWrite, useRenderMeasure } from "@/lib/optimistic-debug";
 import type { OptimisticScope } from "@/hooks/useOptimisticSync";
+import {
+  commitLocalListItemCompletion,
+  commitLocalListItemDelete,
+  commitLocalListItemRename,
+} from "@/lib/local-db/local-write";
+import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
 
 
 interface ListItemComponentProps {
@@ -26,6 +32,7 @@ interface ListItemComponentProps {
   shouldRevealOnMount?: boolean;
   onRevealComplete?: () => void;
   dashboardKeys: DashboardKeys;
+  userId: string | null;
 }
 
 const ListItemComponent = ({
@@ -34,7 +41,8 @@ const ListItemComponent = ({
   enqueue,
   shouldRevealOnMount,
   onRevealComplete,
-  dashboardKeys
+  dashboardKeys,
+  userId
 }: ListItemComponentProps) => {
 
   useRenderMeasure(`ListItemComponent:${listItem.id}`);
@@ -90,9 +98,37 @@ const ListItemComponent = ({
     }
   }));
 
+  const handleRenameItem = (input: { id: string; name: string }) => {
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      updateListInDashboardCaches(queryClient, dashboardKeys, listItem.listId, (list) => ({
+        ...list,
+        listItems: list.listItems.map((item: ListItem) =>
+          item.id === input.id ? { ...item, name: input.name } : item
+        ),
+      }));
+      void commitLocalListItemRename({
+        userId,
+        itemId: input.id,
+        name: input.name,
+      }).catch(() => {});
+      return;
+    }
+
+    renameListItem(input);
+  };
+
   const deleteItemMutation = useMutation(trpc.listItem.deleteListItem.mutationOptions());
 
   const deleteItem = (itemId: string) => {
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      updateListInDashboardCaches(queryClient, dashboardKeys, listItem.listId, (list) => ({
+        ...list,
+        listItems: list.listItems.filter((item: ListItem) => item.id !== itemId),
+      }));
+      void commitLocalListItemDelete({ userId, itemId }).catch(() => {});
+      return;
+    }
+
     // Find the parent list before deleting
     const parentList = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists)?.lists.find(
       (list: List) => list.listItems.some(
@@ -251,6 +287,29 @@ const ListItemComponent = ({
     }
   }));
 
+  const handleToggleCompletion = () => {
+    const nextCompleted = !listItem.completed;
+
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      updateListInDashboardCaches(queryClient, dashboardKeys, listItem.listId, (list) => ({
+        ...list,
+        listItems: list.listItems.map((item: ListItem) =>
+          item.id === listItem.id
+            ? { ...item, completed: nextCompleted }
+            : item
+        ),
+      }));
+      void commitLocalListItemCompletion({
+        userId,
+        itemId: listItem.id,
+        completed: nextCompleted,
+      }).catch(() => {});
+      return;
+    }
+
+    setCompletion({ id: listItem.id, completed: nextCompleted });
+  };
+
   const { ref, handleRef: itemHandle, isDragging } = useSortable({
     id: `list-item-${listItem.id}`,
     index,
@@ -283,12 +342,7 @@ const ListItemComponent = ({
       <Checkbox
         className="w-4 h-4 shrink-0 hover:cursor-pointer my-1"
         checked={listItem.completed}
-        onClick={() => {
-          setCompletion({
-            id: listItem.id,
-            completed: !listItem.completed,
-          });
-        }}
+        onClick={handleToggleCompletion}
       />
 
       <div className="min-w-0 flex-1">
@@ -301,7 +355,7 @@ const ListItemComponent = ({
           )}
           id={listItem.id}
           value={listItem.name}
-          onSave={renameListItem}
+          onSave={handleRenameItem}
           disabled={renameListItemPending}
           displayClassName="whitespace-normal"
           inputClassName="text-sm! p-0! leading-6! break-normal!"
