@@ -14,6 +14,11 @@ import {
 } from "@/lib/local-first-dashboard";
 import {
   listLocalListsForUser,
+  listLocalListItemsForUser,
+  listLocalListTagsForUser,
+  listLocalTagsForUser,
+  listLocalViewListsForUser,
+  listLocalViewTagsForUser,
   listLocalViewsForUser,
 } from "@/lib/local-db/local-repositories";
 import { createClient } from "@/lib/supabase/client";
@@ -59,16 +64,45 @@ export function useLocalFirstDashboardBoot(): LocalFirstDashboardBoot {
           return;
         }
 
-        const [storedViews, storedLists] = await Promise.all([
+        const [
+          storedViews,
+          storedLists,
+          storedListItems,
+          storedTags,
+          storedListTags,
+          storedViewLists,
+          storedViewTags,
+        ] = await Promise.all([
           listLocalViewsForUser(userId),
           listLocalListsForUser(userId),
+          listLocalListItemsForUser(userId),
+          listLocalTagsForUser(userId),
+          listLocalListTagsForUser(userId),
+          listLocalViewListsForUser(userId),
+          listLocalViewTagsForUser(userId),
         ]);
         const localViews: ViewsCache = storedViews.length > 0
-          ? storedViews.map(mapLocalViewToViewCacheItem)
+          ? storedViews
+            .map((view) =>
+              mapLocalViewToViewCacheItem(
+                view,
+                storedViewTags,
+                storedViewLists,
+                storedTags,
+              )
+            )
+            .sort((left, right) =>
+              left.order - right.order || left.id.localeCompare(right.id)
+            )
           : [synthesizeAllListsView(userId)];
         const defaultView = selectedViewFromCache(localViews);
         const localCurrentView = defaultView
-          ? buildLocalDashboardSnapshot(defaultView, storedLists)
+          ? buildLocalDashboardSnapshot(defaultView, {
+            lists: storedLists,
+            listItems: storedListItems,
+            tags: storedTags,
+            listTags: storedListTags,
+          })
           : undefined;
 
         if (!cancelled) {
