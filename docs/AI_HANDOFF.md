@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.18-alpha -->
+<!-- Current Version: 1.9.18 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.18-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.18 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)
 **Next**: 1.9.19 - Offline App-Shell (Service Worker)
 
