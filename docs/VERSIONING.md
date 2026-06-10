@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.21-alpha
+- **Current version:** 1.9.21
 - **Current phase:** 1.9.21 - Dexie<->Server Reconciliation & Lifecycle
 - **Next phase:** 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
 
