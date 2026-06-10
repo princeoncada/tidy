@@ -59,7 +59,7 @@ describe("local db role audit (1.8.0 characterization)", () => {
     });
   });
 
-  describe("local-first dashboard boot is the only sanctioned runtime local read surface", () => {
+  describe("local-first dashboard reads stay in the boot and reconciliation surfaces", () => {
     it("boot hook reads local repositories without coupling to outbox, replay, or metadata", () => {
       const source = readSource("hooks/useLocalFirstDashboardBoot.ts");
       expect(source).toMatch(/@\/lib\/local-db\/local-repositories/);
@@ -74,6 +74,24 @@ describe("local db role audit (1.8.0 characterization)", () => {
       expect(source).not.toMatch(/outbox/);
       expect(source).not.toMatch(/sync-replay/);
       expect(source).not.toMatch(/metadata-repository/);
+      expect(source).not.toMatch(/tidy-db/);
+    });
+
+    it("ListsContainer seeds through repositories and the pure reconcile planner only", () => {
+      const source = readSource("components/list/ListsContainer.tsx");
+      expect(source).toMatch(/@\/lib\/local-db\/local-repositories/);
+      expect(source).toMatch(/@\/lib\/local-first-reconcile/);
+      expect(source).not.toMatch(/outbox/);
+      expect(source).not.toMatch(/sync-replay/);
+      expect(source).not.toMatch(/metadata-repository/);
+      expect(source).not.toMatch(/tidy-db/);
+    });
+
+    it("the reconcile planner stays pure and Dexie-free", () => {
+      const source = readSource("lib/local-first-reconcile.ts");
+      expect(source).toMatch(/@\/lib\/local-first-dashboard/);
+      expect(source).toMatch(/@\/lib\/local-db\/local-schema/);
+      expect(source).not.toMatch(/dexie/i);
       expect(source).not.toMatch(/tidy-db/);
     });
   });
