@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.23-alpha",
-    "state":  "alpha",
+    "version":  "1.9.23",
+    "state":  "stable",
     "phase":  "1.9.23",
     "phaseTitle":  "Dexie-First List \u0026 Item CRUD",
     "nextPhase":  "1.9.24 - Dexie-First Movement, Ordering \u0026 View-Switch Consistency",
