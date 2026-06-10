@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.22 -->
+<!-- Current Version: 1.9.23-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.22 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.22 - Bounded Batch Sync Endpoint & Server Apply
-**Next**: 1.9.23 - Dexie-First List & Item CRUD
+**Current Version**: 1.9.23-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.23 - Dexie-First List & Item CRUD
+**Next**: 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -157,6 +157,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
 
 **Local-first and sync:**
+- 1.9.23 adds a gated Dexie-first path for list/item create, rename, complete/uncomplete, and delete. When `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` is on, these actions commit through `lib/local-db/local-write.ts` in one atomic Dexie entity + coalesced outbox transaction and fire no component tRPC mutation; the batch endpoint is the only remote path. The gate defaults off, so default runtime is unchanged and legacy tRPC handlers remain until 1.9.26. `ListsContainer` only threads `userId` and adds no outbox, direct `tidy-db`, replay, or metadata import, preserving the role-audit guard.
 - The offline app-shell plus reconciled Dexie fallback can render a structurally complete local dashboard graph after confirmed API unavailability. Remaining read risk is lifecycle freshness between the last successful server seed and later offline use; unmatched pending/local/failed rows are intentionally preserved rather than overwritten or deleted.
 - The offline replay conflict policy remains deterministic timestamp last-write-wins, server-authoritative on equal/missing timestamps (`lib/sync/conflict-resolution.ts`). Its optional `getServerSnapshot` provider still has no runtime caller; real server application and per-operation results are owned by the bounded batch endpoint phase.
 - The 2026-06-10 decision supersedes the remaining server-authoritative/per-slice planning stance for future work. The delivery target is a complete Dexie dashboard graph plus bounded batch synchronization; existing direct tRPC persistence is transitional, not the accepted final architecture.

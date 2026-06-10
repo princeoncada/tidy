@@ -259,12 +259,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.23 - Dexie-First List & Item CRUD (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.23 - Dexie-First List & Item CRUD
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** lib/local-db/*, lib/dashboard-cache.ts, components/list/ListAdder.tsx, components/list/ListComponent.tsx, components/list/ListItemComponent.tsx, tests
 - **Implementation goal:** route list and item create, rename, complete/uncomplete, notes, and delete through one atomic local transaction that updates the Dexie entity graph and appends/coalesces an outbox operation before the UI treats the action as committed.

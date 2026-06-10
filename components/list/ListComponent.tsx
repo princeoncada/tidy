@@ -28,6 +28,12 @@ import ListInlineEdit from "./ListInlineEdit";
 import ListMenu from "./ListMenu";
 import ListTagPicker from "./ListTagPicker";
 import { CurrentView, List, ListItem, OptimisticListItem } from "./types";
+import {
+  commitLocalListDelete,
+  commitLocalListItemCreate,
+  commitLocalListRename,
+} from "@/lib/local-db/local-write";
+import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
 
 function listIsOptimistic(list: List) {
   return Boolean("isOptimistic" in list && list.isOptimistic);
@@ -72,6 +78,7 @@ interface ListComponentProps {
   shouldRevealOnMount?: boolean,
   onRevealComplete: () => void;
   dashboardKeys: DashboardKeys;
+  userId: string | null;
 }
 
 const ListComponent = ({
@@ -82,7 +89,8 @@ const ListComponent = ({
   activeDropTarget,
   shouldRevealOnMount,
   onRevealComplete,
-  dashboardKeys
+  dashboardKeys,
+  userId
 }: ListComponentProps) => {
 
   useRenderMeasure(`ListComponent:${list.id}`);
@@ -135,9 +143,32 @@ const ListComponent = ({
     },
   }));
 
+  const handleRenameList = (input: { id: string; name: string }) => {
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      updateListInDashboardCaches(queryClient, dashboardKeys, input.id, (currentList) => ({
+        ...currentList,
+        name: input.name,
+      }));
+      void commitLocalListRename({
+        userId,
+        listId: input.id,
+        name: input.name,
+      }).catch(() => {});
+      return;
+    }
+
+    renameList(input);
+  };
+
   const deleteListMutation = useMutation(trpc.list.deleteList.mutationOptions());
 
   const deleteList = (listId: string) => {
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      removeListFromDashboardCaches(queryClient, dashboardKeys, listId);
+      void commitLocalListDelete({ userId, listId }).catch(() => {});
+      return;
+    }
+
     // Snapshot before optimistic update
     const deletedList = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists)?.lists.find(
       (list: List) => list.id === listId
@@ -281,6 +312,37 @@ const ListComponent = ({
     if (!itemName) return;
 
     setNewItemId(crypto.randomUUID());
+
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      const order = list.listItems && list.listItems.length > 0
+        ? Math.max(...list.listItems.map((item: ListItem) => item.order)) + 1
+        : 0;
+      const optimisticListItem: OptimisticListItem = {
+        id: itemId,
+        name: itemName,
+        listId: list.id,
+        order,
+        completed: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isOptimistic: true,
+        notes: "",
+      };
+
+      updateListInDashboardCaches(queryClient, dashboardKeys, list.id, (currentList) => ({
+        ...currentList,
+        listItems: [optimisticListItem, ...currentList.listItems],
+      }));
+      setCreateListItemName("");
+      void commitLocalListItemCreate({
+        userId,
+        itemId,
+        listId: list.id,
+        name: itemName,
+        order,
+      }).catch(() => {});
+      return;
+    }
 
     if (listIsOnlyInBrowser) {
       // Show the item now, but wait for the parent list before calling the server.
@@ -433,7 +495,7 @@ const ListComponent = ({
                     displayClassName=""
                     id={list.id}
                     value={list.name}
-                    onSave={renameList}
+                    onSave={handleRenameList}
                     disabled={renameListPending}
                   />
 
