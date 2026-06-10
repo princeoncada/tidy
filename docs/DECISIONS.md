@@ -211,3 +211,50 @@ The dashboard read authority is the server: the tRPC All-Lists payload (view.get
 **Supersession**: This revises the 2026-06-06 "Dashboard source of truth is the server; Dexie is a write-side buffer" decision. The 1.9.18 views-foundation phase will make Dexie a runtime READ source on the offline/seed path (the views+selected-view boot resolves locally), with TanStack/tRPC retained as the online hydration/sync bridge. This is the explicitly-driven phase that earlier decision named as the only way to revisit the server-as-read-authority stance.
 
 **Impact**: 1.9.17 promotes as honest infrastructure with no product over-claim. `docs/AI_HANDOFF.md` over-claims (create-list "renders from local state by default" / "enabled by default" / "no list/item/tag/view is read from or written to Dexie at runtime") are corrected to state there is no user-visible change. seriesComplete in STATE.json stays false by decision.
+
+---
+
+## 2026-06-09: Re-sequence the local-first arc service-worker-first; preserve the stopped Dexie-read attempt (1.9.18)
+
+The original 1.9.18 "Local-First Views/Dashboard Scaffold" attempt was stopped (not merged) after two
+blocking findings. Its Dexie work is preserved on branch wip/local-first-dexie-read (do NOT delete it;
+it seeds 1.9.20).
+
+**Finding 1 - offline reload needs an app-shell, not just a Dexie read.** A true "go offline -> reload
+-> renders from Dexie" proof is impossible without an offline app-shell. Without a service worker, an
+offline full reload dies with ERR_INTERNET_DISCONNECTED before any JS runs (production included), so no
+read path executes at all. The Dexie read path alone cannot deliver an offline reload; the views/dashboard
+scaffold was therefore not the real unlock - the service worker is the prerequisite.
+
+**Finding 2 - the Dexie read path needs reconciliation.** The preserved attempt reached 23/26 e2e. The
+remaining failures were duplicate React keys and undefined `list.listItems` under rapid-create + reload,
+caused by stale/duplicate Dexie rows. This is a reconciliation/dedup problem and is split into its own
+phase rather than folded into the read fallback.
+
+**Decision.** Re-sequence the remaining 1.9.x arc service-worker-first:
+- 1.9.18 - Roadmap Re-Plan Correction (this docs/workflow phase: record this decision, re-sequence
+  FUTURE_PLANS, correct AI_HANDOFF).
+- 1.9.19 - Offline App-Shell (Service Worker): precache + serve the app shell + dashboard route so an
+  offline reload runs the client instead of the browser offline-error page. The real prerequisite/unlock.
+  Design-heavy; plan first.
+- 1.9.20 - Dexie Read Fallback (API-Unavailable): render from Dexie when tRPC is unreachable but the app
+  is already loaded; server authoritative, fallback inert online. Proof by blocking tRPC (Playwright
+  route.abort), NOT a full offline reload. Seeded by wip/local-first-dexie-read (readers/mappers in
+  lib/local-first-dashboard.ts, hooks/useLocalFirstDashboardBoot.ts, render-gate fallback, offline
+  ListAdder, loop fix).
+- 1.9.21 - Dexie<->Server Reconciliation & Lifecycle: dedup, stale-row cleanup, correct every-load
+  seeding; fixes the Finding-2 dup-keys / undefined-listItems bug.
+- The per-slice local-first writes shift down: rename 1.9.19->1.9.22, item create/complete 1.9.20->1.9.23,
+  delete/recovery 1.9.21->1.9.24, CRUD rebaseline decision 1.9.22->1.9.25. 1.10.x and later are unchanged.
+
+**Supersession.** This revises the 2026-06-08 "Reclassify 1.9.17 ... re-sequence the 1.9.x arc views-first"
+decision, which named a new 1.9.18 views/dashboard scaffold as the offline unlock and folded the genuine
+offline create-list hydration read into it. Finding 1 invalidates that: the views/selected-view boot cannot
+produce an offline reload without the service-worker app-shell. The genuine offline-reload proof now requires
+the app-shell (1.9.19) first, then the Dexie read fallback (1.9.20) and reconciliation (1.9.21). The
+2026-06-06 "server is the dashboard read authority; Dexie is a write-side buffer" decision remains superseded
+in direction (Dexie advances to a runtime read source on the offline/fallback path), now via the SW-first path.
+
+**Impact.** seriesComplete in STATE.json stays false by decision. docs/AI_HANDOFF.md claims that named the old
+1.9.18 views/dashboard scaffold as the offline unlock are corrected in this phase to state the offline reload
+requires the service-worker app-shell first. No source or test behavior changes in 1.9.18.

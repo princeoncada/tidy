@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.17
-- **Current phase:** 1.9.17 - Stabilize and Enable Local-First Create List Slice
-- **Next phase:** 1.9.18 - Local-First Views/Dashboard Scaffold
+- **Current version:** 1.9.18-alpha
+- **Current phase:** 1.9.18 - Roadmap Re-Plan Correction (SW-First Re-Sequence)
+- **Next phase:** 1.9.19 - Offline App-Shell (Service Worker)
 
 ---
 
