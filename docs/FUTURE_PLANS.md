@@ -252,6 +252,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.23 - Dexie-First List & Item CRUD~~ (stable 2026-06-10)
 
+- ~~1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency~~ (stable 2026-06-11)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -261,21 +263,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
-- **Status:** In progress | Priority: P1 product (local-first)
-- **Type:** product behavior
-- **Files:** components/list/ListsContainer.tsx, components/views/ViewsSidebarPreview.tsx, lib/local-db/*, lib/dashboard-cache.ts, tests
-- **Implementation goal:** persist committed list, item, and custom-view reorder/move operations to Dexie/outbox instead of calling tRPC after each drop. Preserve local-only drag hover, coalesce newest-state-wins reorder intents, and overlay pending local movement during view fetch/reconciliation so stale server projections cannot temporarily move an item back.
-- **Product impact:** moving an item or list remains correct while switching views, waiting for sync, going offline, or reloading. A completed drop does not immediately create its own network request.
-- **Runtime integration target:** each drop creates one local reorder/move intent; repeated movement coalesces locally; the next batch flush persists the final state with existing ownership and batch-SQL protections.
-- **Deferral boundary:** tags/custom views CRUD are 1.9.25; lifecycle triggers and final request-spam proof are 1.9.26.
-- **Validation target:** targeted alpha (same-list reorder, cross-list move, empty-list move, rapid repeated drops, view-switch-before-flush, reload-before-flush, and request-count E2E); full test:ci before stable.
-- **Acceptance:** movement is immediately and durably correct from Dexie, stale server payloads cannot repaint old placement, and several drops are represented by coalesced operations in one later sync request.
 
 ### 1.9.25 - Dexie-First Tags, Views & Relationships
 - **Status:** Open | Priority: P1 product (local-first)
