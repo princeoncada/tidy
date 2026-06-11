@@ -58,7 +58,7 @@ const Dashboard = () => {
             </div>
 
             <div className="w-full lg:hidden">
-              <ViewsSidebarPreview />
+              <ViewsSidebarPreview userId={localFirstBoot.userId} />
             </div>
 
             <Separator className="bg-zinc-200 md:bg-zinc-200/30" />
@@ -69,7 +69,7 @@ const Dashboard = () => {
 
         <aside className="hidden lg:block w-64 shrink-0 py-11">
           <div className="sticky top-4">
-            <ViewsSidebarPreview />
+            <ViewsSidebarPreview userId={localFirstBoot.userId} />
           </div>
         </aside>
       </div>
