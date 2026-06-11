@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.24-alpha
+- **Current version:** 1.9.24
 - **Current phase:** 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
 - **Next phase:** 1.9.25 - Dexie-First Tags, Views & Relationships
 
