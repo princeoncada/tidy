@@ -1,5 +1,6 @@
 import { expect, test } from "./utils/fixtures";
 import type { Page } from "@playwright/test";
+import { config } from "dotenv";
 
 import {
   createTag,
@@ -21,9 +22,12 @@ import {
   getVisibleViewCard,
   getVisibleViewNames,
 } from "./utils/assertions";
-import { dragByMouseAndWaitForMutation } from "./utils/drag";
+import { dragByMouse, dragByMouseAndWaitForMutation } from "./utils/drag";
 import { cleanupNamedList, collectConsoleErrors, expectNoConsoleErrors, gotoDashboard, uniqueTestName } from "./utils/seed";
 import { testIds } from "./utils/test-ids";
+
+config({ path: ".env.local", quiet: true });
+config({ path: ".env", quiet: true });
 
 let consoleErrors: string[];
 
@@ -75,6 +79,75 @@ async function getOrderedVisibleNames(
   expect(orderedNames).toHaveLength(expectedNames.length);
 
   return orderedNames;
+}
+
+async function getLocalUserAndAllListsView(page: Page) {
+  return page.waitForFunction(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("tidy-local-db");
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
+
+    try {
+      if (!db.objectStoreNames.contains("views")) return null;
+
+      const views = await new Promise<
+        Array<{ clientId: string; userId: string; type: string }>
+      >((resolve, reject) => {
+        const transaction = db.transaction("views", "readonly");
+        const request = transaction.objectStore("views").getAll();
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+      const allListsView = views.find((view) => view.type === "ALL_LISTS");
+
+      return allListsView
+        ? {
+            userId: allListsView.userId,
+            allListsViewId: allListsView.clientId,
+          }
+        : null;
+    } finally {
+      db.close();
+    }
+  }).then((handle) => handle.jsonValue());
+}
+
+async function getPendingMovementOperationCount(page: Page) {
+  return page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("tidy-local-db");
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
+
+    try {
+      const operations = await new Promise<
+        Array<{
+          entityType: string;
+          operationType: string;
+          status: string;
+        }>
+      >((resolve, reject) => {
+        const transaction = db.transaction("outboxOperations", "readonly");
+        const request = transaction.objectStore("outboxOperations").getAll();
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+
+      return operations.filter(
+        (operation) =>
+          operation.status === "pending" &&
+          ((operation.entityType === "listItem" &&
+            ["move", "reorder"].includes(operation.operationType)) ||
+            (operation.entityType === "viewList" &&
+              operation.operationType === "reorder")),
+      ).length;
+    } finally {
+      db.close();
+    }
+  });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -242,4 +315,181 @@ test("move item into empty list if implemented", async ({ page }) => {
   await expectItemInList(page, targetList, itemName);
   await cleanupNamedList(page, sourceList);
   await cleanupNamedList(page, targetList);
+});
+
+test.describe("Dexie-first movement", () => {
+  test.skip(
+    () =>
+      process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED !== "true",
+    "Run this targeted proof with NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED=true.",
+  );
+
+  test("coalesces committed drops and preserves placement through view switch and reload", async ({
+    page,
+  }) => {
+    const identity = await getLocalUserAndAllListsView(page);
+    expect(identity).not.toBeNull();
+
+    const { db } = await import("@/lib/db");
+    const sourceListId = crypto.randomUUID();
+    const targetListId = crypto.randomUUID();
+    const movingItemId = crypto.randomUUID();
+    const sourceAnchorId = crypto.randomUUID();
+    const targetAnchorId = crypto.randomUUID();
+    const customViewId = crypto.randomUUID();
+    const sourceListName = uniqueTestName("dexie-move-source");
+    const targetListName = uniqueTestName("dexie-move-target");
+    const movingItemName = uniqueTestName("dexie-moving-item");
+    const customViewName = uniqueTestName("dexie-move-view");
+    const syncRequests: string[] = [];
+
+    page.on("request", (request) => {
+      if (
+        request.method() === "POST" &&
+        request.url().endsWith("/api/sync")
+      ) {
+        syncRequests.push(request.url());
+      }
+    });
+
+    try {
+      await db.$transaction(async (tx) => {
+        await tx.view.updateMany({
+          where: { userId: identity!.userId },
+          data: { isDefault: false },
+        });
+        await tx.view.update({
+          where: { id: identity!.allListsViewId },
+          data: { isDefault: true },
+        });
+        await tx.view.create({
+          data: {
+            id: customViewId,
+            name: customViewName,
+            userId: identity!.userId,
+            order: 1,
+            type: "CUSTOM",
+            isDefault: false,
+            matchMode: "ALL",
+          },
+        });
+        await tx.list.createMany({
+          data: [
+            {
+              id: sourceListId,
+              name: sourceListName,
+              userId: identity!.userId,
+            },
+            {
+              id: targetListId,
+              name: targetListName,
+              userId: identity!.userId,
+            },
+          ],
+        });
+        await tx.listItem.createMany({
+          data: [
+            {
+              id: movingItemId,
+              name: movingItemName,
+              listId: sourceListId,
+              order: 0,
+            },
+            {
+              id: sourceAnchorId,
+              name: uniqueTestName("dexie-source-anchor"),
+              listId: sourceListId,
+              order: 1,
+            },
+            {
+              id: targetAnchorId,
+              name: uniqueTestName("dexie-target-anchor"),
+              listId: targetListId,
+              order: 0,
+            },
+          ],
+        });
+        await tx.viewList.createMany({
+          data: [
+            {
+              viewId: identity!.allListsViewId,
+              listId: sourceListId,
+              order: 0,
+            },
+            {
+              viewId: identity!.allListsViewId,
+              listId: targetListId,
+              order: 1,
+            },
+            { viewId: customViewId, listId: sourceListId, order: 0 },
+            { viewId: customViewId, listId: targetListId, order: 1 },
+          ],
+        });
+      });
+
+      await page.reload();
+      await openAllLists(page);
+      await expectItemInList(page, sourceListName, movingItemName);
+
+      for (const targetListNameForDrop of [
+        targetListName,
+        sourceListName,
+        targetListName,
+      ]) {
+        const movingItem = page
+          .getByTestId(testIds.listItem)
+          .filter({ hasText: movingItemName })
+          .first();
+        const targetCard = await getVisibleListCard(
+          page,
+          targetListNameForDrop,
+        );
+
+        await dragByMouse(
+          page,
+          movingItem.getByTestId(testIds.itemDragHandle),
+          targetCard.getByTestId(testIds.listDropZone),
+        );
+        await page.waitForTimeout(400);
+      }
+
+      expect(syncRequests).toHaveLength(0);
+      await expect
+        .poll(() => getPendingMovementOperationCount(page))
+        .toBe(3);
+      await expectItemInList(page, targetListName, movingItemName);
+
+      await openViewByName(page, customViewName);
+      await expectItemNotInList(page, sourceListName, movingItemName);
+      await expectItemInList(page, targetListName, movingItemName);
+
+      await page.reload();
+      await expect.poll(() => syncRequests.length).toBe(1);
+      await expectItemNotInList(page, sourceListName, movingItemName);
+      await expectItemInList(page, targetListName, movingItemName);
+    } finally {
+      await db.$transaction(async (tx) => {
+        await tx.view.updateMany({
+          where: { userId: identity!.userId },
+          data: { isDefault: false },
+        });
+        await tx.view.updateMany({
+          where: {
+            id: identity!.allListsViewId,
+            userId: identity!.userId,
+          },
+          data: { isDefault: true },
+        });
+        await tx.view.deleteMany({
+          where: { id: customViewId, userId: identity!.userId },
+        });
+        await tx.list.deleteMany({
+          where: {
+            id: { in: [sourceListId, targetListId] },
+            userId: identity!.userId,
+          },
+        });
+      });
+    }
+  });
 });

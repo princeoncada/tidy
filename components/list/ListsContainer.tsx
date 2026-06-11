@@ -30,6 +30,19 @@ import {
   listLocalViewsForUser,
   listLocalViewTagsForUser,
 } from '@/lib/local-db/local-repositories';
+import {
+  applyPendingMovementOverlay,
+  translateListItemMovement,
+} from '@/lib/local-db/local-movement';
+import {
+  readPendingMovementOperationsForUser,
+} from '@/lib/local-db/local-movement-repository';
+import {
+  commitLocalListItemMove,
+  commitLocalListItemReorder,
+  commitLocalListReorder,
+} from '@/lib/local-db/local-write';
+import { isOfflineWriteCaptureEnabled } from '@/lib/sync/offline-write-prototype';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -204,6 +217,18 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const movementCaptureEnabled =
+    isOfflineWriteCaptureEnabled() && Boolean(boot.userId);
+  const [pendingMovementOperations, setPendingMovementOperations] = useState<
+    Parameters<typeof applyPendingMovementOverlay>[1]
+  >([]);
+  const [movementOperationsUserId, setMovementOperationsUserId] = useState<
+    string | null
+  >(null);
+  const pendingMovementReady =
+    movementCaptureEnabled &&
+    movementOperationsUserId !== null &&
+    movementOperationsUserId === boot.userId;
 
   const {
     data: views,
@@ -272,14 +297,58 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   );
 
   useEffect(() => {
-    if (!canApplySelectedViewPayload(selectedViewId, bootCurrentView)) return;
-    queryClient.setQueryData(currentViewQueryKey, bootCurrentView);
-  }, [bootCurrentView, currentViewQueryKey, queryClient, selectedViewId]);
+    if (!movementCaptureEnabled || !boot.userId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void readPendingMovementOperationsForUser(boot.userId)
+      .then((operations) => {
+        if (!cancelled) {
+          setPendingMovementOperations(operations);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPendingMovementOperations([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setMovementOperationsUserId(boot.userId);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [boot.userId, movementCaptureEnabled]);
+
+  const effectiveBootCurrentView =
+    movementCaptureEnabled && pendingMovementReady && bootCurrentView
+      ? applyPendingMovementOverlay(
+          bootCurrentView,
+          pendingMovementOperations,
+        )
+      : bootCurrentView;
+  const effectiveSelectedViewSnapshot =
+    movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
+      ? applyPendingMovementOverlay(
+          selectedViewSnapshot,
+          pendingMovementOperations,
+        )
+      : selectedViewSnapshot;
 
   useEffect(() => {
-    if (!canApplySelectedViewPayload(selectedViewId, selectedViewSnapshot)) return;
-    queryClient.setQueryData(currentViewQueryKey, selectedViewSnapshot);
-  }, [currentViewQueryKey, queryClient, selectedViewId, selectedViewSnapshot]);
+    if (!canApplySelectedViewPayload(selectedViewId, effectiveBootCurrentView)) return;
+    queryClient.setQueryData(currentViewQueryKey, effectiveBootCurrentView);
+  }, [currentViewQueryKey, effectiveBootCurrentView, queryClient, selectedViewId]);
+
+  useEffect(() => {
+    if (!canApplySelectedViewPayload(selectedViewId, effectiveSelectedViewSnapshot)) return;
+    queryClient.setQueryData(currentViewQueryKey, effectiveSelectedViewSnapshot);
+  }, [currentViewQueryKey, effectiveSelectedViewSnapshot, queryClient, selectedViewId]);
 
   useEffect(() => {
     if (
@@ -381,8 +450,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   const currentView = resolveDashboardCurrentView({
     selectedViewId,
-    selectedViewSnapshot,
-    bootCurrentView,
+    selectedViewSnapshot: effectiveSelectedViewSnapshot,
+    bootCurrentView: effectiveBootCurrentView,
     localCurrentView: usingLocalFallback ? boot.localCurrentView : undefined,
     previousCurrentView: undefined,
   });
@@ -400,6 +469,20 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   const reorderListsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reorderListItemsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingItemMovementBaseRef = useRef<Lists | null>(null);
+
+  const refreshPendingMovementOperations = useCallback(async () => {
+    if (!boot.userId) return;
+
+    try {
+      setPendingMovementOperations(
+        await readPendingMovementOperationsForUser(boot.userId),
+      );
+      setMovementOperationsUserId(boot.userId);
+    } catch {
+      // The committed cache placement remains authoritative for this render.
+    }
+  }, [boot.userId]);
 
   const writeListOrderToCaches = useCallback((nextLists: Lists) => {
     if (currentView?.view.type === "ALL_LISTS") {
@@ -456,6 +539,21 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         const savedLists = buildPersistedListOrderPayload(nextLists);
         if (savedLists.length === 0) return;
 
+        if (isOfflineWriteCaptureEnabled() && boot.userId) {
+          try {
+            await commitLocalListReorder({
+              userId: boot.userId,
+              viewId: currentView.view.id,
+              orderedListIds: savedLists.map((list) => list.id),
+            });
+            await refreshPendingMovementOperations();
+          } catch {
+            // Local persistence must not replace the committed cache placement.
+          }
+          writeListOrderToCaches(nextLists);
+          return;
+        }
+
         measureRequest("view.reorderViewLists", { count: savedLists.length });
         await reorderViewListsMutation.mutateAsync({
           viewId: currentView.view.id,
@@ -468,8 +566,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     queryKey,
     currentViewQueryKey,
     currentView,
+    boot.userId,
     optimisticSync,
     queryClient,
+    refreshPendingMovementOperations,
     reorderViewListsMutation,
     writeListOrderToCaches,
     viewsQueryKey,
@@ -492,7 +592,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     queryClient.setQueryData<CurrentView>(currentViewQueryKey, mergeChangedLists);
   }, [allListsQueryKey, currentViewQueryKey, queryClient, queryKey]);
 
-  const scheduleReorderListItemsSave = useCallback(async (nextLists: Lists) => {
+  const scheduleReorderListItemsSave = useCallback(async (
+    previousLists: Lists,
+    nextLists: Lists,
+  ) => {
     await Promise.all([
       queryClient.cancelQueries({ queryKey: allListsQueryKey }),
       queryClient.cancelQueries({ queryKey }),
@@ -500,13 +603,50 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     ]);
 
     writeListItemOrderToCaches(nextLists);
+    pendingItemMovementBaseRef.current ??= previousLists;
 
     if (reorderListItemsTimeoutRef.current) {
       clearTimeout(reorderListItemsTimeoutRef.current);
     }
 
     reorderListItemsTimeoutRef.current = setTimeout(() => {
+      const movementBase =
+        pendingItemMovementBaseRef.current ?? previousLists;
+      pendingItemMovementBaseRef.current = null;
+
       optimisticSync.replacePending("item-order", async () => {
+        if (isOfflineWriteCaptureEnabled() && boot.userId) {
+          const intents = translateListItemMovement(
+            movementBase,
+            nextLists,
+          );
+
+          try {
+            for (const intent of intents) {
+              if (intent.type === "move") {
+                await commitLocalListItemMove({
+                  userId: boot.userId,
+                  itemId: intent.itemId,
+                  toListId: intent.toListId,
+                  order: intent.order,
+                });
+                continue;
+              }
+
+              await commitLocalListItemReorder({
+                userId: boot.userId,
+                listId: intent.listId,
+                orderedItemIds: intent.orderedItemIds,
+              });
+            }
+            await refreshPendingMovementOperations();
+          } catch {
+            // Local persistence must not replace the committed cache placement.
+          }
+          writeListItemOrderToCaches(nextLists);
+          return;
+        }
+
         const savedItems = buildPersistedItemOrderPayload(nextLists);
 
         if (savedItems.length === 0) return;
@@ -524,8 +664,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     queryKey,
     allListsQueryKey,
     currentViewQueryKey,
+    boot.userId,
     optimisticSync,
     queryClient,
+    refreshPendingMovementOperations,
     reorderListItemsMutation,
     writeListItemOrderToCaches,
   ]);
@@ -552,7 +694,14 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   }, []);
 
   if (
-    (viewsLoading || !allListsView || bootListsLoading || allListsLoading || selectedViewLoading) &&
+    (
+      viewsLoading ||
+      !allListsView ||
+      bootListsLoading ||
+      allListsLoading ||
+      selectedViewLoading ||
+      (movementCaptureEnabled && !pendingMovementReady)
+    ) &&
     !usingLocalFallback
   ) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
@@ -625,7 +774,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
           case "list-item":
             if (!itemPlacementMatches(finalPreview, lists)) {
-              void scheduleReorderListItemsSave(finalPreview);
+              void scheduleReorderListItemsSave(lists, finalPreview);
             }
             break;
 

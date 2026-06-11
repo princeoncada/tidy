@@ -348,3 +348,20 @@ projection can be repaired by a later recompute.
 per flush, then consumes the per-operation results. The existing public prototype gate remains off by default.
 Dashboard component migration, flush scheduling/backoff, concurrent-flush control, and stranded-operation
 recovery remain assigned to phases 1.9.23-1.9.26.
+
+---
+
+## 2026-06-11: Preserve movement dependency order and stable view-reorder coalescing (1.9.24)
+
+Committed cross-list movement is represented by three local operations: the item `move`, the destination
+list-item `reorder`, then the source list-item `reorder`. The move must remain first because server batch
+application is FIFO and destination reorder ownership/membership validation requires the item to belong to
+the destination already. Movement writes therefore use monotonically increasing local timestamps so the
+existing created-at replay ordering cannot reorder same-millisecond operations.
+
+Custom-view reorder uses the stable per-user `entityClientId = "view-order"` key. The server ignores that
+identifier for view reorder, while the stable key lets repeated sidebar drops coalesce to the newest complete
+custom-view order instead of accumulating one operation per drop.
+
+Pending, syncing, and failed movement operations remain eligible for hydration overlay until acknowledged.
+This prevents stale server payloads from repainting old list/item placement during a view switch or reload.

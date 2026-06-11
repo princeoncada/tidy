@@ -77,9 +77,12 @@ describe("local db role audit (1.8.0 characterization)", () => {
       expect(source).not.toMatch(/tidy-db/);
     });
 
-    it("ListsContainer seeds through repositories and the pure reconcile planner only", () => {
+    it("ListsContainer seeds through repositories and routes movement through sanctioned helpers", () => {
       const source = readSource("components/list/ListsContainer.tsx");
       expect(source).toMatch(/@\/lib\/local-db\/local-repositories/);
+      expect(source).toMatch(/@\/lib\/local-db\/local-write/);
+      expect(source).toMatch(/@\/lib\/local-db\/local-movement/);
+      expect(source).toMatch(/@\/lib\/local-db\/local-movement-repository/);
       expect(source).toMatch(/@\/lib\/local-first-reconcile/);
       expect(source).not.toMatch(/outbox/);
       expect(source).not.toMatch(/sync-replay/);

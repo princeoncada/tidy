@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.23",
-  "generatedAt": "2026-06-10",
+  "version": "1.9.24-alpha",
+  "generatedAt": "2026-06-11",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -579,6 +579,10 @@
         "@/lib/local-first-dashboard",
         "@/lib/local-first-reconcile",
         "@/lib/local-db/local-repositories",
+        "@/lib/local-db/local-movement",
+        "@/lib/local-db/local-movement-repository",
+        "@/lib/local-db/local-write",
+        "@/lib/sync/offline-write-prototype",
         "@/trpc/client",
         "@dnd-kit/react",
         "@tanstack/react-query",
@@ -959,6 +963,8 @@
         "@/hooks/useOptimisticSync",
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
+        "@/lib/local-db/local-write",
+        "@/lib/sync/offline-write-prototype",
         "@/lib/trpc",
         "@/lib/utils",
         "@/trpc/client"
@@ -1433,6 +1439,33 @@
       ]
     },
     {
+      "path": "lib/local-db/local-movement-repository.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "readPendingMovementOperationsForUser"
+      ],
+      "imports": [
+        "./local-repositories",
+        "./outbox-schema",
+        "./tidy-db"
+      ]
+    },
+    {
+      "path": "lib/local-db/local-movement.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "LocalListItemMovementIntent",
+        "applyPendingMovementOverlay",
+        "translateListItemMovement"
+      ],
+      "imports": [
+        "@/lib/dashboard-cache",
+        "./outbox-schema"
+      ]
+    },
+    {
       "path": "lib/local-db/local-repositories.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1496,14 +1529,20 @@
         "CommitLocalListItemCompletionArgs",
         "CommitLocalListItemCreateArgs",
         "CommitLocalListItemDeleteArgs",
+        "CommitLocalListItemMoveArgs",
         "CommitLocalListItemRenameArgs",
+        "CommitLocalListItemReorderArgs",
         "CommitLocalListRenameArgs",
+        "CommitLocalListReorderArgs",
+        "CommitLocalViewReorderArgs",
         "commitLocalListCreate",
         "commitLocalListDelete",
         "commitLocalListItemCompletion",
         "commitLocalListItemCreate",
         "commitLocalListItemDelete",
+        "commitLocalListItemMove",
         "commitLocalListItemRename",
+        "commitLocalListItemReorder",
         "commitLocalListRename"
       ],
       "imports": [
@@ -2148,11 +2187,13 @@
       "imports": [
         "./utils/fixtures",
         "@playwright/test",
+        "dotenv",
         "./utils/app",
         "./utils/assertions",
         "./utils/drag",
         "./utils/seed",
-        "./utils/test-ids"
+        "./utils/test-ids",
+        "@/lib/db"
       ]
     },
     {
@@ -2456,6 +2497,19 @@
         "@/lib/dashboard-cache",
         "@/lib/local-first-reconcile",
         "@/lib/local-db/local-schema"
+      ]
+    },
+    {
+      "path": "tests/unit/local-movement.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/dashboard-cache",
+        "@/components/list/types",
+        "@/lib/local-db/local-repositories",
+        "@/lib/local-db/local-movement"
       ]
     },
     {
@@ -3647,9 +3701,27 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
+      "to": "lib/local-db/local-movement-repository.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-movement-repository"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/local-db/local-movement.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-movement"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/local-db/local-write.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-write"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -3668,6 +3740,12 @@
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -4079,9 +4157,21 @@
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
+      "to": "lib/local-db/local-write.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-write"
+    },
+    {
+      "from": "components/views/ViewsSidebarPreview.tsx",
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
+    },
+    {
+      "from": "components/views/ViewsSidebarPreview.tsx",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
@@ -4214,6 +4304,36 @@
       "to": "lib/local-db/tidy-db.ts",
       "type": "imports",
       "import": "./tidy-db"
+    },
+    {
+      "from": "lib/local-db/local-movement-repository.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "./local-repositories"
+    },
+    {
+      "from": "lib/local-db/local-movement-repository.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "./outbox-schema"
+    },
+    {
+      "from": "lib/local-db/local-movement-repository.ts",
+      "to": "lib/local-db/tidy-db.ts",
+      "type": "imports",
+      "import": "./tidy-db"
+    },
+    {
+      "from": "lib/local-db/local-movement.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "lib/local-db/local-movement.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "./outbox-schema"
     },
     {
       "from": "lib/local-db/local-repositories.ts",
@@ -4517,6 +4637,12 @@
     },
     {
       "from": "tests/e2e/drag-drop.spec.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/drag-drop.spec.ts",
       "to": "tests/e2e/utils/app.ts",
       "type": "imports",
       "import": "./utils/app"
@@ -4814,6 +4940,30 @@
       "to": "lib/local-first-reconcile.ts",
       "type": "imports",
       "import": "@/lib/local-first-reconcile"
+    },
+    {
+      "from": "tests/unit/local-movement.test.ts",
+      "to": "components/list/types.ts",
+      "type": "imports",
+      "import": "@/components/list/types"
+    },
+    {
+      "from": "tests/unit/local-movement.test.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "tests/unit/local-movement.test.ts",
+      "to": "lib/local-db/local-movement.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-movement"
+    },
+    {
+      "from": "tests/unit/local-movement.test.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-repositories"
     },
     {
       "from": "tests/unit/local-repositories.test.ts",

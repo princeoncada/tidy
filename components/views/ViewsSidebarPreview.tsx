@@ -68,6 +68,8 @@ import {
   OptimisticProfiler,
   useRenderMeasure,
 } from "@/lib/optimistic-debug";
+import { commitLocalViewReorder } from "@/lib/local-db/local-write";
+import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
 import type { RouterOutputs } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
@@ -408,7 +410,11 @@ function ViewDialog({
   );
 }
 
-export default function ViewsSidebarPreview() {
+export default function ViewsSidebarPreview({
+  userId,
+}: {
+  userId: string | null;
+}) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const optimisticSync = useOptimisticSync();
@@ -564,13 +570,25 @@ export default function ViewsSidebarPreview() {
       if (savedViews.length === 0) return;
 
       optimisticSync.replacePending("views", async () => {
+        if (isOfflineWriteCaptureEnabled() && userId) {
+          try {
+            await commitLocalViewReorder({
+              userId,
+              orderedViewIds: savedViews.map((view) => view.id),
+            });
+          } catch {
+            // Local persistence must not replace the committed cache order.
+          }
+          return;
+        }
+
         measureRequest("view.reorderViews", { count: savedViews.length });
         await reorderMutation.mutateAsync({
           views: savedViews,
         });
       }, { label: "view.reorderViews" });
     }, 300);
-  }, [optimisticSync, reorderMutation]);
+  }, [optimisticSync, reorderMutation, userId]);
 
   const commitViewOrder = useCallback((nextViews: ViewItem[]) => {
     // Only save the final dropped order. Older drag positions do not matter.

@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.23 -->
+<!-- Current Version: 1.9.24-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.23 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.23 - Dexie-First List & Item CRUD
-**Next**: 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
+**Current Version**: 1.9.24-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
+**Next**: 1.9.25 - Dexie-First Tags, Views & Relationships
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -113,6 +113,9 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Drag ids: `list-${id}` for list cards, `list-item-${id}` for item rows, and `list-drop-${id}` for list drop zones.
 - List reorder writes `ViewList.order`, not `List.order`.
 - Item cross-list move writes both `ListItem.listId` and `ListItem.order`.
+- 1.9.24 routes committed list, item, and custom-view movement through atomic Dexie entity/relationship plus coalesced operation writes when `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` and `userId` are present. The default gate-off path retains the existing per-drop tRPC mutations.
+- Cross-list movement appends the item move before destination and source list reorders; movement timestamps are monotonic so batch replay preserves that dependency order. Custom-view reorder uses the stable per-user `entityClientId = "view-order"` key.
+- Pending, syncing, or failed movement operations overlay incoming current/selected-view snapshots before render, preserving local list order and item placement while server hydration is stale. `ListsContainer` reaches this state only through `local-write`, `local-movement`, and the existing repository surface; direct replay/database-construction imports remain role-audited out.
 - `ALL_LISTS` view is pinned and not sortable; only custom views are reorderable.
 - Authenticated drag/drop E2E waits for reorder mutation success before reload assertions.
 - Custom view reorder product behavior exists, but its authenticated E2E stabilization is deferred to `1.4.26 - Custom View Reorder E2E Stabilization`.
@@ -158,6 +161,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 **Local-first and sync:**
 - 1.9.23 adds a gated Dexie-first path for list/item create, rename, complete/uncomplete, and delete. When `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` is on, these actions commit through `lib/local-db/local-write.ts` in one atomic Dexie entity + coalesced outbox transaction and fire no component tRPC mutation; the batch endpoint is the only remote path. The gate defaults off, so default runtime is unchanged and legacy tRPC handlers remain until 1.9.26. `ListsContainer` only threads `userId` and adds no outbox, direct `tidy-db`, replay, or metadata import, preserving the role-audit guard.
+- 1.9.24 extends that gated path to list order, same-list item order, cross-list item movement, and custom-view order. Repeated drops coalesce by view/list/item movement key, and stale view payloads are overlaid from unacknowledged local movement until the server acknowledges the batch.
 - The offline app-shell plus reconciled Dexie fallback can render a structurally complete local dashboard graph after confirmed API unavailability. Remaining read risk is lifecycle freshness between the last successful server seed and later offline use; unmatched pending/local/failed rows are intentionally preserved rather than overwritten or deleted.
 - The offline replay conflict policy remains deterministic timestamp last-write-wins, server-authoritative on equal/missing timestamps (`lib/sync/conflict-resolution.ts`). Its optional `getServerSnapshot` provider still has no runtime caller; real server application and per-operation results are owned by the bounded batch endpoint phase.
 - The 2026-06-10 decision supersedes the remaining server-authoritative/per-slice planning stance for future work. The delivery target is a complete Dexie dashboard graph plus bounded batch synchronization; existing direct tRPC persistence is transitional, not the accepted final architecture.
