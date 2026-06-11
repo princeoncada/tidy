@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.24-alpha",
-    "state":  "alpha",
+    "version":  "1.9.24",
+    "state":  "stable",
     "phase":  "1.9.24",
     "phaseTitle":  "Dexie-First Movement, Ordering \u0026 View-Switch Consistency",
     "nextPhase":  "1.9.25 - Dexie-First Tags, Views \u0026 Relationships",
