@@ -226,7 +226,9 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     string | null
   >(null);
   const pendingMovementReady =
-    !movementCaptureEnabled || movementOperationsUserId === boot.userId;
+    movementCaptureEnabled &&
+    movementOperationsUserId !== null &&
+    movementOperationsUserId === boot.userId;
 
   const {
     data: views,
@@ -296,13 +298,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   useEffect(() => {
     if (!movementCaptureEnabled || !boot.userId) {
-      setPendingMovementOperations([]);
-      setMovementOperationsUserId(null);
       return;
     }
 
     let cancelled = false;
-    setMovementOperationsUserId(null);
 
     void readPendingMovementOperationsForUser(boot.userId)
       .then((operations) => {
