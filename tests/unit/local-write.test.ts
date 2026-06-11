@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import type {
   LocalList,
   LocalListItem,
+  LocalView,
+  LocalViewList,
 } from "@/lib/local-db/local-schema";
 import type { LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
 import type { TidyLocalDatabase } from "@/lib/local-db/tidy-db";
@@ -11,12 +13,18 @@ import {
   commitLocalListDelete,
   commitLocalListItemCompletion,
   commitLocalListItemCreate,
+  commitLocalListItemMove,
+  commitLocalListItemReorder,
+  commitLocalListReorder,
   commitLocalListRename,
+  commitLocalViewReorder,
 } from "@/lib/local-db/local-write";
 
 function createFakeLocalWriteDb() {
   const lists = new Map<string, LocalList>();
   const listItems = new Map<string, LocalListItem>();
+  const views = new Map<string, LocalView>();
+  const viewLists = new Map<string, LocalViewList>();
   const outboxOperations = new Map<string, LocalOutboxOperation>();
 
   const listTable = {
@@ -32,6 +40,36 @@ function createFakeLocalWriteDb() {
       listItems.set(item.clientId, item);
       return item.clientId;
     }),
+  };
+  const viewTable = {
+    get: vi.fn(async (clientId: string) => views.get(clientId)),
+    put: vi.fn(async (view: LocalView) => {
+      views.set(view.clientId, view);
+      return view.clientId;
+    }),
+  };
+  const viewListTable = {
+    get: vi.fn(async (clientId: string) => viewLists.get(clientId)),
+    put: vi.fn(async (viewList: LocalViewList) => {
+      viewLists.set(viewList.clientId, viewList);
+      return viewList.clientId;
+    }),
+    where: vi.fn((indexName: string) => ({
+      equals: vi.fn((value: [string, string]) => ({
+        first: vi.fn(async () => {
+          if (indexName !== "[viewClientId+listClientId]") {
+            return undefined;
+          }
+
+          const [viewClientId, listClientId] = value;
+          return [...viewLists.values()].find(
+            (viewList) =>
+              viewList.viewClientId === viewClientId &&
+              viewList.listClientId === listClientId,
+          );
+        }),
+      })),
+    })),
   };
   const outboxTable = {
     get: vi.fn(async (operationId: string) => outboxOperations.get(operationId)),
@@ -77,6 +115,8 @@ function createFakeLocalWriteDb() {
   const db = {
     lists: listTable,
     listItems: listItemTable,
+    views: viewTable,
+    viewLists: viewListTable,
     outboxOperations: outboxTable,
     transaction,
   } as unknown as TidyLocalDatabase;
@@ -85,6 +125,8 @@ function createFakeLocalWriteDb() {
     db,
     lists,
     listItems,
+    views,
+    viewLists,
     outboxOperations,
     transaction,
   };
@@ -123,6 +165,46 @@ function createListItem(
     notes: null,
     listClientId: "list-1",
     listServerId: "list-1",
+    ...overrides,
+  };
+}
+
+function createView(overrides: Partial<LocalView> = {}): LocalView {
+  return {
+    clientId: "view-1",
+    serverId: "view-1",
+    userId: "user-1",
+    syncStatus: "synced",
+    createdAt: "2026-06-10T10:00:00.000Z",
+    updatedAt: "2026-06-10T10:00:00.000Z",
+    deletedAt: null,
+    lastSyncedAt: "2026-06-10T10:00:00.000Z",
+    name: "Work",
+    order: 3,
+    type: "CUSTOM",
+    isDefault: false,
+    matchMode: "ALL",
+    ...overrides,
+  };
+}
+
+function createViewList(
+  overrides: Partial<LocalViewList> = {},
+): LocalViewList {
+  return {
+    clientId: "view-1:list-1",
+    serverId: null,
+    userId: "user-1",
+    syncStatus: "synced",
+    createdAt: "2026-06-10T10:00:00.000Z",
+    updatedAt: "2026-06-10T10:00:00.000Z",
+    deletedAt: null,
+    lastSyncedAt: "2026-06-10T10:00:00.000Z",
+    viewClientId: "view-1",
+    viewServerId: "view-1",
+    listClientId: "list-1",
+    listServerId: "list-1",
+    order: 3,
     ...overrides,
   };
 }
@@ -291,6 +373,201 @@ describe("atomic local list and item writes", () => {
       expect.objectContaining({
         operationType: "delete",
         payload: {},
+      }),
+    ]);
+  });
+
+  it("reorders view-list rows and appends the exact view-list payload", async () => {
+    const { db, viewLists, outboxOperations } = createFakeLocalWriteDb();
+    viewLists.set("view-1:list-1", createViewList());
+    viewLists.set(
+      "view-1:list-2",
+      createViewList({
+        clientId: "view-1:list-2",
+        listClientId: "list-2",
+        listServerId: "list-2",
+      }),
+    );
+
+    await commitLocalListReorder({
+      userId: "user-1",
+      viewId: "view-1",
+      orderedListIds: ["list-2", "list-1"],
+      db,
+    });
+
+    expect(viewLists.get("view-1:list-2")).toMatchObject({
+      order: 0,
+      syncStatus: "pending",
+    });
+    expect(viewLists.get("view-1:list-1")).toMatchObject({
+      order: 1,
+      syncStatus: "pending",
+    });
+    expect(
+      operationsForEntity(outboxOperations, "viewList", "view-1"),
+    ).toEqual([
+      expect.objectContaining({
+        operationType: "reorder",
+        payload: {
+          viewId: "view-1",
+          orderedIds: ["list-2", "list-1"],
+        },
+      }),
+    ]);
+  });
+
+  it("reorders local list items and coalesces to the newest state", async () => {
+    const { db, listItems, outboxOperations } = createFakeLocalWriteDb();
+    listItems.set("item-1", createListItem({ order: 0 }));
+    listItems.set(
+      "item-2",
+      createListItem({ clientId: "item-2", serverId: "item-2", order: 1 }),
+    );
+
+    await commitLocalListItemReorder({
+      userId: "user-1",
+      listId: "list-1",
+      orderedItemIds: ["item-2", "item-1"],
+      db,
+    });
+    await commitLocalListItemReorder({
+      userId: "user-1",
+      listId: "list-1",
+      orderedItemIds: ["item-1", "item-2"],
+      db,
+    });
+
+    expect(listItems.get("item-1")).toMatchObject({
+      order: 0,
+      syncStatus: "pending",
+    });
+    expect(listItems.get("item-2")).toMatchObject({
+      order: 1,
+      syncStatus: "pending",
+    });
+    expect(
+      operationsForEntity(outboxOperations, "listItem", "list-1"),
+    ).toEqual([
+      expect.objectContaining({
+        operationType: "reorder",
+        payload: {
+          listId: "list-1",
+          orderedIds: ["item-1", "item-2"],
+        },
+      }),
+    ]);
+  });
+
+  it("appends move before destination and source reorders", async () => {
+    const { db, listItems, outboxOperations } = createFakeLocalWriteDb();
+    listItems.set("item-1", createListItem({ order: 0 }));
+    listItems.set(
+      "item-2",
+      createListItem({ clientId: "item-2", serverId: "item-2", order: 1 }),
+    );
+    listItems.set(
+      "item-3",
+      createListItem({
+        clientId: "item-3",
+        serverId: "item-3",
+        listClientId: "list-2",
+        listServerId: "list-2",
+        order: 0,
+      }),
+    );
+
+    await commitLocalListItemMove({
+      userId: "user-1",
+      itemId: "item-1",
+      toListId: "list-2",
+      order: 1,
+      db,
+    });
+    await commitLocalListItemReorder({
+      userId: "user-1",
+      listId: "list-2",
+      orderedItemIds: ["item-3", "item-1"],
+      db,
+    });
+    await commitLocalListItemReorder({
+      userId: "user-1",
+      listId: "list-1",
+      orderedItemIds: ["item-2"],
+      db,
+    });
+
+    expect(listItems.get("item-1")).toMatchObject({
+      listClientId: "list-2",
+      order: 1,
+      syncStatus: "pending",
+    });
+    const operations = [...outboxOperations.values()];
+
+    expect(operations.map((operation) => operation.createdAt)).toEqual(
+      [...operations]
+        .map((operation) => operation.createdAt)
+        .sort((left, right) => left.localeCompare(right)),
+    );
+    expect(new Set(operations.map((operation) => operation.createdAt)).size).toBe(
+      3,
+    );
+    expect(operations).toEqual([
+      expect.objectContaining({
+        entityClientId: "item-1",
+        operationType: "move",
+        payload: { toListClientId: "list-2", order: 1 },
+      }),
+      expect.objectContaining({
+        entityClientId: "list-2",
+        operationType: "reorder",
+        payload: {
+          listId: "list-2",
+          orderedIds: ["item-3", "item-1"],
+        },
+      }),
+      expect.objectContaining({
+        entityClientId: "list-1",
+        operationType: "reorder",
+        payload: { listId: "list-1", orderedIds: ["item-2"] },
+      }),
+    ]);
+  });
+
+  it("reorders custom views through one stable coalescing key", async () => {
+    const { db, views, outboxOperations } = createFakeLocalWriteDb();
+    views.set("view-1", createView({ order: 0 }));
+    views.set(
+      "view-2",
+      createView({
+        clientId: "view-2",
+        serverId: "view-2",
+        name: "Home",
+        order: 1,
+      }),
+    );
+
+    await commitLocalViewReorder({
+      userId: "user-1",
+      orderedViewIds: ["view-2", "view-1"],
+      db,
+    });
+    await commitLocalViewReorder({
+      userId: "user-1",
+      orderedViewIds: ["view-1", "view-2"],
+      db,
+    });
+
+    expect(views.get("view-1")).toMatchObject({
+      order: 0,
+      syncStatus: "pending",
+    });
+    expect(
+      operationsForEntity(outboxOperations, "view", "view-order"),
+    ).toEqual([
+      expect.objectContaining({
+        operationType: "reorder",
+        payload: { orderedIds: ["view-1", "view-2"] },
       }),
     ]);
   });
