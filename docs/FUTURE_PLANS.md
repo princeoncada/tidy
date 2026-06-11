@@ -261,12 +261,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** components/list/ListsContainer.tsx, components/views/ViewsSidebarPreview.tsx, lib/local-db/*, lib/dashboard-cache.ts, tests
 - **Implementation goal:** persist committed list, item, and custom-view reorder/move operations to Dexie/outbox instead of calling tRPC after each drop. Preserve local-only drag hover, coalesce newest-state-wins reorder intents, and overlay pending local movement during view fetch/reconciliation so stale server projections cannot temporarily move an item back.
