@@ -266,23 +266,46 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
+- 1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)
 
 ---
 
 ## Planned
 
-### 1.9.27 - Direct-Write Retirement & Default Dexie-First
+### 1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)
+- **Status:** In progress | Priority: P1 docs/workflow
+- **Type:** docs/workflow
+- **Files:** docs/DECISIONS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md
+- **Implementation goal:** record the overlay-first decision and re-sequence the local-first arc so a reconcile-overlay foundation precedes direct-write retirement.
+- **Product impact:** none - planning correction.
+- **Runtime integration target:** none.
+- **Deferral boundary:** builds no overlay and retires no writes; those are 1.9.28 and 1.9.29.
+- **Validation target:** targeted alpha (validate.ps1 consistency); full validate.ps1 at the gate.
+- **Acceptance:** the roadmap reflects overlay-before-retirement and STATE.nextPhase equals the first Planned heading.
+
+### 1.9.28 - Dexie-First Reconcile Overlay
+- **Status:** Open | Priority: P1 product (local-first foundation)
+- **Type:** product behavior (foundation)
+- **Files:** lib/dashboard-cache.ts, hooks/useLocalFirstDashboardBoot.ts, lib/local-first-reconcile.ts, components/list/ListsContainer.tsx, hooks/*, tests/*
+- **Implementation goal:** make unsynced local mutations (create, rename, complete, delete, tag, view, selection, and existing reorder/move) survive server hydration by overlaying pending outbox / local-graph state on the rendered dashboard cache, generalizing the existing pending-movement overlay to all entity types, so a settling or refocused tRPC dashboard query never clobbers an optimistic entry not yet batch-synced.
+- **Product impact:** optimistically created/edited lists, items, tags, and views stay visible and correct after the action and across incidental refetches, until batch sync confirms them - no flicker or disappearance.
+- **Runtime integration target:** the dashboard render reconciles server hydration with pending local writes (outbox + Dexie); tRPC queries remain the server hydration bridge. Direct tRPC persistence still runs (not retired here).
+- **Deferral boundary:** does NOT retire direct tRPC persistence (1.9.29) and does NOT flip the default gate; no full Dexie-primary-read rewrite beyond overlay survival.
+- **Validation target:** targeted alpha (overlay unit coverage + a gate-on authenticated e2e proving optimistic create/tag survival across refetch) + manual proof; full test:ci before stable.
+- **Acceptance:** with the Dexie-first path active (gate on), optimistic create/tag/view entries survive incidental server refetches deterministically and the gated authenticated proof is stable.
+
+### 1.9.29 - Direct-Write Retirement & Default Dexie-First
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** components/list/*, components/views/*, dashboard mutation components, hooks/*, lib/sync/*, tests/e2e/*
-- **Implementation goal:** make Dexie-first the default dashboard write path and remove remaining component-level direct tRPC persistence for list, item, reorder/move, tag, view, selection, and relationship writes, then re-baseline the authenticated e2e suite that currently asserts per-action tRPC mutations.
+- **Implementation goal:** make Dexie-first the default dashboard write path and remove remaining component-level direct tRPC persistence for list, item, reorder/move, tag, view, selection, and relationship writes, then re-baseline the authenticated e2e suite that currently asserts per-action tRPC mutations. This phase depends on the 1.9.28 overlay and is seeded by branch `wip/direct-write-retirement`.
 - **Product impact:** every dashboard mutation persists through Dexie/outbox and the batch endpoint by default; per-action tRPC persistence no longer runs.
 - **Runtime integration target:** Dexie is the default primary local dashboard source and `/api/sync` batch flushes are the only remote dashboard write path; tRPC query procedures may remain the online hydration/read bridge.
-- **Deferral boundary:** no dashboard CRUD or movement slice may remain on direct tRPC persistence by the end of this phase. The architecture closeout decision is 1.9.28.
+- **Deferral boundary:** no dashboard CRUD or movement slice may remain on direct tRPC persistence by the end of this phase. The architecture closeout decision is 1.9.30.
 - **Validation target:** targeted alpha (default-path mutation coverage, rewritten authenticated e2e); full test:ci before stable.
 - **Acceptance:** with the prototype gate removed or defaulted on, a representative multi-action session updates instantly from Dexie, reaches the server in bounded batch requests, and the authenticated suite passes against the Dexie-first default.
 
-### 1.9.28 - Local-First Dashboard Architecture Closeout
+### 1.9.30 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
@@ -400,8 +423,9 @@ Assigned a version only when scoped.
 - Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
 - The reconciled Dexie fallback is structurally complete, but offline freshness is bounded by the last successful server seed and pending local work.
 - Most dashboard actions still persist through direct tRPC mutations, so the app does not yet satisfy Dexie-first writes or bounded multi-action synchronization.
-- The bounded batch endpoint applies accepted operations, but the path remains gated off by default and dashboard actions still use transitional direct tRPC persistence until 1.9.27.
+- The bounded batch endpoint applies accepted operations, but the path remains gated off by default and dashboard actions still use transitional direct tRPC persistence until 1.9.29.
 - 1.9.26 adds backoff-ready `failed` selection and stranded `syncing` recovery; cross-tab flush coordination remains a follow-up.
+- Retiring direct tRPC persistence before a generalized pending overlay lets settling/refocused dashboard queries clobber unsynced optimistic create/tag/view entries; the 1.9.28 overlay closes this and is a hard prerequisite for 1.9.29.
 - Large components increase risk for focused changes.
 - Frontend projection and backend refresh must agree before UI/UX polish.
 

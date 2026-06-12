@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.26 -->
+<!-- Current Version: 1.9.27-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.26 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.26 - Batch Sync Lifecycle, Retry & Recovery
-**Next**: 1.9.27 - Direct-Write Retirement & Default Dexie-First
+**Current Version**: 1.9.27-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)
+**Next**: 1.9.28 - Dexie-First Reconcile Overlay
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -22,7 +22,7 @@ The latest completed change is the stable version recorded in `STATE.json`; read
 
 Active arc: the 1.9.x product-first cleanup series. 1.9.11 added the Product-First Planning Contract and rebaselined the roadmap; 1.9.12 realigned the agent role model (Claude Code architects/scopes/plans/validates/writes prompts; Codex is the boosted implementer; ChatGPT reviews). The Codex validation boundary and five-location versioning rules are unchanged.
 
-Approved priority correction (2026-06-10): finish two product outcomes before production-readiness or polish work. First, make list/item rendering immediately correct from a complete reconciled Dexie graph, without empty/duplicated/misplaced transient cards during normal API loading. Second, make Dexie the primary local dashboard source and synchronize accumulated operations to PostgreSQL through one bounded multi-operation request per flush, rather than one direct tRPC mutation per action. `docs/DECISIONS.md` owns the architecture contract and `docs/FUTURE_PLANS.md` owns the 1.9.21-1.9.27 sequence.
+Approved priority correction (2026-06-10): finish two product outcomes before production-readiness or polish work. First, make list/item rendering immediately correct from a complete reconciled Dexie graph, without empty/duplicated/misplaced transient cards during normal API loading. Second, make Dexie the primary local dashboard source and synchronize accumulated operations to PostgreSQL through one bounded multi-operation request per flush, rather than one direct tRPC mutation per action. `docs/DECISIONS.md` owns the architecture contract and `docs/FUTURE_PLANS.md` owns the local-first sequence through 1.9.30.
 
 ---
 
@@ -135,8 +135,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Successful server views plus the canonical All Lists payload are reconciled into Dexie in one local transaction. Reconciliation preserves local identity for acknowledged optimistic rows, keeps unmatched non-synced work, and removes stale synced rows.
 - The local fallback is inert during ordinary loading and whenever server views data exists. It renders only after the views query has settled into an error state with no server data, so normal online loading remains server-backed.
 - A gated replay trigger is mounted through `OfflineReplayTrigger`, but `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` defaults off. When enabled, one flush now sends one bounded coalesced batch to `/api/sync`; the endpoint applies accepted operations to PostgreSQL and returns per-operation outcomes.
-- All dashboard mutation categories now have a gated Dexie/outbox path: list/item CRUD (1.9.23), movement/order (1.9.24), and tag/view/relationship/selection writes (1.9.25). The prototype gate still defaults off, so legacy component tRPC persistence remains the default runtime path until 1.9.27 removes it after the 1.9.26 worker lifecycle phase.
-- Approved target for 1.9.22-1.9.27: one atomic Dexie entity/outbox transaction per committed action, TanStack as the render projection, one bounded `operations[]` request per flush, real authenticated/idempotent server application, retryable failure handling, and no remaining direct dashboard tRPC persistence.
+- All dashboard mutation categories now have a gated Dexie/outbox path: list/item CRUD (1.9.23), movement/order (1.9.24), and tag/view/relationship/selection writes (1.9.25). The prototype gate still defaults off, so legacy component tRPC persistence remains the default runtime path until 1.9.29 removes it after the 1.9.28 reconcile overlay prevents pending local writes from being clobbered by server hydration.
+- Approved target for 1.9.22-1.9.29: one atomic Dexie entity/outbox transaction per committed action, TanStack as the render projection, one bounded `operations[]` request per flush, real authenticated/idempotent server application, retryable failure handling, a generalized pending-outbox reconcile overlay, and no remaining direct dashboard tRPC persistence.
 - Drag hover remains local-only. A committed drop will become one durable local move/reorder intent, coalesced before batch sync; pending placement must overlay server hydration so stale payloads cannot repaint old placement.
 
 ---
@@ -162,14 +162,16 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Optimistic custom-view create can briefly fetch `view.getViewListsWithItems` before `view.create` commits, causing a transient self-healing 404 deferred to a future product phase.
 
 **Local-first and sync:**
-- 1.9.23 adds a gated Dexie-first path for list/item create, rename, complete/uncomplete, and delete. When `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` is on, these actions commit through `lib/local-db/local-write.ts` in one atomic Dexie entity + coalesced outbox transaction and fire no component tRPC mutation; the batch endpoint is the only remote path. The gate defaults off, so default runtime is unchanged and legacy tRPC handlers remain until 1.9.27. `ListsContainer` only threads `userId` and adds no outbox, direct `tidy-db`, replay, or metadata import, preserving the role-audit guard.
+- 1.9.23 adds a gated Dexie-first path for list/item create, rename, complete/uncomplete, and delete. When `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` is on, these actions commit through `lib/local-db/local-write.ts` in one atomic Dexie entity + coalesced outbox transaction and fire no component tRPC mutation; the batch endpoint is the only remote path. The gate defaults off, so default runtime is unchanged and legacy tRPC handlers remain until 1.9.29. `ListsContainer` only threads `userId` and adds no outbox, direct `tidy-db`, replay, or metadata import, preserving the role-audit guard.
 - 1.9.24 extends that gated path to list order, same-list item order, cross-list item movement, and custom-view order. Repeated drops coalesce by view/list/item movement key, and stale view payloads are overlaid from unacknowledged local movement until the server acknowledges the batch.
 - 1.9.25 extends the gated path to tag CRUD, batched list-tag attach/detach, custom-view CRUD/filter relationships, and selected-view metadata. View create/update carries `tagIds` inside the view operation to match server apply, rename plus filter edits emit one combined view update, membership attach/detach coalesces latest-wins per relationship, and selected-view uses the stable `entityClientId = "selected-view"`.
 - The offline app-shell plus reconciled Dexie fallback can render a structurally complete local dashboard graph after confirmed API unavailability. Remaining read risk is lifecycle freshness between the last successful server seed and later offline use; unmatched pending/local/failed rows are intentionally preserved rather than overwritten or deleted.
 - The offline replay conflict policy remains deterministic timestamp last-write-wins, server-authoritative on equal/missing timestamps (`lib/sync/conflict-resolution.ts`). Its optional `getServerSnapshot` provider still has no runtime caller; real server application and per-operation results are owned by the bounded batch endpoint phase.
 - The 2026-06-10 decision supersedes the remaining server-authoritative/per-slice planning stance for future work. The delivery target is a complete Dexie dashboard graph plus bounded batch synchronization; existing direct tRPC persistence is transitional, not the accepted final architecture.
 - Gated runtime dashboard mutations now commit through the local-write helpers across list/item CRUD, movement/order, tag/view CRUD, relationships, and selected-view metadata. The legacy tRPC branches remain present and are still the default while the prototype gate is off.
-- The acknowledge-only, one-request-per-operation, and dashboard mutation coverage risks are discharged through 1.9.22-1.9.25. 1.9.26 delivers gated sync lifecycle scheduling (quiet-window/threshold/reconnect/lifecycle flush), per-user single-flight flush suppression, backoff retry by re-selecting backoff-ready `failed` operations, and stranded `syncing` recovery on reload. Legacy direct-write retirement and the default-on flip move to 1.9.27; the architecture closeout decision is 1.9.28.
+- Retiring direct tRPC persistence before a generalized pending-outbox reconcile overlay lets settling or refocused `view.getViewListsWithItems` / `view.getAll` results clobber unsynced optimistic create/tag/view entries. Movement already has an overlay; 1.9.28 generalizes that defense before retirement.
+- The unmerged retirement implementation is preserved on `wip/direct-write-retirement` and deferred to 1.9.29 behind the 1.9.28 overlay. The architecture closeout decision is 1.9.30.
+- The acknowledge-only, one-request-per-operation, and dashboard mutation coverage risks are discharged through 1.9.22-1.9.25. 1.9.26 delivers gated sync lifecycle scheduling (quiet-window/threshold/reconnect/lifecycle flush), per-user single-flight flush suppression, backoff retry by re-selecting backoff-ready `failed` operations, and stranded `syncing` recovery on reload.
 - There is no persistent server idempotency-key ledger. Replays are safe through idempotent operation semantics, but a durable ledger remains a follow-up for stronger duplicate-request auditability.
 - Custom-view recompute runs after the atomic write transaction. If recompute fails, the writes remain durable and are reported applied; the projection may remain stale until a later successful recompute.
 - 1.9.26 closes the replay-reader gap: the batch flush selects pending plus backoff-ready `failed` operations via `lib/sync/retry-backoff.ts`, and `reconcilePendingWritesOnLoad` resets stranded `syncing` rows to `pending` before flushing. Permanent rejections still stay `failed` and visible, and operations beyond `RETRY_MAX_ATTEMPTS` stop auto-retrying until an explicit retry.
@@ -190,7 +192,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Never run `git restore <file>` on a file whose intended edit is still uncommitted; commit the file first, or strip only the injected negative-proof line.
 - Stable-promotion closeout routes users to the per-file commit commands and final push printed by `promote.ps1`; the assistant should not re-emit those stable promotion commands.
 - `open-phase.ps1` requires an explicit `-NextPhase "<version - title>"` or `-NoNextPhase` on every invocation; there is no silent default from the previous STATE.json nextPhase.
-- The active product work is the 1.9.26 sync lifecycle, followed by 1.9.27 direct-write retirement and the 1.9.28 architecture closeout, per `docs/FUTURE_PLANS.md`; authenticated E2E requires real Supabase credentials and per-worker storage state.
+- The next product phase is 1.9.28 - Dexie-First Reconcile Overlay, followed by 1.9.29 direct-write retirement and the 1.9.30 architecture closeout, per `docs/FUTURE_PLANS.md`; authenticated E2E requires real Supabase credentials and per-worker storage state.
 
 ---
 
