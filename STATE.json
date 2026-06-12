@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.27",
-    "state":  "stable",
-    "phase":  "1.9.27",
-    "phaseTitle":  "Roadmap Re-Plan Correction (Overlay-First Re-Sequence)",
-    "nextPhase":  "1.9.28 - Dexie-First Reconcile Overlay",
+    "version":  "1.9.28-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.28",
+    "phaseTitle":  "Dexie-First Reconcile Overlay",
+    "nextPhase":  "1.9.29 - Direct-Write Retirement \u0026 Default Dexie-First",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-12"
 }
