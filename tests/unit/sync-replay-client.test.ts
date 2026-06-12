@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  flushOutboxOperationsBatch,
   replayOutboxOperations,
   type SyncReplayRepository,
 } from "@/lib/local-db/sync-replay-client";
@@ -32,6 +33,7 @@ function createReplayRepository(
 ): SyncReplayRepository {
   return {
     getPendingOutboxOperations: vi.fn(async () => pendingOperations),
+    getRetryableOutboxOperations: vi.fn(async () => pendingOperations),
     markOutboxOperationDiscarded: vi.fn(async ({ operationId }) =>
       pendingOperations.find((operation) => operation.operationId === operationId) ?? null,
     ),
@@ -285,6 +287,49 @@ describe("sync replay client", () => {
     expect(repository.getPendingOutboxOperations).toHaveBeenCalledWith({
       userId: "user-1",
       limit: 25,
+    });
+  });
+
+  it("selects retryable operations for batch flush and threads the supplied time", async () => {
+    const retryableFailure = createOperation({
+      operationId: "failed-ready",
+      status: "failed",
+      retryCount: 2,
+      lastAttemptedAt: "2026-05-10T10:00:00.000Z",
+      idempotencyKey: "failed-ready",
+    });
+    const repository = createReplayRepository([retryableFailure]);
+    const transport = vi.fn(async () => [
+      {
+        operationId: "failed-ready",
+        status: "applied" as const,
+        errorMessage: null,
+      },
+    ]);
+    const now = Date.parse("2026-05-10T10:01:00.000Z");
+
+    await flushOutboxOperationsBatch({
+      userId: "user-1",
+      now,
+      transport,
+      repository,
+    });
+
+    expect(repository.getRetryableOutboxOperations).toHaveBeenCalledWith({
+      userId: "user-1",
+      now,
+      limit: 100,
+    });
+    expect(transport).toHaveBeenCalledWith({
+      operations: [
+        {
+          operation: expect.objectContaining({
+            operationId: "failed-ready",
+            status: "syncing",
+          }),
+          idempotencyKey: "failed-ready",
+        },
+      ],
     });
   });
 });
