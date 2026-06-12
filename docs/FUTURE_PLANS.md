@@ -254,6 +254,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency~~ (stable 2026-06-11)
 
+- ~~1.9.25 - Dexie-First Tags, Views & Relationships~~ (stable 2026-06-11)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -263,21 +265,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.25 - Dexie-First Tags, Views & Relationships (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.25 - Dexie-First Tags, Views & Relationships
-- **Status:** In progress | Priority: P1 product (local-first)
-- **Type:** product behavior
-- **Files:** components/list/ListTagPicker.tsx, components/views/ViewsSidebarPreview.tsx, lib/local-db/*, lib/dashboard-cache.ts, tests
-- **Implementation goal:** migrate tag, list-tag, view, view-tag, selected-view, and view-list relationship writes to the same Dexie/outbox transaction contract, preserving custom-view projection and latest-selection invariants.
-- **Product impact:** the remaining dashboard actions are immediate and durable locally instead of generating direct per-action tRPC writes.
-- **Runtime integration target:** all persisted dashboard entities and relationships use Dexie-first writes and the bounded batch endpoint.
-- **Deferral boundary:** final worker lifecycle, retry policy, legacy direct-write removal, and full end-to-end proof are 1.9.26.
-- **Validation target:** targeted alpha (tag/view CRUD, rapid tag toggles, custom-view projection, selected-view races, offline refresh, and request-count E2E); full test:ci before stable.
-- **Acceptance:** list/tag/view workflows remain correct while their remote persistence is performed only through batched sync.
 
 ### 1.9.26 - Batch Sync Lifecycle, Retry & Direct-Write Retirement
 - **Status:** Open | Priority: P1 product (local-first)
