@@ -14,9 +14,6 @@ export type LocalOutboxRepositoryDatabase = {
       equals(value: unknown): {
         sortBy(fieldName: string): Promise<LocalOutboxOperation[]>;
       };
-      anyOf(values: unknown[]): {
-        sortBy(fieldName: string): Promise<LocalOutboxOperation[]>;
-      };
     };
   };
 };
@@ -103,17 +100,23 @@ export async function getRetryableOutboxOperations({
   limit,
   db,
 }: RetryableQueryArgs): Promise<LocalOutboxOperation[]> {
-  const operations = await getOutboxRepositoryDb(db)
-    .outboxOperations.where("[userId+status]")
-    .anyOf([
-      [userId, "pending"],
-      [userId, "failed"],
-    ])
-    .sortBy("createdAt");
+  const repositoryDb = getOutboxRepositoryDb(db);
+  const [pendingOperations, failedOperations] = await Promise.all([
+    repositoryDb.outboxOperations
+      .where("[userId+status]")
+      .equals([userId, "pending"])
+      .sortBy("createdAt"),
+    repositoryDb.outboxOperations
+      .where("[userId+status]")
+      .equals([userId, "failed"])
+      .sortBy("createdAt"),
+  ]);
 
-  const retryable = operations.filter((operation) =>
-    isOutboxOperationRetryReady({ operation, now }),
-  );
+  const retryable = [...pendingOperations, ...failedOperations]
+    .filter((operation) => isOutboxOperationRetryReady({ operation, now }))
+    .sort((a, b) =>
+      a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0,
+    );
 
   return typeof limit === "number" ? retryable.slice(0, limit) : retryable;
 }
