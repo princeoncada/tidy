@@ -365,3 +365,30 @@ custom-view order instead of accumulating one operation per drop.
 
 Pending, syncing, and failed movement operations remain eligible for hydration overlay until acknowledged.
 This prevents stale server payloads from repainting old list/item placement during a view switch or reload.
+
+---
+
+## 2026-06-11: Fold tag relationships into view operations and coalesce membership latest-wins (1.9.25)
+
+Custom-view create and update operations carry their complete `tagIds` relationship state inside the
+view operation payload. They do not emit separate `viewTag` attach/detach operations. This matches the
+existing server-apply contract, which replaces the view's tag relationships while applying the view
+create/update.
+
+View rename and filter changes from one dialog save emit one combined `view` / `update` operation.
+Splitting those edits into two operations would collide under latest-only update coalescing and could
+discard either the rename or the filter change.
+
+Relationship `attach` and `detach` operations are latest-wins for the same
+`[userId+entityType+entityClientId]`. Attach then detach, detach then attach, and repeated attaches collapse
+to the final required membership state. Existing delete supersession and unsynced create-plus-delete
+annihilation rules remain unchanged.
+
+Selected-view persistence uses `entityType = "metadata"` with the stable per-user
+`entityClientId = "selected-view"`. Repeated fast selections therefore coalesce to the newest selected view
+without creating one metadata entity key per view.
+
+**Impact:** When the offline-write gate is enabled, tag CRUD, batched list-tag changes, custom-view
+create/update/delete, and selected-view save commit atomically to Dexie plus the outbox and skip direct
+component tRPC persistence. Optimistic cache projection remains immediate. Custom-view membership
+reconciliation from tag/view edits is deferred to batch sync plus reload.
