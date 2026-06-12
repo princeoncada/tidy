@@ -188,8 +188,10 @@ export default function ListTagPicker({
     tagFlushTimeoutRef.current = setTimeout(() => {
       const currentLists = queryClient.getQueryData<CurrentView>(queryKey);
 
-      if (listIsStillOptimistic(currentLists, listId)) {
-        // Newly created lists may not exist on the server yet. Wait instead of sending a temporary id.
+      if (!isOfflineWriteCaptureEnabled() && listIsStillOptimistic(currentLists, listId)) {
+        // Legacy direct-tRPC path needs a real server id, so newly created lists that
+        // do not exist on the server yet must wait instead of sending a temporary id.
+        // The Dexie-first path commits by the local clientId and needs no server id.
         scheduleTagFlush(cacheTag, action);
         return;
       }
