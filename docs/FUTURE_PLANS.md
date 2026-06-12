@@ -269,12 +269,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.28 - Dexie-First Reconcile Overlay (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.28 - Dexie-First Reconcile Overlay
-- **Status:** Open | Priority: P1 product (local-first foundation)
+- **Status:** In progress | Priority: P1 product (local-first foundation)
 - **Type:** product behavior (foundation)
 - **Files:** lib/dashboard-cache.ts, hooks/useLocalFirstDashboardBoot.ts, lib/local-first-reconcile.ts, components/list/ListsContainer.tsx, hooks/*, tests/*
 - **Implementation goal:** make unsynced local mutations (create, rename, complete, delete, tag, view, selection, and existing reorder/move) survive server hydration by overlaying pending outbox / local-graph state on the rendered dashboard cache, generalizing the existing pending-movement overlay to all entity types, so a settling or refocused tRPC dashboard query never clobbers an optimistic entry not yet batch-synced.
