@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.25
-- **Current phase:** 1.9.25 - Dexie-First Tags, Views & Relationships
-- **Next phase:** 1.9.26 - Batch Sync Lifecycle, Retry & Direct-Write Retirement
+- **Current version:** 1.9.26-alpha
+- **Current phase:** 1.9.26 - Batch Sync Lifecycle, Retry & Recovery
+- **Next phase:** 1.9.27 - Direct-Write Retirement & Default Dexie-First
 
 ---
 
