@@ -12,6 +12,7 @@ import type {
   LocalOutboxOperation,
   LocalOutboxOperationType,
 } from "./outbox-schema";
+import type { LocalTagColor } from "./local-schema";
 import type { TidyLocalDatabase } from "./tidy-db";
 
 type LocalWriteIntent = {
@@ -96,6 +97,68 @@ export type CommitLocalListItemMoveArgs = {
 export type CommitLocalViewReorderArgs = {
   userId: string;
   orderedViewIds: string[];
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalTagCreateArgs = {
+  userId: string;
+  tagId: string;
+  name: string;
+  color: LocalTagColor;
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalTagUpdateArgs = {
+  userId: string;
+  tagId: string;
+  name?: string;
+  color?: LocalTagColor;
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalTagDeleteArgs = {
+  userId: string;
+  tagId: string;
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalListTagChangesArgs = {
+  userId: string;
+  listId: string;
+  operations: Array<{
+    tagId: string;
+    action: "add" | "remove";
+  }>;
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalViewCreateArgs = {
+  userId: string;
+  viewId: string;
+  name: string;
+  tagIds: string[];
+  matchMode?: "ALL" | "ANY";
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalViewUpdateArgs = {
+  userId: string;
+  viewId: string;
+  name?: string;
+  tagIds?: string[];
+  matchMode?: "ALL" | "ANY";
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalViewDeleteArgs = {
+  userId: string;
+  viewId: string;
+  db?: TidyLocalDatabase;
+};
+
+export type CommitLocalSelectedViewArgs = {
+  userId: string;
+  viewId: string;
   db?: TidyLocalDatabase;
 };
 
@@ -489,6 +552,399 @@ export async function commitLocalViewReorder({
         entityClientId: "view-order",
         operationType: "reorder",
         payload: { orderedIds: orderedViewIds },
+      },
+      now,
+    );
+  });
+}
+
+export async function commitLocalTagCreate({
+  userId,
+  tagId,
+  name,
+  color,
+  db = getLocalDbOrThrow(),
+}: CommitLocalTagCreateArgs): Promise<void> {
+  await db.transaction("rw", [db.tags, db.outboxOperations], async () => {
+    const now = createLocalTimestamp();
+
+    await db.tags.put({
+      ...createLocalEntityBase({
+        clientId: tagId,
+        userId,
+        syncStatus: "local",
+        createdAt: now,
+        updatedAt: now,
+      }),
+      name,
+      color,
+    });
+    await appendCoalescedOutbox(
+      db,
+      {
+        userId,
+        entityType: "tag",
+        entityClientId: tagId,
+        operationType: "create",
+        payload: { name, color },
+      },
+      now,
+    );
+  });
+}
+
+export async function commitLocalTagUpdate({
+  userId,
+  tagId,
+  name,
+  color,
+  db = getLocalDbOrThrow(),
+}: CommitLocalTagUpdateArgs): Promise<void> {
+  await db.transaction("rw", [db.tags, db.outboxOperations], async () => {
+    const now = createLocalTimestamp();
+    const existing = await db.tags.get(tagId);
+
+    if (existing) {
+      await db.tags.put(
+        markEntityPending(
+          {
+            ...existing,
+            ...(name !== undefined ? { name } : {}),
+            ...(color !== undefined ? { color } : {}),
+          },
+          now,
+        ),
+      );
+    }
+
+    await appendCoalescedOutbox(
+      db,
+      {
+        userId,
+        entityType: "tag",
+        entityClientId: tagId,
+        operationType: "update",
+        payload: {
+          ...(name !== undefined ? { name } : {}),
+          ...(color !== undefined ? { color } : {}),
+        },
+      },
+      now,
+    );
+  });
+}
+
+export async function commitLocalTagDelete({
+  userId,
+  tagId,
+  db = getLocalDbOrThrow(),
+}: CommitLocalTagDeleteArgs): Promise<void> {
+  await db.transaction("rw", [db.tags, db.outboxOperations], async () => {
+    const now = createLocalTimestamp();
+    const existing = await db.tags.get(tagId);
+
+    if (existing) {
+      await db.tags.put({
+        ...markEntityPending(existing, now),
+        deletedAt: now,
+      });
+    }
+
+    await appendCoalescedOutbox(
+      db,
+      {
+        userId,
+        entityType: "tag",
+        entityClientId: tagId,
+        operationType: "delete",
+        payload: {},
+      },
+      now,
+    );
+  });
+}
+
+export async function commitLocalListTagChanges({
+  userId,
+  listId,
+  operations,
+  db = getLocalDbOrThrow(),
+}: CommitLocalListTagChangesArgs): Promise<void> {
+  await db.transaction("rw", [db.listTags, db.outboxOperations], async () => {
+    const now = createLocalTimestamp();
+
+    for (const operation of operations) {
+      const entityClientId = `${listId}:${operation.tagId}`;
+      const existing = await db.listTags
+        .where("[listClientId+tagClientId]")
+        .equals([listId, operation.tagId])
+        .first();
+
+      if (operation.action === "add") {
+        await db.listTags.put(
+          existing
+            ? markEntityPending({ ...existing, deletedAt: null }, now)
+            : {
+                ...createLocalEntityBase({
+                  clientId: entityClientId,
+                  userId,
+                  syncStatus: "local",
+                  createdAt: now,
+                  updatedAt: now,
+                }),
+                listClientId: listId,
+                listServerId: null,
+                tagClientId: operation.tagId,
+                tagServerId: null,
+              },
+        );
+        await appendCoalescedOutbox(
+          db,
+          {
+            userId,
+            entityType: "listTag",
+            entityClientId,
+            operationType: "attach",
+            payload: { listId, tagId: operation.tagId },
+          },
+          now,
+        );
+        continue;
+      }
+
+      if (existing) {
+        await db.listTags.put({
+          ...markEntityPending(existing, now),
+          deletedAt: now,
+        });
+      }
+      await appendCoalescedOutbox(
+        db,
+        {
+          userId,
+          entityType: "listTag",
+          entityClientId,
+          operationType: "detach",
+          payload: { listId, tagId: operation.tagId },
+        },
+        now,
+      );
+    }
+  });
+}
+
+export async function commitLocalViewCreate({
+  userId,
+  viewId,
+  name,
+  tagIds,
+  matchMode = "ALL",
+  db = getLocalDbOrThrow(),
+}: CommitLocalViewCreateArgs): Promise<void> {
+  await db.transaction(
+    "rw",
+    [db.views, db.viewTags, db.outboxOperations],
+    async () => {
+      const now = createLocalTimestamp();
+      const existingViews = await db.views.where("userId").equals(userId).toArray();
+      const topOrder = existingViews.length
+        ? Math.min(...existingViews.map((view) => view.order)) - 1
+        : 0;
+
+      for (const view of existingViews) {
+        if (view.isDefault) {
+          await db.views.put({ ...view, isDefault: false });
+        }
+      }
+
+      await db.views.put({
+        ...createLocalEntityBase({
+          clientId: viewId,
+          userId,
+          syncStatus: "local",
+          createdAt: now,
+          updatedAt: now,
+        }),
+        name,
+        order: topOrder,
+        type: "CUSTOM",
+        isDefault: true,
+        matchMode,
+      });
+
+      for (const tagId of tagIds) {
+        await db.viewTags.put({
+          ...createLocalEntityBase({
+            clientId: `${viewId}:${tagId}`,
+            userId,
+            syncStatus: "local",
+            createdAt: now,
+            updatedAt: now,
+          }),
+          viewClientId: viewId,
+          viewServerId: null,
+          tagClientId: tagId,
+          tagServerId: null,
+        });
+      }
+
+      await appendCoalescedOutbox(
+        db,
+        {
+          userId,
+          entityType: "view",
+          entityClientId: viewId,
+          operationType: "create",
+          payload: { name, tagIds, matchMode },
+        },
+        now,
+      );
+    },
+  );
+}
+
+export async function commitLocalViewUpdate({
+  userId,
+  viewId,
+  name,
+  tagIds,
+  matchMode,
+  db = getLocalDbOrThrow(),
+}: CommitLocalViewUpdateArgs): Promise<void> {
+  await db.transaction(
+    "rw",
+    [db.views, db.viewTags, db.outboxOperations],
+    async () => {
+      const now = createLocalTimestamp();
+      const existing = await db.views.get(viewId);
+
+      if (existing) {
+        await db.views.put(
+          markEntityPending(
+            {
+              ...existing,
+              ...(name !== undefined ? { name } : {}),
+              ...(matchMode !== undefined ? { matchMode } : {}),
+            },
+            now,
+          ),
+        );
+      }
+
+      if (tagIds !== undefined) {
+        const existingViewTags = await db.viewTags
+          .where("viewClientId")
+          .equals(viewId)
+          .toArray();
+
+        for (const viewTag of existingViewTags) {
+          await db.viewTags.put({
+            ...viewTag,
+            deletedAt: now,
+            updatedAt: now,
+          });
+        }
+
+        for (const tagId of tagIds) {
+          await db.viewTags.put({
+            ...createLocalEntityBase({
+              clientId: `${viewId}:${tagId}`,
+              userId,
+              syncStatus: "local",
+              createdAt: now,
+              updatedAt: now,
+            }),
+            viewClientId: viewId,
+            viewServerId: null,
+            tagClientId: tagId,
+            tagServerId: null,
+          });
+        }
+      }
+
+      await appendCoalescedOutbox(
+        db,
+        {
+          userId,
+          entityType: "view",
+          entityClientId: viewId,
+          operationType: "update",
+          payload: {
+            ...(name !== undefined ? { name } : {}),
+            ...(tagIds !== undefined ? { tagIds } : {}),
+            ...(matchMode !== undefined ? { matchMode } : {}),
+          },
+        },
+        now,
+      );
+    },
+  );
+}
+
+export async function commitLocalViewDelete({
+  userId,
+  viewId,
+  db = getLocalDbOrThrow(),
+}: CommitLocalViewDeleteArgs): Promise<void> {
+  await db.transaction("rw", [db.views, db.outboxOperations], async () => {
+    const now = createLocalTimestamp();
+    const existing = await db.views.get(viewId);
+
+    if (existing) {
+      await db.views.put({
+        ...markEntityPending(existing, now),
+        deletedAt: now,
+      });
+    }
+
+    if (existing?.isDefault) {
+      const views = await db.views.where("userId").equals(userId).toArray();
+      const allListsView = views.find((view) => view.type === "ALL_LISTS");
+
+      if (allListsView) {
+        await db.views.put({ ...allListsView, isDefault: true });
+      }
+    }
+
+    await appendCoalescedOutbox(
+      db,
+      {
+        userId,
+        entityType: "view",
+        entityClientId: viewId,
+        operationType: "delete",
+        payload: {},
+      },
+      now,
+    );
+  });
+}
+
+export async function commitLocalSelectedView({
+  userId,
+  viewId,
+  db = getLocalDbOrThrow(),
+}: CommitLocalSelectedViewArgs): Promise<void> {
+  await db.transaction("rw", [db.views, db.outboxOperations], async () => {
+    const now = createLocalTimestamp();
+    const views = await db.views.where("userId").equals(userId).toArray();
+
+    for (const view of views) {
+      const isDefault = view.clientId === viewId;
+
+      if (view.isDefault !== isDefault) {
+        await db.views.put({ ...view, isDefault });
+      }
+    }
+
+    await appendCoalescedOutbox(
+      db,
+      {
+        userId,
+        entityType: "metadata",
+        entityClientId: "selected-view",
+        operationType: "update",
+        payload: { selectedViewId: viewId },
       },
       now,
     );

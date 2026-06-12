@@ -263,12 +263,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.25 - Dexie-First Tags, Views & Relationships (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.25 - Dexie-First Tags, Views & Relationships
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** components/list/ListTagPicker.tsx, components/views/ViewsSidebarPreview.tsx, lib/local-db/*, lib/dashboard-cache.ts, tests
 - **Implementation goal:** migrate tag, list-tag, view, view-tag, selected-view, and view-list relationship writes to the same Dexie/outbox transaction contract, preserving custom-view projection and latest-selection invariants.

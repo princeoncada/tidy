@@ -3,8 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 import type {
   LocalList,
   LocalListItem,
+  LocalListTag,
+  LocalTag,
   LocalView,
   LocalViewList,
+  LocalViewTag,
 } from "@/lib/local-db/local-schema";
 import type { LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
 import type { TidyLocalDatabase } from "@/lib/local-db/tidy-db";
@@ -17,13 +20,24 @@ import {
   commitLocalListItemReorder,
   commitLocalListReorder,
   commitLocalListRename,
+  commitLocalListTagChanges,
+  commitLocalSelectedView,
+  commitLocalTagCreate,
+  commitLocalTagDelete,
+  commitLocalTagUpdate,
+  commitLocalViewCreate,
+  commitLocalViewDelete,
   commitLocalViewReorder,
+  commitLocalViewUpdate,
 } from "@/lib/local-db/local-write";
 
 function createFakeLocalWriteDb() {
   const lists = new Map<string, LocalList>();
   const listItems = new Map<string, LocalListItem>();
+  const tags = new Map<string, LocalTag>();
   const views = new Map<string, LocalView>();
+  const listTags = new Map<string, LocalListTag>();
+  const viewTags = new Map<string, LocalViewTag>();
   const viewLists = new Map<string, LocalViewList>();
   const outboxOperations = new Map<string, LocalOutboxOperation>();
 
@@ -41,12 +55,69 @@ function createFakeLocalWriteDb() {
       return item.clientId;
     }),
   };
+  const tagTable = {
+    get: vi.fn(async (clientId: string) => tags.get(clientId)),
+    put: vi.fn(async (tag: LocalTag) => {
+      tags.set(tag.clientId, tag);
+      return tag.clientId;
+    }),
+  };
   const viewTable = {
     get: vi.fn(async (clientId: string) => views.get(clientId)),
     put: vi.fn(async (view: LocalView) => {
       views.set(view.clientId, view);
       return view.clientId;
     }),
+    where: vi.fn((indexName: string) => ({
+      equals: vi.fn((value: string) => ({
+        toArray: vi.fn(async () => {
+          if (indexName !== "userId") return [];
+
+          return [...views.values()].filter((view) => view.userId === value);
+        }),
+      })),
+    })),
+  };
+  const listTagTable = {
+    get: vi.fn(async (clientId: string) => listTags.get(clientId)),
+    put: vi.fn(async (listTag: LocalListTag) => {
+      listTags.set(listTag.clientId, listTag);
+      return listTag.clientId;
+    }),
+    where: vi.fn((indexName: string) => ({
+      equals: vi.fn((value: [string, string]) => ({
+        first: vi.fn(async () => {
+          if (indexName !== "[listClientId+tagClientId]") {
+            return undefined;
+          }
+
+          const [listClientId, tagClientId] = value;
+          return [...listTags.values()].find(
+            (listTag) =>
+              listTag.listClientId === listClientId &&
+              listTag.tagClientId === tagClientId,
+          );
+        }),
+      })),
+    })),
+  };
+  const viewTagTable = {
+    get: vi.fn(async (clientId: string) => viewTags.get(clientId)),
+    put: vi.fn(async (viewTag: LocalViewTag) => {
+      viewTags.set(viewTag.clientId, viewTag);
+      return viewTag.clientId;
+    }),
+    where: vi.fn((indexName: string) => ({
+      equals: vi.fn((value: string) => ({
+        toArray: vi.fn(async () => {
+          if (indexName !== "viewClientId") return [];
+
+          return [...viewTags.values()].filter(
+            (viewTag) => viewTag.viewClientId === value,
+          );
+        }),
+      })),
+    })),
   };
   const viewListTable = {
     get: vi.fn(async (clientId: string) => viewLists.get(clientId)),
@@ -115,7 +186,10 @@ function createFakeLocalWriteDb() {
   const db = {
     lists: listTable,
     listItems: listItemTable,
+    tags: tagTable,
     views: viewTable,
+    listTags: listTagTable,
+    viewTags: viewTagTable,
     viewLists: viewListTable,
     outboxOperations: outboxTable,
     transaction,
@@ -125,7 +199,10 @@ function createFakeLocalWriteDb() {
     db,
     lists,
     listItems,
+    tags,
     views,
+    listTags,
+    viewTags,
     viewLists,
     outboxOperations,
     transaction,
@@ -184,6 +261,62 @@ function createView(overrides: Partial<LocalView> = {}): LocalView {
     type: "CUSTOM",
     isDefault: false,
     matchMode: "ALL",
+    ...overrides,
+  };
+}
+
+function createTag(overrides: Partial<LocalTag> = {}): LocalTag {
+  return {
+    clientId: "tag-1",
+    serverId: "tag-1",
+    userId: "user-1",
+    syncStatus: "synced",
+    createdAt: "2026-06-10T10:00:00.000Z",
+    updatedAt: "2026-06-10T10:00:00.000Z",
+    deletedAt: null,
+    lastSyncedAt: "2026-06-10T10:00:00.000Z",
+    name: "Work",
+    color: "gray",
+    ...overrides,
+  };
+}
+
+function createListTag(
+  overrides: Partial<LocalListTag> = {},
+): LocalListTag {
+  return {
+    clientId: "list-1:tag-1",
+    serverId: null,
+    userId: "user-1",
+    syncStatus: "synced",
+    createdAt: "2026-06-10T10:00:00.000Z",
+    updatedAt: "2026-06-10T10:00:00.000Z",
+    deletedAt: null,
+    lastSyncedAt: "2026-06-10T10:00:00.000Z",
+    listClientId: "list-1",
+    listServerId: "list-1",
+    tagClientId: "tag-1",
+    tagServerId: "tag-1",
+    ...overrides,
+  };
+}
+
+function createViewTag(
+  overrides: Partial<LocalViewTag> = {},
+): LocalViewTag {
+  return {
+    clientId: "view-1:tag-1",
+    serverId: null,
+    userId: "user-1",
+    syncStatus: "synced",
+    createdAt: "2026-06-10T10:00:00.000Z",
+    updatedAt: "2026-06-10T10:00:00.000Z",
+    deletedAt: null,
+    lastSyncedAt: "2026-06-10T10:00:00.000Z",
+    viewClientId: "view-1",
+    viewServerId: "view-1",
+    tagClientId: "tag-1",
+    tagServerId: "tag-1",
     ...overrides,
   };
 }
@@ -568,6 +701,351 @@ describe("atomic local list and item writes", () => {
       expect.objectContaining({
         operationType: "reorder",
         payload: { orderedIds: ["view-1", "view-2"] },
+      }),
+    ]);
+  });
+});
+
+describe("atomic local tag, view, and relationship writes", () => {
+  it("creates a local tag and matching create operation", async () => {
+    const { db, tags, outboxOperations, transaction } =
+      createFakeLocalWriteDb();
+
+    await commitLocalTagCreate({
+      userId: "user-1",
+      tagId: "tag-1",
+      name: "Work",
+      color: "blue",
+      db,
+    });
+
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(tags.get("tag-1")).toMatchObject({
+      clientId: "tag-1",
+      syncStatus: "local",
+      name: "Work",
+      color: "blue",
+    });
+    expect(operationsForEntity(outboxOperations, "tag", "tag-1")).toEqual([
+      expect.objectContaining({
+        operationType: "create",
+        payload: { name: "Work", color: "blue" },
+      }),
+    ]);
+  });
+
+  it("supports name-only and color-only tag updates", async () => {
+    const { db, tags, outboxOperations } = createFakeLocalWriteDb();
+    tags.set("tag-1", createTag());
+    tags.set(
+      "tag-2",
+      createTag({
+        clientId: "tag-2",
+        serverId: "tag-2",
+        name: "Home",
+        color: "red",
+      }),
+    );
+
+    await commitLocalTagUpdate({
+      userId: "user-1",
+      tagId: "tag-1",
+      name: "Focused work",
+      db,
+    });
+    await commitLocalTagUpdate({
+      userId: "user-1",
+      tagId: "tag-2",
+      color: "green",
+      db,
+    });
+
+    expect(tags.get("tag-1")).toMatchObject({
+      name: "Focused work",
+      color: "gray",
+      syncStatus: "pending",
+    });
+    expect(tags.get("tag-2")).toMatchObject({
+      name: "Home",
+      color: "green",
+      syncStatus: "pending",
+    });
+    expect(operationsForEntity(outboxOperations, "tag", "tag-1")).toEqual([
+      expect.objectContaining({
+        operationType: "update",
+        payload: { name: "Focused work" },
+      }),
+    ]);
+    expect(operationsForEntity(outboxOperations, "tag", "tag-2")).toEqual([
+      expect.objectContaining({
+        operationType: "update",
+        payload: { color: "green" },
+      }),
+    ]);
+  });
+
+  it("tombstones a tag and emits a delete operation", async () => {
+    const { db, tags, outboxOperations } = createFakeLocalWriteDb();
+    tags.set("tag-1", createTag());
+
+    await commitLocalTagDelete({
+      userId: "user-1",
+      tagId: "tag-1",
+      db,
+    });
+
+    expect(tags.get("tag-1")).toMatchObject({
+      syncStatus: "pending",
+      deletedAt: expect.any(String),
+    });
+    expect(operationsForEntity(outboxOperations, "tag", "tag-1")).toEqual([
+      expect.objectContaining({
+        operationType: "delete",
+        payload: {},
+      }),
+    ]);
+  });
+
+  it("adds a list-tag row and emits an attach operation", async () => {
+    const { db, listTags, outboxOperations } = createFakeLocalWriteDb();
+
+    await commitLocalListTagChanges({
+      userId: "user-1",
+      listId: "list-1",
+      operations: [{ tagId: "tag-1", action: "add" }],
+      db,
+    });
+
+    expect(listTags.get("list-1:tag-1")).toMatchObject({
+      syncStatus: "local",
+      deletedAt: null,
+      listClientId: "list-1",
+      tagClientId: "tag-1",
+    });
+    expect(
+      operationsForEntity(outboxOperations, "listTag", "list-1:tag-1"),
+    ).toEqual([
+      expect.objectContaining({
+        operationType: "attach",
+        payload: { listId: "list-1", tagId: "tag-1" },
+      }),
+    ]);
+  });
+
+  it("tombstones a list-tag row and emits a detach operation", async () => {
+    const { db, listTags, outboxOperations } = createFakeLocalWriteDb();
+    listTags.set("list-1:tag-1", createListTag());
+
+    await commitLocalListTagChanges({
+      userId: "user-1",
+      listId: "list-1",
+      operations: [{ tagId: "tag-1", action: "remove" }],
+      db,
+    });
+
+    expect(listTags.get("list-1:tag-1")).toMatchObject({
+      syncStatus: "pending",
+      deletedAt: expect.any(String),
+    });
+    expect(
+      operationsForEntity(outboxOperations, "listTag", "list-1:tag-1"),
+    ).toEqual([
+      expect.objectContaining({
+        operationType: "detach",
+        payload: { listId: "list-1", tagId: "tag-1" },
+      }),
+    ]);
+  });
+
+  it("applies mixed list-tag changes in one transaction", async () => {
+    const { db, listTags, outboxOperations, transaction } =
+      createFakeLocalWriteDb();
+    listTags.set(
+      "list-1:tag-2",
+      createListTag({
+        clientId: "list-1:tag-2",
+        tagClientId: "tag-2",
+        tagServerId: "tag-2",
+      }),
+    );
+
+    await commitLocalListTagChanges({
+      userId: "user-1",
+      listId: "list-1",
+      operations: [
+        { tagId: "tag-1", action: "add" },
+        { tagId: "tag-2", action: "remove" },
+      ],
+      db,
+    });
+
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(listTags.get("list-1:tag-1")?.deletedAt).toBeNull();
+    expect(listTags.get("list-1:tag-2")?.deletedAt).toEqual(
+      expect.any(String),
+    );
+    expect(
+      operationsForEntity(outboxOperations, "listTag", "list-1:tag-1")[0],
+    ).toMatchObject({ operationType: "attach" });
+    expect(
+      operationsForEntity(outboxOperations, "listTag", "list-1:tag-2")[0],
+    ).toMatchObject({ operationType: "detach" });
+  });
+
+  it("creates a selected custom view with view-tag rows and one view operation", async () => {
+    const { db, views, viewTags, outboxOperations } =
+      createFakeLocalWriteDb();
+    views.set(
+      "all-lists",
+      createView({
+        clientId: "all-lists",
+        serverId: "all-lists",
+        name: "All Lists",
+        order: 0,
+        type: "ALL_LISTS",
+        isDefault: true,
+      }),
+    );
+    views.set("view-old", createView({ clientId: "view-old", order: 2 }));
+
+    await commitLocalViewCreate({
+      userId: "user-1",
+      viewId: "view-new",
+      name: "Priority",
+      tagIds: ["tag-1", "tag-2"],
+      matchMode: "ANY",
+      db,
+    });
+
+    expect(views.get("all-lists")?.isDefault).toBe(false);
+    expect(views.get("view-new")).toMatchObject({
+      name: "Priority",
+      order: -1,
+      type: "CUSTOM",
+      isDefault: true,
+      matchMode: "ANY",
+      syncStatus: "local",
+    });
+    expect(viewTags.get("view-new:tag-1")).toMatchObject({
+      viewClientId: "view-new",
+      tagClientId: "tag-1",
+      deletedAt: null,
+    });
+    expect(viewTags.get("view-new:tag-2")).toMatchObject({
+      viewClientId: "view-new",
+      tagClientId: "tag-2",
+      deletedAt: null,
+    });
+    expect(operationsForEntity(outboxOperations, "view", "view-new")).toEqual([
+      expect.objectContaining({
+        operationType: "create",
+        payload: {
+          name: "Priority",
+          tagIds: ["tag-1", "tag-2"],
+          matchMode: "ANY",
+        },
+      }),
+    ]);
+  });
+
+  it("combines view name and tag changes into one update operation", async () => {
+    const { db, views, viewTags, outboxOperations } =
+      createFakeLocalWriteDb();
+    views.set("view-1", createView());
+    viewTags.set("view-1:tag-1", createViewTag());
+
+    await commitLocalViewUpdate({
+      userId: "user-1",
+      viewId: "view-1",
+      name: "Focused",
+      tagIds: ["tag-2"],
+      db,
+    });
+
+    expect(views.get("view-1")).toMatchObject({
+      name: "Focused",
+      syncStatus: "pending",
+    });
+    expect(viewTags.get("view-1:tag-1")?.deletedAt).toEqual(
+      expect.any(String),
+    );
+    expect(viewTags.get("view-1:tag-2")).toMatchObject({
+      tagClientId: "tag-2",
+      deletedAt: null,
+      syncStatus: "local",
+    });
+    expect(operationsForEntity(outboxOperations, "view", "view-1")).toEqual([
+      expect.objectContaining({
+        operationType: "update",
+        payload: {
+          name: "Focused",
+          tagIds: ["tag-2"],
+        },
+      }),
+    ]);
+  });
+
+  it("tombstones a default custom view and restores All Lists selection", async () => {
+    const { db, views, outboxOperations } = createFakeLocalWriteDb();
+    views.set(
+      "all-lists",
+      createView({
+        clientId: "all-lists",
+        serverId: "all-lists",
+        name: "All Lists",
+        type: "ALL_LISTS",
+        isDefault: false,
+      }),
+    );
+    views.set("view-1", createView({ isDefault: true }));
+
+    await commitLocalViewDelete({
+      userId: "user-1",
+      viewId: "view-1",
+      db,
+    });
+
+    expect(views.get("view-1")).toMatchObject({
+      syncStatus: "pending",
+      deletedAt: expect.any(String),
+    });
+    expect(views.get("all-lists")?.isDefault).toBe(true);
+    expect(operationsForEntity(outboxOperations, "view", "view-1")).toEqual([
+      expect.objectContaining({
+        operationType: "delete",
+        payload: {},
+      }),
+    ]);
+  });
+
+  it("updates selected-view flags and emits one stable metadata operation", async () => {
+    const { db, views, outboxOperations } = createFakeLocalWriteDb();
+    views.set(
+      "all-lists",
+      createView({
+        clientId: "all-lists",
+        serverId: "all-lists",
+        name: "All Lists",
+        type: "ALL_LISTS",
+        isDefault: true,
+      }),
+    );
+    views.set("view-1", createView({ isDefault: false }));
+
+    await commitLocalSelectedView({
+      userId: "user-1",
+      viewId: "view-1",
+      db,
+    });
+
+    expect(views.get("all-lists")?.isDefault).toBe(false);
+    expect(views.get("view-1")?.isDefault).toBe(true);
+    expect(
+      operationsForEntity(outboxOperations, "metadata", "selected-view"),
+    ).toEqual([
+      expect.objectContaining({
+        operationType: "update",
+        payload: { selectedViewId: "view-1" },
       }),
     ]);
   });

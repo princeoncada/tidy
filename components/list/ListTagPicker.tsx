@@ -35,7 +35,14 @@ import {
   rollbackTagMutationCaches,
   TagMutationSnapshots,
 } from "@/lib/dashboard-cache";
+import {
+  commitLocalListTagChanges,
+  commitLocalTagCreate,
+  commitLocalTagDelete,
+  commitLocalTagUpdate,
+} from "@/lib/local-db/local-write";
 import { measureCacheWrite, measureRequest, useRenderMeasure } from "@/lib/optimistic-debug";
+import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
 
 type TagValue = RouterOutputs["tag"]["getAll"][number];
 type ListTagValue = Lists[number]["listTags"][number];
@@ -45,6 +52,7 @@ type ListTagPickerProps = {
   listId: string;
   selectedListTags: ListTagValue[];
   dashboardKeys: DashboardKeys;
+  userId: string | null;
 };
 
 function listIsStillOptimistic(currentView: CurrentView | undefined, listId: string) {
@@ -83,6 +91,7 @@ export default function ListTagPicker({
   listId,
   selectedListTags,
   dashboardKeys,
+  userId,
 }: ListTagPickerProps) {
   useRenderMeasure(`ListTagPicker:${listId}`);
 
@@ -199,6 +208,18 @@ export default function ListTagPicker({
       tagSaveChainRef.current = tagSaveChainRef.current
         .catch(() => undefined)
         .then(async () => {
+          if (isOfflineWriteCaptureEnabled() && userId) {
+            await commitLocalListTagChanges({
+              userId,
+              listId,
+              operations: operations.map((operation) => ({
+                tagId: operation.tagId,
+                action: operation.action,
+              })),
+            });
+            return;
+          }
+
           measureRequest("tag.applyListTagChanges", {
             listId,
             count: operations.length,
@@ -339,6 +360,27 @@ export default function ListTagPicker({
   };
 
   const updateTagColor = (tagId: string, color: TagColor) => {
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.map((tag) =>
+          tag.id === tagId ? { ...tag, color } : tag
+        )
+      );
+
+      const existingTag = previousTags?.find((tag) => tag.id === tagId);
+      if (existingTag) {
+        applyTagMetadataToDashboardCaches(queryClient, dashboardKeys, {
+          ...existingTag,
+          color,
+        });
+      }
+
+      void commitLocalTagUpdate({ userId, tagId, color }).catch(() => {});
+      return;
+    }
+
     updateTagMutation.mutate({ id: tagId, color });
   };
 
@@ -349,6 +391,33 @@ export default function ListTagPicker({
     const id = crypto.randomUUID();
     setSearch("");
     setOpen(false);
+
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+      const optimisticTag: TagValue = {
+        id,
+        name,
+        color: "gray",
+        userId: "optimistic",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        listTags: [],
+      };
+
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) => [
+        ...currentTags,
+        optimisticTag,
+      ].sort((a, b) => a.name.localeCompare(b.name)));
+      addTagToListCache(optimisticTag);
+      void commitLocalTagCreate({
+        userId,
+        tagId: id,
+        name,
+        color: "gray",
+      }).catch(() => {});
+      scheduleTagFlush(optimisticTag, "add");
+      return;
+    }
 
     await createTagMutation.mutateAsync({
       id,
@@ -365,6 +434,15 @@ export default function ListTagPicker({
   };
 
   const deleteTag = (tagId: string) => {
+    if (isOfflineWriteCaptureEnabled() && userId) {
+      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+        currentTags.filter((tag) => tag.id !== tagId)
+      );
+      applyDeletedTagToDashboardCaches(queryClient, dashboardKeys, tagId);
+      void commitLocalTagDelete({ userId, tagId }).catch(() => {});
+      return;
+    }
+
     deleteTagMutation.mutate({ id: tagId });
   };
 
