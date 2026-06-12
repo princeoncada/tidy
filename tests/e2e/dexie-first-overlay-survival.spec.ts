@@ -64,6 +64,61 @@ async function getLocalUserAndAllListsView(
     await page.waitForTimeout(250);
   }
 
+  try {
+    const diag = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open("tidy-local-db");
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+
+      try {
+        const readAll = <T,>(storeName: string) =>
+          new Promise<T[]>((resolve, reject) => {
+            const transaction = db.transaction(storeName, "readonly");
+            const request = transaction.objectStore(storeName).getAll();
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+          });
+        const [lists, operations] = await Promise.all([
+          readAll<{
+            clientId: string;
+            name: string;
+            syncStatus: string;
+          }>("lists"),
+          readAll<{
+            entityType: string;
+            operationType: string;
+            entityClientId: string;
+            status: string;
+          }>("outboxOperations"),
+        ]);
+
+        return {
+          lists: lists.map(({ clientId, name, syncStatus }) => ({
+            clientId,
+            name,
+            syncStatus,
+          })),
+          operations: operations.map(
+            ({ entityType, operationType, entityClientId, status }) => ({
+              entityType,
+              operationType,
+              entityClientId,
+              status,
+            }),
+          ),
+        };
+      } finally {
+        db.close();
+      }
+    });
+
+    console.log("OVERLAY_DIAG " + JSON.stringify(diag));
+  } catch (error) {
+    console.log("OVERLAY_DIAG_ERROR " + String(error));
+  }
+
   return null;
 }
 
