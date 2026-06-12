@@ -256,6 +256,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.25 - Dexie-First Tags, Views & Relationships~~ (stable 2026-06-11)
 
+- ~~1.9.26 - Batch Sync Lifecycle, Retry & Recovery~~ (stable 2026-06-12)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -265,21 +267,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.26 - Batch Sync Lifecycle, Retry & Recovery (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.26 - Batch Sync Lifecycle, Retry & Recovery
-- **Status:** In progress | Priority: P1 product (local-first)
-- **Type:** product behavior
-- **Files:** hooks/use-offline-replay-trigger.ts, lib/sync/flush-scheduler.ts, lib/sync/retry-backoff.ts, lib/sync/outbox-capture-events.ts, lib/sync/offline-write-prototype.ts, lib/local-db/outbox-repository.ts, lib/local-db/sync-replay-client.ts, tests
-- **Implementation goal:** finish the production sync lifecycle behind the existing gate: flush after a bounded quiet window or batch-size threshold, on reconnect, and on safe lifecycle opportunities; allow only one in-flight flush per user; retry transient failures with backoff by re-selecting backoff-ready `failed` operations; and recover stranded `syncing` operations on reload. Direct-write retirement is explicitly deferred to 1.9.27.
-- **Product impact:** normal interaction produces local updates without request spam, then synchronizes multiple changes in one bounded request with visible pending/error state and durable recovery after a crash or reload.
-- **Runtime integration target:** Dexie remains the gated primary local dashboard source, PostgreSQL/Supabase is the remote durable source, and `/api/sync` batch flushes are the single remote write path for gated dashboard state. The prototype gate stays default-off and gate-off behavior is byte-identical.
-- **Deferral boundary:** legacy direct tRPC dashboard persistence and the default-on flip stay untouched here and move to 1.9.27. The architecture closeout decision is 1.9.28.
-- **Validation target:** targeted alpha (backoff math, retryable selection, stranded recovery, scheduler debounce/threshold/single-flight units, plus one gated isolated e2e request-count batching + reload-recovery proof); full test:ci before stable.
-- **Acceptance:** a gated multi-action burst reaches the server in one bounded batch request after the quiet window rather than one request per action, a transient failure returns to a retryable state and later syncs, and a stranded `syncing` operation is recovered and synced after reload.
 
 ### 1.9.27 - Direct-Write Retirement & Default Dexie-First
 - **Status:** Open | Priority: P1 product (local-first)
