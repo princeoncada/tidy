@@ -2,7 +2,7 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check,
   GripVertical,
@@ -14,7 +14,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,29 +41,21 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOptimisticSync } from "@/hooks/useOptimisticSync";
 import {
-  applySelectedViewPayloadToCurrentView,
   applyViewFilterUpdateToCaches,
   applyViewRenameToViewsCache,
   applyViewSelection,
   buildDashboardKeys,
-  buildPersistedViewOrderPayload,
   captureViewMutationSnapshots,
   commitViewOrderToViewsCache,
   DashboardSnapshot,
   insertOptimisticViewIntoDashboardCaches,
   listMatchesView,
-  reconcileCreatedViewInViewsCache,
-  reconcileUpdatedViewInViewsCache,
   removeViewFromDashboardCaches,
-  rollbackScope,
-  rollbackSelectedView,
-  rollbackViewMutationCaches,
   ViewsCache,
 } from "@/lib/dashboard-cache";
 import {
   measureCacheWrite,
   measureOptimisticEvent,
-  measureRequest,
   OptimisticProfiler,
   useRenderMeasure,
 } from "@/lib/optimistic-debug";
@@ -75,7 +66,6 @@ import {
   commitLocalViewReorder,
   commitLocalViewUpdate,
 } from "@/lib/local-db/local-write";
-import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
 import type { RouterOutputs } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
@@ -426,7 +416,6 @@ export default function ViewsSidebarPreview({
   const optimisticSync = useOptimisticSync();
   const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dragPreviewViewsRef = useRef<ViewItem[] | null>(null);
-  const latestSelectedViewIdRef = useRef<string | null>(null);
 
   const [dialogState, setDialogState] = useState<ViewDialogState | null>(null);
   const [dragPreviewViews, setDragPreviewViews] = useState<ViewItem[] | null>(null);
@@ -459,106 +448,7 @@ export default function ViewsSidebarPreview({
     allListsViewId: allListsView?.id,
     selectedViewId,
   });
-  const {
-    views: viewsQueryKey,
-    allLists: allListsQueryKey,
-    currentView: currentViewQueryKey,
-  } = dashboardKeys;
-  const queryKey = allListsQueryKey;
-
-  const selectViewMutation = useMutation(
-    trpc.view.saveSelectedView.mutationOptions()
-  );
-
-  const createMutation = useMutation(trpc.view.create.mutationOptions({
-    async onMutate(variables) {
-      const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
-      const optimisticView = buildOptimisticView({
-        id: variables.id,
-        name: variables.name,
-        tagIds: variables.tagIds ?? [],
-        views: snapshots.previousViews,
-        tags,
-        allListsSnapshot,
-      });
-
-      insertOptimisticViewIntoDashboardCaches(
-        queryClient,
-        dashboardKeys,
-        optimisticView,
-        allListsSnapshot
-      );
-
-      return snapshots;
-    },
-    async onSuccess(createdView) {
-      reconcileCreatedViewInViewsCache(queryClient, dashboardKeys, createdView);
-      const createdViewPayload = await queryClient.fetchQuery(
-        trpc.view.getViewListsWithItems.queryOptions({ viewId: createdView.id })
-      );
-      queryClient.setQueryData(currentViewQueryKey, createdViewPayload);
-    },
-    onError(error, _variables, context) {
-      if (context) rollbackViewMutationCaches(queryClient, dashboardKeys, context);
-      toast.error(error.message || "View could not be created.");
-    },
-  }));
-
-  const renameMutation = useMutation(trpc.view.rename.mutationOptions({
-    async onMutate(variables) {
-      const previousViews = queryClient.getQueryData<ViewsCache>(viewsQueryKey);
-      applyViewRenameToViewsCache(queryClient, dashboardKeys, variables.id, variables.name);
-      return { previousViews };
-    },
-    onError(_error, _variables, context) {
-      rollbackScope(queryClient, viewsQueryKey, context?.previousViews);
-    },
-  }));
-  const updateFilterMutation = useMutation(trpc.view.updateFilter.mutationOptions({
-    async onMutate(variables) {
-      const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
-      const selectedTagIds = variables.tagIds ?? [];
-      const selectedTags = tags.filter((tag) => selectedTagIds.includes(tag.id));
-
-      applyViewFilterUpdateToCaches(queryClient, dashboardKeys, {
-        viewId: variables.id,
-        selectedTags,
-        allListsSnapshot,
-      });
-
-      return snapshots;
-    },
-    async onSuccess(updatedView) {
-      reconcileUpdatedViewInViewsCache(queryClient, dashboardKeys, updatedView);
-      if (updatedView.isDefault) {
-        const updatedViewPayload = await queryClient.fetchQuery(
-          trpc.view.getViewListsWithItems.queryOptions({ viewId: updatedView.id })
-        );
-        queryClient.setQueryData(currentViewQueryKey, updatedViewPayload);
-      }
-    },
-    onError(_error, _variables, context) {
-      if (context) rollbackViewMutationCaches(queryClient, dashboardKeys, context);
-    },
-  }));
-
-  const deleteMutation = useMutation(trpc.view.delete.mutationOptions({
-    async onMutate({ id }) {
-      const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
-
-      removeViewFromDashboardCaches(queryClient, dashboardKeys, id, allListsSnapshot);
-
-      return snapshots;
-    },
-    onError(_error, _variables, context) {
-      if (context) rollbackViewMutationCaches(queryClient, dashboardKeys, context);
-    },
-  }));
-
-  const reorderMutation = useMutation(trpc.view.reorderViews.mutationOptions());
+  const queryKey = dashboardKeys.allLists;
 
   const setLocalViewPreview = useCallback((nextViews: ViewItem[] | null) => {
     dragPreviewViewsRef.current = nextViews;
@@ -571,37 +461,29 @@ export default function ViewsSidebarPreview({
     }
 
     reorderTimeoutRef.current = setTimeout(() => {
-      const savedViews = buildPersistedViewOrderPayload(nextViews);
-
-      if (savedViews.length === 0) return;
+      if (!userId || nextViews.length === 0) return;
 
       optimisticSync.replacePending("views", async () => {
-        if (isOfflineWriteCaptureEnabled() && userId) {
-          try {
-            await commitLocalViewReorder({
-              userId,
-              orderedViewIds: savedViews.map((view) => view.id),
-            });
-          } catch {
-            // Local persistence must not replace the committed cache order.
-          }
-          return;
+        try {
+          await commitLocalViewReorder({
+            userId,
+            orderedViewIds: nextViews.map((view) => view.id),
+          });
+        } catch {
+          // Local persistence must not replace the committed cache order.
         }
-
-        measureRequest("view.reorderViews", { count: savedViews.length });
-        await reorderMutation.mutateAsync({
-          views: savedViews,
-        });
       }, { label: "view.reorderViews" });
     }, 300);
-  }, [optimisticSync, reorderMutation, userId]);
+  }, [optimisticSync, userId]);
 
   const commitViewOrder = useCallback((nextViews: ViewItem[]) => {
+    if (!userId) return;
+
     // Only save the final dropped order. Older drag positions do not matter.
     measureCacheWrite("views.drop.order", nextViews);
     commitViewOrderToViewsCache(queryClient, dashboardKeys, nextViews);
     scheduleReorderSave(nextViews);
-  }, [queryClient, scheduleReorderSave, dashboardKeys]);
+  }, [queryClient, scheduleReorderSave, dashboardKeys, userId]);
 
   const moveViewPreview = useCallback((sourceId: string, targetId: string) => {
     const baseViews = dragPreviewViewsRef.current ?? customViews;
@@ -611,184 +493,100 @@ export default function ViewsSidebarPreview({
   }, [customViews, setLocalViewPreview]);
 
   function selectView(id: string | undefined) {
-    if (!id || selectedViewId === id) return;
+    if (!id || selectedViewId === id || !userId) return;
 
-    /**
-     * View save requests can finish out of order during fast switching.
-     * Only the latest requested view may write the dashboard cache.
-     */
-    latestSelectedViewIdRef.current = id;
-
-    const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
-
-    // Update the sidebar and dashboard immediately; the server only records the last selected view.
     applyViewSelection(queryClient, dashboardKeys, id);
     optimisticSync.replacePending(
       "view-selection",
       async () => {
-        if (isOfflineWriteCaptureEnabled() && userId) {
-          try {
-            await commitLocalSelectedView({ userId, viewId: id });
-          } catch {
-            // Local persistence must not replace the committed cache selection.
-          }
-          return;
+        try {
+          await commitLocalSelectedView({ userId, viewId: id });
+        } catch {
+          // Local persistence must not replace the committed cache selection.
         }
-
-        measureRequest("view.saveSelectedView", { viewId: id });
-        const nextViewQueryKey = trpc.view.getViewListsWithItems.queryKey({
-          viewId: id,
-        });
-
-        const cachedNextView = queryClient.getQueryData<DashboardSnapshot>(
-          nextViewQueryKey
-        );
-
-        applySelectedViewPayloadToCurrentView(
-          queryClient,
-          dashboardKeys,
-          latestSelectedViewIdRef.current,
-          cachedNextView
-        );
-
-        await selectViewMutation.mutateAsync({ viewId: id });
-
-        if (latestSelectedViewIdRef.current !== id) return;
-
-        await queryClient.fetchQuery(
-          trpc.view.getViewListsWithItems.queryOptions({ viewId: id })
-        );
-
-        const freshNextView = queryClient.getQueryData<DashboardSnapshot>(
-          nextViewQueryKey
-        );
-
-        applySelectedViewPayloadToCurrentView(
-          queryClient,
-          dashboardKeys,
-          latestSelectedViewIdRef.current,
-          freshNextView
-        );
       },
-      {
-        label: "view.saveSelectedView",
-        rollback: () => {
-          rollbackSelectedView(
-            queryClient,
-            dashboardKeys,
-            latestSelectedViewIdRef.current,
-            id,
-            snapshots
-          );
-        },
-      }
+      { label: "view.saveSelectedView" }
     );
   }
 
   function createView(name: string, tagIds: string[]) {
-    if (tagIds.length === 0) return;
+    if (tagIds.length === 0 || !userId) return;
 
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      const viewId = crypto.randomUUID();
-      const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
-      const optimisticView = buildOptimisticView({
-        id: viewId,
-        name,
-        tagIds,
-        views: snapshots.previousViews,
-        tags,
-        allListsSnapshot,
-      });
-
-      insertOptimisticViewIntoDashboardCaches(
-        queryClient,
-        dashboardKeys,
-        optimisticView,
-        allListsSnapshot
-      );
-      void commitLocalViewCreate({
-        userId,
-        viewId,
-        name,
-        tagIds,
-      }).catch(() => {});
-      setDialogState(null);
-      return;
-    }
-
-    createMutation.mutate({
-      id: crypto.randomUUID(),
+    const viewId = crypto.randomUUID();
+    const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
+    const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
+    const optimisticView = buildOptimisticView({
+      id: viewId,
       name,
       tagIds,
+      views: snapshots.previousViews,
+      tags,
+      allListsSnapshot,
     });
+
+    insertOptimisticViewIntoDashboardCaches(
+      queryClient,
+      dashboardKeys,
+      optimisticView,
+      allListsSnapshot
+    );
+    void commitLocalViewCreate({
+      userId,
+      viewId,
+      name,
+      tagIds,
+    }).catch(() => {});
     setDialogState(null);
   }
 
   function updateView(view: ViewItem, name: string, tagIds: string[]) {
-    if (tagIds.length === 0) return;
+    if (tagIds.length === 0 || !userId) return;
 
     const currentTagIds = view.viewTags.map((viewTag) => viewTag.tagId).sort();
     const nextTagIds = [...tagIds].sort();
     const nameChanged = view.name !== name;
     const tagsChanged = currentTagIds.join("|") !== nextTagIds.join("|");
 
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      if (nameChanged) {
-        applyViewRenameToViewsCache(queryClient, dashboardKeys, view.id, name);
-      }
-
-      if (tagsChanged) {
-        const allListsSnapshot =
-          queryClient.getQueryData<DashboardSnapshot>(queryKey);
-        const selectedTags = tags.filter((tag) => tagIds.includes(tag.id));
-
-        applyViewFilterUpdateToCaches(queryClient, dashboardKeys, {
-          viewId: view.id,
-          selectedTags,
-          allListsSnapshot,
-        });
-      }
-
-      if (nameChanged || tagsChanged) {
-        void commitLocalViewUpdate({
-          userId,
-          viewId: view.id,
-          ...(nameChanged ? { name } : {}),
-          ...(tagsChanged ? { tagIds } : {}),
-        }).catch(() => {});
-      }
-      setDialogState(null);
-      return;
-    }
-
     if (nameChanged) {
-      renameMutation.mutate({ id: view.id, name });
+      applyViewRenameToViewsCache(queryClient, dashboardKeys, view.id, name);
     }
 
     if (tagsChanged) {
-      updateFilterMutation.mutate({ id: view.id, tagIds });
+      const allListsSnapshot =
+        queryClient.getQueryData<DashboardSnapshot>(queryKey);
+      const selectedTags = tags.filter((tag) => tagIds.includes(tag.id));
+
+      applyViewFilterUpdateToCaches(queryClient, dashboardKeys, {
+        viewId: view.id,
+        selectedTags,
+        allListsSnapshot,
+      });
+    }
+
+    if (nameChanged || tagsChanged) {
+      void commitLocalViewUpdate({
+        userId,
+        viewId: view.id,
+        ...(nameChanged ? { name } : {}),
+        ...(tagsChanged ? { tagIds } : {}),
+      }).catch(() => {});
     }
 
     setDialogState(null);
   }
 
   function deleteView(id: string) {
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      captureViewMutationSnapshots(queryClient, dashboardKeys);
-      const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
+    if (!userId) return;
 
-      removeViewFromDashboardCaches(
-        queryClient,
-        dashboardKeys,
-        id,
-        allListsSnapshot
-      );
-      void commitLocalViewDelete({ userId, viewId: id }).catch(() => {});
-      return;
-    }
+    const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
 
-    deleteMutation.mutate({ id });
+    removeViewFromDashboardCaches(
+      queryClient,
+      dashboardKeys,
+      id,
+      allListsSnapshot
+    );
+    void commitLocalViewDelete({ userId, viewId: id }).catch(() => {});
   }
 
   function openCreateView() {
