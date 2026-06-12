@@ -8,24 +8,16 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrentView, OptimisticList } from "./types";
 import { Plus } from "lucide-react";
 import {
   buildDashboardKeys,
   insertOptimisticListIntoDashboardCaches,
-  invalidateViewPayloadQueries,
-  reconcileCreatedListInDashboardCaches,
-  rollbackDashboardCaches,
   selectedViewFromCache,
 } from "@/lib/dashboard-cache";
 import { LOCAL_ALL_LISTS_VIEW_ID } from "@/lib/local-first-dashboard";
-import { createLocalEntityBase, putLocalList } from "@/lib/local-db/local-repositories";
 import { commitLocalListCreate } from "@/lib/local-db/local-write";
-import {
-  captureDashboardMutationOutbox,
-  isOfflineWriteCaptureEnabled,
-} from "@/lib/sync/offline-write-prototype";
 import { Skeleton } from "../ui/skeleton";
 
 
@@ -76,150 +68,42 @@ const ListAdder = ({ boot }: ListAdderProps) => {
     )
   );
 
-  const { mutate: createList, isPending: createListPending } = useMutation(trpc.list.createList.mutationOptions({
-    async onMutate(variables) {
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
-      ]);
-
-      const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
-      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
-      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
-
-      if (!previousAllLists && !previousCurrentView) {
-        return { previousAllLists, previousCurrentView, previousSelectedView };
-      }
-
-      const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
-      const selectedViewTags = activeView?.viewTags ?? [];
-      const optimisticListTags = selectedViewTags.map((viewTag) => ({
-        listId: variables.id,
-        tagId: viewTag.tagId,
-        tag: viewTag.tag,
-      }));
-
-      const optimisticList: OptimisticList = {
-        id: variables.id,
-        userId: "optimistic",
-        name: variables.name,
-        order: (previousCurrentView?.lists.length ?? previousAllLists?.lists.length ?? 0) > 0
-          ? Math.min(...(previousCurrentView?.lists ?? previousAllLists?.lists ?? []).map((list) => list.order)) - 1
-          : 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        listTags: activeView?.type === "CUSTOM"
-          ? optimisticListTags
-          : [],
-        listItems: [],
-        isOptimistic: true
-      };
-
-      insertOptimisticListIntoDashboardCaches(
-        queryClient,
-        dashboardKeys,
-        optimisticList,
-        activeView
-      );
-
-      if (boot.userId) {
-        try {
-          const createdAt = optimisticList.createdAt.toISOString();
-          await putLocalList({
-            ...createLocalEntityBase({
-              clientId: variables.id,
-              userId: boot.userId,
-              syncStatus: "local",
-              createdAt,
-              updatedAt: createdAt,
-            }),
-            name: variables.name,
-          });
-        } catch {
-          // Local persistence is best-effort and must not block the optimistic insert.
-        }
-      }
-
-      return { previousAllLists, previousCurrentView, previousSelectedView };
-    },
-    async onSuccess(createdList, variables) {
-      await reconcileCreatedListInDashboardCaches(
-        queryClient,
-        dashboardKeys,
-        createdList,
-        variables.id
-      );
-      void captureDashboardMutationOutbox({
-        userId: createdList.userId,
-        entityType: "list",
-        entityClientId: variables.id,
-        entityServerId: createdList.id,
-        operationType: "create",
-        payload: {
-          name: variables.name,
-          viewId: variables.viewId ?? null,
-        },
-      });
-      await queryClient.invalidateQueries({ queryKey: dashboardKeys.views });
-      await invalidateViewPayloadQueries(queryClient);
-    },
-    onError(_error, _variables, context) {
-      rollbackDashboardCaches(queryClient, dashboardKeys, {
-        previousAllLists: context?.previousAllLists,
-        previousCurrentView: context?.previousCurrentView,
-        previousSelectedView: context?.previousSelectedView,
-      });
-    },
-  }));
-
   const handleCreateList = () => {
     const name = createListName.trim();
 
-    if (!name || createListPending) return;
+    if (!name || !boot.userId) return;
 
     const newListId = crypto.randomUUID();
-
-    if (isOfflineWriteCaptureEnabled() && boot.userId) {
-      const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
-      const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
-      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
-      const baseLists = previousCurrentView?.lists ?? previousAllLists?.lists ?? [];
-      const optimisticList: OptimisticList = {
-        id: newListId,
-        userId: "optimistic",
-        name,
-        order: baseLists.length > 0
-          ? Math.min(...baseLists.map((list) => list.order)) - 1
-          : 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        listTags: [],
-        listItems: [],
-        isOptimistic: true,
-      };
-
-      insertOptimisticListIntoDashboardCaches(
-        queryClient,
-        dashboardKeys,
-        optimisticList,
-        activeView,
-      );
-      void commitLocalListCreate({
-        userId: boot.userId,
-        listId: newListId,
-        name,
-      }).catch(() => {
-        // Local-first commit is best-effort and must not block the UI.
-      });
-      setCreateListName('');
-      return;
-    }
-
-    createList({
+    const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
+    const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
+    const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+    const baseLists = previousCurrentView?.lists ?? previousAllLists?.lists ?? [];
+    const optimisticList: OptimisticList = {
       id: newListId,
+      userId: "optimistic",
       name,
-      viewId: selectedView?.id === LOCAL_ALL_LISTS_VIEW_ID ? undefined : selectedView?.id,
+      order: baseLists.length > 0
+        ? Math.min(...baseLists.map((list) => list.order)) - 1
+        : 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      listTags: [],
+      listItems: [],
+      isOptimistic: true,
+    };
+
+    insertOptimisticListIntoDashboardCaches(
+      queryClient,
+      dashboardKeys,
+      optimisticList,
+      activeView,
+    );
+    void commitLocalListCreate({
+      userId: boot.userId,
+      listId: newListId,
+      name,
+    }).catch(() => {
+      // Local-first commit is best-effort and must not block the UI.
     });
     setCreateListName('');
   };
@@ -309,7 +193,7 @@ const ListAdder = ({ boot }: ListAdderProps) => {
               handleCreateList();
               setDialogOpen(false);
             }}
-            disabled={createListName.trim().length === 0 || createListPending}
+            disabled={createListName.trim().length === 0 || !boot.userId}
           >Create List
           </Button>
         </DialogFooter>
