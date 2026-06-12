@@ -15,6 +15,65 @@ import {
 } from "./utils/seed";
 import { testIds } from "./utils/test-ids";
 
+async function dumpOverlayDiagnostics(page: Page): Promise<void> {
+  try {
+    const diag = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open("tidy-local-db");
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+      try {
+        const readAll = <T,>(storeName: string) =>
+          new Promise<T[]>((resolve, reject) => {
+            const transaction = db.transaction(storeName, "readonly");
+            const request = transaction.objectStore(storeName).getAll();
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+          });
+        const [lists, operations] = await Promise.all([
+          readAll<{
+            clientId: string;
+            name: string;
+            syncStatus: string;
+          }>("lists"),
+          readAll<{
+            entityType: string;
+            operationType: string;
+            entityClientId: string;
+            status: string;
+          }>("outboxOperations"),
+        ]);
+        return {
+          lists: lists.map(({ clientId, name, syncStatus }) => ({
+            clientId,
+            name,
+            syncStatus,
+          })),
+          operations: operations.map(
+            ({ entityType, operationType, entityClientId, status }) => ({
+              entityType,
+              operationType,
+              entityClientId,
+              status,
+            }),
+          ),
+        };
+      } finally {
+        db.close();
+      }
+    });
+    const fs = await import("node:fs");
+    fs.writeFileSync(
+      "test-results/overlay-diag.json",
+      JSON.stringify(diag, null, 2),
+    );
+    console.log("OVERLAY_DIAG " + JSON.stringify(diag));
+  } catch (error) {
+    console.log("OVERLAY_DIAG_ERROR " + String(error));
+  }
+}
+
 config({ path: ".env.local", quiet: true });
 config({ path: ".env", quiet: true });
 
@@ -62,61 +121,6 @@ async function getLocalUserAndAllListsView(
     }
 
     await page.waitForTimeout(250);
-  }
-
-  try {
-    const diag = await page.evaluate(async () => {
-      const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open("tidy-local-db");
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-      });
-
-      try {
-        const readAll = <T,>(storeName: string) =>
-          new Promise<T[]>((resolve, reject) => {
-            const transaction = db.transaction(storeName, "readonly");
-            const request = transaction.objectStore(storeName).getAll();
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => resolve(request.result);
-          });
-        const [lists, operations] = await Promise.all([
-          readAll<{
-            clientId: string;
-            name: string;
-            syncStatus: string;
-          }>("lists"),
-          readAll<{
-            entityType: string;
-            operationType: string;
-            entityClientId: string;
-            status: string;
-          }>("outboxOperations"),
-        ]);
-
-        return {
-          lists: lists.map(({ clientId, name, syncStatus }) => ({
-            clientId,
-            name,
-            syncStatus,
-          })),
-          operations: operations.map(
-            ({ entityType, operationType, entityClientId, status }) => ({
-              entityType,
-              operationType,
-              entityClientId,
-              status,
-            }),
-          ),
-        };
-      } finally {
-        db.close();
-      }
-    });
-
-    console.log("OVERLAY_DIAG " + JSON.stringify(diag));
-  } catch (error) {
-    console.log("OVERLAY_DIAG_ERROR " + String(error));
   }
 
   return null;
@@ -191,6 +195,7 @@ async function waitForPendingListAndTagAttach(
     await page.waitForTimeout(250);
   }
 
+  await dumpOverlayDiagnostics(page);
   return null;
 }
 
