@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.28-alpha -->
+<!-- Current Version: 1.9.28 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.28-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.28 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.28 - Dexie-First Reconcile Overlay
 **Next**: 1.9.29 - Direct-Write Retirement & Default Dexie-First
 
