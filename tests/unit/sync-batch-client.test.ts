@@ -58,6 +58,7 @@ function createRepository(
 
   return {
     getPendingOutboxOperations: vi.fn(async () => operations),
+    getRetryableOutboxOperations: vi.fn(async () => operations),
     markOutboxOperationDiscarded: vi.fn(async ({ operationId }) =>
       updateOperation(operations, operationId, (operation) => ({
         ...operation,
@@ -167,8 +168,9 @@ describe("sync batch client", () => {
       repository,
     });
 
-    expect(repository.getPendingOutboxOperations).toHaveBeenCalledWith({
+    expect(repository.getRetryableOutboxOperations).toHaveBeenCalledWith({
       userId: "user-1",
+      now: expect.any(Number),
       limit: SYNC_BATCH_MAX_OPERATIONS,
     });
     expect(transport.mock.calls[0]?.[0].operations).toHaveLength(
