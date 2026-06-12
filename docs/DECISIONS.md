@@ -400,3 +400,13 @@ reconciliation from tag/view edits is deferred to batch sync plus reload.
 **Decision**: Split the work. 1.9.26 - Batch Sync Lifecycle, Retry & Recovery delivers the gated sync lifecycle only (quiet-window/threshold/reconnect/lifecycle flush, per-user single-flight suppression, backoff retry by re-selecting backoff-ready `failed` operations, stranded `syncing` recovery on reload), staying behind `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` with byte-identical gate-off behavior. A new 1.9.27 - Direct-Write Retirement & Default Dexie-First owns removing legacy direct tRPC dashboard persistence, the default-on flip, and the authenticated e2e re-baseline. The architecture closeout decision renumbers to 1.9.28.
 
 **Consequences**: Decision 4 (no dashboard CRUD/movement on direct tRPC) is now satisfied by 1.9.27 rather than 1.9.26. Decision 6 (bounded, durable, retryable lifecycle) is satisfied by 1.9.26. `seriesComplete` stays false until 1.9.28.
+
+## 2026-06-12: Overlay-first re-sequence - retirement requires a pending-outbox reconcile overlay (1.9.27)
+
+The 1.9.27 direct-write retirement attempt was committed on `wip/direct-write-retirement` but not merged. It exposed that removing direct tRPC dashboard persistence lets a settling or refocused dashboard query clobber unsynced optimistic create, tag, and view entries that already exist in Dexie and the outbox. Movement already had a pending-overlay defense; the other mutation categories did not.
+
+**Decision**: Insert 1.9.28 - Dexie-First Reconcile Overlay as a foundation phase before retiring direct writes. It will make unsynced local mutations survive server hydration. Renumber Direct-Write Retirement & Default Dexie-First to 1.9.29, seeded by `wip/direct-write-retirement`, and renumber Local-First Dashboard Architecture Closeout to 1.9.30.
+
+**Supersession**: This supersedes the sequencing of the 2026-06-11 split decision. Retirement now follows the overlay. Decision 4 remains satisfied by the retirement phase, now 1.9.29.
+
+**Impact**: `seriesComplete` stays false; 1.9.30 decides whether the local-first series is complete.
