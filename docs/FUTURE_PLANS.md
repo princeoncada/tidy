@@ -265,6 +265,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.26 - Batch Sync Lifecycle, Retry & Recovery (active) - see Planned
 ---
 
 ## Planned
