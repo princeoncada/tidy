@@ -267,6 +267,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence) (active) - see Planned
 ---
 
 ## Planned
