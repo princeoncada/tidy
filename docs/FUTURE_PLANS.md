@@ -258,6 +258,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.26 - Batch Sync Lifecycle, Retry & Recovery~~ (stable 2026-06-12)
 
+- ~~1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)~~ (stable 2026-06-12)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -266,22 +268,10 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## In Progress
 
-- 1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)
 
 ---
 
 ## Planned
-
-### 1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)
-- **Status:** In progress | Priority: P1 docs/workflow
-- **Type:** docs/workflow
-- **Files:** docs/DECISIONS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md
-- **Implementation goal:** record the overlay-first decision and re-sequence the local-first arc so a reconcile-overlay foundation precedes direct-write retirement.
-- **Product impact:** none - planning correction.
-- **Runtime integration target:** none.
-- **Deferral boundary:** builds no overlay and retires no writes; those are 1.9.28 and 1.9.29.
-- **Validation target:** targeted alpha (validate.ps1 consistency); full validate.ps1 at the gate.
-- **Acceptance:** the roadmap reflects overlay-before-retirement and STATE.nextPhase equals the first Planned heading.
 
 ### 1.9.28 - Dexie-First Reconcile Overlay
 - **Status:** Open | Priority: P1 product (local-first foundation)
