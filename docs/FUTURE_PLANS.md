@@ -270,18 +270,29 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
-### 1.9.26 - Batch Sync Lifecycle, Retry & Direct-Write Retirement
+### 1.9.26 - Batch Sync Lifecycle, Retry & Recovery
+- **Status:** In progress | Priority: P1 product (local-first)
+- **Type:** product behavior
+- **Files:** hooks/use-offline-replay-trigger.ts, lib/sync/flush-scheduler.ts, lib/sync/retry-backoff.ts, lib/sync/outbox-capture-events.ts, lib/sync/offline-write-prototype.ts, lib/local-db/outbox-repository.ts, lib/local-db/sync-replay-client.ts, tests
+- **Implementation goal:** finish the production sync lifecycle behind the existing gate: flush after a bounded quiet window or batch-size threshold, on reconnect, and on safe lifecycle opportunities; allow only one in-flight flush per user; retry transient failures with backoff by re-selecting backoff-ready `failed` operations; and recover stranded `syncing` operations on reload. Direct-write retirement is explicitly deferred to 1.9.27.
+- **Product impact:** normal interaction produces local updates without request spam, then synchronizes multiple changes in one bounded request with visible pending/error state and durable recovery after a crash or reload.
+- **Runtime integration target:** Dexie remains the gated primary local dashboard source, PostgreSQL/Supabase is the remote durable source, and `/api/sync` batch flushes are the single remote write path for gated dashboard state. The prototype gate stays default-off and gate-off behavior is byte-identical.
+- **Deferral boundary:** legacy direct tRPC dashboard persistence and the default-on flip stay untouched here and move to 1.9.27. The architecture closeout decision is 1.9.28.
+- **Validation target:** targeted alpha (backoff math, retryable selection, stranded recovery, scheduler debounce/threshold/single-flight units, plus one gated isolated e2e request-count batching + reload-recovery proof); full test:ci before stable.
+- **Acceptance:** a gated multi-action burst reaches the server in one bounded batch request after the quiet window rather than one request per action, a transient failure returns to a retryable state and later syncs, and a stranded `syncing` operation is recovered and synced after reload.
+
+### 1.9.27 - Direct-Write Retirement & Default Dexie-First
 - **Status:** Open | Priority: P1 product (local-first)
 - **Type:** product behavior
-- **Files:** hooks/use-offline-replay-trigger.ts, lib/sync/*, lib/local-db/*, dashboard mutation components, tests
-- **Implementation goal:** finish the production sync lifecycle: flush after a bounded quiet window or batch-size threshold, on reconnect, and on safe lifecycle opportunities; prevent concurrent flushes; retry transient failures with backoff; recover stranded `syncing`/`failed` operations; and remove remaining component-level direct tRPC persistence for dashboard mutations.
-- **Product impact:** normal interaction produces local updates without request spam, then synchronizes multiple changes in one bounded request with visible pending/error state.
-- **Runtime integration target:** Dexie is the primary local dashboard source, PostgreSQL/Supabase is the remote durable source, and `/api/sync` batch flushes are the single remote write path for dashboard state.
-- **Deferral boundary:** no dashboard CRUD or movement slice may remain on direct tRPC persistence. The architecture closeout decision is 1.9.27.
-- **Validation target:** targeted alpha (flush timing/thresholds, retry/backoff, crash/reload recovery, concurrent-trigger suppression, request-count assertions, and full manual multi-action proof); full test:ci before stable.
-- **Acceptance:** a representative multi-action session updates instantly from Dexie and reaches the server in bounded batch requests rather than one request per action; all acknowledged operations survive reload and match PostgreSQL.
+- **Files:** components/list/*, components/views/*, dashboard mutation components, hooks/*, lib/sync/*, tests/e2e/*
+- **Implementation goal:** make Dexie-first the default dashboard write path and remove remaining component-level direct tRPC persistence for list, item, reorder/move, tag, view, selection, and relationship writes, then re-baseline the authenticated e2e suite that currently asserts per-action tRPC mutations.
+- **Product impact:** every dashboard mutation persists through Dexie/outbox and the batch endpoint by default; per-action tRPC persistence no longer runs.
+- **Runtime integration target:** Dexie is the default primary local dashboard source and `/api/sync` batch flushes are the only remote dashboard write path; tRPC query procedures may remain the online hydration/read bridge.
+- **Deferral boundary:** no dashboard CRUD or movement slice may remain on direct tRPC persistence by the end of this phase. The architecture closeout decision is 1.9.28.
+- **Validation target:** targeted alpha (default-path mutation coverage, rewritten authenticated e2e); full test:ci before stable.
+- **Acceptance:** with the prototype gate removed or defaulted on, a representative multi-action session updates instantly from Dexie, reaches the server in bounded batch requests, and the authenticated suite passes against the Dexie-first default.
 
-### 1.9.27 - Local-First Dashboard Architecture Closeout
+### 1.9.28 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
@@ -399,8 +410,8 @@ Assigned a version only when scoped.
 - Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
 - The reconciled Dexie fallback is structurally complete, but offline freshness is bounded by the last successful server seed and pending local work.
 - Most dashboard actions still persist through direct tRPC mutations, so the app does not yet satisfy Dexie-first writes or bounded multi-action synchronization.
-- The bounded batch endpoint applies accepted operations, but the path remains gated off by default and dashboard actions still use transitional direct tRPC persistence until 1.9.23-1.9.26.
-- Failed replay operations can become stranded because replay selects `pending` rows while failures are marked `failed`; lifecycle recovery is required by 1.9.26.
+- The bounded batch endpoint applies accepted operations, but the path remains gated off by default and dashboard actions still use transitional direct tRPC persistence until 1.9.27.
+- 1.9.26 adds backoff-ready `failed` selection and stranded `syncing` recovery; cross-tab flush coordination remains a follow-up.
 - Large components increase risk for focused changes.
 - Frontend projection and backend refresh must agree before UI/UX polish.
 
