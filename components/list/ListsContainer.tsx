@@ -2,8 +2,6 @@
 
 import {
   buildDashboardKeys,
-  buildPersistedItemOrderPayload,
-  buildPersistedListOrderPayload,
   canApplySelectedViewPayload,
   DashboardSnapshot,
   selectedViewFromCache,
@@ -12,7 +10,6 @@ import {
 import {
   measureCacheWrite,
   measureOptimisticEvent,
-  measureRequest,
   OptimisticProfiler,
   useRenderMeasure,
 } from '@/lib/optimistic-debug';
@@ -44,10 +41,9 @@ import {
   commitLocalListReorder,
 } from '@/lib/local-db/local-write';
 import { subscribeToOutboxCaptures } from '@/lib/sync/outbox-capture-events';
-import { isOfflineWriteCaptureEnabled } from '@/lib/sync/offline-write-prototype';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
@@ -219,8 +215,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const movementCaptureEnabled =
-    isOfflineWriteCaptureEnabled() && Boolean(boot.userId);
+  const movementCaptureEnabled = Boolean(boot.userId);
   const [pendingMovementOperations, setPendingMovementOperations] = useState<
     Parameters<typeof applyPendingOutboxOverlay>[1]
   >([]);
@@ -492,14 +487,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const lists = currentView?.lists ?? [];
   const visibleLists = dragPreviewLists ?? lists;
 
-  const reorderViewListsMutation = useMutation(
-    trpc.view.reorderViewLists.mutationOptions()
-  );
-
-  const reorderListItemsMutation = useMutation(
-    trpc.listItem.reorderListItems.mutationOptions()
-  );
-
   const reorderListsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reorderListItemsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingItemMovementBaseRef = useRef<Lists | null>(null);
@@ -554,6 +541,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   }, [currentView?.view.id, currentView?.view.type, currentViewQueryKey, queryClient, queryKey, viewsQueryKey]);
 
   const scheduleReorderListsSave = useCallback(async (nextLists: Lists) => {
+    if (!boot.userId) return;
+
     await Promise.all([
       queryClient.cancelQueries({ queryKey }),
       queryClient.cancelQueries({ queryKey: currentViewQueryKey }),
@@ -568,30 +557,18 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     reorderListsTimeoutRef.current = setTimeout(() => {
       optimisticSync.replacePending("list-order", async () => {
-        if (!currentView) return;
-        const savedLists = buildPersistedListOrderPayload(nextLists);
-        if (savedLists.length === 0) return;
+        if (!currentView || !boot.userId) return;
 
-        if (isOfflineWriteCaptureEnabled() && boot.userId) {
-          try {
-            await commitLocalListReorder({
-              userId: boot.userId,
-              viewId: currentView.view.id,
-              orderedListIds: savedLists.map((list) => list.id),
-            });
-            await refreshPendingMovementOperations();
-          } catch {
-            // Local persistence must not replace the committed cache placement.
-          }
-          writeListOrderToCaches(nextLists);
-          return;
+        try {
+          await commitLocalListReorder({
+            userId: boot.userId,
+            viewId: currentView.view.id,
+            orderedListIds: nextLists.map((list) => list.id),
+          });
+          await refreshPendingMovementOperations();
+        } catch {
+          // Local persistence must not replace the committed cache placement.
         }
-
-        measureRequest("view.reorderViewLists", { count: savedLists.length });
-        await reorderViewListsMutation.mutateAsync({
-          viewId: currentView.view.id,
-          lists: savedLists
-        });
         writeListOrderToCaches(nextLists);
       }, { label: "view.reorderViewLists" });
     }, 300);
@@ -603,7 +580,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     optimisticSync,
     queryClient,
     refreshPendingMovementOperations,
-    reorderViewListsMutation,
     writeListOrderToCaches,
     viewsQueryKey,
   ]);
@@ -629,6 +605,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     previousLists: Lists,
     nextLists: Lists,
   ) => {
+    if (!boot.userId) return;
+
     await Promise.all([
       queryClient.cancelQueries({ queryKey: allListsQueryKey }),
       queryClient.cancelQueries({ queryKey }),
@@ -648,48 +626,35 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
       pendingItemMovementBaseRef.current = null;
 
       optimisticSync.replacePending("item-order", async () => {
-        if (isOfflineWriteCaptureEnabled() && boot.userId) {
-          const intents = translateListItemMovement(
-            movementBase,
-            nextLists,
-          );
+        if (!boot.userId) return;
 
-          try {
-            for (const intent of intents) {
-              if (intent.type === "move") {
-                await commitLocalListItemMove({
-                  userId: boot.userId,
-                  itemId: intent.itemId,
-                  toListId: intent.toListId,
-                  order: intent.order,
-                });
-                continue;
-              }
+        const intents = translateListItemMovement(
+          movementBase,
+          nextLists,
+        );
 
-              await commitLocalListItemReorder({
+        try {
+          for (const intent of intents) {
+            if (intent.type === "move") {
+              await commitLocalListItemMove({
                 userId: boot.userId,
-                listId: intent.listId,
-                orderedItemIds: intent.orderedItemIds,
+                itemId: intent.itemId,
+                toListId: intent.toListId,
+                order: intent.order,
               });
+              continue;
             }
-            await refreshPendingMovementOperations();
-          } catch {
-            // Local persistence must not replace the committed cache placement.
+
+            await commitLocalListItemReorder({
+              userId: boot.userId,
+              listId: intent.listId,
+              orderedItemIds: intent.orderedItemIds,
+            });
           }
-          writeListItemOrderToCaches(nextLists);
-          return;
+          await refreshPendingMovementOperations();
+        } catch {
+          // Local persistence must not replace the committed cache placement.
         }
-
-        const savedItems = buildPersistedItemOrderPayload(nextLists);
-
-        if (savedItems.length === 0) return;
-
-        measureRequest("listItem.reorderListItems", {
-          count: savedItems.length,
-        });
-        await reorderListItemsMutation.mutateAsync({
-          items: savedItems
-        });
         writeListItemOrderToCaches(nextLists);
       }, { label: "listItem.reorderListItems" });
     }, 300);
@@ -701,7 +666,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     optimisticSync,
     queryClient,
     refreshPendingMovementOperations,
-    reorderListItemsMutation,
     writeListItemOrderToCaches,
   ]);
 
@@ -870,7 +834,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                 listValues={list}
                 index={index}
                 userId={boot.userId}
-                enqueue={optimisticSync.enqueue}
                 activeDropTarget={activeDropTarget}
                 dashboardKeys={dashboardKeys}
                 shouldRevealOnMount={
@@ -885,7 +848,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                       listItem={item}
                       index={index}
                       userId={boot.userId}
-                      enqueue={optimisticSync.enqueue}
                       dashboardKeys={dashboardKeys}
                       shouldRevealOnMount={
                         Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
