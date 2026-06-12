@@ -580,8 +580,9 @@
         "@/lib/local-first-reconcile",
         "@/lib/local-db/local-repositories",
         "@/lib/local-db/local-movement",
-        "@/lib/local-db/local-movement-repository",
+        "@/lib/local-db/local-overlay",
         "@/lib/local-db/local-write",
+        "@/lib/sync/outbox-capture-events",
         "@/lib/sync/offline-write-prototype",
         "@/trpc/client",
         "@dnd-kit/react",
@@ -1470,6 +1471,24 @@
       ]
     },
     {
+      "path": "lib/local-db/local-overlay.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "applyPendingOutboxOverlay",
+        "applyPendingViewOverlay",
+        "readPendingOutboxOperationsForUser"
+      ],
+      "imports": [
+        "@/lib/dashboard-cache",
+        "./local-movement",
+        "./local-repositories",
+        "./local-schema",
+        "./outbox-schema",
+        "./tidy-db"
+      ]
+    },
+    {
       "path": "lib/local-db/local-repositories.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2231,6 +2250,22 @@
       ]
     },
     {
+      "path": "tests/e2e/dexie-first-overlay-survival.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "dotenv",
+        "@playwright/test",
+        "./utils/fixtures",
+        "./utils/app",
+        "./utils/assertions",
+        "./utils/seed",
+        "./utils/test-ids",
+        "@/lib/db"
+      ]
+    },
+    {
       "path": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2603,6 +2638,21 @@
         "@/components/list/types",
         "@/lib/local-db/local-repositories",
         "@/lib/local-db/local-movement"
+      ]
+    },
+    {
+      "path": "tests/unit/local-overlay.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/dashboard-cache",
+        "@/lib/local-db/local-movement",
+        "@/lib/local-db/local-overlay",
+        "@/lib/local-db/local-repositories",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/local-db/tidy-db"
       ]
     },
     {
@@ -3805,15 +3855,15 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
-      "to": "lib/local-db/local-movement-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-movement-repository"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
       "to": "lib/local-db/local-movement.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-movement"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/local-db/local-overlay.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-overlay"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -3850,6 +3900,12 @@
       "to": "lib/sync/offline-write-prototype.ts",
       "type": "imports",
       "import": "@/lib/sync/offline-write-prototype"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/sync/outbox-capture-events.ts",
+      "type": "imports",
+      "import": "@/lib/sync/outbox-capture-events"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -4464,6 +4520,42 @@
       "import": "./outbox-schema"
     },
     {
+      "from": "lib/local-db/local-overlay.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "lib/local-db/local-overlay.ts",
+      "to": "lib/local-db/local-movement.ts",
+      "type": "imports",
+      "import": "./local-movement"
+    },
+    {
+      "from": "lib/local-db/local-overlay.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "./local-repositories"
+    },
+    {
+      "from": "lib/local-db/local-overlay.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "./local-schema"
+    },
+    {
+      "from": "lib/local-db/local-overlay.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "./outbox-schema"
+    },
+    {
+      "from": "lib/local-db/local-overlay.ts",
+      "to": "lib/local-db/tidy-db.ts",
+      "type": "imports",
+      "import": "./tidy-db"
+    },
+    {
       "from": "lib/local-db/local-repositories.ts",
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
@@ -4792,6 +4884,42 @@
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
+      "to": "tests/e2e/utils/app.ts",
+      "type": "imports",
+      "import": "./utils/app"
+    },
+    {
+      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
+      "to": "tests/e2e/utils/assertions.ts",
+      "type": "imports",
+      "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
+      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
+      "to": "tests/e2e/utils/test-ids.ts",
+      "type": "imports",
+      "import": "./utils/test-ids"
     },
     {
       "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
@@ -5200,6 +5328,42 @@
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "tests/unit/local-overlay.test.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "tests/unit/local-overlay.test.ts",
+      "to": "lib/local-db/local-movement.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-movement"
+    },
+    {
+      "from": "tests/unit/local-overlay.test.ts",
+      "to": "lib/local-db/local-overlay.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-overlay"
+    },
+    {
+      "from": "tests/unit/local-overlay.test.ts",
+      "to": "lib/local-db/local-repositories.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-repositories"
+    },
+    {
+      "from": "tests/unit/local-overlay.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/local-overlay.test.ts",
+      "to": "lib/local-db/tidy-db.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/tidy-db"
     },
     {
       "from": "tests/unit/local-repositories.test.ts",
