@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.28-alpha",
-    "state":  "alpha",
+    "version":  "1.9.28",
+    "state":  "stable",
     "phase":  "1.9.28",
     "phaseTitle":  "Dexie-First Reconcile Overlay",
     "nextPhase":  "1.9.29 - Direct-Write Retirement \u0026 Default Dexie-First",
