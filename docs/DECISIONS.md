@@ -392,3 +392,11 @@ without creating one metadata entity key per view.
 create/update/delete, and selected-view save commit atomically to Dexie plus the outbox and skip direct
 component tRPC persistence. Optimistic cache projection remains immediate. Custom-view membership
 reconciliation from tag/view edits is deferred to batch sync plus reload.
+
+## 2026-06-11: Split 1.9.26 into sync lifecycle (1.9.26) and direct-write retirement (1.9.27)
+
+**Context**: The original 1.9.26 bundled batch sync lifecycle/retry/recovery with removal of legacy direct tRPC dashboard persistence and the Dexie-first default-on flip. The retirement collides with the GATE-OFF authenticated e2e contract (the suite asserts per-action tRPC mutations via `waitForSuccessfulTrpcMutation`), so bundling forced an outsized, hard-to-validate alpha.
+
+**Decision**: Split the work. 1.9.26 - Batch Sync Lifecycle, Retry & Recovery delivers the gated sync lifecycle only (quiet-window/threshold/reconnect/lifecycle flush, per-user single-flight suppression, backoff retry by re-selecting backoff-ready `failed` operations, stranded `syncing` recovery on reload), staying behind `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` with byte-identical gate-off behavior. A new 1.9.27 - Direct-Write Retirement & Default Dexie-First owns removing legacy direct tRPC dashboard persistence, the default-on flip, and the authenticated e2e re-baseline. The architecture closeout decision renumbers to 1.9.28.
+
+**Consequences**: Decision 4 (no dashboard CRUD/movement on direct tRPC) is now satisfied by 1.9.27 rather than 1.9.26. Decision 6 (bounded, durable, retryable lifecycle) is satisfied by 1.9.26. `seriesComplete` stays false until 1.9.28.

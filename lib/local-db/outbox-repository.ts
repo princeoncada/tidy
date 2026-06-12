@@ -4,6 +4,7 @@ import {
   type LocalOutboxOperation,
 } from "./outbox-schema";
 import type { TidyLocalDatabase } from "./tidy-db";
+import { isOutboxOperationRetryReady } from "@/lib/sync/retry-backoff";
 
 export type LocalOutboxRepositoryDatabase = {
   outboxOperations: {
@@ -29,6 +30,13 @@ type FailedUpdateArgs = TimestampedUpdateArgs & {
 
 type PendingQueryArgs = {
   userId: string;
+  limit?: number;
+  db?: LocalOutboxRepositoryDatabase;
+};
+
+type RetryableQueryArgs = {
+  userId: string;
+  now: number;
   limit?: number;
   db?: LocalOutboxRepositoryDatabase;
 };
@@ -86,6 +94,33 @@ export async function getPendingOutboxOperations({
   return typeof limit === "number" ? operations.slice(0, limit) : operations;
 }
 
+export async function getRetryableOutboxOperations({
+  userId,
+  now,
+  limit,
+  db,
+}: RetryableQueryArgs): Promise<LocalOutboxOperation[]> {
+  const repositoryDb = getOutboxRepositoryDb(db);
+  const [pendingOperations, failedOperations] = await Promise.all([
+    repositoryDb.outboxOperations
+      .where("[userId+status]")
+      .equals([userId, "pending"])
+      .sortBy("createdAt"),
+    repositoryDb.outboxOperations
+      .where("[userId+status]")
+      .equals([userId, "failed"])
+      .sortBy("createdAt"),
+  ]);
+
+  const retryable = [...pendingOperations, ...failedOperations]
+    .filter((operation) => isOutboxOperationRetryReady({ operation, now }))
+    .sort((a, b) =>
+      a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0,
+    );
+
+  return typeof limit === "number" ? retryable.slice(0, limit) : retryable;
+}
+
 export async function getOutboxOperationsForUser({
   userId,
   db,
@@ -112,6 +147,46 @@ export async function markOutboxOperationSyncing(
       errorMessage: null,
     }),
   });
+}
+
+export async function markOutboxOperationPending(
+  args: TimestampedUpdateArgs,
+): Promise<LocalOutboxOperation | null> {
+  return updateOutboxOperation({
+    ...args,
+    update: (operation, updatedAt) => ({
+      ...operation,
+      status: "pending",
+      updatedAt,
+      errorMessage: null,
+    }),
+  });
+}
+
+export async function recoverStrandedSyncingOperations({
+  userId,
+  db,
+}: {
+  userId: string;
+  db?: LocalOutboxRepositoryDatabase;
+}): Promise<LocalOutboxOperation[]> {
+  const stranded = await getOutboxRepositoryDb(db)
+    .outboxOperations.where("[userId+status]")
+    .equals([userId, "syncing"])
+    .sortBy("createdAt");
+
+  const recovered: LocalOutboxOperation[] = [];
+  for (const operation of stranded) {
+    const reset = await markOutboxOperationPending(
+      db !== undefined
+        ? { operationId: operation.operationId, db }
+        : { operationId: operation.operationId },
+    );
+    if (reset) {
+      recovered.push(reset);
+    }
+  }
+  return recovered;
 }
 
 export async function markOutboxOperationSynced(

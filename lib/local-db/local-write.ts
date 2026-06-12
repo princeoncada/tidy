@@ -14,6 +14,7 @@ import type {
 } from "./outbox-schema";
 import type { LocalTagColor } from "./local-schema";
 import type { TidyLocalDatabase } from "./tidy-db";
+import { notifyOutboxCaptured } from "@/lib/sync/outbox-capture-events";
 
 type LocalWriteIntent = {
   userId: string;
@@ -198,6 +199,8 @@ async function appendCoalescedOutbox(
   for (const survivor of operations as LocalOutboxOperation[]) {
     await db.outboxOperations.put(survivor);
   }
+
+  notifyOutboxCaptured({ userId: intent.userId });
 }
 
 export async function commitLocalListCreate({

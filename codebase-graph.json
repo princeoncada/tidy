@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.25",
-  "generatedAt": "2026-06-11",
+  "version": "1.9.26-alpha",
+  "generatedAt": "2026-06-12",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -1304,7 +1304,9 @@
       "imports": [
         "react",
         "@/lib/supabase/client",
-        "@/lib/sync/offline-write-prototype"
+        "@/lib/sync/flush-scheduler",
+        "@/lib/sync/offline-write-prototype",
+        "@/lib/sync/outbox-capture-events"
       ]
     },
     {
@@ -1552,7 +1554,8 @@
         "./local-repositories",
         "./outbox-schema",
         "./local-schema",
-        "./tidy-db"
+        "./tidy-db",
+        "@/lib/sync/outbox-capture-events"
       ]
     },
     {
@@ -1596,16 +1599,20 @@
         "getOutboxOperationById",
         "getOutboxOperationsForUser",
         "getPendingOutboxOperations",
+        "getRetryableOutboxOperations",
         "incrementRetryCount",
         "markOutboxOperationDiscarded",
         "markOutboxOperationFailed",
+        "markOutboxOperationPending",
         "markOutboxOperationSynced",
-        "markOutboxOperationSyncing"
+        "markOutboxOperationSyncing",
+        "recoverStrandedSyncingOperations"
       ],
       "imports": [
         "./local-repositories",
         "./outbox-schema",
-        "./tidy-db"
+        "./tidy-db",
+        "@/lib/sync/retry-backoff"
       ]
     },
     {
@@ -1827,6 +1834,19 @@
       ]
     },
     {
+      "path": "lib/sync/flush-scheduler.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "CreateFlushSchedulerArgs",
+        "FLUSH_BATCH_SIZE_THRESHOLD",
+        "FLUSH_QUIET_WINDOW_MS",
+        "FlushScheduler",
+        "createFlushScheduler"
+      ],
+      "imports": []
+    },
+    {
       "path": "lib/sync/offline-write-prototype.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1851,7 +1871,35 @@
         "@/lib/local-db/local-repositories",
         "@/lib/sync/sync-status-surface",
         "@/lib/local-db/outbox-schema",
-        "@/lib/sync/sync-batch-contract"
+        "@/lib/sync/sync-batch-contract",
+        "@/lib/sync/outbox-capture-events"
+      ]
+    },
+    {
+      "path": "lib/sync/outbox-capture-events.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "OutboxCaptureEvent",
+        "notifyOutboxCaptured",
+        "subscribeToOutboxCaptures"
+      ],
+      "imports": []
+    },
+    {
+      "path": "lib/sync/retry-backoff.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "RETRY_BASE_DELAY_MS",
+        "RETRY_MAX_ATTEMPTS",
+        "RETRY_MAX_DELAY_MS",
+        "computeRetryDelayMs",
+        "isOutboxOperationRetryExhausted",
+        "isOutboxOperationRetryReady"
+      ],
+      "imports": [
+        "@/lib/local-db/outbox-schema"
       ]
     },
     {
@@ -2183,6 +2231,22 @@
       ]
     },
     {
+      "path": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "dotenv",
+        "@playwright/test",
+        "./utils/fixtures",
+        "./utils/app",
+        "./utils/assertions",
+        "./utils/seed",
+        "./utils/test-ids",
+        "@/lib/db"
+      ]
+    },
+    {
       "path": "tests/e2e/dexie-first-tags-views.spec.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2449,6 +2513,16 @@
       ]
     },
     {
+      "path": "tests/unit/flush-scheduler.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/flush-scheduler"
+      ]
+    },
+    {
       "path": "tests/unit/lists-container-local-fallback.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2630,6 +2704,17 @@
       "symbols": [],
       "imports": [
         "vitest",
+        "@/lib/local-db/outbox-schema"
+      ]
+    },
+    {
+      "path": "tests/unit/retry-backoff.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/retry-backoff",
         "@/lib/local-db/outbox-schema"
       ]
     },
@@ -4242,9 +4327,21 @@
     },
     {
       "from": "hooks/use-offline-replay-trigger.ts",
+      "to": "lib/sync/flush-scheduler.ts",
+      "type": "imports",
+      "import": "@/lib/sync/flush-scheduler"
+    },
+    {
+      "from": "hooks/use-offline-replay-trigger.ts",
       "to": "lib/sync/offline-write-prototype.ts",
       "type": "imports",
       "import": "@/lib/sync/offline-write-prototype"
+    },
+    {
+      "from": "hooks/use-offline-replay-trigger.ts",
+      "to": "lib/sync/outbox-capture-events.ts",
+      "type": "imports",
+      "import": "@/lib/sync/outbox-capture-events"
     },
     {
       "from": "hooks/use-sync-status-surface.ts",
@@ -4421,6 +4518,12 @@
       "import": "./tidy-db"
     },
     {
+      "from": "lib/local-db/local-write.ts",
+      "to": "lib/sync/outbox-capture-events.ts",
+      "type": "imports",
+      "import": "@/lib/sync/outbox-capture-events"
+    },
+    {
       "from": "lib/local-db/metadata-repository.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -4461,6 +4564,12 @@
       "to": "lib/local-db/tidy-db.ts",
       "type": "imports",
       "import": "./tidy-db"
+    },
+    {
+      "from": "lib/local-db/outbox-repository.ts",
+      "to": "lib/sync/retry-backoff.ts",
+      "type": "imports",
+      "import": "@/lib/sync/retry-backoff"
     },
     {
       "from": "lib/local-db/outbox-schema.ts",
@@ -4590,6 +4699,12 @@
     },
     {
       "from": "lib/sync/offline-write-prototype.ts",
+      "to": "lib/sync/outbox-capture-events.ts",
+      "type": "imports",
+      "import": "@/lib/sync/outbox-capture-events"
+    },
+    {
+      "from": "lib/sync/offline-write-prototype.ts",
       "to": "lib/sync/sync-batch-contract.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-batch-contract"
@@ -4599,6 +4714,12 @@
       "to": "lib/sync/sync-status-surface.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-status-surface"
+    },
+    {
+      "from": "lib/sync/retry-backoff.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
     },
     {
       "from": "lib/sync/server-apply.ts",
@@ -4671,6 +4792,42 @@
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
+      "to": "tests/e2e/utils/app.ts",
+      "type": "imports",
+      "import": "./utils/app"
+    },
+    {
+      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
+      "to": "tests/e2e/utils/assertions.ts",
+      "type": "imports",
+      "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
+      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
+      "to": "tests/e2e/utils/test-ids.ts",
+      "type": "imports",
+      "import": "./utils/test-ids"
     },
     {
       "from": "tests/e2e/dexie-first-tags-views.spec.ts",
@@ -4943,6 +5100,12 @@
       "import": "@/lib/local-db/local-schema"
     },
     {
+      "from": "tests/unit/flush-scheduler.test.ts",
+      "to": "lib/sync/flush-scheduler.ts",
+      "type": "imports",
+      "import": "@/lib/sync/flush-scheduler"
+    },
+    {
       "from": "tests/unit/local-db-diagnostics.test.ts",
       "to": "lib/local-db/local-db-diagnostics.ts",
       "type": "imports",
@@ -5175,6 +5338,18 @@
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/retry-backoff.test.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/retry-backoff.test.ts",
+      "to": "lib/sync/retry-backoff.ts",
+      "type": "imports",
+      "import": "@/lib/sync/retry-backoff"
     },
     {
       "from": "tests/unit/router-ownership-baseline.test.ts",

@@ -4,11 +4,14 @@ import {
   enqueueOutboxOperation,
   getOutboxOperationById,
   getPendingOutboxOperations,
+  getRetryableOutboxOperations,
   incrementRetryCount,
   markOutboxOperationDiscarded,
   markOutboxOperationFailed,
+  markOutboxOperationPending,
   markOutboxOperationSynced,
   markOutboxOperationSyncing,
+  recoverStrandedSyncingOperations,
   type LocalOutboxRepositoryDatabase,
 } from "@/lib/local-db/outbox-repository";
 import type { LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
@@ -57,12 +60,15 @@ function createFakeOutboxDb(initialOperations: LocalOutboxOperation[] = []) {
             const [userId, status] = value;
 
             return Array.from(operations.values())
-              .filter((operation) => operation.userId === userId && operation.status === status)
+              .filter(
+                (operation: LocalOutboxOperation) =>
+                  operation.userId === userId && operation.status === status,
+              )
               .sort((left, right) =>
                 String(left[fieldName as keyof LocalOutboxOperation]).localeCompare(
                   String(right[fieldName as keyof LocalOutboxOperation]),
                 ),
-              );
+            );
           }),
         })),
       })),
@@ -143,6 +149,53 @@ describe("outbox repository helpers", () => {
     ]);
   });
 
+  it("returns pending and backoff-ready failed operations in created order with a limit", async () => {
+    const now = Date.parse("2026-05-10T10:10:00.000Z");
+    const { db } = createFakeOutboxDb([
+      createOperation({
+        operationId: "pending",
+        createdAt: "2026-05-10T10:00:00.000Z",
+        idempotencyKey: "pending",
+      }),
+      createOperation({
+        operationId: "failed-ready",
+        status: "failed",
+        retryCount: 1,
+        lastAttemptedAt: "2026-05-10T10:09:58.000Z",
+        createdAt: "2026-05-10T10:01:00.000Z",
+        idempotencyKey: "failed-ready",
+      }),
+      createOperation({
+        operationId: "failed-waiting",
+        status: "failed",
+        retryCount: 2,
+        lastAttemptedAt: "2026-05-10T10:09:59.000Z",
+        createdAt: "2026-05-10T10:02:00.000Z",
+        idempotencyKey: "failed-waiting",
+      }),
+      ...(["syncing", "synced", "discarded"] as const).map((status) =>
+        createOperation({
+          operationId: status,
+          status,
+          createdAt: `2026-05-10T10:0${status.length}:00.000Z`,
+          idempotencyKey: status,
+        }),
+      ),
+    ]);
+
+    await expect(
+      getRetryableOutboxOperations({
+        userId: "user-1",
+        now,
+        limit: 2,
+        db,
+      }),
+    ).resolves.toEqual([
+      expect.objectContaining({ operationId: "pending" }),
+      expect.objectContaining({ operationId: "failed-ready" }),
+    ]);
+  });
+
   it("marks an operation syncing and records the attempt time", async () => {
     const { db } = createFakeOutboxDb([createOperation({ errorMessage: "Previous failure" })]);
 
@@ -176,6 +229,78 @@ describe("outbox repository helpers", () => {
       updatedAt: "2026-05-10T10:06:00.000Z",
       errorMessage: null,
     });
+  });
+
+  it("marks an operation pending, clears error text, and preserves retry count", async () => {
+    const { db } = createFakeOutboxDb([
+      createOperation({
+        status: "failed",
+        retryCount: 3,
+        errorMessage: "Network unavailable",
+      }),
+    ]);
+
+    await expect(
+      markOutboxOperationPending({
+        operationId: "op-1",
+        updatedAt: "2026-05-10T10:05:30.000Z",
+        db,
+      }),
+    ).resolves.toMatchObject({
+      status: "pending",
+      retryCount: 3,
+      errorMessage: null,
+      updatedAt: "2026-05-10T10:05:30.000Z",
+    });
+  });
+
+  it("recovers every stranded syncing operation for one user", async () => {
+    const { db } = createFakeOutboxDb([
+      createOperation({
+        operationId: "syncing-1",
+        status: "syncing",
+        retryCount: 1,
+        errorMessage: "Previous failure",
+        idempotencyKey: "syncing-1",
+      }),
+      createOperation({
+        operationId: "syncing-2",
+        status: "syncing",
+        retryCount: 2,
+        createdAt: "2026-05-10T10:01:00.000Z",
+        idempotencyKey: "syncing-2",
+      }),
+      createOperation({
+        operationId: "other-user",
+        userId: "user-2",
+        status: "syncing",
+        idempotencyKey: "other-user",
+      }),
+      createOperation({
+        operationId: "pending",
+        idempotencyKey: "pending",
+      }),
+    ]);
+
+    const recovered = await recoverStrandedSyncingOperations({
+      userId: "user-1",
+      db,
+    });
+
+    expect(recovered).toEqual([
+      expect.objectContaining({
+        operationId: "syncing-1",
+        status: "pending",
+        retryCount: 1,
+        errorMessage: null,
+      }),
+      expect.objectContaining({
+        operationId: "syncing-2",
+        status: "pending",
+        retryCount: 2,
+        errorMessage: null,
+      }),
+    ]);
   });
 
   it("marks an operation failed with a readable error", async () => {

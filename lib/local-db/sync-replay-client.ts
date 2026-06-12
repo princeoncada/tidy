@@ -1,6 +1,7 @@
 import { coalesceOutboxOperations } from "./outbox-coalescing";
 import {
   getPendingOutboxOperations,
+  getRetryableOutboxOperations,
   incrementRetryCount,
   markOutboxOperationDiscarded,
   markOutboxOperationFailed,
@@ -54,6 +55,11 @@ export type SyncReplayResult = {
 
 export type SyncReplayRepository = {
   getPendingOutboxOperations(args: { userId: string; limit?: number }): Promise<LocalOutboxOperation[]>;
+  getRetryableOutboxOperations(args: {
+    userId: string;
+    now: number;
+    limit?: number;
+  }): Promise<LocalOutboxOperation[]>;
   markOutboxOperationDiscarded(args: { operationId: string }): Promise<LocalOutboxOperation | null>;
   markOutboxOperationSyncing(args: { operationId: string }): Promise<LocalOutboxOperation | null>;
   markOutboxOperationSynced(args: { operationId: string }): Promise<LocalOutboxOperation | null>;
@@ -81,6 +87,7 @@ export type FlushOutboxOperationsBatchArgs = {
   userId: string;
   transport: SyncBatchTransport;
   limit?: number;
+  now?: number;
   db?: LocalOutboxRepositoryDatabase;
   repository?: SyncReplayRepository;
 };
@@ -102,6 +109,7 @@ function createDefaultSyncReplayRepository(
 ): SyncReplayRepository {
   return {
     getPendingOutboxOperations: (args) => getPendingOutboxOperations({ ...args, db }),
+    getRetryableOutboxOperations: (args) => getRetryableOutboxOperations({ ...args, db }),
     markOutboxOperationDiscarded: (args) => markOutboxOperationDiscarded({ ...args, db }),
     markOutboxOperationSyncing: (args) => markOutboxOperationSyncing({ ...args, db }),
     markOutboxOperationSynced: (args) => markOutboxOperationSynced({ ...args, db }),
@@ -216,6 +224,7 @@ export async function flushOutboxOperationsBatch({
   userId,
   transport,
   limit,
+  now,
   db,
   repository = createDefaultSyncReplayRepository(db),
 }: FlushOutboxOperationsBatchArgs): Promise<SyncReplayResult> {
@@ -223,8 +232,9 @@ export async function flushOutboxOperationsBatch({
     limit ?? SYNC_BATCH_MAX_OPERATIONS,
     SYNC_BATCH_MAX_OPERATIONS,
   );
-  const pendingOperations = await repository.getPendingOutboxOperations({
+  const pendingOperations = await repository.getRetryableOutboxOperations({
     userId,
+    now: now ?? Date.now(),
     limit: boundedLimit,
   });
   const { operations: coalescedOperations, discardedOperationIds } =

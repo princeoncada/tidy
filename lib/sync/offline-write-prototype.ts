@@ -1,7 +1,8 @@
 import {
   enqueueOutboxOperation,
   getOutboxOperationsForUser,
-  getPendingOutboxOperations,
+  getRetryableOutboxOperations,
+  recoverStrandedSyncingOperations,
   type LocalOutboxRepositoryDatabase,
 } from "@/lib/local-db/outbox-repository";
 import {
@@ -24,6 +25,7 @@ import type {
   LocalOutboxOperationType,
 } from "@/lib/local-db/outbox-schema";
 import type { SyncBatchRequest } from "@/lib/sync/sync-batch-contract";
+import { notifyOutboxCaptured } from "@/lib/sync/outbox-capture-events";
 
 export function isOfflineWriteCaptureEnabled(): boolean {
   return process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED === "true";
@@ -45,6 +47,7 @@ export async function captureOfflineWrite(
 ): Promise<LocalOutboxOperation> {
   const operation = createOutboxOperation(intent);
   await enqueueOutboxOperation(operation, options.db);
+  notifyOutboxCaptured({ userId: intent.userId });
   return operation;
 }
 
@@ -158,6 +161,7 @@ export type FlushOfflineWritesArgs = {
   endpoint?: string;
   fetchImpl?: typeof fetch;
   limit?: number;
+  now?: number;
   db?: LocalOutboxRepositoryDatabase;
   repository?: SyncReplayRepository;
 };
@@ -191,6 +195,10 @@ export async function flushOfflineWrites(args: FlushOfflineWritesArgs): Promise<
     Object.assign(replayArgs, { repository: args.repository });
   }
 
+  if (args.now !== undefined) {
+    Object.assign(replayArgs, { now: args.now });
+  }
+
   return flushOutboxOperationsBatch(replayArgs);
 }
 
@@ -208,14 +216,21 @@ export async function reconcilePendingWritesOnLoad(
   }
 
   try {
+    await recoverStrandedSyncingOperations(
+      args.db !== undefined
+        ? { userId: args.userId, db: args.db }
+        : { userId: args.userId },
+    );
+
     const queryArgs: {
       userId: string;
+      now: number;
       limit?: number;
       db?: LocalOutboxRepositoryDatabase;
-    } = { userId: args.userId };
+    } = { userId: args.userId, now: Date.now() };
     if (args.limit !== undefined) queryArgs.limit = args.limit;
     if (args.db !== undefined) queryArgs.db = args.db;
-    return await getPendingOutboxOperations(queryArgs);
+    return await getRetryableOutboxOperations(queryArgs);
   } catch (error) {
     console.error("Failed to reconcile pending outbox writes on load", error);
     return [];
