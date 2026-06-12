@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
   "version": "1.9.26-alpha",
-  "generatedAt": "2026-06-11",
+  "generatedAt": "2026-06-12",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -1554,7 +1554,8 @@
         "./local-repositories",
         "./outbox-schema",
         "./local-schema",
-        "./tidy-db"
+        "./tidy-db",
+        "@/lib/sync/outbox-capture-events"
       ]
     },
     {
@@ -4515,6 +4516,12 @@
       "to": "lib/local-db/tidy-db.ts",
       "type": "imports",
       "import": "./tidy-db"
+    },
+    {
+      "from": "lib/local-db/local-write.ts",
+      "to": "lib/sync/outbox-capture-events.ts",
+      "type": "imports",
+      "import": "@/lib/sync/outbox-capture-events"
     },
     {
       "from": "lib/local-db/metadata-repository.ts",
