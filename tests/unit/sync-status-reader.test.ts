@@ -48,9 +48,6 @@ function createFakeOutboxDb() {
             });
           }),
         })),
-        anyOf: vi.fn(() => ({
-          sortBy: vi.fn(async () => []),
-        })),
       })),
     },
   };
