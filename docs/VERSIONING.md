@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.27
-- **Current phase:** 1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)
-- **Next phase:** 1.9.28 - Dexie-First Reconcile Overlay
+- **Current version:** 1.9.28-alpha
+- **Current phase:** 1.9.28 - Dexie-First Reconcile Overlay
+- **Next phase:** 1.9.29 - Direct-Write Retirement & Default Dexie-First
 
 ---
 

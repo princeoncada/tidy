@@ -31,17 +31,19 @@ import {
   listLocalViewTagsForUser,
 } from '@/lib/local-db/local-repositories';
 import {
-  applyPendingMovementOverlay,
   translateListItemMovement,
 } from '@/lib/local-db/local-movement';
 import {
-  readPendingMovementOperationsForUser,
-} from '@/lib/local-db/local-movement-repository';
+  applyPendingOutboxOverlay,
+  applyPendingViewOverlay,
+  readPendingOutboxOperationsForUser,
+} from '@/lib/local-db/local-overlay';
 import {
   commitLocalListItemMove,
   commitLocalListItemReorder,
   commitLocalListReorder,
 } from '@/lib/local-db/local-write';
+import { subscribeToOutboxCaptures } from '@/lib/sync/outbox-capture-events';
 import { isOfflineWriteCaptureEnabled } from '@/lib/sync/offline-write-prototype';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
@@ -220,7 +222,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const movementCaptureEnabled =
     isOfflineWriteCaptureEnabled() && Boolean(boot.userId);
   const [pendingMovementOperations, setPendingMovementOperations] = useState<
-    Parameters<typeof applyPendingMovementOverlay>[1]
+    Parameters<typeof applyPendingOutboxOverlay>[1]
   >([]);
   const [movementOperationsUserId, setMovementOperationsUserId] = useState<
     string | null
@@ -241,7 +243,11 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
     ? undefined
     : views;
-  const effectiveViews = views ?? boot.localViews;
+  const serverEffectiveViews = views ?? boot.localViews;
+  const effectiveViews =
+    movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
+      ? applyPendingViewOverlay(serverEffectiveViews, pendingMovementOperations)
+      : serverEffectiveViews;
   const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
   const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
   const selectedView = selectedViewFromCache(effectiveViews);
@@ -303,7 +309,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     let cancelled = false;
 
-    void readPendingMovementOperationsForUser(boot.userId)
+    void readPendingOutboxOperationsForUser(boot.userId)
       .then((operations) => {
         if (!cancelled) {
           setPendingMovementOperations(operations);
@@ -325,16 +331,43 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     };
   }, [boot.userId, movementCaptureEnabled]);
 
+  useEffect(() => {
+    const userId = boot.userId;
+    if (!movementCaptureEnabled || !userId) {
+      return;
+    }
+
+    let cancelled = false;
+    const unsubscribe = subscribeToOutboxCaptures((event) => {
+      if (event.userId !== userId) return;
+
+      void readPendingOutboxOperationsForUser(userId)
+        .then((operations) => {
+          if (!cancelled) {
+            setPendingMovementOperations(operations);
+          }
+        })
+        .catch(() => {
+          // The existing overlay remains authoritative if the refresh fails.
+        });
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [boot.userId, movementCaptureEnabled]);
+
   const effectiveBootCurrentView =
     movementCaptureEnabled && pendingMovementReady && bootCurrentView
-      ? applyPendingMovementOverlay(
+      ? applyPendingOutboxOverlay(
           bootCurrentView,
           pendingMovementOperations,
         )
       : bootCurrentView;
   const effectiveSelectedViewSnapshot =
     movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
-      ? applyPendingMovementOverlay(
+      ? applyPendingOutboxOverlay(
           selectedViewSnapshot,
           pendingMovementOperations,
         )
@@ -476,7 +509,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     try {
       setPendingMovementOperations(
-        await readPendingMovementOperationsForUser(boot.userId),
+        await readPendingOutboxOperationsForUser(boot.userId),
       );
       setMovementOperationsUserId(boot.userId);
     } catch {
