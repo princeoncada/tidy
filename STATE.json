@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.25",
-    "state":  "stable",
-    "phase":  "1.9.25",
-    "phaseTitle":  "Dexie-First Tags, Views \u0026 Relationships",
-    "nextPhase":  "1.9.26 - Batch Sync Lifecycle, Retry \u0026 Direct-Write Retirement",
+    "version":  "1.9.26-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.26",
+    "phaseTitle":  "Batch Sync Lifecycle, Retry \u0026 Recovery",
+    "nextPhase":  "1.9.27 - Direct-Write Retirement \u0026 Default Dexie-First",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-11"
 }
