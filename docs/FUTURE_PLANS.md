@@ -271,12 +271,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.29 - Direct-Write Retirement & Default Dexie-First (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.29 - Direct-Write Retirement & Default Dexie-First
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** components/list/*, components/views/*, dashboard mutation components, hooks/*, lib/sync/*, tests/e2e/*
 - **Implementation goal:** make Dexie-first the default dashboard write path and remove remaining component-level direct tRPC persistence for list, item, reorder/move, tag, view, selection, and relationship writes, then re-baseline the authenticated e2e suite that currently asserts per-action tRPC mutations. This phase depends on the 1.9.28 overlay and is seeded by branch `wip/direct-write-retirement`.
