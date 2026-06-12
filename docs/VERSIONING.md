@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.28-alpha
+- **Current version:** 1.9.28
 - **Current phase:** 1.9.28 - Dexie-First Reconcile Overlay
 - **Next phase:** 1.9.29 - Direct-Write Retirement & Default Dexie-First
 
