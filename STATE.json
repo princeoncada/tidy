@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.27-alpha",
-    "state":  "alpha",
+    "version":  "1.9.27",
+    "state":  "stable",
     "phase":  "1.9.27",
     "phaseTitle":  "Roadmap Re-Plan Correction (Overlay-First Re-Sequence)",
     "nextPhase":  "1.9.28 - Dexie-First Reconcile Overlay",
