@@ -45,8 +45,11 @@ function createFakeOutboxDb() {
                 const rightValue = right[fieldName as keyof LocalOutboxOperation];
 
                 return String(leftValue).localeCompare(String(rightValue));
-              });
+            });
           }),
+        })),
+        anyOf: vi.fn(() => ({
+          sortBy: vi.fn(async () => []),
         })),
       })),
     },
