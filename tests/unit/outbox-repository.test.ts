@@ -60,34 +60,15 @@ function createFakeOutboxDb(initialOperations: LocalOutboxOperation[] = []) {
             const [userId, status] = value;
 
             return Array.from(operations.values())
-              .filter((operation) => operation.userId === userId && operation.status === status)
-              .sort((left, right) =>
-                String(left[fieldName as keyof LocalOutboxOperation]).localeCompare(
-                  String(right[fieldName as keyof LocalOutboxOperation]),
-                ),
-            );
-          }),
-        })),
-        anyOf: vi.fn((values) => ({
-          sortBy: vi.fn(async (fieldName) => {
-            if (indexName !== "[userId+status]") {
-              return [];
-            }
-
-            return Array.from(operations.values())
-              .filter((operation) =>
-                values.some(
-                  (value) =>
-                    Array.isArray(value) &&
-                    value[0] === operation.userId &&
-                    value[1] === operation.status,
-                ),
+              .filter(
+                (operation: LocalOutboxOperation) =>
+                  operation.userId === userId && operation.status === status,
               )
               .sort((left, right) =>
                 String(left[fieldName as keyof LocalOutboxOperation]).localeCompare(
                   String(right[fieldName as keyof LocalOutboxOperation]),
                 ),
-              );
+            );
           }),
         })),
       })),
