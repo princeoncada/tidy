@@ -128,6 +128,102 @@ describe("outbox coalescing", () => {
     expect(result.discardedOperationIds).toEqual(["reorder-1"]);
   });
 
+  it("collapses attach then detach to the final detach", () => {
+    const result = coalesceOutboxOperations([
+      createOperation({
+        operationId: "attach-1",
+        entityType: "listTag",
+        entityClientId: "list-1:tag-1",
+        operationType: "attach",
+        payload: { listId: "list-1", tagId: "tag-1" },
+        idempotencyKey: "attach-1",
+      }),
+      createOperation({
+        operationId: "detach-1",
+        entityType: "listTag",
+        entityClientId: "list-1:tag-1",
+        operationType: "detach",
+        payload: { listId: "list-1", tagId: "tag-1" },
+        idempotencyKey: "detach-1",
+      }),
+    ]);
+
+    expect(operationIds(result.operations)).toEqual(["detach-1"]);
+    expect(result.discardedOperationIds).toEqual(["attach-1"]);
+  });
+
+  it("collapses detach then attach to the final attach", () => {
+    const result = coalesceOutboxOperations([
+      createOperation({
+        operationId: "detach-1",
+        entityType: "viewTag",
+        entityClientId: "view-1:tag-1",
+        operationType: "detach",
+        payload: { viewId: "view-1", tagId: "tag-1" },
+        idempotencyKey: "detach-1",
+      }),
+      createOperation({
+        operationId: "attach-1",
+        entityType: "viewTag",
+        entityClientId: "view-1:tag-1",
+        operationType: "attach",
+        payload: { viewId: "view-1", tagId: "tag-1" },
+        idempotencyKey: "attach-1",
+      }),
+    ]);
+
+    expect(operationIds(result.operations)).toEqual(["attach-1"]);
+    expect(result.discardedOperationIds).toEqual(["detach-1"]);
+  });
+
+  it("collapses repeated attaches to one operation", () => {
+    const result = coalesceOutboxOperations([
+      createOperation({
+        operationId: "attach-1",
+        entityType: "listTag",
+        entityClientId: "list-1:tag-1",
+        operationType: "attach",
+        payload: { listId: "list-1", tagId: "tag-1" },
+        idempotencyKey: "attach-1",
+      }),
+      createOperation({
+        operationId: "attach-2",
+        entityType: "listTag",
+        entityClientId: "list-1:tag-1",
+        operationType: "attach",
+        payload: { listId: "list-1", tagId: "tag-1" },
+        idempotencyKey: "attach-2",
+      }),
+    ]);
+
+    expect(operationIds(result.operations)).toEqual(["attach-2"]);
+    expect(result.discardedOperationIds).toEqual(["attach-1"]);
+  });
+
+  it("still lets delete supersede a prior attach", () => {
+    const result = coalesceOutboxOperations([
+      createOperation({
+        operationId: "attach-1",
+        entityType: "listTag",
+        entityClientId: "list-1:tag-1",
+        operationType: "attach",
+        payload: { listId: "list-1", tagId: "tag-1" },
+        idempotencyKey: "attach-1",
+      }),
+      createOperation({
+        operationId: "delete-1",
+        entityType: "listTag",
+        entityClientId: "list-1:tag-1",
+        operationType: "delete",
+        payload: {},
+        idempotencyKey: "delete-1",
+      }),
+    ]);
+
+    expect(operationIds(result.operations)).toEqual(["delete-1"]);
+    expect(result.discardedOperationIds).toEqual(["attach-1"]);
+  });
+
   it("replaces pending updates with delete for the same entity", () => {
     const result = coalesceOutboxOperations([
       createOperation({
