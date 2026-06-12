@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.26-alpha",
-    "state":  "alpha",
+    "version":  "1.9.26",
+    "state":  "stable",
     "phase":  "1.9.26",
     "phaseTitle":  "Batch Sync Lifecycle, Retry \u0026 Recovery",
     "nextPhase":  "1.9.27 - Direct-Write Retirement \u0026 Default Dexie-First",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-11"
+    "lastUpdated":  "2026-06-12"
 }
