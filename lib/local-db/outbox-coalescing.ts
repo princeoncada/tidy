@@ -25,6 +25,12 @@ function isLatestOnlyOperation(operation: LocalOutboxOperation): boolean {
   return ["update", "reorder", "move"].includes(operation.operationType);
 }
 
+const MEMBERSHIP_OPERATION_TYPES = ["attach", "detach"];
+
+function isMembershipOperation(operation: LocalOutboxOperation): boolean {
+  return MEMBERSHIP_OPERATION_TYPES.includes(operation.operationType);
+}
+
 function isUnsyncedCreateDeletePair(
   existing: LocalOutboxOperation,
   next: LocalOutboxOperation,
@@ -42,6 +48,10 @@ function shouldReplaceExistingOperation(
   next: LocalOutboxOperation,
 ): boolean {
   if (existing.operationType === next.operationType && isLatestOnlyOperation(next)) {
+    return true;
+  }
+
+  if (isMembershipOperation(existing) && isMembershipOperation(next)) {
     return true;
   }
 
