@@ -10,7 +10,7 @@ import {
   deleteView,
   openViewByName,
   openAllLists,
-  waitForSuccessfulTrpcMutation,
+  waitForSyncBatch,
 } from "./utils/app";
 import {
   expectItemInList,
@@ -32,14 +32,14 @@ config({ path: ".env", quiet: true });
 let consoleErrors: string[];
 
 async function createPersistedList(page: Page, name: string) {
-  const persisted = waitForSuccessfulTrpcMutation(page, "list.createList");
+  const persisted = waitForSyncBatch(page);
 
   await createList(page, name);
   await persisted;
 }
 
 async function createPersistedTag(page: Page, listName: string, tagName: string) {
-  const persisted = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
+  const persisted = waitForSyncBatch(page);
 
   await createTag(page, listName, tagName);
   await persisted;
@@ -47,7 +47,7 @@ async function createPersistedTag(page: Page, listName: string, tagName: string)
 
 async function attachExistingTag(page: Page, listName: string, tagName: string) {
   const card = await getVisibleListCard(page, listName);
-  const persisted = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
+  const persisted = waitForSyncBatch(page);
 
   await card.getByTestId(testIds.tagSelector).click();
   await page.getByPlaceholder("Search or create tag...").fill(tagName);
@@ -187,8 +187,7 @@ test("reorder custom view cards persists after reload", async ({ page }) => {
   await dragByMouseAndWaitForMutation(
     page,
     sourceViewCard.getByTestId(testIds.viewDragHandle),
-    targetViewCard.getByTestId(testIds.viewDragHandle),
-    "view.reorderViews"
+    targetViewCard.getByTestId(testIds.viewDragHandle)
   );
 
   await expectViewOrder(page, swappedOrder);
@@ -228,8 +227,7 @@ test("reorder lists inside a custom view persists after reload", async ({ page }
   await dragByMouseAndWaitForMutation(
     page,
     sourceListCard.getByTestId(testIds.listDragHandle),
-    targetListCard.getByTestId(testIds.listDragHandle),
-    "view.reorderViewLists"
+    targetListCard.getByTestId(testIds.listDragHandle)
   );
 
   await expectListOrder(page, swappedOrder);
@@ -254,8 +252,7 @@ test("reorder lists if drag/drop is currently implemented", async ({ page }) => 
   await dragByMouseAndWaitForMutation(
     page,
     firstCard.getByTestId(testIds.listDragHandle),
-    secondCard.getByTestId(testIds.listDragHandle),
-    "view.reorderViewLists"
+    secondCard.getByTestId(testIds.listDragHandle)
   );
 
   await expectListOrder(page, [first, second]);
@@ -278,8 +275,7 @@ test("move item between lists if implemented", async ({ page }) => {
   await dragByMouseAndWaitForMutation(
     page,
     item.getByTestId(testIds.itemDragHandle),
-    targetCard.getByTestId(testIds.listDropZone),
-    "listItem.reorderListItems"
+    targetCard.getByTestId(testIds.listDropZone)
   );
 
   await expectItemNotInList(page, sourceList, itemName);
@@ -304,8 +300,7 @@ test("move item into empty list if implemented", async ({ page }) => {
   await dragByMouseAndWaitForMutation(
     page,
     item.getByTestId(testIds.itemDragHandle),
-    targetCard.getByTestId(testIds.listDropZone),
-    "listItem.reorderListItems"
+    targetCard.getByTestId(testIds.listDropZone)
   );
 
   await expectItemNotInList(page, sourceList, itemName);
@@ -318,12 +313,6 @@ test("move item into empty list if implemented", async ({ page }) => {
 });
 
 test.describe("Dexie-first movement", () => {
-  test.skip(
-    () =>
-      process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED !== "true",
-    "Run this targeted proof with NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED=true.",
-  );
-
   test("coalesces committed drops and preserves placement through view switch and reload", async ({
     page,
   }) => {
