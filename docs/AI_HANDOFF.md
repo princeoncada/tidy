@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.24 -->
+<!-- Current Version: 1.9.25-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.24 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.24 - Dexie-First Movement, Ordering & View-Switch Consistency
-**Next**: 1.9.25 - Dexie-First Tags, Views & Relationships
+**Current Version**: 1.9.25-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.25 - Dexie-First Tags, Views & Relationships
+**Next**: 1.9.26 - Batch Sync Lifecycle, Retry & Direct-Write Retirement
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
