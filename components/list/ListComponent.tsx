@@ -516,6 +516,7 @@ const ListComponent = ({
                   listId={list.id}
                   selectedListTags={list.listTags}
                   dashboardKeys={dashboardKeys}
+                  userId={userId}
                 />
               </div>
 
