@@ -260,6 +260,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.27 - Roadmap Re-Plan Correction (Overlay-First Re-Sequence)~~ (stable 2026-06-12)
 
+- ~~1.9.28 - Dexie-First Reconcile Overlay~~ (stable 2026-06-12)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -269,21 +271,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.28 - Dexie-First Reconcile Overlay (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.28 - Dexie-First Reconcile Overlay
-- **Status:** In progress | Priority: P1 product (local-first foundation)
-- **Type:** product behavior (foundation)
-- **Files:** lib/dashboard-cache.ts, hooks/useLocalFirstDashboardBoot.ts, lib/local-first-reconcile.ts, components/list/ListsContainer.tsx, hooks/*, tests/*
-- **Implementation goal:** make unsynced local mutations (create, rename, complete, delete, tag, view, selection, and existing reorder/move) survive server hydration by overlaying pending outbox / local-graph state on the rendered dashboard cache, generalizing the existing pending-movement overlay to all entity types, so a settling or refocused tRPC dashboard query never clobbers an optimistic entry not yet batch-synced.
-- **Product impact:** optimistically created/edited lists, items, tags, and views stay visible and correct after the action and across incidental refetches, until batch sync confirms them - no flicker or disappearance.
-- **Runtime integration target:** the dashboard render reconciles server hydration with pending local writes (outbox + Dexie); tRPC queries remain the server hydration bridge. Direct tRPC persistence still runs (not retired here).
-- **Deferral boundary:** does NOT retire direct tRPC persistence (1.9.29) and does NOT flip the default gate; no full Dexie-primary-read rewrite beyond overlay survival.
-- **Validation target:** targeted alpha (overlay unit coverage + a gate-on authenticated e2e proving optimistic create/tag survival across refetch) + manual proof; full test:ci before stable.
-- **Acceptance:** with the Dexie-first path active (gate on), optimistic create/tag/view entries survive incidental server refetches deterministically and the gated authenticated proof is stable.
 
 ### 1.9.29 - Direct-Write Retirement & Default Dexie-First
 - **Status:** Open | Priority: P1 product (local-first)
