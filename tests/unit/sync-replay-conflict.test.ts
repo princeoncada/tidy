@@ -54,6 +54,7 @@ function createReplayRepository(pendingOperations: LocalOutboxOperation[]): Sync
 
   return {
     getPendingOutboxOperations: vi.fn(async () => operations),
+    getRetryableOutboxOperations: vi.fn(async () => operations),
     markOutboxOperationDiscarded: vi.fn(async ({ operationId }) =>
       updateOperation(operations, operationId, (operation) => ({ ...operation, status: "discarded" })),
     ),
