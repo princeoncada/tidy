@@ -48,27 +48,6 @@ function createFakeOutboxDb() {
             });
           }),
         })),
-        anyOf: vi.fn((values: unknown[]) => ({
-          sortBy: vi.fn(async (fieldName: string) => {
-            return [...store.values()]
-              .filter((operation) =>
-                values.some(
-                  (value) =>
-                    Array.isArray(value) &&
-                    value[0] === operation.userId &&
-                    value[1] === operation.status,
-                ),
-              )
-              .sort((left, right) => {
-                const leftValue =
-                  left[fieldName as keyof LocalOutboxOperation];
-                const rightValue =
-                  right[fieldName as keyof LocalOutboxOperation];
-
-                return String(leftValue).localeCompare(String(rightValue));
-              });
-          }),
-        })),
       })),
     },
   };
