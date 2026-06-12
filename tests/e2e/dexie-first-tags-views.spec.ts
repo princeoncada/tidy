@@ -23,34 +23,48 @@ let consoleErrors: string[];
 async function getLocalUserAndAllListsView(
   page: Page,
 ) {
-  return page.waitForFunction(async () => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("tidy-local-db");
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-    });
-
-    try {
-      const views = await new Promise<
-        Array<{ clientId: string; userId: string; type: string }>
-      >((resolve, reject) => {
-        const transaction = db.transaction("views", "readonly");
-        const request = transaction.objectStore("views").getAll();
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const identity = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open("tidy-local-db");
         request.onerror = () => reject(request.error);
         request.onsuccess = () => resolve(request.result);
       });
-      const allListsView = views.find((view) => view.type === "ALL_LISTS");
 
-      return allListsView
-        ? {
-            userId: allListsView.userId,
-            allListsViewId: allListsView.clientId,
-          }
-        : null;
-    } finally {
-      db.close();
+      try {
+        if (!db.objectStoreNames.contains("views")) {
+          return null;
+        }
+
+        const views = await new Promise<
+          Array<{ clientId: string; userId: string; type: string }>
+        >((resolve, reject) => {
+          const transaction = db.transaction("views", "readonly");
+          const request = transaction.objectStore("views").getAll();
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => resolve(request.result);
+        });
+        const allListsView = views.find((view) => view.type === "ALL_LISTS");
+
+        return allListsView
+          ? {
+              userId: allListsView.userId,
+              allListsViewId: allListsView.clientId,
+            }
+          : null;
+      } finally {
+        db.close();
+      }
+    });
+
+    if (identity) {
+      return identity;
     }
-  }).then((handle) => handle.jsonValue());
+
+    await page.waitForTimeout(250);
+  }
+
+  return null;
 }
 
 test.beforeEach(async ({ page }) => {
