@@ -4,6 +4,7 @@ import type { Page, Request } from "@playwright/test";
 import { expect, test } from "./utils/fixtures";
 import { openAllLists } from "./utils/app";
 import {
+  firstVisible,
   getVisibleListCard,
   getVisibleViewCard,
 } from "./utils/assertions";
@@ -174,7 +175,10 @@ test.describe("Dexie-first tags and views", () => {
       await expect(listCard.getByText(tagName, { exact: true })).toBeVisible();
       await page.keyboard.press("Escape");
 
-      await page.getByTestId(testIds.viewCreateButton).click();
+      const createViewButton = await firstVisible(
+        page.getByTestId(testIds.viewCreateButton),
+      );
+      await createViewButton.click();
       const dialog = page.getByRole("dialog");
       await dialog.getByLabel("Name").fill(viewName);
       await dialog.getByRole("button", { name: new RegExp(`^${tagName}\\b`) }).click();
