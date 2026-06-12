@@ -431,6 +431,8 @@ test.describe("Dexie-first sync lifecycle", () => {
       );
       expect(synced.entityClientId).toBe(pending.entityClientId);
       expect(syncRequests).toHaveLength(1);
+      await page.reload();
+      await openAllLists(page);
       await expect(await getVisibleListCard(page, listName)).toBeVisible();
     } finally {
       page.off("request", trackSyncRequest);
