@@ -635,7 +635,9 @@
         "@/lib/trpc",
         "./types",
         "@/lib/dashboard-cache",
-        "@/lib/optimistic-debug"
+        "@/lib/local-db/local-write",
+        "@/lib/optimistic-debug",
+        "@/lib/sync/offline-write-prototype"
       ]
     },
     {
@@ -1534,21 +1536,22 @@
         "CommitLocalListItemReorderArgs",
         "CommitLocalListRenameArgs",
         "CommitLocalListReorderArgs",
+        "CommitLocalListTagChangesArgs",
+        "CommitLocalSelectedViewArgs",
+        "CommitLocalTagCreateArgs",
+        "CommitLocalTagDeleteArgs",
+        "CommitLocalTagUpdateArgs",
+        "CommitLocalViewCreateArgs",
+        "CommitLocalViewDeleteArgs",
         "CommitLocalViewReorderArgs",
-        "commitLocalListCreate",
-        "commitLocalListDelete",
-        "commitLocalListItemCompletion",
-        "commitLocalListItemCreate",
-        "commitLocalListItemDelete",
-        "commitLocalListItemMove",
-        "commitLocalListItemRename",
-        "commitLocalListItemReorder",
-        "commitLocalListRename"
+        "CommitLocalViewUpdateArgs",
+        "commitLocalListCreate"
       ],
       "imports": [
         "./outbox-coalescing",
         "./local-repositories",
         "./outbox-schema",
+        "./local-schema",
         "./tidy-db"
       ]
     },
@@ -2176,6 +2179,22 @@
       "imports": [
         "@playwright/test",
         "dotenv",
+        "@/lib/db"
+      ]
+    },
+    {
+      "path": "tests/e2e/dexie-first-tags-views.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "dotenv",
+        "@playwright/test",
+        "./utils/fixtures",
+        "./utils/app",
+        "./utils/assertions",
+        "./utils/seed",
+        "./utils/test-ids",
         "@/lib/db"
       ]
     },
@@ -3821,9 +3840,21 @@
     },
     {
       "from": "components/list/ListTagPicker.tsx",
+      "to": "lib/local-db/local-write.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/local-write"
+    },
+    {
+      "from": "components/list/ListTagPicker.tsx",
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
+    },
+    {
+      "from": "components/list/ListTagPicker.tsx",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/list/ListTagPicker.tsx",
@@ -4367,6 +4398,12 @@
     },
     {
       "from": "lib/local-db/local-write.ts",
+      "to": "lib/local-db/local-schema.ts",
+      "type": "imports",
+      "import": "./local-schema"
+    },
+    {
+      "from": "lib/local-db/local-write.ts",
       "to": "lib/local-db/outbox-coalescing.ts",
       "type": "imports",
       "import": "./outbox-coalescing"
@@ -4634,6 +4671,42 @@
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
+      "to": "tests/e2e/utils/app.ts",
+      "type": "imports",
+      "import": "./utils/app"
+    },
+    {
+      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
+      "to": "tests/e2e/utils/assertions.ts",
+      "type": "imports",
+      "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
+      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
+      "to": "tests/e2e/utils/test-ids.ts",
+      "type": "imports",
+      "import": "./utils/test-ids"
     },
     {
       "from": "tests/e2e/drag-drop.spec.ts",
