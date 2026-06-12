@@ -300,12 +300,6 @@ test.afterEach(async () => {
 });
 
 test.describe("Dexie-first sync lifecycle", () => {
-  test.skip(
-    () =>
-      process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED !== "true",
-    "Run this targeted proof with NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED=true.",
-  );
-
   test("sync lifecycle batches a mutation burst into one sync request", async ({
     page,
   }) => {
