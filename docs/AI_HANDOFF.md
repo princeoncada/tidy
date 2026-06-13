@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.31-alpha -->
+<!-- Current Version: 1.9.31 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.31-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.31 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening
 **Next**: 1.9.32 - Local-First Dashboard Architecture Closeout
 
