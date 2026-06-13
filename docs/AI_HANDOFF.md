@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.29-alpha -->
+<!-- Current Version: 1.9.29 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.29-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.29 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.29 - Direct-Write Retirement & Default Dexie-First
 **Next**: 1.9.30 - Local-First Dashboard Architecture Closeout
 
