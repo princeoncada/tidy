@@ -1,6 +1,7 @@
-import type {
-  DashboardSnapshot,
-  ViewsCache,
+import {
+  listMatchesView,
+  type DashboardSnapshot,
+  type ViewsCache,
 } from "@/lib/dashboard-cache";
 import { applyPendingMovementOverlay } from "./local-movement";
 import { getLocalDbOrThrow } from "./local-repositories";
@@ -104,6 +105,16 @@ function findListTagMetadata(
   }
 
   return undefined;
+}
+
+function findSnapshotTagMetadata(
+  snapshot: DashboardSnapshot,
+  tagId: string,
+): DashboardTag | undefined {
+  return findListTagMetadata(snapshot, tagId) ??
+    snapshot.view.viewTags
+      .find((viewTag) => viewTag.tagId === tagId)
+      ?.tag;
 }
 
 function buildPendingTagCreateMetadata(
@@ -223,8 +234,40 @@ export function applyPendingOutboxOverlay(
     if (operation.entityType === "list") {
       if (operation.operationType === "create") {
         const name = getString(operation.payload.name);
+        const tagIds = getStringArray(operation.payload.tagIds) ?? [];
         if (!name) continue;
-        if (result.lists.some((list) => list.id === operation.entityClientId)) {
+        const listTags = tagIds.map((tagId) => ({
+          listId: operation.entityClientId,
+          tagId,
+          tag:
+            findSnapshotTagMetadata(result, tagId) ??
+            pendingTagCreateMetadata.get(tagId) ??
+            synthesizeTag(tagId, now),
+        }));
+        const existingList = result.lists.find(
+          (list) => list.id === operation.entityClientId,
+        );
+        if (existingList) {
+          result = {
+            ...result,
+            lists: result.lists.map((list) =>
+              list.id === operation.entityClientId
+                ? {
+                    ...list,
+                    listTags: [
+                      ...list.listTags,
+                      ...listTags.filter(
+                        (listTag) =>
+                          !list.listTags.some(
+                            (existingTag) =>
+                              existingTag.tagId === listTag.tagId,
+                          ),
+                      ),
+                    ],
+                  }
+                : list,
+            ),
+          };
           continue;
         }
 
@@ -237,12 +280,13 @@ export function applyPendingOutboxOverlay(
           name,
           userId: "optimistic",
           listItems: [],
-          listTags: [],
+          listTags,
           order,
           isOptimistic: true,
           createdAt: now,
           updatedAt: now,
         };
+        if (!listMatchesView(optimisticList, result.view)) continue;
         result = {
           ...result,
           lists: [optimisticList, ...result.lists],
@@ -462,7 +506,15 @@ export function isOutboxOperationServerConfirmed(
     const target = allLists.lists.find(
       (list) => list.id === operation.entityClientId,
     );
-    if (operation.operationType === "create") return Boolean(target);
+    if (operation.operationType === "create") {
+      const tagIds = getStringArray(operation.payload.tagIds) ?? [];
+      return Boolean(
+        target &&
+        tagIds.every((tagId) =>
+          target.listTags.some((listTag) => listTag.tagId === tagId),
+        ),
+      );
+    }
     if (operation.operationType === "update") {
       const name = getString(operation.payload.name);
       return name === null
