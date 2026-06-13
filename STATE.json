@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.30-alpha",
-    "state":  "alpha",
+    "version":  "1.9.30",
+    "state":  "stable",
     "phase":  "1.9.30",
     "phaseTitle":  "Delete Outbox Payload Validation Fix",
     "nextPhase":  "1.9.31 - Local-First Dashboard Architecture Closeout",
