@@ -145,6 +145,31 @@ describe("sync batch contract", () => {
     });
   });
 
+  it("accepts a delete operation with a non-empty validation payload", () => {
+    const deletion = createOperation({
+      operationType: "delete",
+      payload: { deleted: true },
+    });
+
+    expect(
+      validateSyncBatchRequest({
+        operations: [batchEntry(deletion)],
+      }, {
+        authenticatedUserId: "user-1",
+      }),
+    ).toEqual({
+      ok: true,
+      decisions: [
+        {
+          operationId: deletion.operationId,
+          idempotencyKey: deletion.idempotencyKey,
+          accepted: true,
+          operation: deletion,
+        },
+      ],
+    });
+  });
+
   it("rejects a later duplicate idempotency key", () => {
     const first = createOperation();
     const duplicate = createOperation({
