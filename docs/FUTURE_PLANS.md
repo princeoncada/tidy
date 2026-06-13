@@ -273,6 +273,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.30 - Delete Outbox Payload Validation Fix (active) - see Planned
 ---
 
 ## Planned
