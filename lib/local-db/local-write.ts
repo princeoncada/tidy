@@ -313,7 +313,7 @@ export async function commitLocalListDelete({
         entityType: "list",
         entityClientId: listId,
         operationType: "delete",
-        payload: {},
+        payload: { deleted: true },
       },
       now,
     );
@@ -477,7 +477,7 @@ export async function commitLocalListItemDelete({
         entityType: "listItem",
         entityClientId: itemId,
         operationType: "delete",
-        payload: {},
+        payload: { deleted: true },
       },
       now,
     );
@@ -686,7 +686,7 @@ export async function commitLocalTagDelete({
         entityType: "tag",
         entityClientId: tagId,
         operationType: "delete",
-        payload: {},
+        payload: { deleted: true },
       },
       now,
     );
@@ -942,7 +942,7 @@ export async function commitLocalViewDelete({
         entityType: "view",
         entityClientId: viewId,
         operationType: "delete",
-        payload: {},
+        payload: { deleted: true },
       },
       now,
     );
