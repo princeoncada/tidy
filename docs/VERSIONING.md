@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.29-alpha
+- **Current version:** 1.9.29
 - **Current phase:** 1.9.29 - Direct-Write Retirement & Default Dexie-First
 - **Next phase:** 1.9.30 - Local-First Dashboard Architecture Closeout
 
