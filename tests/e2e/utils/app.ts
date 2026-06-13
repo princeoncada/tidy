@@ -112,7 +112,7 @@ export async function openViewByName(page: Page, viewName: string) {
   const viewButton = viewCard.getByRole("button", { name: viewName, exact: true });
   const buttonClass = await viewButton.getAttribute("class");
 
-  if (buttonClass?.includes("text-zinc-900")) return;
+  if (buttonClass?.split(/\s+/).includes("text-zinc-900")) return;
 
   const persisted = waitForSyncBatch(page);
   await viewButton.click();
