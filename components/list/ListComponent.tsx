@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import {
   DashboardKeys,
+  reconcileLocallyCommittedListItemInDashboardCaches,
   removeListFromDashboardCaches,
   updateListInDashboardCaches,
 } from "@/lib/dashboard-cache";
@@ -130,7 +131,16 @@ const ListComponent = ({
       listId: list.id,
       name: itemName,
       order,
-    }).catch(() => {});
+    })
+      .then(() => {
+        reconcileLocallyCommittedListItemInDashboardCaches(
+          queryClient,
+          dashboardKeys,
+          list.id,
+          itemId,
+        );
+      })
+      .catch(() => {});
   };
 
   const { ref: listRef, handleRef, isDragging } = useSortable({
