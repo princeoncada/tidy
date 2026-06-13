@@ -184,6 +184,7 @@ export function applyPendingMovementOverlay(
       const toListId = getString(operation.payload.toListClientId);
       const order = getInteger(operation.payload.order);
       if (!toListId || order === null) continue;
+      if (!lists.some((list) => list.id === toListId)) continue;
 
       let movedItem: DashboardSnapshot["lists"][number]["listItems"][number] | undefined;
       lists = lists.map((list) => {
