@@ -19,7 +19,21 @@ export async function dragByMouse(page: Page, source: Locator, target: Locator) 
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
   await page.mouse.move(to.x, to.y, { steps: 12 });
+
+  if (await target.getAttribute("data-testid") === "list-drop-zone") {
+    await expect(target.locator("xpath=..")).toHaveClass(/border-zinc-400/, {
+      timeout: 5_000,
+    });
+  }
+
   await page.mouse.up();
+
+  await expect(page.locator('[data-dnd-dragging="true"]')).toHaveCount(0, {
+    timeout: 5_000,
+  });
+  await expect(page.locator("[data-dnd-placeholder]")).toHaveCount(0, {
+    timeout: 5_000,
+  });
 }
 
 export async function dragByMouseAndWaitForMutation(
