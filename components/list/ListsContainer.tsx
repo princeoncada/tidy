@@ -761,20 +761,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
           finalPreview = reorderListsForDrag(lists, sourceListId, targetListId) ?? finalPreview;
         }
 
-        if (
-          source.type === "list-item" &&
-          target?.type === "list-drop" &&
-          itemPlacementMatches(finalPreview, lists)
-        ) {
-          const draggedItemId = String(source.id).replace("list-item-", "");
-          finalPreview = reorderItemsForDrag(
-            lists,
-            draggedItemId,
-            String(target.type),
-            String(target.id),
-          ) ?? finalPreview;
-        }
-
         // Only save the final dropped order. Older drag positions do not matter.
         switch (source.type) {
           case "list":
