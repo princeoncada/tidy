@@ -161,6 +161,78 @@ describe("server sync apply", () => {
     expect(tx.list.create).not.toHaveBeenCalled();
   });
 
+  it("creates inherited owned list tags with a new list", async () => {
+    const tx = createTx();
+    tx.list.findUnique.mockResolvedValue(null);
+    tx.tag.findMany.mockResolvedValue([{ id: "tag-1" }, { id: "tag-2" }]);
+    tx.view.findFirst.mockResolvedValue({
+      id: "all-view",
+      isDefault: true,
+    });
+    tx.viewList.findFirst.mockResolvedValue(null);
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        operationType: "create",
+        entityServerId: null,
+        payload: {
+          name: "Inbox",
+          tagIds: ["tag-1", "tag-2"],
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.tag.findMany).toHaveBeenCalledWith({
+      where: {
+        id: { in: ["tag-1", "tag-2"] },
+        userId: "user-1",
+      },
+      select: { id: true },
+    });
+    expect(tx.list.create).toHaveBeenCalledWith({
+      data: {
+        id: "list-1",
+        name: "Inbox",
+        userId: "user-1",
+        listTags: {
+          createMany: {
+            data: [{ tagId: "tag-1" }, { tagId: "tag-2" }],
+            skipDuplicates: true,
+          },
+        },
+      },
+    });
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("rejects inherited list tags outside the authenticated user", async () => {
+    const tx = createTx();
+    tx.tag.findMany.mockResolvedValue([{ id: "tag-1" }]);
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        operationType: "create",
+        entityServerId: null,
+        payload: {
+          name: "Inbox",
+          tagIds: ["tag-1", "tag-foreign"],
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toEqual({
+      operationId: "op-1",
+      status: "rejected",
+      errorMessage:
+        "List create includes a tag outside the authenticated user.",
+    });
+    expect(tx.list.create).not.toHaveBeenCalled();
+  });
+
   it("treats an absent owned delete target as already applied", async () => {
     const tx = createTx();
     tx.list.findUnique.mockResolvedValue(null);
