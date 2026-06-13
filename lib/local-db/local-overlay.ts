@@ -636,7 +636,50 @@ export function relinquishConfirmedOperations(
   operations: readonly LocalOutboxOperation[],
   context: OutboxConfirmContext,
 ): LocalOutboxOperation[] {
-  return operations.filter((operation) => {
+  // Active rows include synced history, so suppress intents made obsolete by
+  // later operations before comparing the remaining desired state to the server.
+  const latestSelectedViewIndexByUser = new Map<string, number>();
+  const latestListDeleteIndexByEntity = new Map<string, number>();
+
+  operations.forEach((operation, index) => {
+    if (
+      operation.entityType === "metadata" &&
+      operation.entityClientId === "selected-view" &&
+      operation.operationType === "update"
+    ) {
+      latestSelectedViewIndexByUser.set(operation.userId, index);
+    }
+
+    if (
+      operation.entityType === "list" &&
+      operation.operationType === "delete"
+    ) {
+      latestListDeleteIndexByEntity.set(
+        `${operation.userId}:${operation.entityClientId}`,
+        index,
+      );
+    }
+  });
+
+  return operations.filter((operation, index) => {
+    if (
+      operation.entityType === "metadata" &&
+      operation.entityClientId === "selected-view" &&
+      operation.operationType === "update" &&
+      latestSelectedViewIndexByUser.get(operation.userId) !== index
+    ) {
+      return false;
+    }
+
+    if (operation.entityType === "list") {
+      const latestDeleteIndex = latestListDeleteIndexByEntity.get(
+        `${operation.userId}:${operation.entityClientId}`,
+      );
+      if (latestDeleteIndex !== undefined && index < latestDeleteIndex) {
+        return false;
+      }
+    }
+
     if (isMovementOperation(operation)) {
       return operation.status !== "synced";
     }
