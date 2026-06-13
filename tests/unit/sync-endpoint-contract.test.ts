@@ -191,6 +191,22 @@ describe("sync endpoint contract validation", () => {
     });
   });
 
+  it("accepts delete operations with a non-empty validation payload", () => {
+    const operation = createOperation({
+      operationType: "delete",
+      payload: { deleted: true },
+    });
+
+    expect(
+      validateSyncEndpointRequest(createRequest(operation), {
+        authenticatedUserId: "user-1",
+      }),
+    ).toEqual({
+      ok: true,
+      request: createRequest(operation),
+    });
+  });
+
   it("requires move operations to include a target client id", () => {
     expect(
       validateSyncEndpointRequest(
