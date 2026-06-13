@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.30
-- **Current phase:** 1.9.30 - Delete Outbox Payload Validation Fix
-- **Next phase:** 1.9.31 - Local-First Dashboard Architecture Closeout
+- **Current version:** 1.9.31-alpha
+- **Current phase:** 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening
+- **Next phase:** 1.9.32 - Local-First Dashboard Architecture Closeout
 
 ---
 
