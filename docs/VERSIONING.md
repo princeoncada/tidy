@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.29
-- **Current phase:** 1.9.29 - Direct-Write Retirement & Default Dexie-First
-- **Next phase:** 1.9.30 - Local-First Dashboard Architecture Closeout
+- **Current version:** 1.9.30-alpha
+- **Current phase:** 1.9.30 - Delete Outbox Payload Validation Fix
+- **Next phase:** 1.9.31 - Local-First Dashboard Architecture Closeout
 
 ---
 
