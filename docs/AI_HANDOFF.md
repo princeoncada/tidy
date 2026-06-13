@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.30 -->
+<!-- Current Version: 1.9.31-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.30 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.30 - Delete Outbox Payload Validation Fix
-**Next**: 1.9.31 - Local-First Dashboard Architecture Closeout
+**Current Version**: 1.9.31-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening
+**Next**: 1.9.32 - Local-First Dashboard Architecture Closeout
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -184,6 +184,11 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
 - Authenticated E2E requires a Supabase user pool with at least as many users as Playwright workers (`tests/.auth/user-<index>.json` plus real env vars), with a legacy single-user fallback only for serial runs.
+- Authenticated E2E outbox-state assertions must verify a Dexie-first write was ENQUEUED (operation present for the entity + operationType) plus `directMutationRequests === []`, never that the op is still in transient `status: "pending"`: the flush scheduler can drain pending -> synced before a one-shot read, which caused the flaky failure in `dexie-first-tags-views.spec.ts` fixed in 1.9.31.
+- `drag-drop.spec.ts` asserts the real drag contract: bounded coalescing plus final settled placement across view switch/reload, not per-drop intermediate placement during the rapid three-drop sequence. `dragByMouse` engages dnd-kit with an activation move, briefly settles at the final pointer position, and then awaits removal of the `data-dnd-dragging="true"` feedback clone and hidden/inert `data-dnd-placeholder`. Raw-mouse dnd-kit simulation remains inherently flaky, so this spec alone carries file-scoped retries (`2`); affected movement tests retain a 60-second timeout.
+- Repeating the full authenticated suite many times back-to-back can exhaust the Postgres session-mode pool (`EMAXCONNSESSION`, pool size 15) because specs use the shared Prisma client for setup/cleanup without per-spec connection release. This is an environment/connection-hygiene constraint, not a product defect; a dedicated test-database connection-hygiene pass is a candidate follow-up.
+- Repeated authenticated-suite runs then exposed a separate product read-correctness gap: synced movement operations were relinquished before the authoritative query snapshot confirmed their placement, so a stale snapshot could briefly render the moving item in neither list. Movement handoff now keeps only the latest intent per entity and retains a synced intent until the server snapshot confirms its destination/order.
+- The movement overlay also retains the moving item defensively if no destination placement is available. Unit coverage proves both the partial-sync retention guard and stale-versus-confirmed movement handoff.
 - No keyboard drag accessibility validation.
 - UI/UX polish is intentionally late, after projection correctness, ownership, optimistic behavior, and test baselines.
 - Register submit button says "Login".

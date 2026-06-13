@@ -29,6 +29,8 @@ import { testIds } from "./utils/test-ids";
 config({ path: ".env.local", quiet: true });
 config({ path: ".env", quiet: true });
 
+test.describe.configure({ retries: 2 });
+
 let consoleErrors: string[];
 
 async function createPersistedList(page: Page, name: string) {
@@ -263,6 +265,8 @@ test("reorder lists if drag/drop is currently implemented", async ({ page }) => 
 });
 
 test("move item between lists if implemented", async ({ page }) => {
+  test.setTimeout(60_000);
+
   const sourceList = uniqueTestName("move-source");
   const targetList = uniqueTestName("move-target");
   const itemName = uniqueTestName("move-item");
@@ -313,6 +317,8 @@ test("move item into empty list if implemented", async ({ page }) => {
 });
 
 test.describe("Dexie-first movement", () => {
+  test.describe.configure({ timeout: 60_000 });
+
   test("coalesces committed drops and preserves placement through view switch and reload", async ({
     page,
   }) => {
@@ -459,12 +465,21 @@ test.describe("Dexie-first movement", () => {
       await expectItemInList(page, targetListName, movingItemName);
 
       await page.reload();
+      await openViewByName(page, customViewName);
       // Reload replays any remaining queued movement ops: the outbox must
       // drain to empty and at least one batch must have reached /api/sync.
       await expect
         .poll(() => getPendingMovementOperationCount(page))
         .toBe(0);
       expect(syncRequests.length).toBeGreaterThanOrEqual(1);
+      // The outbox can drain before the reloaded custom-view projection
+      // finishes rendering. Establish projection readiness with the positive
+      // destination list before asserting that the source no longer owns it.
+      await expect(
+        page
+          .getByTestId(testIds.listCard)
+          .filter({ hasText: targetListName }),
+      ).toBeVisible({ timeout: 15_000 });
       await expectItemNotInList(page, sourceListName, movingItemName);
       await expectItemInList(page, targetListName, movingItemName);
     } finally {

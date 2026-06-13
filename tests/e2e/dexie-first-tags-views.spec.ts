@@ -243,13 +243,15 @@ test.describe("Dexie-first tags and views", () => {
                       viewTag.deletedAt === null,
                   ),
               ),
+              // Assert the op was ENQUEUED (any status); the flush scheduler
+              // may drain pending -> synced before this read, and
+              // directMutationRequests === [] already proves no direct tRPC write.
               attachQueued: operations.some(
                 (operation) =>
                   operation.entityType === "listTag" &&
                   operation.entityClientId ===
                     `${expectedListId}:${expectedTagId}` &&
-                  operation.operationType === "attach" &&
-                  operation.status === "pending",
+                  operation.operationType === "attach",
               ),
               viewCreateQueued: Boolean(
                 createdView &&
@@ -257,8 +259,7 @@ test.describe("Dexie-first tags and views", () => {
                     (operation) =>
                       operation.entityType === "view" &&
                       operation.entityClientId === createdView.clientId &&
-                      operation.operationType === "create" &&
-                      operation.status === "pending",
+                      operation.operationType === "create",
                   ),
               ),
             };

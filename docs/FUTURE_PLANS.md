@@ -275,11 +275,23 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening (active) - see Planned
 ---
 
 ## Planned
 
-### 1.9.31 - Local-First Dashboard Architecture Closeout
+### 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening
+- **Status:** In progress | Priority: P1 test stability
+- **Type:** test stability + product read-correctness hardening
+- **Files:** lib/local-db/local-overlay.ts, tests/unit/local-overlay.test.ts, tests/e2e/utils/drag.ts, tests/e2e/drag-drop.spec.ts, tests/e2e/dexie-first-tags-views.spec.ts, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
+- **Implementation goal:** remove authenticated E2E timing races around transient outbox status, dnd-kit target recognition/drop cleanup, and movement sync duration; close the synced-movement handoff gap by retaining the latest movement intent until the authoritative server snapshot confirms its destination/order.
+- **Product impact:** prevents an intermittent stale-snapshot window where a recently moved item could render in neither list.
+- **Runtime integration target:** none.
+- **Deferral boundary:** broader E2E cross-test data-isolation hardening (server-side residue such as leftover view cards) is out of scope. Repeated back-to-back authenticated-suite runs can exhaust the Postgres session-mode pool (`EMAXCONNSESSION`, pool size 15) because shared-Prisma setup/cleanup lacks per-spec connection release; treat a dedicated test-DB connection-hygiene pass as a candidate follow-up, not a product defect.
+- **Validation target:** repeated `npm run test:e2e:auth` green + full validate.ps1 at the gate.
+- **Acceptance:** npm run test:e2e:auth is green across repeated runs (drag-drop.spec.ts carries file-scoped retries for raw-mouse dnd-kit flakiness); drag helpers engage + finalize deterministically; drag tests assert coalescing + final settled placement, not per-drop state; movement overlay relinquishes only after authoritative confirmation (unit-proven). No product behavior change beyond the committed overlay handoff fix.
+
+### 1.9.32 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
@@ -288,7 +300,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Runtime integration target:** none (decision); records the delivered runtime contract and names any follow-up outside dashboard local-first behavior.
 - **Deferral boundary:** production-readiness work remains in 1.10.x; no missing dashboard mutation may be silently deferred through this decision.
 - **Validation target:** targeted alpha (validate.ps1 + decision recorded); full validate.ps1 at the gate.
-- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps seriesComplete false with an explicitly versioned remaining product phase.
+- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps seriesComplete false with an explicitly versioned remaining product phase. Phase 1.9.31 separates and fixes the authenticated-suite timing races from the synced-movement authoritative-snapshot handoff defect, so this decision may record seriesComplete=true once a deterministically green `npm run test:e2e:auth` is presented.
 
 ### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness
