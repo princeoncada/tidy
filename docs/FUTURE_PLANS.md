@@ -280,7 +280,18 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
-### 1.9.31 - Local-First Dashboard Architecture Closeout
+### 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening
+- **Status:** In progress | Priority: P1 test stability
+- **Type:** test stability
+- **Files:** tests/e2e/dexie-first-tags-views.spec.ts, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
+- **Implementation goal:** remove the transient `status: "pending"` outbox assertion race in the Dexie-first tags/views authenticated E2E so the suite is deterministically green; assert the enqueue-not-direct-tRPC contract by op presence (any status) plus `directMutationRequests === []`, not by a one-shot observation of a still-pending op.
+- **Product impact:** none - test-only; product behavior unchanged.
+- **Runtime integration target:** none.
+- **Deferral boundary:** broader E2E cross-test data-isolation hardening (server-side residue such as leftover view cards) is out of scope; file it separately only if validation shows residual non-timing flakes.
+- **Validation target:** repeated `npm run test:e2e:auth` green + full validate.ps1 at the gate.
+- **Acceptance:** `npm run test:e2e:auth` passes deterministically across repeated runs; no product code changed.
+
+### 1.9.32 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
@@ -289,7 +300,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Runtime integration target:** none (decision); records the delivered runtime contract and names any follow-up outside dashboard local-first behavior.
 - **Deferral boundary:** production-readiness work remains in 1.10.x; no missing dashboard mutation may be silently deferred through this decision.
 - **Validation target:** targeted alpha (validate.ps1 + decision recorded); full validate.ps1 at the gate.
-- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps seriesComplete false with an explicitly versioned remaining product phase.
+- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps seriesComplete false with an explicitly versioned remaining product phase. The 1.9.30-carried drag-drop:316 concern was re-baselined as authenticated-suite test flakiness (not a product defect) and the timing-assertion race is fixed in 1.9.31, so this decision may record seriesComplete=true once a deterministically green `npm run test:e2e:auth` is presented.
 
 ### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness
