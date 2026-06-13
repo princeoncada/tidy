@@ -33,7 +33,10 @@ import {
 import {
   applyPendingOutboxOverlay,
   applyPendingViewOverlay,
+  outboxOperationsSignature,
+  readActiveOutboxOperationsForUser,
   readPendingOutboxOperationsForUser,
+  relinquishConfirmedOperations,
 } from '@/lib/local-db/local-overlay';
 import {
   commitLocalListItemMove,
@@ -44,7 +47,7 @@ import { subscribeToOutboxCaptures } from '@/lib/sync/outbox-capture-events';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
 import ListSkeleton from './ListSkeleton';
@@ -241,7 +244,12 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const serverEffectiveViews = views ?? boot.localViews;
   const effectiveViews =
     movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
-      ? applyPendingViewOverlay(serverEffectiveViews, pendingMovementOperations)
+      ? applyPendingViewOverlay(
+          serverEffectiveViews,
+          relinquishConfirmedOperations(pendingMovementOperations, {
+            views: views ?? null,
+          }),
+        )
       : serverEffectiveViews;
   const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
   const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
@@ -274,6 +282,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   } | null>(null);
   const [dragPreviewLists, setDragPreviewLists] = useState<DragPreviewLists | null>(null);
   const dragPreviewListsRef = useRef<DragPreviewLists | null>(null);
+  const outboxRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const outboxSignatureRef = useRef<string>("");
   const { data: bootCurrentView, isLoading: bootListsLoading, isError: bootListsError } = useQuery(
     trpc.view.getCurrentViewListsWithItems.queryOptions()
   );
@@ -297,6 +307,15 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     )
   );
 
+  const relinquishedOperations = useMemo(
+    () =>
+      relinquishConfirmedOperations(pendingMovementOperations, {
+        allLists: serverAllListsSnapshot ?? null,
+        views: views ?? null,
+      }),
+    [pendingMovementOperations, serverAllListsSnapshot, views],
+  );
+
   useEffect(() => {
     if (!movementCaptureEnabled || !boot.userId) {
       return;
@@ -304,9 +323,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     let cancelled = false;
 
-    void readPendingOutboxOperationsForUser(boot.userId)
+    void readActiveOutboxOperationsForUser(boot.userId)
       .then((operations) => {
         if (!cancelled) {
+          outboxSignatureRef.current = outboxOperationsSignature(operations);
           setPendingMovementOperations(operations);
         }
       })
@@ -333,22 +353,35 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     }
 
     let cancelled = false;
-    const unsubscribe = subscribeToOutboxCaptures((event) => {
-      if (event.userId !== userId) return;
 
-      void readPendingOutboxOperationsForUser(userId)
+    const refresh = () => {
+      void readActiveOutboxOperationsForUser(userId)
         .then((operations) => {
-          if (!cancelled) {
-            setPendingMovementOperations(operations);
-          }
+          if (cancelled) return;
+          const signature = outboxOperationsSignature(operations);
+          if (signature === outboxSignatureRef.current) return;
+          outboxSignatureRef.current = signature;
+          setPendingMovementOperations(operations);
         })
         .catch(() => {
           // The existing overlay remains authoritative if the refresh fails.
         });
+    };
+
+    const unsubscribe = subscribeToOutboxCaptures((event) => {
+      if (event.userId !== userId) return;
+      if (outboxRefreshTimerRef.current !== null) {
+        clearTimeout(outboxRefreshTimerRef.current);
+      }
+      outboxRefreshTimerRef.current = setTimeout(refresh, 120);
     });
 
     return () => {
       cancelled = true;
+      if (outboxRefreshTimerRef.current !== null) {
+        clearTimeout(outboxRefreshTimerRef.current);
+        outboxRefreshTimerRef.current = null;
+      }
       unsubscribe();
     };
   }, [boot.userId, movementCaptureEnabled]);
@@ -357,14 +390,14 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     movementCaptureEnabled && pendingMovementReady && bootCurrentView
       ? applyPendingOutboxOverlay(
           bootCurrentView,
-          pendingMovementOperations,
+          relinquishedOperations,
         )
       : bootCurrentView;
   const effectiveSelectedViewSnapshot =
     movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
       ? applyPendingOutboxOverlay(
           selectedViewSnapshot,
-          pendingMovementOperations,
+          relinquishedOperations,
         )
       : selectedViewSnapshot;
 
