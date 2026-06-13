@@ -14,6 +14,7 @@ import { Plus } from "lucide-react";
 import {
   buildDashboardKeys,
   insertOptimisticListIntoDashboardCaches,
+  reconcileLocallyCommittedListInDashboardCaches,
   selectedViewFromCache,
 } from "@/lib/dashboard-cache";
 import { LOCAL_ALL_LISTS_VIEW_ID } from "@/lib/local-first-dashboard";
@@ -70,8 +71,9 @@ const ListAdder = ({ boot }: ListAdderProps) => {
 
   const handleCreateList = () => {
     const name = createListName.trim();
+    const userId = boot.userId;
 
-    if (!name || !boot.userId) return;
+    if (!name || !userId) return;
 
     const newListId = crypto.randomUUID();
     const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
@@ -99,12 +101,21 @@ const ListAdder = ({ boot }: ListAdderProps) => {
       activeView,
     );
     void commitLocalListCreate({
-      userId: boot.userId,
+      userId,
       listId: newListId,
       name,
-    }).catch(() => {
-      // Local-first commit is best-effort and must not block the UI.
-    });
+    })
+      .then(() => {
+        reconcileLocallyCommittedListInDashboardCaches(
+          queryClient,
+          dashboardKeys,
+          newListId,
+          userId,
+        );
+      })
+      .catch(() => {
+        // Local-first commit is best-effort and must not block the UI.
+      });
     setCreateListName('');
   };
 
