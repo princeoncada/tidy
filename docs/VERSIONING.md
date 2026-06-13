@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.30-alpha
+- **Current version:** 1.9.30
 - **Current phase:** 1.9.30 - Delete Outbox Payload Validation Fix
 - **Next phase:** 1.9.31 - Local-First Dashboard Architecture Closeout
 
