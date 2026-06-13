@@ -16,6 +16,7 @@ import {
   commitLocalListDelete,
   commitLocalListItemCompletion,
   commitLocalListItemCreate,
+  commitLocalListItemDelete,
   commitLocalListItemMove,
   commitLocalListItemReorder,
   commitLocalListReorder,
@@ -544,7 +545,31 @@ describe("atomic local list and item writes", () => {
     expect(operationsForEntity(outboxOperations, "list", "list-1")).toEqual([
       expect.objectContaining({
         operationType: "delete",
-        payload: {},
+        payload: { deleted: true },
+      }),
+    ]);
+  });
+
+  it("tombstones an existing list item and appends a delete operation", async () => {
+    const { db, listItems, outboxOperations } = createFakeLocalWriteDb();
+    listItems.set("item-1", createListItem());
+
+    await commitLocalListItemDelete({
+      userId: "user-1",
+      itemId: "item-1",
+      db,
+    });
+
+    expect(listItems.get("item-1")).toMatchObject({
+      syncStatus: "pending",
+      deletedAt: expect.any(String),
+    });
+    expect(
+      operationsForEntity(outboxOperations, "listItem", "item-1"),
+    ).toEqual([
+      expect.objectContaining({
+        operationType: "delete",
+        payload: { deleted: true },
       }),
     ]);
   });
@@ -840,7 +865,7 @@ describe("atomic local tag, view, and relationship writes", () => {
     expect(operationsForEntity(outboxOperations, "tag", "tag-1")).toEqual([
       expect.objectContaining({
         operationType: "delete",
-        payload: {},
+        payload: { deleted: true },
       }),
     ]);
   });
@@ -1052,7 +1077,7 @@ describe("atomic local tag, view, and relationship writes", () => {
     expect(operationsForEntity(outboxOperations, "view", "view-1")).toEqual([
       expect.objectContaining({
         operationType: "delete",
-        payload: {},
+        payload: { deleted: true },
       }),
     ]);
   });

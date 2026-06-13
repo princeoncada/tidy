@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.29 -->
+<!-- Current Version: 1.9.30-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.29 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.29 - Direct-Write Retirement & Default Dexie-First
-**Next**: 1.9.30 - Local-First Dashboard Architecture Closeout
+**Current Version**: 1.9.30-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.30 - Delete Outbox Payload Validation Fix
+**Next**: 1.9.31 - Local-First Dashboard Architecture Closeout
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -171,6 +171,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - The offline replay conflict policy remains deterministic timestamp last-write-wins, server-authoritative on equal/missing timestamps (`lib/sync/conflict-resolution.ts`). Its optional `getServerSnapshot` provider still has no runtime caller; real server application and per-operation results are owned by the bounded batch endpoint phase.
 - The 2026-06-10 decision supersedes the remaining server-authoritative/per-slice planning stance for future work. The delivery target is a complete Dexie dashboard graph plus bounded batch synchronization; existing direct tRPC persistence is transitional, not the accepted final architecture.
 - Runtime dashboard mutations now commit through the local-write helpers across list/item CRUD, movement/order, tag/view CRUD, relationships, and selected-view metadata; Dexie-first is default-on and direct component tRPC persistence is retired.
+- Every list, list-item, tag, and view delete outbox operation emits `payload: { deleted: true }`.
+- The non-empty delete-payload rule in `sync-endpoint-contract.ts` remains strict by design; it is the deliberate client/server replay contract.
 - The 1.9.28 pending-outbox overlay preserves operations only while they remain pending/syncing/failed. In the online create-to-immediate-mutation flow it relinquishes a locally-created list after flush but before a stale server refetch includes it; retaining the list alone is insufficient if its local `listTags` and tag metadata are not also projected.
 - Remaining 1.9.29 work is a performance-safe online local-presence overlay for lists, items, tags, and relationships through server confirmation. The server apply path is correct: list create writes both the `List` and All-Lists `ViewList` membership.
 - The acknowledge-only, one-request-per-operation, and dashboard mutation coverage risks are discharged through 1.9.22-1.9.25. 1.9.26 delivers gated sync lifecycle scheduling (quiet-window/threshold/reconnect/lifecycle flush), per-user single-flight flush suppression, backoff retry by re-selecting backoff-ready `failed` operations, and stranded `syncing` recovery on reload.

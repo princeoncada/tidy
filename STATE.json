@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.29",
-    "state":  "stable",
-    "phase":  "1.9.29",
-    "phaseTitle":  "Direct-Write Retirement \u0026 Default Dexie-First",
-    "nextPhase":  "1.9.30 - Local-First Dashboard Architecture Closeout",
+    "version":  "1.9.30-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.30",
+    "phaseTitle":  "Delete Outbox Payload Validation Fix",
+    "nextPhase":  "1.9.31 - Local-First Dashboard Architecture Closeout",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-13"
 }

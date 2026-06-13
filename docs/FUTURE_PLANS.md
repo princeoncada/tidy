@@ -273,11 +273,23 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.30 - Delete Outbox Payload Validation Fix (active) - see Planned
 ---
 
 ## Planned
 
-### 1.9.30 - Local-First Dashboard Architecture Closeout
+### 1.9.30 - Delete Outbox Payload Validation Fix
+- **Status:** In progress
+- **Type:** product behavior
+- **Files:** lib/local-db/local-write.ts, tests/unit/local-write.test.ts, tests/unit/sync-endpoint-contract.test.ts, tests/unit/sync-batch-contract.test.ts, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
+- **Implementation goal:** every Dexie-first delete outbox producer (list, listItem, tag, view) emits payload { deleted: true } so the strict server non-empty-delete-payload validator accepts replayed deletes.
+- **Product impact:** list/view/tag/item deletes sync successfully instead of accumulating as FAILED outbox rows; the sync badge no longer surfaces delete failures.
+- **Runtime integration target:** /api/sync applies delete operations (applied/already-applied); no failed delete rows remain in outboxOperations.
+- **Deferral boundary:** server validation stays strict and unchanged; no legacy failed-row recovery/migration this phase (dev cleanup only); architecture closeout -> 1.9.31.
+- **Validation target:** targeted alpha (local-write + sync contract tests + manual delete->sync proof); full validate.ps1 / test:ci before stable.
+- **Acceptance:** all four delete producers emit a non-empty payload, { deleted: true } is accepted by endpoint and batch validation, an empty {} delete payload is still rejected, and a manual delete clears the sync badge with no failed delete rows.
+
+### 1.9.31 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
@@ -286,7 +298,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Runtime integration target:** none (decision); records the delivered runtime contract and names any follow-up outside dashboard local-first behavior.
 - **Deferral boundary:** production-readiness work remains in 1.10.x; no missing dashboard mutation may be silently deferred through this decision.
 - **Validation target:** targeted alpha (validate.ps1 + decision recorded); full validate.ps1 at the gate.
-- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps `seriesComplete` false with an explicitly versioned remaining product phase.
+- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps seriesComplete false with an explicitly versioned remaining product phase.
 
 ### 1.10.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness
