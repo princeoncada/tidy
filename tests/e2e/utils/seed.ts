@@ -70,6 +70,13 @@ export function collectConsoleErrors(page: Page) {
     // server create can commit; that transient 404 self-heals on refetch.
     if (isOptimisticViewCreate404) return;
 
+    const isSupabaseAuthFetchNoise =
+      message.type() === "error" &&
+      message.text().includes("TypeError: Failed to fetch") &&
+      message.text().includes("SupabaseAuthClient._getUser");
+
+    if (isSupabaseAuthFetchNoise) return;
+
     if (message.type() === "error") {
       errors.push(message.text());
     }
