@@ -287,9 +287,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Implementation goal:** remove authenticated E2E timing races around transient outbox status, dnd-kit target recognition/drop cleanup, and movement sync duration; close the synced-movement handoff gap by retaining the latest movement intent until the authoritative server snapshot confirms its destination/order.
 - **Product impact:** prevents an intermittent stale-snapshot window where a recently moved item could render in neither list.
 - **Runtime integration target:** none.
-- **Deferral boundary:** broader E2E cross-test data-isolation hardening (server-side residue such as leftover view cards) is out of scope; file it separately only if validation shows residual non-timing flakes.
+- **Deferral boundary:** broader E2E cross-test data-isolation hardening (server-side residue such as leftover view cards) is out of scope. Repeated back-to-back authenticated-suite runs can exhaust the Postgres session-mode pool (`EMAXCONNSESSION`, pool size 15) because shared-Prisma setup/cleanup lacks per-spec connection release; treat a dedicated test-DB connection-hygiene pass as a candidate follow-up, not a product defect.
 - **Validation target:** repeated `npm run test:e2e:auth` green + full validate.ps1 at the gate.
-- **Acceptance:** `npm run test:e2e:auth` is green across repeated runs; list-item drags await destination recognition before release and all drags await finalization; movement tests have an adequate timeout; synced movement remains overlaid until authoritative placement confirmation; the movement overlay defensively retains the moving item. Both handoff and retention behavior are unit-proven.
+- **Acceptance:** npm run test:e2e:auth is green across repeated runs (drag-drop.spec.ts carries file-scoped retries for raw-mouse dnd-kit flakiness); drag helpers engage + finalize deterministically; drag tests assert coalescing + final settled placement, not per-drop state; movement overlay relinquishes only after authoritative confirmation (unit-proven). No product behavior change beyond the committed overlay handoff fix.
 
 ### 1.9.32 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
