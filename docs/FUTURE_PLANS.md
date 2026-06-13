@@ -262,6 +262,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.28 - Dexie-First Reconcile Overlay~~ (stable 2026-06-12)
 
+- ~~1.9.29 - Direct-Write Retirement & Default Dexie-First~~ (stable 2026-06-13)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -271,22 +273,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.29 - Direct-Write Retirement & Default Dexie-First (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.29 - Direct-Write Retirement & Default Dexie-First
-- **Status:** In progress | Priority: P1 product (local-first)
-- **Type:** product behavior
-- **Files:** components/list/*, components/views/*, dashboard mutation components, hooks/*, lib/sync/*, tests/e2e/*
-- **Implementation goal:** make Dexie-first the default dashboard write path and remove remaining component-level direct tRPC persistence for list, item, reorder/move, tag, view, selection, and relationship writes, then re-baseline the authenticated e2e suite that currently asserts per-action tRPC mutations. This phase depends on the 1.9.28 overlay and is seeded by branch `wip/direct-write-retirement`.
-- **Product impact:** every dashboard mutation persists through Dexie/outbox and the batch endpoint by default; per-action tRPC persistence no longer runs.
-- **Runtime integration target:** Dexie is the default primary local dashboard source and `/api/sync` batch flushes are the only remote dashboard write path; tRPC query procedures may remain the online hydration/read bridge.
-- **Deferral boundary:** no dashboard CRUD or movement slice may remain on direct tRPC persistence by the end of this phase. The architecture closeout decision is 1.9.30.
-- **Validation target:** targeted alpha (default-path mutation coverage, rewritten authenticated e2e); full test:ci before stable.
-- **Acceptance:** with the prototype gate removed or defaulted on, a representative multi-action session updates instantly from Dexie, reaches the server in bounded batch requests, and the authenticated suite passes against the Dexie-first default.
-- **Discovered (alpha):** direct tRPC persistence retirement and the Dexie-first default are landed and remain in place, but online read correctness is incomplete for create-then-immediately-mutate flows. The 1.9.28 overlay relinquishes a locally-created list after its create op flushes but before the server read reflects it; once list presence is retained, the overlaid list can still lose its optimistic `listTags`, and a naive Dexie reread/setState on every outbox capture can hang renders. Remaining 1.9.29 work is a performance-safe local-presence union that preserves lists, list tags, and tag rendering through the flush-to-server-confirmed window. The isolated `views.spec.ts` and `dexie-first-tags-views.spec.ts:82` failures are product behavior, not test pollution.
 
 ### 1.9.30 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
