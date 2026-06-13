@@ -108,6 +108,10 @@ const ListItemComponent = ({
     group: "list-items"
   });
 
+  if (itemDeleted) {
+    return null;
+  }
+
   return (
     <div
       data-testid="list-item"
