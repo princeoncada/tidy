@@ -85,25 +85,29 @@ function useAuthoritativeQuerySnapshot<T>({
   scopeKey: string | null;
 }) {
   const queryKeyHash = JSON.stringify(queryKey);
-  const trackedQueryKeyRef = useRef({ hash: queryKeyHash, queryKey });
   const [snapshot, setSnapshot] = useState<T | undefined>(initialData);
 
-  if (trackedQueryKeyRef.current.hash !== queryKeyHash) {
-    trackedQueryKeyRef.current = { hash: queryKeyHash, queryKey };
-  }
-
   useEffect(() => {
-    const trackedQueryKey = trackedQueryKeyRef.current.queryKey;
     const queryCache = queryClient.getQueryCache();
-    const currentQuery = queryCache.find({ queryKey: trackedQueryKey });
+    const findCurrentQuery = () =>
+      queryCache
+        .getAll()
+        .find((query) => JSON.stringify(query.queryKey) === queryKeyHash);
 
-    setSnapshot(
-      currentQuery?.state.status === "success"
-        ? currentQuery.state.data as T
-        : undefined,
-    );
+    const currentQuery = findCurrentQuery();
+    let cancelled = false;
 
-    return queryCache.subscribe((event) => {
+    queueMicrotask(() => {
+      if(!cancelled) {
+        setSnapshot(
+          currentQuery?.state.status === "success"
+            ? currentQuery.state.data as T
+            : undefined,
+        );
+      }
+    })
+
+    const unsubscribe =  queryCache.subscribe((event) => {
       if (
         event.type !== "updated" ||
         event.action.type !== "success" ||
@@ -115,8 +119,13 @@ function useAuthoritativeQuerySnapshot<T>({
 
       setSnapshot(event.action.data as T);
     });
-  }, [queryClient, queryKeyHash, scopeKey]);
 
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+
+  }, [queryClient, queryKeyHash, scopeKey]);
   return snapshot;
 }
 
@@ -304,11 +313,11 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     () =>
       movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
         ? applyPendingViewOverlay(
-            serverEffectiveViews,
-            relinquishConfirmedOperations(pendingMovementOperations, {
-              views: confirmedServerViews ?? null,
-            }),
-          )
+          serverEffectiveViews,
+          relinquishConfirmedOperations(pendingMovementOperations, {
+            views: confirmedServerViews ?? null,
+          }),
+        )
         : serverEffectiveViews,
     [
       confirmedServerViews,
@@ -469,9 +478,9 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     () =>
       movementCaptureEnabled && pendingMovementReady && bootCurrentView
         ? applyPendingOutboxOverlay(
-            bootCurrentView,
-            relinquishedOperations,
-          )
+          bootCurrentView,
+          relinquishedOperations,
+        )
         : bootCurrentView,
     [
       bootCurrentView,
@@ -484,9 +493,9 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     () =>
       movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
         ? applyPendingOutboxOverlay(
-            selectedViewSnapshot,
-            relinquishedOperations,
-          )
+          selectedViewSnapshot,
+          relinquishedOperations,
+        )
         : selectedViewSnapshot,
     [
       movementCaptureEnabled,
