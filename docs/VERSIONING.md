@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.31-alpha
+- **Current version:** 1.9.31
 - **Current phase:** 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening
 - **Next phase:** 1.9.32 - Local-First Dashboard Architecture Closeout
 
