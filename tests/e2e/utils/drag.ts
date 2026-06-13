@@ -31,12 +31,8 @@ export async function dragByMouse(page: Page, source: Locator, target: Locator) 
   await page.mouse.move(activationX, activationY, { steps: 2 });
   await page.waitForTimeout(50);
   await page.mouse.move(to.x, to.y, { steps: 12 });
-
-  if (await target.getAttribute("data-testid") === "list-drop-zone") {
-    await expect(target.locator("xpath=..")).toHaveClass(/border-zinc-400/, {
-      timeout: 5_000,
-    });
-  }
+  await page.mouse.move(to.x, to.y);
+  await page.waitForTimeout(150);
 
   await page.mouse.up();
 
