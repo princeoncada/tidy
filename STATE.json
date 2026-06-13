@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.31-alpha",
-    "state":  "alpha",
+    "version":  "1.9.31",
+    "state":  "stable",
     "phase":  "1.9.31",
     "phaseTitle":  "E2E Auth-Suite Sync-Timing Assertion Hardening",
     "nextPhase":  "1.9.32 - Local-First Dashboard Architecture Closeout",
