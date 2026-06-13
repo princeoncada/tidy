@@ -106,6 +106,38 @@ function findListTagMetadata(
   return undefined;
 }
 
+function buildPendingTagCreateMetadata(
+  operations: readonly LocalOutboxOperation[],
+  now: Date,
+): Map<string, DashboardTag> {
+  const tags = new Map<string, DashboardTag>();
+
+  for (const operation of operations) {
+    if (
+      operation.entityType !== "tag" ||
+      operation.operationType !== "create" ||
+      !isOverlayPayload(operation.payload)
+    ) {
+      continue;
+    }
+
+    const name = getString(operation.payload.name);
+    const color = getTagColor(operation.payload.color);
+    if (!name || !color) continue;
+
+    tags.set(operation.entityClientId, {
+      id: operation.entityClientId,
+      name,
+      color,
+      userId: "optimistic",
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  return tags;
+}
+
 function findViewTagMetadata(
   views: ViewsCache,
   tagId: string,
@@ -175,6 +207,10 @@ export function applyPendingOutboxOverlay(
       })),
     })),
   };
+  const pendingTagCreateMetadata = buildPendingTagCreateMetadata(
+    operations,
+    now,
+  );
   const movementOperations: LocalOutboxOperation[] = [];
 
   for (const operation of operations) {
@@ -323,7 +359,9 @@ export function applyPendingOutboxOverlay(
 
       if (operation.operationType === "attach") {
         const tag =
-          findListTagMetadata(result, tagId) ?? synthesizeTag(tagId, now);
+          findListTagMetadata(result, tagId) ??
+          pendingTagCreateMetadata.get(tagId) ??
+          synthesizeTag(tagId, now);
         result = {
           ...result,
           lists: result.lists.map((list) => {
