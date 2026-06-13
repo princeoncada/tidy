@@ -98,16 +98,16 @@ function useAuthoritativeQuerySnapshot<T>({
     let cancelled = false;
 
     queueMicrotask(() => {
-      if(!cancelled) {
+      if (!cancelled) {
         setSnapshot(
           currentQuery?.state.status === "success"
             ? currentQuery.state.data as T
             : undefined,
         );
       }
-    })
+    });
 
-    const unsubscribe =  queryCache.subscribe((event) => {
+    const unsubscribe = queryCache.subscribe((event) => {
       if (
         event.type !== "updated" ||
         event.action.type !== "success" ||
@@ -627,6 +627,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const reorderListsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reorderListItemsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingItemMovementBaseRef = useRef<Lists | null>(null);
+  const pendingItemMovementNextRef = useRef<Lists | null>(null);
 
   const refreshPendingMovementOperations = useCallback(async () => {
     if (!boot.userId) return;
@@ -752,6 +753,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     writeListItemOrderToCaches(nextLists);
     pendingItemMovementBaseRef.current ??= previousLists;
+    pendingItemMovementNextRef.current = nextLists;
 
     if (reorderListItemsTimeoutRef.current) {
       clearTimeout(reorderListItemsTimeoutRef.current);
@@ -760,14 +762,18 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     reorderListItemsTimeoutRef.current = setTimeout(() => {
       const movementBase =
         pendingItemMovementBaseRef.current ?? previousLists;
+      const movementNext =
+        pendingItemMovementNextRef.current ?? nextLists;
+
       pendingItemMovementBaseRef.current = null;
+      pendingItemMovementNextRef.current = null;
 
       optimisticSync.replacePending("item-order", async () => {
         if (!boot.userId) return;
 
         const intents = translateListItemMovement(
           movementBase,
-          nextLists,
+          movementNext,
         );
 
         try {
@@ -792,7 +798,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         } catch {
           // Local persistence must not replace the committed cache placement.
         }
-        writeListItemOrderToCaches(nextLists);
+        writeListItemOrderToCaches(movementNext);
       }, { label: "listItem.reorderListItems" });
     }, 300);
   }, [
