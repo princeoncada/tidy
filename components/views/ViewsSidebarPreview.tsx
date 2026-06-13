@@ -50,6 +50,7 @@ import {
   DashboardSnapshot,
   insertOptimisticViewIntoDashboardCaches,
   listMatchesView,
+  reconcileCreatedViewInViewsCache,
   removeViewFromDashboardCaches,
   ViewsCache,
 } from "@/lib/dashboard-cache";
@@ -535,7 +536,14 @@ export default function ViewsSidebarPreview({
       viewId,
       name,
       tagIds,
-    }).catch(() => {});
+    })
+      .then(() => {
+        reconcileCreatedViewInViewsCache(queryClient, dashboardKeys, {
+          id: viewId,
+          userId,
+        });
+      })
+      .catch(() => {});
     setDialogState(null);
   }
 
