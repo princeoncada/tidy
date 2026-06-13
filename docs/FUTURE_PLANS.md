@@ -275,6 +275,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening (active) - see Planned
 ---
 
 ## Planned
