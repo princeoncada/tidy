@@ -1492,15 +1492,18 @@ describe("relinquishConfirmedOperations", () => {
     ).toBe("view-b");
   });
 
-  it("drops synced movement and keeps other movement statuses", () => {
+  it("drops server-confirmed synced movement and keeps other movement statuses", () => {
     const operations = (["synced", "pending", "syncing", "failed"] as const)
       .map((status) =>
         operation({
           operationId: status,
           entityType: "listItem",
-          entityClientId: "list-a",
+          entityClientId: status === "synced" ? "list-a" : `list-${status}`,
           operationType: "reorder",
-          payload: { listId: "list-a", orderedIds: ["item-a", "item-b"] },
+          payload: {
+            listId: status === "synced" ? "list-a" : `list-${status}`,
+            orderedIds: ["item-a", "item-b"],
+          },
           status,
         }),
       );
@@ -1510,6 +1513,96 @@ describe("relinquishConfirmedOperations", () => {
         allLists: snapshot(),
       }).map((candidate) => candidate.status),
     ).toEqual(["pending", "syncing", "failed"]);
+  });
+
+  it("retains the latest synced movement until the server snapshot confirms it", () => {
+    const move = operation({
+      operationId: "move-item-a",
+      entityType: "listItem",
+      entityClientId: "item-a",
+      operationType: "move",
+      payload: { toListClientId: "list-b", order: 0 },
+      status: "synced",
+    });
+    const staleServer = snapshot();
+
+    expect(
+      relinquishConfirmedOperations([move], { allLists: staleServer }),
+    ).toEqual([move]);
+    expect(
+      applyPendingOutboxOverlay(staleServer, [move]).lists[1].listItems[0],
+    ).toMatchObject({ id: "item-a", listId: "list-b", order: 0 });
+
+    const confirmedServer = snapshot();
+    const [movedItem] = confirmedServer.lists[0].listItems.splice(0, 1);
+    confirmedServer.lists[1].listItems.push({
+      ...movedItem,
+      listId: "list-b",
+      order: 0,
+    });
+
+    expect(
+      relinquishConfirmedOperations([move], { allLists: confirmedServer }),
+    ).toEqual([]);
+  });
+
+  it("suppresses obsolete synced movement history before overlaying", () => {
+    const moveToTarget = operation({
+      operationId: "move-target",
+      entityType: "listItem",
+      entityClientId: "item-a",
+      operationType: "move",
+      payload: { toListClientId: "list-b", order: 0 },
+      status: "synced",
+      createdAt: "2026-06-12T10:00:00.001Z",
+    });
+    const moveBackToSource = operation({
+      operationId: "move-source",
+      entityType: "listItem",
+      entityClientId: "item-a",
+      operationType: "move",
+      payload: { toListClientId: "list-a", order: 0 },
+      status: "synced",
+      createdAt: "2026-06-12T10:00:00.002Z",
+    });
+
+    expect(
+      relinquishConfirmedOperations(
+        [moveToTarget, moveBackToSource],
+        { allLists: snapshot() },
+      ),
+    ).toEqual([]);
+  });
+
+  it("retains synced view-list order until the views snapshot confirms it", () => {
+    const reorder = operation({
+      operationId: "reorder-view-lists",
+      entityType: "viewList",
+      entityClientId: "view-all",
+      operationType: "reorder",
+      payload: {
+        viewId: "view-all",
+        orderedIds: ["list-b", "list-a"],
+      },
+      status: "synced",
+    });
+    const staleViews: ViewsCache = [snapshot().view];
+
+    expect(
+      relinquishConfirmedOperations([reorder], { views: staleViews }),
+    ).toEqual([reorder]);
+
+    const confirmedViews: ViewsCache = [{
+      ...staleViews[0],
+      viewLists: [
+        { listId: "list-b", order: 0 },
+        { listId: "list-a", order: 1 },
+      ],
+    }];
+
+    expect(
+      relinquishConfirmedOperations([reorder], { views: confirmedViews }),
+    ).toEqual([]);
   });
 });
 
