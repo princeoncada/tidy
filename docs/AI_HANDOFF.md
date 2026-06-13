@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.30 -->
+<!-- Current Version: 1.9.31-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.30 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.30 - Delete Outbox Payload Validation Fix
-**Next**: 1.9.31 - Local-First Dashboard Architecture Closeout
+**Current Version**: 1.9.31-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening
+**Next**: 1.9.32 - Local-First Dashboard Architecture Closeout
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
