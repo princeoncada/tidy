@@ -46,7 +46,12 @@ import {
 import { subscribeToOutboxCaptures } from '@/lib/sync/outbox-capture-events';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  type QueryClient,
+  type QueryKey,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
@@ -66,6 +71,53 @@ function isOptimisticCacheRow(value: unknown) {
     "isOptimistic" in value &&
     value.isOptimistic
   );
+}
+
+function useAuthoritativeQuerySnapshot<T>({
+  queryClient,
+  queryKey,
+  initialData,
+  scopeKey,
+}: {
+  queryClient: QueryClient;
+  queryKey: QueryKey;
+  initialData: T | undefined;
+  scopeKey: string | null;
+}) {
+  const queryKeyHash = JSON.stringify(queryKey);
+  const trackedQueryKeyRef = useRef({ hash: queryKeyHash, queryKey });
+  const [snapshot, setSnapshot] = useState<T | undefined>(initialData);
+
+  if (trackedQueryKeyRef.current.hash !== queryKeyHash) {
+    trackedQueryKeyRef.current = { hash: queryKeyHash, queryKey };
+  }
+
+  useEffect(() => {
+    const trackedQueryKey = trackedQueryKeyRef.current.queryKey;
+    const queryCache = queryClient.getQueryCache();
+    const currentQuery = queryCache.find({ queryKey: trackedQueryKey });
+
+    setSnapshot(
+      currentQuery?.state.status === "success"
+        ? currentQuery.state.data as T
+        : undefined,
+    );
+
+    return queryCache.subscribe((event) => {
+      if (
+        event.type !== "updated" ||
+        event.action.type !== "success" ||
+        event.action.manual ||
+        JSON.stringify(event.query.queryKey) !== queryKeyHash
+      ) {
+        return;
+      }
+
+      setSnapshot(event.action.data as T);
+    });
+  }, [queryClient, queryKeyHash, scopeKey]);
+
+  return snapshot;
 }
 
 function reorderListsForDrag(
@@ -242,15 +294,30 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     ? undefined
     : views;
   const serverEffectiveViews = views ?? boot.localViews;
-  const effectiveViews =
-    movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
-      ? applyPendingViewOverlay(
-          serverEffectiveViews,
-          relinquishConfirmedOperations(pendingMovementOperations, {
-            views: views ?? null,
-          }),
-        )
-      : serverEffectiveViews;
+  const confirmedServerViews = useAuthoritativeQuerySnapshot<ViewsCache>({
+    queryClient,
+    queryKey: trpc.view.getAll.queryKey(),
+    initialData: views,
+    scopeKey: boot.userId,
+  });
+  const effectiveViews = useMemo(
+    () =>
+      movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
+        ? applyPendingViewOverlay(
+            serverEffectiveViews,
+            relinquishConfirmedOperations(pendingMovementOperations, {
+              views: confirmedServerViews ?? null,
+            }),
+          )
+        : serverEffectiveViews,
+    [
+      confirmedServerViews,
+      movementCaptureEnabled,
+      pendingMovementOperations,
+      pendingMovementReady,
+      serverEffectiveViews,
+    ],
+  );
   const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
   const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
   const selectedView = selectedViewFromCache(effectiveViews);
@@ -307,13 +374,25 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     )
   );
 
+  const confirmedServerAllListsSnapshot =
+    useAuthoritativeQuerySnapshot<DashboardSnapshot>({
+      queryClient,
+      queryKey: allListsQueryKey,
+      initialData: serverAllListsSnapshot,
+      scopeKey: boot.userId,
+    });
+
   const relinquishedOperations = useMemo(
     () =>
       relinquishConfirmedOperations(pendingMovementOperations, {
-        allLists: serverAllListsSnapshot ?? null,
-        views: views ?? null,
+        allLists: confirmedServerAllListsSnapshot ?? null,
+        views: confirmedServerViews ?? null,
       }),
-    [pendingMovementOperations, serverAllListsSnapshot, views],
+    [
+      confirmedServerAllListsSnapshot,
+      confirmedServerViews,
+      pendingMovementOperations,
+    ],
   );
 
   useEffect(() => {
@@ -386,20 +465,36 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     };
   }, [boot.userId, movementCaptureEnabled]);
 
-  const effectiveBootCurrentView =
-    movementCaptureEnabled && pendingMovementReady && bootCurrentView
-      ? applyPendingOutboxOverlay(
-          bootCurrentView,
-          relinquishedOperations,
-        )
-      : bootCurrentView;
-  const effectiveSelectedViewSnapshot =
-    movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
-      ? applyPendingOutboxOverlay(
-          selectedViewSnapshot,
-          relinquishedOperations,
-        )
-      : selectedViewSnapshot;
+  const effectiveBootCurrentView = useMemo(
+    () =>
+      movementCaptureEnabled && pendingMovementReady && bootCurrentView
+        ? applyPendingOutboxOverlay(
+            bootCurrentView,
+            relinquishedOperations,
+          )
+        : bootCurrentView,
+    [
+      bootCurrentView,
+      movementCaptureEnabled,
+      pendingMovementReady,
+      relinquishedOperations,
+    ],
+  );
+  const effectiveSelectedViewSnapshot = useMemo(
+    () =>
+      movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
+        ? applyPendingOutboxOverlay(
+            selectedViewSnapshot,
+            relinquishedOperations,
+          )
+        : selectedViewSnapshot,
+    [
+      movementCaptureEnabled,
+      pendingMovementReady,
+      relinquishedOperations,
+      selectedViewSnapshot,
+    ],
+  );
 
   useEffect(() => {
     if (!canApplySelectedViewPayload(selectedViewId, effectiveBootCurrentView)) return;
@@ -415,8 +510,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     if (
       typeof window === "undefined" ||
       !boot.userId ||
-      !views ||
-      !serverAllListsSnapshot ||
+      !confirmedServerViews ||
+      !confirmedServerAllListsSnapshot ||
       !viewsSucceeded ||
       !allListsSucceeded ||
       viewsError ||
@@ -429,13 +524,13 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     async function seedServerGraphIntoLocalDb() {
       try {
-        if (!views || !serverAllListsSnapshot) return;
-        const confirmedServerViews = views.filter(
+        if (!confirmedServerViews || !confirmedServerAllListsSnapshot) return;
+        const confirmedViewsForUser = confirmedServerViews.filter(
           (view) => view.userId === boot.userId,
         );
         const confirmedServerAllLists = {
-          ...serverAllListsSnapshot,
-          lists: serverAllListsSnapshot.lists
+          ...confirmedServerAllListsSnapshot,
+          lists: confirmedServerAllListsSnapshot.lists
             .filter((list) => !isOptimisticCacheRow(list))
             .map((list) => ({
               ...list,
@@ -467,7 +562,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         const plan = reconcileServerGraphIntoLocalPlan({
           userId: boot.userId!,
           server: {
-            views: confirmedServerViews,
+            views: confirmedViewsForUser,
             allLists: confirmedServerAllLists,
           },
           local: {
@@ -496,8 +591,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     allListsError,
     allListsSucceeded,
     boot.userId,
-    serverAllListsSnapshot,
-    views,
+    confirmedServerAllListsSnapshot,
+    confirmedServerViews,
     viewsError,
     viewsSucceeded,
   ]);
