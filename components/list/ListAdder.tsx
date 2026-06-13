@@ -80,6 +80,13 @@ const ListAdder = ({ boot }: ListAdderProps) => {
     const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
     const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
     const baseLists = previousCurrentView?.lists ?? previousAllLists?.lists ?? [];
+    const inheritedListTags = activeView?.type === "CUSTOM"
+      ? activeView.viewTags.map((viewTag) => ({
+          listId: newListId,
+          tagId: viewTag.tagId,
+          tag: viewTag.tag,
+        }))
+      : [];
     const optimisticList: OptimisticList = {
       id: newListId,
       userId: "optimistic",
@@ -89,7 +96,7 @@ const ListAdder = ({ boot }: ListAdderProps) => {
         : 0,
       createdAt: new Date(),
       updatedAt: new Date(),
-      listTags: [],
+      listTags: inheritedListTags,
       listItems: [],
       isOptimistic: true,
     };
@@ -104,6 +111,7 @@ const ListAdder = ({ boot }: ListAdderProps) => {
       userId,
       listId: newListId,
       name,
+      inheritedTagIds: inheritedListTags.map((listTag) => listTag.tagId),
     })
       .then(() => {
         reconcileLocallyCommittedListInDashboardCaches(
