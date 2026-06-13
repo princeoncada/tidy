@@ -1,17 +1,30 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   initializeLocalDbHealthMetadata,
   LOCAL_DB_METADATA_KEYS,
 } from "@/lib/local-db/metadata-repository";
 import type { LocalDbMetadata } from "@/lib/local-db/local-schema";
+import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
 
 const readSource = (relativePath: string): string =>
   readFileSync(resolve(process.cwd(), relativePath), "utf8");
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe("local db role audit (1.8.0 characterization)", () => {
+  it("defaults the local-first write path on and keeps explicit opt-out", () => {
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "");
+    expect(isOfflineWriteCaptureEnabled()).toBe(true);
+
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "false");
+    expect(isOfflineWriteCaptureEnabled()).toBe(false);
+  });
+
   describe("runtime startup persists only health metadata, never dashboard entities", () => {
     it("writes exactly the three health-metadata keys", async () => {
       const store = new Map<string, LocalDbMetadata>();

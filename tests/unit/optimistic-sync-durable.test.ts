@@ -90,12 +90,12 @@ afterEach(() => {
 });
 
 describe("optimistic sync durable pending-write backing", () => {
-  it("marks the durable operation synced after a successful task when the gate is on", async () => {
+  it("marks the durable operation synced after a successful task with the default-on gate", async () => {
     const { result } = await renderIsolatedOptimisticSync();
     const { db, store } = createFakeOutboxDb();
     const task = vi.fn(async () => undefined);
 
-    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "true");
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "");
 
     await result.current.enqueue("list-edits", task, {
       durable: {

@@ -271,12 +271,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.29 - Direct-Write Retirement & Default Dexie-First (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.29 - Direct-Write Retirement & Default Dexie-First
-- **Status:** Open | Priority: P1 product (local-first)
+- **Status:** In progress | Priority: P1 product (local-first)
 - **Type:** product behavior
 - **Files:** components/list/*, components/views/*, dashboard mutation components, hooks/*, lib/sync/*, tests/e2e/*
 - **Implementation goal:** make Dexie-first the default dashboard write path and remove remaining component-level direct tRPC persistence for list, item, reorder/move, tag, view, selection, and relationship writes, then re-baseline the authenticated e2e suite that currently asserts per-action tRPC mutations. This phase depends on the 1.9.28 overlay and is seeded by branch `wip/direct-write-retirement`.
@@ -285,6 +286,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Deferral boundary:** no dashboard CRUD or movement slice may remain on direct tRPC persistence by the end of this phase. The architecture closeout decision is 1.9.30.
 - **Validation target:** targeted alpha (default-path mutation coverage, rewritten authenticated e2e); full test:ci before stable.
 - **Acceptance:** with the prototype gate removed or defaulted on, a representative multi-action session updates instantly from Dexie, reaches the server in bounded batch requests, and the authenticated suite passes against the Dexie-first default.
+- **Discovered (alpha):** direct tRPC persistence retirement and the Dexie-first default are landed and remain in place, but online read correctness is incomplete for create-then-immediately-mutate flows. The 1.9.28 overlay relinquishes a locally-created list after its create op flushes but before the server read reflects it; once list presence is retained, the overlaid list can still lose its optimistic `listTags`, and a naive Dexie reread/setState on every outbox capture can hang renders. Remaining 1.9.29 work is a performance-safe local-presence union that preserves lists, list tags, and tag rendering through the flush-to-server-confirmed window. The isolated `views.spec.ts` and `dexie-first-tags-views.spec.ts:82` failures are product behavior, not test pollution.
 
 ### 1.9.30 - Local-First Dashboard Architecture Closeout
 - **Status:** Open | Priority: P1 decision
@@ -403,10 +405,10 @@ Assigned a version only when scoped.
 
 - Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
 - The reconciled Dexie fallback is structurally complete, but offline freshness is bounded by the last successful server seed and pending local work.
-- Most dashboard actions still persist through direct tRPC mutations, so the app does not yet satisfy Dexie-first writes or bounded multi-action synchronization.
-- The bounded batch endpoint applies accepted operations, but the path remains gated off by default and dashboard actions still use transitional direct tRPC persistence until 1.9.29.
+- Direct dashboard tRPC persistence is retired and Dexie-first writes are default-on in 1.9.29; phase acceptance remains blocked on online read correctness.
 - 1.9.26 adds backoff-ready `failed` selection and stranded `syncing` recovery; cross-tab flush coordination remains a follow-up.
 - Retiring direct tRPC persistence before a generalized pending overlay lets settling/refocused dashboard queries clobber unsynced optimistic create/tag/view entries; the 1.9.28 overlay closes this and is a hard prerequisite for 1.9.29.
+- The 1.9.28 online overlay does not yet keep locally-created entities visible across the flush-to-server-confirmed window; list presence, `listTags`/tag rendering, and a performance-safe local refresh are the remaining 1.9.29 work.
 - Large components increase risk for focused changes.
 - Frontend projection and backend refresh must agree before UI/UX polish.
 

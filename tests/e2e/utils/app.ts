@@ -9,10 +9,10 @@ import {
   getVisibleViewCard,
 } from "./assertions";
 
-export function waitForSuccessfulTrpcMutation(page: Page, procedure: string) {
+export function waitForSyncBatch(page: Page) {
   return page.waitForResponse((response) =>
     response.request().method() === "POST" &&
-    response.url().includes(`/api/trpc/${procedure}`) &&
+    response.url().includes("/api/sync") &&
     response.ok()
   );
 }
@@ -29,7 +29,7 @@ export async function createList(page: Page, name: string) {
   const dialog = page.getByRole("dialog");
   const nameInput = dialog.getByPlaceholder("Enter your list name...");
   const submitButton = dialog.getByRole("button", { name: "Create List" });
-  const persisted = waitForSuccessfulTrpcMutation(page, "list.createList");
+  const persisted = waitForSyncBatch(page);
 
   await expect(dialog).toBeVisible();
   await expect(nameInput).toBeVisible();
@@ -54,7 +54,7 @@ export async function createItemInVisibleList(
   await page.getByRole("menuitem", { name: "Add Item" }).click();
   await card.getByTestId(testIds.createItemInput).fill(itemName);
   const persisted = options.waitForPersistence
-    ? waitForSuccessfulTrpcMutation(page, "listItem.createListItem")
+    ? waitForSyncBatch(page)
     : undefined;
   await card.getByTestId(testIds.createItemInput).press("Enter");
   await expect(card.getByTestId(testIds.listItem).filter({ hasText: itemName })).toBeVisible();
@@ -79,7 +79,7 @@ export async function renameList(page: Page, oldName: string, newName: string) {
   const input = await firstVisible(page.getByTestId(testIds.listTitleInput));
   await expect(input).toBeVisible();
   await input.fill(newName);
-  const persisted = waitForSuccessfulTrpcMutation(page, "list.renameList");
+  const persisted = waitForSyncBatch(page);
   await input.press("Enter");
   await persisted;
   await expect(await getVisibleListCard(page, newName)).toBeVisible();
@@ -90,7 +90,7 @@ export async function deleteList(page: Page, name: string) {
   const card = await getVisibleListCard(page, name);
   await expect(card).toBeVisible();
   await card.getByRole("button", { name: /list options/i }).click();
-  const deleted = waitForSuccessfulTrpcMutation(page, "list.deleteList");
+  const deleted = waitForSyncBatch(page);
   await page.getByTestId(testIds.deleteListButton).click();
   await expectListNotVisible(page, name);
   await deleted;
@@ -98,14 +98,25 @@ export async function deleteList(page: Page, name: string) {
 
 export async function openAllLists(page: Page) {
   const allListsButton = await firstVisible(page.getByRole("button", { name: /all lists/i }));
+  const buttonClass = await allListsButton.getAttribute("class");
 
+  if (buttonClass?.includes("border-zinc-300")) return;
+
+  const persisted = waitForSyncBatch(page);
   await allListsButton.click();
+  await persisted;
 }
 
 export async function openViewByName(page: Page, viewName: string) {
   const viewCard = await getVisibleViewCard(page, viewName);
+  const viewButton = viewCard.getByRole("button", { name: viewName, exact: true });
+  const buttonClass = await viewButton.getAttribute("class");
 
-  await viewCard.getByRole("button", { name: viewName, exact: true }).click();
+  if (buttonClass?.split(/\s+/).includes("text-zinc-900")) return;
+
+  const persisted = waitForSyncBatch(page);
+  await viewButton.click();
+  await persisted;
 }
 
 export async function createItem(page: Page, listName: string, itemName: string) {
@@ -121,7 +132,7 @@ export async function renameItem(page: Page, oldName: string, newName: string) {
   const input = await firstVisible(page.getByTestId(testIds.listTitleInput));
   await expect(input).toBeVisible();
   await input.fill(newName);
-  const persisted = waitForSuccessfulTrpcMutation(page, "listItem.renameListItem");
+  const persisted = waitForSyncBatch(page);
   await input.press("Enter");
   await persisted;
   await expect(page.getByTestId(testIds.listItem).filter({ hasText: newName })).toBeVisible();
@@ -131,7 +142,7 @@ export async function renameItem(page: Page, oldName: string, newName: string) {
 export async function deleteItem(page: Page, itemName: string) {
   const item = await firstVisible(page.getByTestId(testIds.listItem).filter({ hasText: itemName }));
   await expect(item).toBeVisible();
-  const deleted = waitForSuccessfulTrpcMutation(page, "listItem.deleteListItem");
+  const deleted = waitForSyncBatch(page);
   await item.getByRole("button").last().click();
   await expectItemNotVisible(page, itemName);
   await deleted;
@@ -163,10 +174,10 @@ export async function createTag(page: Page, listName: string, tagName: string) {
     )
     .toBe(true);
 
-  const applied = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
+  const applied = waitForSyncBatch(page);
 
   if (await createOption.isVisible()) {
-    const created = waitForSuccessfulTrpcMutation(page, "tag.create");
+    const created = waitForSyncBatch(page);
 
     await createOption.click();
     await created;
@@ -184,7 +195,7 @@ export async function createTag(page: Page, listName: string, tagName: string) {
 
 export async function removeTagFromList(page: Page, listName: string, tagName: string) {
   const card = await getVisibleListCard(page, listName);
-  const applied = waitForSuccessfulTrpcMutation(page, "tag.applyListTagChanges");
+  const applied = waitForSyncBatch(page);
 
   await card.getByRole("button", { name: `Remove ${tagName} tag` }).click();
   await expect(card.getByText(tagName, { exact: true })).toHaveCount(0);
@@ -205,7 +216,7 @@ export async function createView(page: Page, viewName: string, tagName: string) 
   await dialog
     .getByRole("button", { name: new RegExp(`^${escapeRegExp(tagName)}\\b`) })
     .click();
-  const persisted = waitForSuccessfulTrpcMutation(page, "view.create");
+  const persisted = waitForSyncBatch(page);
   await dialog.getByTestId(testIds.saveViewButton).click();
   await persisted;
   const viewCard = await getVisibleViewCard(page, viewName);
@@ -218,7 +229,7 @@ export async function deleteView(page: Page, viewName: string) {
 
   await expect(viewCard).toBeVisible();
   await viewCard.getByRole("button").last().click();
-  const deleted = waitForSuccessfulTrpcMutation(page, "view.delete");
+  const deleted = waitForSyncBatch(page);
   await page.getByRole("menuitem", { name: "Delete" }).click();
   await expect(page.getByTestId(testIds.viewCard).filter({ hasText: viewName })).toHaveCount(0);
   await deleted;

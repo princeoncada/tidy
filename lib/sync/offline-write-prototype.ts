@@ -28,7 +28,7 @@ import type { SyncBatchRequest } from "@/lib/sync/sync-batch-contract";
 import { notifyOutboxCaptured } from "@/lib/sync/outbox-capture-events";
 
 export function isOfflineWriteCaptureEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED === "true";
+  return process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED !== "false";
 }
 
 export type OfflineWriteIntent = {

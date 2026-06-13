@@ -121,9 +121,9 @@ afterEach(() => {
 });
 
 describe("offline dashboard mutation capture gate", () => {
-  it("enables dashboard capture only when the public prototype flag is true", () => {
+  it("enables dashboard capture by default and disables only on explicit false", () => {
     vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "");
-    expect(isOfflineWriteCaptureEnabled()).toBe(false);
+    expect(isOfflineWriteCaptureEnabled()).toBe(true);
 
     vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "false");
     expect(isOfflineWriteCaptureEnabled()).toBe(false);

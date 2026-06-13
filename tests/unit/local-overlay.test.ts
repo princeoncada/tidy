@@ -9,7 +9,11 @@ import { applyPendingMovementOverlay } from "@/lib/local-db/local-movement";
 import {
   applyPendingOutboxOverlay,
   applyPendingViewOverlay,
+  isOutboxOperationServerConfirmed,
+  outboxOperationsSignature,
+  readActiveOutboxOperationsForUser,
   readPendingOutboxOperationsForUser,
+  relinquishConfirmedOperations,
 } from "@/lib/local-db/local-overlay";
 import { createOutboxOperation } from "@/lib/local-db/local-repositories";
 import type { LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
@@ -105,6 +109,34 @@ function snapshot(): DashboardSnapshot {
       },
     ],
   } as DashboardSnapshot;
+}
+
+function viewsSnapshot(): ViewsCache {
+  return [
+    view(),
+    view({
+      id: "view-a",
+      name: "View A",
+      type: "CUSTOM",
+      isDefault: false,
+      matchMode: "ANY",
+      order: 1,
+      viewTags: [
+        {
+          viewId: "view-a",
+          tagId: "tag-a",
+          tag: tag("tag-a", "Focus"),
+        },
+      ],
+    }),
+    view({
+      id: "view-b",
+      name: "View B",
+      type: "CUSTOM",
+      isDefault: true,
+      order: 2,
+    }),
+  ];
 }
 
 function operation(
@@ -267,6 +299,74 @@ describe("readPendingOutboxOperationsForUser", () => {
   });
 });
 
+describe("readActiveOutboxOperationsForUser", () => {
+  it("returns active statuses in created order for one user", async () => {
+    const operations = [
+      operation({
+        operationId: "discarded",
+        entityType: "list",
+        entityClientId: "list-discarded",
+        operationType: "delete",
+        status: "discarded",
+        createdAt: "2026-06-12T10:00:00.006Z",
+      }),
+      operation({
+        operationId: "synced",
+        entityType: "list",
+        entityClientId: "list-a",
+        operationType: "create",
+        status: "synced",
+        createdAt: "2026-06-12T10:00:00.004Z",
+      }),
+      operation({
+        operationId: "failed",
+        entityType: "tag",
+        entityClientId: "tag-a",
+        operationType: "update",
+        status: "failed",
+        createdAt: "2026-06-12T10:00:00.003Z",
+      }),
+      operation({
+        operationId: "pending",
+        entityType: "listItem",
+        entityClientId: "item-a",
+        operationType: "update",
+        status: "pending",
+        createdAt: "2026-06-12T10:00:00.001Z",
+      }),
+      operation({
+        operationId: "syncing",
+        entityType: "listTag",
+        entityClientId: "list-a:tag-a",
+        operationType: "attach",
+        status: "syncing",
+        createdAt: "2026-06-12T10:00:00.002Z",
+      }),
+      operation({
+        operationId: "other-user",
+        userId: "user-2",
+        entityType: "view",
+        entityClientId: "view-other",
+        operationType: "create",
+        status: "pending",
+        createdAt: "2026-06-12T10:00:00.000Z",
+      }),
+    ];
+
+    const result = await readActiveOutboxOperationsForUser(
+      "user-1",
+      fakeOutboxDb(operations),
+    );
+
+    expect(result.map((candidate) => candidate.operationId)).toEqual([
+      "pending",
+      "syncing",
+      "failed",
+      "synced",
+    ]);
+  });
+});
+
 describe("applyPendingOutboxOverlay", () => {
   it("keeps a pending list create visible", () => {
     const result = applyPendingOutboxOverlay(snapshot(), [
@@ -382,6 +482,145 @@ describe("applyPendingOutboxOverlay", () => {
       listId: "list-b",
       tagId: "tag-a",
       tag: expect.objectContaining({ id: "tag-a", name: "Focus" }),
+    });
+  });
+
+  it("projects a tagged list create only into matching custom views", () => {
+    const matching = snapshot();
+    matching.view = view({
+      id: "view-focus",
+      type: "CUSTOM",
+      matchMode: "ALL",
+      viewTags: [{
+        viewId: "view-focus",
+        tagId: "tag-a",
+        tag: tag("tag-a", "Focus"),
+      }],
+    });
+    matching.lists = [];
+    const hidden = structuredClone(matching);
+    hidden.view = view({
+      id: "view-other",
+      type: "CUSTOM",
+      matchMode: "ALL",
+      viewTags: [{
+        viewId: "view-other",
+        tagId: "tag-b",
+        tag: tag("tag-b", "Other"),
+      }],
+    });
+    const create = operation({
+      entityType: "list",
+      entityClientId: "list-local",
+      operationType: "create",
+      payload: { name: "Local List", tagIds: ["tag-a"] },
+    });
+
+    expect(applyPendingOutboxOverlay(matching, [create]).lists[0])
+      .toMatchObject({
+        id: "list-local",
+        listTags: [{
+          listId: "list-local",
+          tagId: "tag-a",
+          tag: expect.objectContaining({ name: "Focus" }),
+        }],
+      });
+    expect(applyPendingOutboxOverlay(hidden, [create]).lists).toEqual([]);
+  });
+
+  it("does not project an untagged All Lists create into a custom view", () => {
+    const custom = snapshot();
+    custom.view = view({
+      id: "view-focus",
+      type: "CUSTOM",
+      viewTags: [{
+        viewId: "view-focus",
+        tagId: "tag-a",
+        tag: tag("tag-a", "Focus"),
+      }],
+    });
+    custom.lists = [];
+
+    const result = applyPendingOutboxOverlay(custom, [
+      operation({
+        entityType: "list",
+        entityClientId: "list-local",
+        operationType: "create",
+        payload: { name: "Local List" },
+      }),
+    ]);
+
+    expect(result.lists).toEqual([]);
+  });
+
+  it("keeps a tagged create active until the server snapshot has its tags", () => {
+    const create = operation({
+      entityType: "list",
+      entityClientId: "list-a",
+      operationType: "create",
+      payload: { name: "List A", tagIds: ["tag-b"] },
+      status: "synced",
+    });
+    const stale = snapshot();
+    const confirmed = snapshot();
+    confirmed.lists[0].listTags.push({
+      listId: "list-a",
+      tagId: "tag-b",
+      tag: tag("tag-b", "Other"),
+    });
+
+    expect(relinquishConfirmedOperations([create], { allLists: stale }))
+      .toEqual([create]);
+    expect(relinquishConfirmedOperations([create], { allLists: confirmed }))
+      .toEqual([]);
+  });
+
+  it("uses active tag-create metadata when attaching a freshly-created tag", () => {
+    const result = applyPendingOutboxOverlay(snapshot(), [
+      operation({
+        entityType: "tag",
+        entityClientId: "tag-local",
+        operationType: "create",
+        payload: { name: "Local Tag", color: "purple" },
+        status: "synced",
+      }),
+      operation({
+        entityType: "listTag",
+        entityClientId: "list-b:tag-local",
+        operationType: "attach",
+        payload: { listId: "list-b", tagId: "tag-local" },
+      }),
+    ]);
+
+    expect(result.lists[1].listTags[0].tag).toMatchObject({
+      id: "tag-local",
+      name: "Local Tag",
+      color: "purple",
+      userId: "optimistic",
+    });
+  });
+
+  it("prefers snapshot tag metadata over active tag-create metadata", () => {
+    const result = applyPendingOutboxOverlay(snapshot(), [
+      operation({
+        entityType: "tag",
+        entityClientId: "tag-a",
+        operationType: "create",
+        payload: { name: "Stale Local Name", color: "red" },
+        status: "synced",
+      }),
+      operation({
+        entityType: "listTag",
+        entityClientId: "list-b:tag-a",
+        operationType: "attach",
+        payload: { listId: "list-b", tagId: "tag-a" },
+      }),
+    ]);
+
+    expect(result.lists[1].listTags[0].tag).toMatchObject({
+      id: "tag-a",
+      name: "Focus",
+      color: "gray",
     });
   });
 
@@ -516,6 +755,587 @@ describe("applyPendingOutboxOverlay", () => {
     expect(source).toEqual(original);
     expect(result).toEqual(original);
     expect(result).not.toBe(source);
+  });
+});
+
+describe("isOutboxOperationServerConfirmed", () => {
+  it("confirms list create, update, and delete effects", () => {
+    const allLists = snapshot();
+
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "list",
+          entityClientId: "list-a",
+          operationType: "create",
+          payload: { name: "List A" },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "list",
+          entityClientId: "list-local",
+          operationType: "create",
+          payload: { name: "Local List" },
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "list",
+          entityClientId: "list-a",
+          operationType: "create",
+          payload: { name: "List A" },
+        }),
+        { allLists: null },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "list",
+          entityClientId: "list-a",
+          operationType: "update",
+          payload: { name: "List A" },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "list",
+          entityClientId: "list-a",
+          operationType: "delete",
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "list",
+          entityClientId: "list-a",
+          operationType: "update",
+          payload: { name: "Other" },
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "list",
+          entityClientId: "list-local",
+          operationType: "delete",
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+  });
+
+  it("confirms list-item create, update, and delete effects", () => {
+    const allLists = snapshot();
+
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listItem",
+          entityClientId: "item-a",
+          operationType: "create",
+          payload: { name: "Item A", listId: "list-a", order: 0 },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listItem",
+          entityClientId: "item-local",
+          operationType: "create",
+          payload: { name: "Local Item", listId: "list-a", order: 2 },
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listItem",
+          entityClientId: "item-a",
+          operationType: "update",
+          payload: { name: "Item A", completed: false },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listItem",
+          entityClientId: "item-a",
+          operationType: "delete",
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listItem",
+          entityClientId: "item-a",
+          operationType: "update",
+          payload: { completed: true },
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listItem",
+          entityClientId: "item-local",
+          operationType: "delete",
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+  });
+
+  it("confirms list-tag attach and detach effects", () => {
+    const allLists = snapshot();
+
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listTag",
+          entityClientId: "list-a:tag-a",
+          operationType: "attach",
+          payload: { listId: "list-a", tagId: "tag-a" },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listTag",
+          entityClientId: "list-b:tag-a",
+          operationType: "attach",
+          payload: { listId: "list-b", tagId: "tag-a" },
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listTag",
+          entityClientId: "list-b:tag-a",
+          operationType: "detach",
+          payload: { listId: "list-b", tagId: "tag-a" },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "listTag",
+          entityClientId: "list-missing:tag-a",
+          operationType: "detach",
+          payload: { listId: "list-missing", tagId: "tag-a" },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+  });
+
+  it("confirms tag update and delete effects", () => {
+    const allLists = snapshot();
+
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "tag",
+          entityClientId: "tag-a",
+          operationType: "update",
+          payload: { name: "Focus", color: "gray" },
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "tag",
+          entityClientId: "tag-a",
+          operationType: "update",
+          payload: { color: "red" },
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "tag",
+          entityClientId: "tag-missing",
+          operationType: "delete",
+        }),
+        { allLists },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "tag",
+          entityClientId: "tag-a",
+          operationType: "delete",
+        }),
+        { allLists },
+      ),
+    ).toBe(false);
+  });
+
+  it("confirms view and selected-view metadata effects", () => {
+    const views = viewsSnapshot();
+
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "view",
+          entityClientId: "view-a",
+          operationType: "create",
+          payload: { name: "View A", tagIds: ["tag-a"] },
+        }),
+        { views },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "view",
+          entityClientId: "view-local",
+          operationType: "create",
+          payload: { name: "Local View", tagIds: [] },
+        }),
+        { views },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "view",
+          entityClientId: "view-a",
+          operationType: "update",
+          payload: {
+            name: "View A",
+            matchMode: "ANY",
+            tagIds: ["tag-a"],
+          },
+        }),
+        { views },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "view",
+          entityClientId: "view-a",
+          operationType: "update",
+          payload: { tagIds: ["tag-b"] },
+        }),
+        { views },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "view",
+          entityClientId: "view-missing",
+          operationType: "delete",
+        }),
+        { views },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "view",
+          entityClientId: "view-a",
+          operationType: "delete",
+        }),
+        { views },
+      ),
+    ).toBe(false);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "metadata",
+          entityClientId: "selected-view",
+          operationType: "update",
+          payload: { selectedViewId: "view-b" },
+        }),
+        { views },
+      ),
+    ).toBe(true);
+    expect(
+      isOutboxOperationServerConfirmed(
+        operation({
+          entityType: "metadata",
+          entityClientId: "selected-view",
+          operationType: "update",
+          payload: { selectedViewId: "view-a" },
+        }),
+        { views },
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("relinquishConfirmedOperations", () => {
+  it("relinquishes correctness operations only after server confirmation", () => {
+    const operations = [
+      operation({
+        operationId: "synced-confirmed",
+        entityType: "list",
+        entityClientId: "list-a",
+        operationType: "create",
+        payload: { name: "List A" },
+        status: "synced",
+      }),
+      operation({
+        operationId: "synced-unconfirmed",
+        entityType: "list",
+        entityClientId: "list-local",
+        operationType: "create",
+        payload: { name: "Local List" },
+        status: "synced",
+      }),
+      operation({
+        operationId: "pending-unconfirmed",
+        entityType: "list",
+        entityClientId: "list-pending",
+        operationType: "create",
+        payload: { name: "Pending List" },
+        status: "pending",
+      }),
+      operation({
+        operationId: "syncing-unconfirmed",
+        entityType: "list",
+        entityClientId: "list-syncing",
+        operationType: "create",
+        payload: { name: "Syncing List" },
+        status: "syncing",
+      }),
+      operation({
+        operationId: "failed-unconfirmed",
+        entityType: "list",
+        entityClientId: "list-failed",
+        operationType: "create",
+        payload: { name: "Failed List" },
+        status: "failed",
+      }),
+    ];
+
+    expect(
+      relinquishConfirmedOperations(operations, {
+        allLists: snapshot(),
+      }).map((candidate) => candidate.operationId),
+    ).toEqual([
+      "synced-unconfirmed",
+      "pending-unconfirmed",
+      "syncing-unconfirmed",
+      "failed-unconfirmed",
+    ]);
+  });
+
+  it("keeps a synced detach until removal is confirmed without re-adding it", () => {
+    const detach = operation({
+      entityType: "listTag",
+      entityClientId: "list-a:tag-a",
+      operationType: "detach",
+      payload: { listId: "list-a", tagId: "tag-a" },
+      status: "synced",
+    });
+    const staleServer = snapshot();
+    const retained = relinquishConfirmedOperations([detach], {
+      allLists: staleServer,
+    });
+
+    expect(retained).toEqual([detach]);
+    expect(
+      applyPendingOutboxOverlay(staleServer, retained).lists[0].listTags,
+    ).toEqual([]);
+
+    const confirmedServer = snapshot();
+    confirmedServer.lists[0].listTags = [];
+    const relinquished = relinquishConfirmedOperations([detach], {
+      allLists: confirmedServer,
+    });
+
+    expect(relinquished).toEqual([]);
+    expect(
+      applyPendingOutboxOverlay(confirmedServer, relinquished).lists[0]
+      .listTags,
+    ).toEqual([]);
+  });
+
+  it("does not replay a list create superseded by a later delete", () => {
+    const create = operation({
+      operationId: "create-list-local",
+      entityType: "list",
+      entityClientId: "list-local",
+      operationType: "create",
+      payload: { name: "Local List" },
+      status: "synced",
+      createdAt: "2026-06-12T10:00:00.001Z",
+    });
+    const remove = operation({
+      operationId: "delete-list-local",
+      entityType: "list",
+      entityClientId: "list-local",
+      operationType: "delete",
+      status: "pending",
+      createdAt: "2026-06-12T10:00:00.002Z",
+    });
+    const staleServer = snapshot();
+    const retained = relinquishConfirmedOperations([create, remove], {
+      allLists: staleServer,
+    });
+
+    expect(retained).toEqual([]);
+    expect(
+      applyPendingOutboxOverlay(staleServer, retained).lists.some(
+        (list) => list.id === "list-local",
+      ),
+    ).toBe(false);
+
+    const serverWithList = snapshot();
+    serverWithList.lists.push({
+      id: "list-local",
+      userId: "user-1",
+      name: "Local List",
+      order: 2,
+      createdAt: new Date(timestamp),
+      updatedAt: new Date(timestamp),
+      listTags: [],
+      listItems: [],
+    });
+    const deleteRetained = relinquishConfirmedOperations([create, remove], {
+      allLists: serverWithList,
+    });
+
+    expect(deleteRetained).toEqual([remove]);
+    expect(
+      applyPendingOutboxOverlay(serverWithList, deleteRetained).lists.some(
+        (list) => list.id === "list-local",
+      ),
+    ).toBe(false);
+  });
+
+  it("keeps only the newest selected-view intent before confirmation", () => {
+    const selectAllLists = operation({
+      operationId: "select-all-lists",
+      entityType: "metadata",
+      entityClientId: "selected-view",
+      operationType: "update",
+      payload: { selectedViewId: "view-all" },
+      status: "synced",
+      createdAt: "2026-06-12T10:00:00.001Z",
+    });
+    const selectViewB = operation({
+      operationId: "select-view-b",
+      entityType: "metadata",
+      entityClientId: "selected-view",
+      operationType: "update",
+      payload: { selectedViewId: "view-b" },
+      status: "pending",
+      createdAt: "2026-06-12T10:00:00.002Z",
+    });
+    const currentServer = viewsSnapshot().map((candidate) => ({
+      ...candidate,
+      isDefault: candidate.id === "view-b",
+    }));
+
+    expect(
+      relinquishConfirmedOperations(
+        [selectAllLists, selectViewB],
+        { views: currentServer },
+      ),
+    ).toEqual([]);
+    expect(
+      applyPendingViewOverlay(currentServer, []).find(
+        (candidate) => candidate.isDefault,
+      )?.id,
+    ).toBe("view-b");
+
+    const staleServer = currentServer.map((candidate) => ({
+      ...candidate,
+      isDefault: candidate.id === "view-all",
+    }));
+    const retained = relinquishConfirmedOperations(
+      [selectAllLists, selectViewB],
+      { views: staleServer },
+    );
+
+    expect(retained).toEqual([selectViewB]);
+    expect(
+      applyPendingViewOverlay(staleServer, retained).find(
+        (candidate) => candidate.isDefault,
+      )?.id,
+    ).toBe("view-b");
+  });
+
+  it("drops synced movement and keeps other movement statuses", () => {
+    const operations = (["synced", "pending", "syncing", "failed"] as const)
+      .map((status) =>
+        operation({
+          operationId: status,
+          entityType: "listItem",
+          entityClientId: "list-a",
+          operationType: "reorder",
+          payload: { listId: "list-a", orderedIds: ["item-a", "item-b"] },
+          status,
+        }),
+      );
+
+    expect(
+      relinquishConfirmedOperations(operations, {
+        allLists: snapshot(),
+      }).map((candidate) => candidate.status),
+    ).toEqual(["pending", "syncing", "failed"]);
+  });
+});
+
+describe("outboxOperationsSignature", () => {
+  it("is stable for equal operations and changes with status or updatedAt", () => {
+    const base = operation({
+      operationId: "operation-a",
+      entityType: "list",
+      entityClientId: "list-a",
+      operationType: "update",
+      status: "pending",
+      updatedAt: "2026-06-12T10:00:00.000Z",
+    });
+
+    expect(outboxOperationsSignature([base])).toBe(
+      outboxOperationsSignature([{ ...base }]),
+    );
+    expect(outboxOperationsSignature([{ ...base, status: "synced" }])).not
+      .toBe(outboxOperationsSignature([base]));
+    expect(
+      outboxOperationsSignature([
+        { ...base, updatedAt: "2026-06-12T10:00:01.000Z" },
+      ]),
+    ).not.toBe(outboxOperationsSignature([base]));
   });
 });
 

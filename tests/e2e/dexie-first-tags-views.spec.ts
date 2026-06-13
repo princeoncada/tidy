@@ -79,12 +79,6 @@ test.afterEach(async () => {
 });
 
 test.describe("Dexie-first tags and views", () => {
-  test.skip(
-    () =>
-      process.env.NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED !== "true",
-    "Run this targeted proof with NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED=true.",
-  );
-
   test("persists tag attachment and custom-view creation without direct tRPC writes", async ({
     page,
   }) => {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.28",
-  "generatedAt": "2026-06-12",
+  "version": "1.9.29-alpha",
+  "generatedAt": "2026-06-13",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -470,9 +470,7 @@
         "lucide-react",
         "@/lib/dashboard-cache",
         "@/lib/local-first-dashboard",
-        "@/lib/local-db/local-repositories",
         "@/lib/local-db/local-write",
-        "@/lib/sync/offline-write-prototype",
         "../ui/skeleton"
       ]
     },
@@ -485,8 +483,6 @@
         "@/lib/utils",
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
-        "@/hooks/useOptimisticSync",
-        "@/trpc/client",
         "@dnd-kit/react",
         "@dnd-kit/react/sortable",
         "@tanstack/react-query",
@@ -503,8 +499,7 @@
         "./ListMenu",
         "./ListTagPicker",
         "./types",
-        "@/lib/local-db/local-write",
-        "@/lib/sync/offline-write-prototype"
+        "@/lib/local-db/local-write"
       ]
     },
     {
@@ -538,7 +533,6 @@
       "extension": ".tsx",
       "symbols": [],
       "imports": [
-        "@/trpc/client",
         "@dnd-kit/react/sortable",
         "@tanstack/react-query",
         "lucide-react",
@@ -550,9 +544,7 @@
         "@/lib/utils",
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
-        "@/hooks/useOptimisticSync",
-        "@/lib/local-db/local-write",
-        "@/lib/sync/offline-write-prototype"
+        "@/lib/local-db/local-write"
       ]
     },
     {
@@ -583,7 +575,6 @@
         "@/lib/local-db/local-overlay",
         "@/lib/local-db/local-write",
         "@/lib/sync/outbox-capture-events",
-        "@/lib/sync/offline-write-prototype",
         "@/trpc/client",
         "@dnd-kit/react",
         "@tanstack/react-query",
@@ -637,8 +628,7 @@
         "./types",
         "@/lib/dashboard-cache",
         "@/lib/local-db/local-write",
-        "@/lib/optimistic-debug",
-        "@/lib/sync/offline-write-prototype"
+        "@/lib/optimistic-debug"
       ]
     },
     {
@@ -951,7 +941,6 @@
         "@tanstack/react-query",
         "lucide-react",
         "react",
-        "sonner",
         "@/components/ui/badge",
         "@/components/ui/button",
         "@/components/ui/card",
@@ -967,7 +956,6 @@
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
         "@/lib/local-db/local-write",
-        "@/lib/sync/offline-write-prototype",
         "@/lib/trpc",
         "@/lib/utils",
         "@/trpc/client"
@@ -1475,9 +1463,14 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "OutboxConfirmContext",
         "applyPendingOutboxOverlay",
         "applyPendingViewOverlay",
-        "readPendingOutboxOperationsForUser"
+        "isOutboxOperationServerConfirmed",
+        "outboxOperationsSignature",
+        "readActiveOutboxOperationsForUser",
+        "readPendingOutboxOperationsForUser",
+        "relinquishConfirmedOperations"
       ],
       "imports": [
         "@/lib/dashboard-cache",
@@ -2401,7 +2394,7 @@
         "removeTagFromList",
         "renameItem",
         "renameList",
-        "waitForSuccessfulTrpcMutation"
+        "waitForSyncBatch"
       ],
       "imports": [
         "@playwright/test",
@@ -2600,7 +2593,8 @@
         "node:path",
         "vitest",
         "@/lib/local-db/metadata-repository",
-        "@/lib/local-db/local-schema"
+        "@/lib/local-db/local-schema",
+        "@/lib/sync/offline-write-prototype"
       ]
     },
     {
@@ -3573,12 +3567,6 @@
     },
     {
       "from": "components/list/ListAdder.tsx",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-repositories"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
       "to": "lib/local-db/local-write.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-write"
@@ -3588,12 +3576,6 @@
       "to": "lib/local-first-dashboard.ts",
       "type": "imports",
       "import": "@/lib/local-first-dashboard"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/list/ListAdder.tsx",
@@ -3663,12 +3645,6 @@
     },
     {
       "from": "components/list/ListComponent.tsx",
-      "to": "hooks/useOptimisticSync.ts",
-      "type": "imports",
-      "import": "@/hooks/useOptimisticSync"
-    },
-    {
-      "from": "components/list/ListComponent.tsx",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
@@ -3687,21 +3663,9 @@
     },
     {
       "from": "components/list/ListComponent.tsx",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "components/list/ListComponent.tsx",
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
-    },
-    {
-      "from": "components/list/ListComponent.tsx",
-      "to": "trpc/client.tsx",
-      "type": "imports",
-      "import": "@/trpc/client"
     },
     {
       "from": "components/list/ListEmpty.tsx",
@@ -3753,12 +3717,6 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
-      "to": "hooks/useOptimisticSync.ts",
-      "type": "imports",
-      "import": "@/hooks/useOptimisticSync"
-    },
-    {
-      "from": "components/list/ListItemComponent.tsx",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
@@ -3777,21 +3735,9 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "components/list/ListItemComponent.tsx",
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
-    },
-    {
-      "from": "components/list/ListItemComponent.tsx",
-      "to": "trpc/client.tsx",
-      "type": "imports",
-      "import": "@/trpc/client"
     },
     {
       "from": "components/list/ListMenu.tsx",
@@ -3897,12 +3843,6 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
       "to": "lib/sync/outbox-capture-events.ts",
       "type": "imports",
       "import": "@/lib/sync/outbox-capture-events"
@@ -3990,12 +3930,6 @@
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
-    },
-    {
-      "from": "components/list/ListTagPicker.tsx",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/list/ListTagPicker.tsx",
@@ -4338,12 +4272,6 @@
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
-    },
-    {
-      "from": "components/views/ViewsSidebarPreview.tsx",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
@@ -5268,6 +5196,12 @@
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
       "import": "@/lib/local-db/metadata-repository"
+    },
+    {
+      "from": "tests/unit/local-db-role-audit.test.ts",
+      "to": "lib/sync/offline-write-prototype.ts",
+      "type": "imports",
+      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "tests/unit/local-first-dashboard.test.ts",

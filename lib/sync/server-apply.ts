@@ -169,14 +169,32 @@ async function applyListOperation(
   userId: string,
   decision: AcceptedDecision,
   tx: SyncTransaction,
+  effects: PostCommitEffects,
 ): Promise<SyncApplyOperationResult> {
   const operation = decision.operation;
 
   switch (operation.operationType) {
     case "create": {
       const name = getString(operation, "name");
+      const tagIds = getStringArray(operation, "tagIds") ?? [];
       if (!name) {
         return rejected(decision, "List create requires payload.name.");
+      }
+      const uniqueTagIds = [...new Set(tagIds)];
+      if (uniqueTagIds.length > 0) {
+        const ownedTags = await tx.tag.findMany({
+          where: {
+            id: { in: uniqueTagIds },
+            userId,
+          },
+          select: { id: true },
+        });
+        if (ownedTags.length !== uniqueTagIds.length) {
+          return rejected(
+            decision,
+            "List create includes a tag outside the authenticated user.",
+          );
+        }
       }
 
       const existing = await tx.list.findUnique({
@@ -191,6 +209,7 @@ async function applyListOperation(
       const allListsView = await ensureAllListsView(userId, tx);
 
       if (existing) {
+        uniqueTagIds.forEach((tagId) => effects.tagIds.add(tagId));
         return result(decision.operationId, "already-applied");
       }
 
@@ -205,6 +224,14 @@ async function applyListOperation(
           id: operation.entityClientId,
           name,
           userId,
+          listTags: uniqueTagIds.length > 0
+            ? {
+                createMany: {
+                  data: uniqueTagIds.map((tagId) => ({ tagId })),
+                  skipDuplicates: true,
+                },
+              }
+            : undefined,
         },
       });
       await tx.viewList.createMany({
@@ -215,6 +242,7 @@ async function applyListOperation(
         }],
         skipDuplicates: true,
       });
+      uniqueTagIds.forEach((tagId) => effects.tagIds.add(tagId));
 
       return result(decision.operationId, "applied");
     }
@@ -1410,7 +1438,7 @@ async function applyAcceptedOperation(
 ): Promise<SyncApplyOperationResult> {
   switch (decision.operation.entityType) {
     case "list":
-      return applyListOperation(userId, decision, tx);
+      return applyListOperation(userId, decision, tx, effects);
     case "listItem":
       return applyListItemOperation(userId, decision, tx);
     case "tag":

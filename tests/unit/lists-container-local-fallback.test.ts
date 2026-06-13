@@ -91,4 +91,22 @@ describe("ListsContainer local fallback gate", () => {
       /localCurrentView: usingLocalFallback \? boot\.localCurrentView : undefined/,
     );
   });
+
+  it("uses only network query successes as server-confirmation snapshots", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/list/ListsContainer.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("function useAuthoritativeQuerySnapshot");
+    expect(source).toContain('event.action.type !== "success"');
+    expect(source).toContain("event.action.manual");
+    expect(source).toMatch(
+      /allLists: confirmedServerAllListsSnapshot \?\? null/,
+    );
+    expect(source).toMatch(/views: confirmedServerViews \?\? null/);
+    expect(source).not.toMatch(
+      /allLists: serverAllListsSnapshot \?\? null/,
+    );
+  });
 });

@@ -659,6 +659,41 @@ export function updateListInDashboardCaches(
   });
 }
 
+export function reconcileLocallyCommittedListInDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  listId: string,
+  userId: string
+) {
+  updateListInDashboardCaches(queryClient, keys, listId, (list) => {
+    const committedList = { ...list, userId } as DashboardList & {
+      isOptimistic?: boolean;
+    };
+    delete committedList.isOptimistic;
+    return committedList;
+  });
+}
+
+export function reconcileLocallyCommittedListItemInDashboardCaches(
+  queryClient: QueryClient,
+  keys: DashboardKeys,
+  listId: string,
+  itemId: string
+) {
+  updateListInDashboardCaches(queryClient, keys, listId, (list) => ({
+    ...list,
+    listItems: list.listItems.map((item) => {
+      if (item.id !== itemId) return item;
+
+      const committedItem = { ...item } as DashboardListItem & {
+        isOptimistic?: boolean;
+      };
+      delete committedItem.isOptimistic;
+      return committedItem;
+    }),
+  }));
+}
+
 function updateListInViewSnapshot(
   snapshot: DashboardSnapshot,
   listId: string,

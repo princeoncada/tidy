@@ -3,18 +3,14 @@
 import { cn } from "@/lib/utils";
 import {
   DashboardKeys,
-  hasSavedListInDashboardSnapshots,
+  reconcileLocallyCommittedListItemInDashboardCaches,
   removeListFromDashboardCaches,
-  removeListItemFromDashboardCaches,
-  rollbackDashboardCaches,
   updateListInDashboardCaches,
 } from "@/lib/dashboard-cache";
-import { measureCacheWrite, useRenderMeasure } from "@/lib/optimistic-debug";
-import type { OptimisticScope } from "@/hooks/useOptimisticSync";
-import { useTRPC } from "@/trpc/client";
+import { useRenderMeasure } from "@/lib/optimistic-debug";
 import { useDroppable } from "@dnd-kit/react";
 import { useSortable } from '@dnd-kit/react/sortable';
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Calendar1, GripVertical, Plus, StickyNote } from "lucide-react";
 import { motion } from "motion/react";
 import { memo, ReactNode, useEffect, useRef, useState } from "react";
@@ -27,50 +23,17 @@ import { Textarea } from "../ui/textarea";
 import ListInlineEdit from "./ListInlineEdit";
 import ListMenu from "./ListMenu";
 import ListTagPicker from "./ListTagPicker";
-import { CurrentView, List, ListItem, OptimisticListItem } from "./types";
+import { List, ListItem, OptimisticListItem } from "./types";
 import {
   commitLocalListDelete,
   commitLocalListItemCreate,
   commitLocalListRename,
 } from "@/lib/local-db/local-write";
-import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
-
-function listIsOptimistic(list: List) {
-  return Boolean("isOptimistic" in list && list.isOptimistic);
-}
-
-function itemIsAlreadyInCache(currentView: CurrentView | undefined, itemId: string) {
-  return Boolean(
-    currentView?.lists.some((currentList) =>
-      currentList.listItems.some((item) => item.id === itemId)
-    )
-  );
-}
-
-async function waitForSavedListInDashboardCaches(
-  getSnapshots: () => Array<CurrentView | undefined>,
-  listId: string
-) {
-  for (let attempt = 0; attempt < 40; attempt += 1) {
-    if (hasSavedListInDashboardSnapshots(getSnapshots(), listId)) {
-      return true;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 150));
-  }
-
-  return false;
-}
 
 interface ListComponentProps {
   children: ReactNode;
   listValues: List;
   index: number;
-  enqueue: (
-    scope: OptimisticScope,
-    task: () => Promise<void>,
-    options?: { label?: string; rollback?: () => void }
-  ) => Promise<void>;
   activeDropTarget: {
     type: string;
     id: string;
@@ -85,7 +48,6 @@ const ListComponent = ({
   children,
   listValues: list,
   index,
-  enqueue,
   activeDropTarget,
   shouldRevealOnMount,
   onRevealComplete,
@@ -94,8 +56,6 @@ const ListComponent = ({
 }: ListComponentProps) => {
 
   useRenderMeasure(`ListComponent:${list.id}`);
-
-  const listIsOnlyInBrowser = listIsOptimistic(list);
 
   const [listDeleted, setListDeleted] = useState<boolean>(false);
   const [listRevealed, setListRevealed] = useState(!shouldRevealOnMount);
@@ -114,290 +74,73 @@ const ListComponent = ({
   const [createListItemName, setCreateListItemName] = useState<string>('');
   const [viewListItemAdder, setViewListItemAdder] = useState<boolean>(false);
   const [newItemId, setNewItemId] = useState(() => crypto.randomUUID());
-  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { mutate: renameList, isPending: renameListPending } = useMutation(trpc.list.renameList.mutationOptions({
-    async onMutate(variables) {
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
-      ]);
-      const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
-      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
-      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
-
-      updateListInDashboardCaches(queryClient, dashboardKeys, variables.id, (currentList) => ({
-        ...currentList,
-        name: variables.name,
-      }));
-      measureCacheWrite("list.rename", { id: variables.id, name: variables.name });
-
-      return { previousAllLists, previousCurrentView, previousSelectedView };
-    },
-    onError(_error, _variables, context) {
-      queryClient.setQueryData(dashboardKeys.allLists, context?.previousAllLists);
-      queryClient.setQueryData(dashboardKeys.currentView, context?.previousCurrentView);
-      queryClient.setQueryData(dashboardKeys.selectedView, context?.previousSelectedView);
-    },
-  }));
-
   const handleRenameList = (input: { id: string; name: string }) => {
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      updateListInDashboardCaches(queryClient, dashboardKeys, input.id, (currentList) => ({
-        ...currentList,
-        name: input.name,
-      }));
-      void commitLocalListRename({
-        userId,
-        listId: input.id,
-        name: input.name,
-      }).catch(() => {});
-      return;
-    }
+    if (!userId) return;
 
-    renameList(input);
+    updateListInDashboardCaches(queryClient, dashboardKeys, input.id, (currentList) => ({
+      ...currentList,
+      name: input.name,
+    }));
+    void commitLocalListRename({
+      userId,
+      listId: input.id,
+      name: input.name,
+    }).catch(() => {});
   };
-
-  const deleteListMutation = useMutation(trpc.list.deleteList.mutationOptions());
 
   const deleteList = (listId: string) => {
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      removeListFromDashboardCaches(queryClient, dashboardKeys, listId);
-      void commitLocalListDelete({ userId, listId }).catch(() => {});
-      return;
-    }
+    if (!userId) return;
 
-    // Snapshot before optimistic update
-    const deletedList = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists)?.lists.find(
-      (list: List) => list.id === listId
-    ) ?? queryClient.getQueryData<CurrentView>(dashboardKeys.currentView)?.lists.find(
-      (list: List) => list.id === listId
-    );
-
-    // Optimistically remove list from cache immediately
     removeListFromDashboardCaches(queryClient, dashboardKeys, listId);
-
-    enqueue(
-      "list-edits",
-      async () => {
-        if (listIsOnlyInBrowser) return;
-
-        try {
-          // Actual server request runs in order
-          await deleteListMutation.mutateAsync({ listId });
-        } catch (error) {
-          // Rollback only if server really failed
-          queryClient.setQueryData<CurrentView>(dashboardKeys.allLists,
-            (old) => {
-              if (!old || !deletedList) return old;
-
-              const alreadyRestored = old.lists.some((list: List) => list.id === listId);
-
-              if (alreadyRestored) return old;
-
-              return {
-                ...old,
-                lists: [...old.lists, deletedList].sort((a, b) => a.order - b.order),
-              };
-            }
-          );
-          queryClient.setQueryData<CurrentView>(dashboardKeys.currentView,
-            (old) => {
-              if (!old || !deletedList) return old;
-
-              const alreadyRestored = old.lists.some((list: List) => list.id === listId);
-
-              if (alreadyRestored) return old;
-
-              return {
-                ...old,
-                lists: [...old.lists, deletedList].sort((a, b) => a.order - b.order),
-              };
-            }
-          );
-          queryClient.setQueryData<CurrentView>(dashboardKeys.selectedView,
-            (old) => {
-              if (!old || !deletedList) return old;
-
-              const alreadyRestored = old.lists.some((list: List) => list.id === listId);
-
-              if (alreadyRestored) return old;
-
-              return {
-                ...old,
-                lists: [...old.lists, deletedList].sort((a, b) => a.order - b.order),
-              };
-            }
-          );
-
-          throw error;
-        }
-      },
-      { label: "list.deleteList" }
-    );
+    void commitLocalListDelete({ userId, listId }).catch(() => {});
   };
-
-  const { mutateAsync: createListItem } = useMutation(trpc.listItem.createListItem.mutationOptions({
-    async onMutate(variables) {
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
-      ]);
-
-      const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
-      const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
-      const previousSelectedView = queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView);
-      const alreadyInCache = itemIsAlreadyInCache(previousAllLists, variables.id) ||
-        itemIsAlreadyInCache(previousCurrentView, variables.id) ||
-        itemIsAlreadyInCache(previousSelectedView, variables.id);
-
-      if (alreadyInCache) {
-        // The UI already showed this item while its parent list was saving.
-        return { previousAllLists, previousCurrentView, previousSelectedView, addedToCache: false };
-      }
-
-      const optimisticListItem: OptimisticListItem = {
-        id: variables.id,
-        name: variables.name,
-        listId: variables.listId,
-        order: list.listItems && list.listItems.length > 0
-          ? Math.max(...list.listItems.map((item: ListItem) => item.order)) + 1
-          : 0,
-        completed: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isOptimistic: true,
-        notes: ""
-      };
-
-      updateListInDashboardCaches(queryClient, dashboardKeys, variables.listId, (currentList) => ({
-        ...currentList,
-        listItems: [optimisticListItem, ...currentList.listItems],
-      }));
-      measureCacheWrite("item.create", optimisticListItem);
-
-      setCreateListItemName('');
-
-      return { previousAllLists, previousCurrentView, previousSelectedView, addedToCache: true };
-    },
-    onSuccess(createdItem) {
-      updateListInDashboardCaches(queryClient, dashboardKeys, createdItem.listId, (currentList) => ({
-        ...currentList,
-        listItems: currentList.listItems.map((item) =>
-          item.id === createdItem.id ? createdItem : item
-        ),
-      }));
-    },
-    onError(_errors, variables, context) {
-      if (context?.addedToCache) {
-        rollbackDashboardCaches(queryClient, dashboardKeys, {
-          previousAllLists: context.previousAllLists,
-          previousCurrentView: context.previousCurrentView,
-          previousSelectedView: context.previousSelectedView,
-        });
-        return;
-      }
-
-      removeListItemFromDashboardCaches(queryClient, dashboardKeys, variables.id);
-    }
-  }));
 
   const handleCreateItem = () => {
     const itemId = newItemId;
     const itemName = createListItemName.trim();
 
-    if (!itemName) return;
+    if (!itemName || !userId) return;
 
     setNewItemId(crypto.randomUUID());
 
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      const order = list.listItems && list.listItems.length > 0
-        ? Math.max(...list.listItems.map((item: ListItem) => item.order)) + 1
-        : 0;
-      const optimisticListItem: OptimisticListItem = {
-        id: itemId,
-        name: itemName,
-        listId: list.id,
-        order,
-        completed: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isOptimistic: true,
-        notes: "",
-      };
-
-      updateListInDashboardCaches(queryClient, dashboardKeys, list.id, (currentList) => ({
-        ...currentList,
-        listItems: [optimisticListItem, ...currentList.listItems],
-      }));
-      setCreateListItemName("");
-      void commitLocalListItemCreate({
-        userId,
-        itemId,
-        listId: list.id,
-        name: itemName,
-        order,
-      }).catch(() => {});
-      return;
-    }
-
-    if (listIsOnlyInBrowser) {
-      // Show the item now, but wait for the parent list before calling the server.
-      const optimisticListItem: OptimisticListItem = {
-        id: itemId,
-        name: itemName,
-        listId: list.id,
-        order: list.listItems && list.listItems.length > 0
-          ? Math.max(...list.listItems.map((item: ListItem) => item.order)) + 1
-          : 0,
-        completed: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isOptimistic: true,
-        notes: "",
-      };
-
-      updateListInDashboardCaches(queryClient, dashboardKeys, list.id, (currentList) => ({
-        ...currentList,
-        listItems: [optimisticListItem, ...currentList.listItems],
-      }));
-      setCreateListItemName("");
-
-      enqueue(
-        "item-edits",
-        async () => {
-          const listWasSaved = await waitForSavedListInDashboardCaches(
-            () => [
-              queryClient.getQueryData<CurrentView>(dashboardKeys.allLists),
-              queryClient.getQueryData<CurrentView>(dashboardKeys.currentView),
-              queryClient.getQueryData<CurrentView>(dashboardKeys.selectedView),
-            ],
-            list.id
-          );
-
-          if (!listWasSaved) {
-            throw new Error("Parent list was not saved before item create.");
-          }
-
-          await createListItem({
-            id: itemId,
-            name: itemName,
-            listId: list.id,
-          });
-        },
-        { label: "listItem.createListItem.afterListCreate" }
-      );
-      return;
-    }
-
-    createListItem({
+    const order = list.listItems && list.listItems.length > 0
+      ? Math.max(...list.listItems.map((item: ListItem) => item.order)) + 1
+      : 0;
+    const optimisticListItem: OptimisticListItem = {
       id: itemId,
       name: itemName,
-      listId: list.id
-    });
+      listId: list.id,
+      order,
+      completed: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isOptimistic: true,
+      notes: "",
+    };
+
+    updateListInDashboardCaches(queryClient, dashboardKeys, list.id, (currentList) => ({
+      ...currentList,
+      listItems: [optimisticListItem, ...currentList.listItems],
+    }));
+    setCreateListItemName("");
+    void commitLocalListItemCreate({
+      userId,
+      itemId,
+      listId: list.id,
+      name: itemName,
+      order,
+    })
+      .then(() => {
+        reconcileLocallyCommittedListItemInDashboardCaches(
+          queryClient,
+          dashboardKeys,
+          list.id,
+          itemId,
+        );
+      })
+      .catch(() => {});
   };
 
   const { ref: listRef, handleRef, isDragging } = useSortable({
@@ -436,6 +179,8 @@ const ListComponent = ({
   }
 
   function handleDeleteList() {
+    if (!userId) return;
+
     setListDeleted(true);
 
     setTimeout(() => {
@@ -496,7 +241,6 @@ const ListComponent = ({
                     id={list.id}
                     value={list.name}
                     onSave={handleRenameList}
-                    disabled={renameListPending}
                   />
 
                   <div className="text-gray-500 flex items-center gap-2">

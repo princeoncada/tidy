@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-import { waitForSuccessfulTrpcMutation } from "./app";
+import { waitForSyncBatch } from "./app";
 
 async function center(locator: Locator) {
   const box = await locator.boundingBox();
@@ -25,10 +25,9 @@ export async function dragByMouse(page: Page, source: Locator, target: Locator) 
 export async function dragByMouseAndWaitForMutation(
   page: Page,
   source: Locator,
-  target: Locator,
-  procedure: string
+  target: Locator
 ) {
-  const persisted = waitForSuccessfulTrpcMutation(page, procedure);
+  const persisted = waitForSyncBatch(page);
 
   await dragByMouse(page, source, target);
   await persisted;

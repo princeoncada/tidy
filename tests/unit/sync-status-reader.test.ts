@@ -172,9 +172,9 @@ describe("sync status reader", () => {
     expect(db.outboxOperations.where).not.toHaveBeenCalled();
   });
 
-  it("returns counts from the stored operations when the gate is on", async () => {
+  it("returns counts from the stored operations when the gate is default-on", async () => {
     const { db } = createFakeOutboxDb();
-    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "true");
+    vi.stubEnv("NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED", "");
     const syncing = await createOperation(db);
     const failed = await createOperation(db);
     await createOperation(db, { userId: "user-2" });

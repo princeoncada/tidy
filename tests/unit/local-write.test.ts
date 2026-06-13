@@ -382,6 +382,45 @@ describe("atomic local list and item writes", () => {
     ]);
   });
 
+  it("creates inherited list-tag rows inside the list-create transaction", async () => {
+    const { db, lists, listTags, outboxOperations, transaction } =
+      createFakeLocalWriteDb();
+
+    await commitLocalListCreate({
+      userId: "user-1",
+      listId: "list-1",
+      name: "Inbox",
+      inheritedTagIds: ["tag-1", "tag-2", "tag-1"],
+      db,
+    });
+
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(lists.has("list-1")).toBe(true);
+    expect([...listTags.values()]).toEqual([
+      expect.objectContaining({
+        clientId: "list-1:tag-1",
+        listClientId: "list-1",
+        tagClientId: "tag-1",
+        syncStatus: "local",
+      }),
+      expect.objectContaining({
+        clientId: "list-1:tag-2",
+        listClientId: "list-1",
+        tagClientId: "tag-2",
+        syncStatus: "local",
+      }),
+    ]);
+    expect(operationsForEntity(outboxOperations, "list", "list-1")).toEqual([
+      expect.objectContaining({
+        operationType: "create",
+        payload: {
+          name: "Inbox",
+          tagIds: ["tag-1", "tag-2"],
+        },
+      }),
+    ]);
+  });
+
   it("creates a local list item and its exact server payload", async () => {
     const { db, listItems, outboxOperations, transaction } =
       createFakeLocalWriteDb();

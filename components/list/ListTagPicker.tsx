@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus, Tag, Trash2, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -23,15 +23,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc";
-import type { CurrentView, Lists } from "./types";
+import type { Lists } from "./types";
 import {
   applyDeletedTagToDashboardCaches,
   applyTagChangeToCaches,
   applyTagMetadataToDashboardCaches,
   captureTagMutationSnapshots,
   DashboardKeys,
-  reconcileAffectedViewLists,
-  reconcileSavedListTags,
   rollbackTagMutationCaches,
   TagMutationSnapshots,
 } from "@/lib/dashboard-cache";
@@ -41,8 +39,7 @@ import {
   commitLocalTagDelete,
   commitLocalTagUpdate,
 } from "@/lib/local-db/local-write";
-import { measureCacheWrite, measureRequest, useRenderMeasure } from "@/lib/optimistic-debug";
-import { isOfflineWriteCaptureEnabled } from "@/lib/sync/offline-write-prototype";
+import { measureCacheWrite, useRenderMeasure } from "@/lib/optimistic-debug";
 
 type TagValue = RouterOutputs["tag"]["getAll"][number];
 type ListTagValue = Lists[number]["listTags"][number];
@@ -54,16 +51,6 @@ type ListTagPickerProps = {
   dashboardKeys: DashboardKeys;
   userId: string | null;
 };
-
-function listIsStillOptimistic(currentView: CurrentView | undefined, listId: string) {
-  const list = currentView?.lists.find((currentList) => currentList.id === listId);
-
-  return Boolean(
-    list &&
-    "isOptimistic" in list &&
-    list.isOptimistic
-  );
-}
 
 const TAG_COLORS: TagColor[] = [
   "gray",
@@ -101,7 +88,6 @@ export default function ListTagPicker({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const tagsQueryKey = trpc.tag.getAll.queryKey();
-  const queryKey = dashboardKeys.allLists;
   const pendingTagOperationsRef = useRef(new Map<string, "add" | "remove">());
   const tagFlushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tagSaveChainRef = useRef(Promise.resolve());
@@ -134,17 +120,6 @@ export default function ListTagPicker({
     applyTagChangeToCaches(queryClient, dashboardKeys, listId, tag, "add");
   };
 
-  const removeTagFromListCache = (tagId: string) => {
-    const tag = tags.find((tag) => tag.id === tagId);
-    if (!tag) return;
-
-    applyTagChangeToCaches(queryClient, dashboardKeys, listId, tag, "remove");
-  };
-
-  const applyListTagChangesMutation = useMutation(
-    trpc.tag.applyListTagChanges.mutationOptions()
-  );
-
   const cancelTagCacheQueries = () =>
     Promise.all([
       queryClient.cancelQueries({ queryKey: tagsQueryKey }),
@@ -162,6 +137,8 @@ export default function ListTagPicker({
     tag: TagValue | ListTagValue["tag"],
     action: "add" | "remove"
   ) => {
+    if (!userId) return;
+
     const cacheTag: TagValue = "listTags" in tag
       ? tag
       : { ...tag, listTags: [] };
@@ -186,16 +163,6 @@ export default function ListTagPicker({
     }
 
     tagFlushTimeoutRef.current = setTimeout(() => {
-      const currentLists = queryClient.getQueryData<CurrentView>(queryKey);
-
-      if (!isOfflineWriteCaptureEnabled() && listIsStillOptimistic(currentLists, listId)) {
-        // Legacy direct-tRPC path needs a real server id, so newly created lists that
-        // do not exist on the server yet must wait instead of sending a temporary id.
-        // The Dexie-first path commits by the local clientId and needs no server id.
-        scheduleTagFlush(cacheTag, action);
-        return;
-      }
-
       const operations = Array.from(pendingTagOperationsRef.current.entries()).map(
         ([tagId, action]) => ({ tagId, action })
       );
@@ -210,40 +177,14 @@ export default function ListTagPicker({
       tagSaveChainRef.current = tagSaveChainRef.current
         .catch(() => undefined)
         .then(async () => {
-          if (isOfflineWriteCaptureEnabled() && userId) {
-            await commitLocalListTagChanges({
-              userId,
-              listId,
-              operations: operations.map((operation) => ({
-                tagId: operation.tagId,
-                action: operation.action,
-              })),
-            });
-            return;
-          }
-
-          measureRequest("tag.applyListTagChanges", {
+          await commitLocalListTagChanges({
+            userId,
             listId,
-            count: operations.length,
+            operations: operations.map((operation) => ({
+              tagId: operation.tagId,
+              action: operation.action,
+            })),
           });
-          const result = await applyListTagChangesMutation.mutateAsync({
-            listId,
-            operations,
-          });
-
-          if (flushVersion !== tagOptimisticVersionRef.current) return;
-
-          reconcileSavedListTags(
-            queryClient,
-            dashboardKeys,
-            result.listId,
-            result.listTags
-          );
-          reconcileAffectedViewLists(
-            queryClient,
-            dashboardKeys,
-            result.affectedViews
-          );
         })
         .catch((error) => {
           if (flushVersion === tagOptimisticVersionRef.current && rollbackSnapshot) {
@@ -253,102 +194,6 @@ export default function ListTagPicker({
         });
     }, 150);
   };
-
-  const createTagMutation = useMutation(trpc.tag.create.mutationOptions({
-    async onMutate(newTag) {
-      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
-
-      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
-      const optimisticTag: TagValue = {
-        id: newTag.id,
-        name: newTag.name,
-        color: newTag.color ?? "gray",
-        userId: "optimistic",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        listTags: [],
-      };
-
-      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) => [
-        ...currentTags,
-        optimisticTag,
-      ].sort((a, b) => a.name.localeCompare(b.name)));
-      addTagToListCache(optimisticTag);
-
-      return { previousTags };
-    },
-    onError(_error, variables, context) {
-      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
-      removeTagFromListCache(variables.id);
-    },
-    onSuccess(createdTag) {
-      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
-        currentTags.map((tag) => tag.id === createdTag.id ? {
-          ...createdTag,
-          listTags: tag.listTags,
-        } : tag)
-      );
-      applyTagMetadataToDashboardCaches(queryClient, dashboardKeys, { ...createdTag, listTags: [] });
-    },
-  }));
-
-  const updateTagMutation = useMutation(trpc.tag.update.mutationOptions({
-    async onMutate(updatedTag) {
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: tagsQueryKey }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.allLists }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.currentView }),
-        queryClient.cancelQueries({ queryKey: dashboardKeys.selectedView }),
-      ]);
-
-      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
-      const dashboardSnapshots = captureTagMutationSnapshots(queryClient, dashboardKeys);
-
-      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
-        currentTags.map((tag) =>
-          tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag
-        )
-      );
-
-      const existingTag = previousTags?.find((tag) => tag.id === updatedTag.id);
-      if (existingTag) {
-        applyTagMetadataToDashboardCaches(queryClient, dashboardKeys, { ...existingTag, ...updatedTag });
-      }
-
-      return { previousTags, dashboardSnapshots };
-    },
-    onError(_error, _variables, context) {
-      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
-      if (context?.dashboardSnapshots) {
-        rollbackTagMutationCaches(queryClient, dashboardKeys, context.dashboardSnapshots);
-      }
-    },
-  }));
-
-  const deleteTagMutation = useMutation(trpc.tag.delete.mutationOptions({
-    async onMutate(deletedTag) {
-      await cancelTagCacheQueries();
-
-      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
-      const dashboardSnapshots = captureTagMutationSnapshots(queryClient, dashboardKeys);
-
-      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
-        currentTags.filter((tag) => tag.id !== deletedTag.id)
-      );
-      applyDeletedTagToDashboardCaches(queryClient, dashboardKeys, deletedTag.id);
-
-      return { previousTags, dashboardSnapshots };
-    },
-    onError(_error, _variables, context) {
-      queryClient.setQueryData(tagsQueryKey, context?.previousTags);
-      if (context?.dashboardSnapshots) {
-        rollbackTagMutationCaches(queryClient, dashboardKeys, context.dashboardSnapshots);
-      }
-    },
-    async onSuccess(result) {
-      reconcileAffectedViewLists(queryClient, dashboardKeys, result.affectedViews);
-    },
-  }));
 
   const toggleTag = (tag: TagValue) => {
     const isSelected = selectedTagIds.includes(tag.id);
@@ -362,90 +207,68 @@ export default function ListTagPicker({
   };
 
   const updateTagColor = (tagId: string, color: TagColor) => {
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
+    if (!userId) return;
 
-      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
-        currentTags.map((tag) =>
-          tag.id === tagId ? { ...tag, color } : tag
-        )
-      );
+    const previousTags = queryClient.getQueryData<TagValue[]>(tagsQueryKey);
 
-      const existingTag = previousTags?.find((tag) => tag.id === tagId);
-      if (existingTag) {
-        applyTagMetadataToDashboardCaches(queryClient, dashboardKeys, {
-          ...existingTag,
-          color,
-        });
-      }
+    queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+      currentTags.map((tag) =>
+        tag.id === tagId ? { ...tag, color } : tag
+      )
+    );
 
-      void commitLocalTagUpdate({ userId, tagId, color }).catch(() => {});
-      return;
+    const existingTag = previousTags?.find((tag) => tag.id === tagId);
+    if (existingTag) {
+      applyTagMetadataToDashboardCaches(queryClient, dashboardKeys, {
+        ...existingTag,
+        color,
+      });
     }
 
-    updateTagMutation.mutate({ id: tagId, color });
+    void commitLocalTagUpdate({ userId, tagId, color }).catch(() => {});
   };
 
   const createTag = async () => {
     const name = search.trim();
-    if (!name || exactTagExists) return;
+    if (!name || exactTagExists || !userId) return;
 
     const id = crypto.randomUUID();
     setSearch("");
     setOpen(false);
 
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      await queryClient.cancelQueries({ queryKey: tagsQueryKey });
-      const optimisticTag: TagValue = {
-        id,
-        name,
-        color: "gray",
-        userId: "optimistic",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        listTags: [],
-      };
-
-      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) => [
-        ...currentTags,
-        optimisticTag,
-      ].sort((a, b) => a.name.localeCompare(b.name)));
-      addTagToListCache(optimisticTag);
-      void commitLocalTagCreate({
-        userId,
-        tagId: id,
-        name,
-        color: "gray",
-      }).catch(() => {});
-      scheduleTagFlush(optimisticTag, "add");
-      return;
-    }
-
-    await createTagMutation.mutateAsync({
+    await queryClient.cancelQueries({ queryKey: tagsQueryKey });
+    const optimisticTag: TagValue = {
       id,
       name,
       color: "gray",
-    });
-    const createdTag = queryClient
-      .getQueryData<TagValue[]>(tagsQueryKey)
-      ?.find((tag) => tag.id === id);
+      userId: "optimistic",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      listTags: [],
+    };
 
-    if (createdTag) {
-      scheduleTagFlush(createdTag, "add");
-    }
+    queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) => [
+      ...currentTags,
+      optimisticTag,
+    ].sort((a, b) => a.name.localeCompare(b.name)));
+    addTagToListCache(optimisticTag);
+    void commitLocalTagCreate({
+      userId,
+      tagId: id,
+      name,
+      color: "gray",
+    }).catch(() => {});
+    scheduleTagFlush(optimisticTag, "add");
   };
 
   const deleteTag = (tagId: string) => {
-    if (isOfflineWriteCaptureEnabled() && userId) {
-      queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
-        currentTags.filter((tag) => tag.id !== tagId)
-      );
-      applyDeletedTagToDashboardCaches(queryClient, dashboardKeys, tagId);
-      void commitLocalTagDelete({ userId, tagId }).catch(() => {});
-      return;
-    }
+    if (!userId) return;
 
-    deleteTagMutation.mutate({ id: tagId });
+    queryClient.setQueryData<TagValue[]>(tagsQueryKey, (currentTags = []) =>
+      currentTags.filter((tag) => tag.id !== tagId)
+    );
+    applyDeletedTagToDashboardCaches(queryClient, dashboardKeys, tagId);
+    void commitLocalTagDelete({ userId, tagId }).catch(() => {});
   };
 
   const isCreatingNewTag = search.trim() && !exactTagExists;

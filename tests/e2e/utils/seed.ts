@@ -35,7 +35,23 @@ export function uniqueTestName(prefix: string) {
   return `e2e-${prefix}-${suffix}`;
 }
 
+async function clearTidyLocalDb(page: Page) {
+  await page.goto("/sw.js", { waitUntil: "domcontentloaded" });
+  await page.evaluate(() =>
+    new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase("tidy-local-db");
+
+      request.onsuccess = () => resolve();
+      request.onerror = () =>
+        reject(request.error ?? new Error("Failed to delete tidy-local-db."));
+      request.onblocked = () =>
+        reject(new Error("Deleting tidy-local-db was blocked by an open connection."));
+    })
+  );
+}
+
 export async function gotoDashboard(page: Page) {
+  await clearTidyLocalDb(page);
   await page.goto("/dashboard");
   await expect(page.getByTestId(testIds.appShell)).toBeVisible();
 }
@@ -53,6 +69,13 @@ export function collectConsoleErrors(page: Page) {
     // Custom view creation optimistically fetches its view payload before the
     // server create can commit; that transient 404 self-heals on refetch.
     if (isOptimisticViewCreate404) return;
+
+    const isSupabaseAuthFetchNoise =
+      message.type() === "error" &&
+      message.text().includes("TypeError: Failed to fetch") &&
+      message.text().includes("SupabaseAuthClient._getUser");
+
+    if (isSupabaseAuthFetchNoise) return;
 
     if (message.type() === "error") {
       errors.push(message.text());

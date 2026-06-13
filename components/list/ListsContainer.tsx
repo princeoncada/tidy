@@ -2,8 +2,6 @@
 
 import {
   buildDashboardKeys,
-  buildPersistedItemOrderPayload,
-  buildPersistedListOrderPayload,
   canApplySelectedViewPayload,
   DashboardSnapshot,
   selectedViewFromCache,
@@ -12,7 +10,6 @@ import {
 import {
   measureCacheWrite,
   measureOptimisticEvent,
-  measureRequest,
   OptimisticProfiler,
   useRenderMeasure,
 } from '@/lib/optimistic-debug';
@@ -36,7 +33,10 @@ import {
 import {
   applyPendingOutboxOverlay,
   applyPendingViewOverlay,
+  outboxOperationsSignature,
+  readActiveOutboxOperationsForUser,
   readPendingOutboxOperationsForUser,
+  relinquishConfirmedOperations,
 } from '@/lib/local-db/local-overlay';
 import {
   commitLocalListItemMove,
@@ -44,11 +44,15 @@ import {
   commitLocalListReorder,
 } from '@/lib/local-db/local-write';
 import { subscribeToOutboxCaptures } from '@/lib/sync/outbox-capture-events';
-import { isOfflineWriteCaptureEnabled } from '@/lib/sync/offline-write-prototype';
 import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type QueryClient,
+  type QueryKey,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ListComponent from './ListComponent';
 import ListItemComponent from './ListItemComponent';
 import ListSkeleton from './ListSkeleton';
@@ -67,6 +71,62 @@ function isOptimisticCacheRow(value: unknown) {
     "isOptimistic" in value &&
     value.isOptimistic
   );
+}
+
+function useAuthoritativeQuerySnapshot<T>({
+  queryClient,
+  queryKey,
+  initialData,
+  scopeKey,
+}: {
+  queryClient: QueryClient;
+  queryKey: QueryKey;
+  initialData: T | undefined;
+  scopeKey: string | null;
+}) {
+  const queryKeyHash = JSON.stringify(queryKey);
+  const [snapshot, setSnapshot] = useState<T | undefined>(initialData);
+
+  useEffect(() => {
+    const queryCache = queryClient.getQueryCache();
+    const findCurrentQuery = () =>
+      queryCache
+        .getAll()
+        .find((query) => JSON.stringify(query.queryKey) === queryKeyHash);
+
+    const currentQuery = findCurrentQuery();
+    let cancelled = false;
+
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setSnapshot(
+          currentQuery?.state.status === "success"
+            ? currentQuery.state.data as T
+            : undefined,
+        );
+      }
+    });
+
+    const unsubscribe = queryCache.subscribe((event) => {
+      if (
+        event.type !== "updated" ||
+        event.action.type !== "success" ||
+        event.action.manual ||
+        JSON.stringify(event.query.queryKey) !== queryKeyHash
+      ) {
+        return;
+      }
+
+      setSnapshot(event.action.data as T);
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+
+  }, [queryClient, queryKeyHash, scopeKey]);
+  return snapshot;
 }
 
 function reorderListsForDrag(
@@ -219,8 +279,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const movementCaptureEnabled =
-    isOfflineWriteCaptureEnabled() && Boolean(boot.userId);
+  const movementCaptureEnabled = Boolean(boot.userId);
   const [pendingMovementOperations, setPendingMovementOperations] = useState<
     Parameters<typeof applyPendingOutboxOverlay>[1]
   >([]);
@@ -244,10 +303,30 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     ? undefined
     : views;
   const serverEffectiveViews = views ?? boot.localViews;
-  const effectiveViews =
-    movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
-      ? applyPendingViewOverlay(serverEffectiveViews, pendingMovementOperations)
-      : serverEffectiveViews;
+  const confirmedServerViews = useAuthoritativeQuerySnapshot<ViewsCache>({
+    queryClient,
+    queryKey: trpc.view.getAll.queryKey(),
+    initialData: views,
+    scopeKey: boot.userId,
+  });
+  const effectiveViews = useMemo(
+    () =>
+      movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
+        ? applyPendingViewOverlay(
+          serverEffectiveViews,
+          relinquishConfirmedOperations(pendingMovementOperations, {
+            views: confirmedServerViews ?? null,
+          }),
+        )
+        : serverEffectiveViews,
+    [
+      confirmedServerViews,
+      movementCaptureEnabled,
+      pendingMovementOperations,
+      pendingMovementReady,
+      serverEffectiveViews,
+    ],
+  );
   const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
   const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
   const selectedView = selectedViewFromCache(effectiveViews);
@@ -279,6 +358,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   } | null>(null);
   const [dragPreviewLists, setDragPreviewLists] = useState<DragPreviewLists | null>(null);
   const dragPreviewListsRef = useRef<DragPreviewLists | null>(null);
+  const outboxRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const outboxSignatureRef = useRef<string>("");
   const { data: bootCurrentView, isLoading: bootListsLoading, isError: bootListsError } = useQuery(
     trpc.view.getCurrentViewListsWithItems.queryOptions()
   );
@@ -302,6 +383,27 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     )
   );
 
+  const confirmedServerAllListsSnapshot =
+    useAuthoritativeQuerySnapshot<DashboardSnapshot>({
+      queryClient,
+      queryKey: allListsQueryKey,
+      initialData: serverAllListsSnapshot,
+      scopeKey: boot.userId,
+    });
+
+  const relinquishedOperations = useMemo(
+    () =>
+      relinquishConfirmedOperations(pendingMovementOperations, {
+        allLists: confirmedServerAllListsSnapshot ?? null,
+        views: confirmedServerViews ?? null,
+      }),
+    [
+      confirmedServerAllListsSnapshot,
+      confirmedServerViews,
+      pendingMovementOperations,
+    ],
+  );
+
   useEffect(() => {
     if (!movementCaptureEnabled || !boot.userId) {
       return;
@@ -309,9 +411,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     let cancelled = false;
 
-    void readPendingOutboxOperationsForUser(boot.userId)
+    void readActiveOutboxOperationsForUser(boot.userId)
       .then((operations) => {
         if (!cancelled) {
+          outboxSignatureRef.current = outboxOperationsSignature(operations);
           setPendingMovementOperations(operations);
         }
       })
@@ -338,40 +441,69 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     }
 
     let cancelled = false;
-    const unsubscribe = subscribeToOutboxCaptures((event) => {
-      if (event.userId !== userId) return;
 
-      void readPendingOutboxOperationsForUser(userId)
+    const refresh = () => {
+      void readActiveOutboxOperationsForUser(userId)
         .then((operations) => {
-          if (!cancelled) {
-            setPendingMovementOperations(operations);
-          }
+          if (cancelled) return;
+          const signature = outboxOperationsSignature(operations);
+          if (signature === outboxSignatureRef.current) return;
+          outboxSignatureRef.current = signature;
+          setPendingMovementOperations(operations);
         })
         .catch(() => {
           // The existing overlay remains authoritative if the refresh fails.
         });
+    };
+
+    const unsubscribe = subscribeToOutboxCaptures((event) => {
+      if (event.userId !== userId) return;
+      if (outboxRefreshTimerRef.current !== null) {
+        clearTimeout(outboxRefreshTimerRef.current);
+      }
+      outboxRefreshTimerRef.current = setTimeout(refresh, 120);
     });
 
     return () => {
       cancelled = true;
+      if (outboxRefreshTimerRef.current !== null) {
+        clearTimeout(outboxRefreshTimerRef.current);
+        outboxRefreshTimerRef.current = null;
+      }
       unsubscribe();
     };
   }, [boot.userId, movementCaptureEnabled]);
 
-  const effectiveBootCurrentView =
-    movementCaptureEnabled && pendingMovementReady && bootCurrentView
-      ? applyPendingOutboxOverlay(
+  const effectiveBootCurrentView = useMemo(
+    () =>
+      movementCaptureEnabled && pendingMovementReady && bootCurrentView
+        ? applyPendingOutboxOverlay(
           bootCurrentView,
-          pendingMovementOperations,
+          relinquishedOperations,
         )
-      : bootCurrentView;
-  const effectiveSelectedViewSnapshot =
-    movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
-      ? applyPendingOutboxOverlay(
+        : bootCurrentView,
+    [
+      bootCurrentView,
+      movementCaptureEnabled,
+      pendingMovementReady,
+      relinquishedOperations,
+    ],
+  );
+  const effectiveSelectedViewSnapshot = useMemo(
+    () =>
+      movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
+        ? applyPendingOutboxOverlay(
           selectedViewSnapshot,
-          pendingMovementOperations,
+          relinquishedOperations,
         )
-      : selectedViewSnapshot;
+        : selectedViewSnapshot,
+    [
+      movementCaptureEnabled,
+      pendingMovementReady,
+      relinquishedOperations,
+      selectedViewSnapshot,
+    ],
+  );
 
   useEffect(() => {
     if (!canApplySelectedViewPayload(selectedViewId, effectiveBootCurrentView)) return;
@@ -387,8 +519,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     if (
       typeof window === "undefined" ||
       !boot.userId ||
-      !views ||
-      !serverAllListsSnapshot ||
+      !confirmedServerViews ||
+      !confirmedServerAllListsSnapshot ||
       !viewsSucceeded ||
       !allListsSucceeded ||
       viewsError ||
@@ -401,13 +533,13 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     async function seedServerGraphIntoLocalDb() {
       try {
-        if (!views || !serverAllListsSnapshot) return;
-        const confirmedServerViews = views.filter(
+        if (!confirmedServerViews || !confirmedServerAllListsSnapshot) return;
+        const confirmedViewsForUser = confirmedServerViews.filter(
           (view) => view.userId === boot.userId,
         );
         const confirmedServerAllLists = {
-          ...serverAllListsSnapshot,
-          lists: serverAllListsSnapshot.lists
+          ...confirmedServerAllListsSnapshot,
+          lists: confirmedServerAllListsSnapshot.lists
             .filter((list) => !isOptimisticCacheRow(list))
             .map((list) => ({
               ...list,
@@ -439,7 +571,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         const plan = reconcileServerGraphIntoLocalPlan({
           userId: boot.userId!,
           server: {
-            views: confirmedServerViews,
+            views: confirmedViewsForUser,
             allLists: confirmedServerAllLists,
           },
           local: {
@@ -468,8 +600,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     allListsError,
     allListsSucceeded,
     boot.userId,
-    serverAllListsSnapshot,
-    views,
+    confirmedServerAllListsSnapshot,
+    confirmedServerViews,
     viewsError,
     viewsSucceeded,
   ]);
@@ -492,17 +624,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const lists = currentView?.lists ?? [];
   const visibleLists = dragPreviewLists ?? lists;
 
-  const reorderViewListsMutation = useMutation(
-    trpc.view.reorderViewLists.mutationOptions()
-  );
-
-  const reorderListItemsMutation = useMutation(
-    trpc.listItem.reorderListItems.mutationOptions()
-  );
-
   const reorderListsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reorderListItemsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingItemMovementBaseRef = useRef<Lists | null>(null);
+  const pendingItemMovementNextRef = useRef<Lists | null>(null);
 
   const refreshPendingMovementOperations = useCallback(async () => {
     if (!boot.userId) return;
@@ -554,6 +679,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   }, [currentView?.view.id, currentView?.view.type, currentViewQueryKey, queryClient, queryKey, viewsQueryKey]);
 
   const scheduleReorderListsSave = useCallback(async (nextLists: Lists) => {
+    if (!boot.userId) return;
+
     await Promise.all([
       queryClient.cancelQueries({ queryKey }),
       queryClient.cancelQueries({ queryKey: currentViewQueryKey }),
@@ -568,30 +695,18 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     reorderListsTimeoutRef.current = setTimeout(() => {
       optimisticSync.replacePending("list-order", async () => {
-        if (!currentView) return;
-        const savedLists = buildPersistedListOrderPayload(nextLists);
-        if (savedLists.length === 0) return;
+        if (!currentView || !boot.userId) return;
 
-        if (isOfflineWriteCaptureEnabled() && boot.userId) {
-          try {
-            await commitLocalListReorder({
-              userId: boot.userId,
-              viewId: currentView.view.id,
-              orderedListIds: savedLists.map((list) => list.id),
-            });
-            await refreshPendingMovementOperations();
-          } catch {
-            // Local persistence must not replace the committed cache placement.
-          }
-          writeListOrderToCaches(nextLists);
-          return;
+        try {
+          await commitLocalListReorder({
+            userId: boot.userId,
+            viewId: currentView.view.id,
+            orderedListIds: nextLists.map((list) => list.id),
+          });
+          await refreshPendingMovementOperations();
+        } catch {
+          // Local persistence must not replace the committed cache placement.
         }
-
-        measureRequest("view.reorderViewLists", { count: savedLists.length });
-        await reorderViewListsMutation.mutateAsync({
-          viewId: currentView.view.id,
-          lists: savedLists
-        });
         writeListOrderToCaches(nextLists);
       }, { label: "view.reorderViewLists" });
     }, 300);
@@ -603,7 +718,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     optimisticSync,
     queryClient,
     refreshPendingMovementOperations,
-    reorderViewListsMutation,
     writeListOrderToCaches,
     viewsQueryKey,
   ]);
@@ -629,6 +743,8 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     previousLists: Lists,
     nextLists: Lists,
   ) => {
+    if (!boot.userId) return;
+
     await Promise.all([
       queryClient.cancelQueries({ queryKey: allListsQueryKey }),
       queryClient.cancelQueries({ queryKey }),
@@ -637,6 +753,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
     writeListItemOrderToCaches(nextLists);
     pendingItemMovementBaseRef.current ??= previousLists;
+    pendingItemMovementNextRef.current = nextLists;
 
     if (reorderListItemsTimeoutRef.current) {
       clearTimeout(reorderListItemsTimeoutRef.current);
@@ -645,52 +762,43 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     reorderListItemsTimeoutRef.current = setTimeout(() => {
       const movementBase =
         pendingItemMovementBaseRef.current ?? previousLists;
+      const movementNext =
+        pendingItemMovementNextRef.current ?? nextLists;
+
       pendingItemMovementBaseRef.current = null;
+      pendingItemMovementNextRef.current = null;
 
       optimisticSync.replacePending("item-order", async () => {
-        if (isOfflineWriteCaptureEnabled() && boot.userId) {
-          const intents = translateListItemMovement(
-            movementBase,
-            nextLists,
-          );
+        if (!boot.userId) return;
 
-          try {
-            for (const intent of intents) {
-              if (intent.type === "move") {
-                await commitLocalListItemMove({
-                  userId: boot.userId,
-                  itemId: intent.itemId,
-                  toListId: intent.toListId,
-                  order: intent.order,
-                });
-                continue;
-              }
+        const intents = translateListItemMovement(
+          movementBase,
+          movementNext,
+        );
 
-              await commitLocalListItemReorder({
+        try {
+          for (const intent of intents) {
+            if (intent.type === "move") {
+              await commitLocalListItemMove({
                 userId: boot.userId,
-                listId: intent.listId,
-                orderedItemIds: intent.orderedItemIds,
+                itemId: intent.itemId,
+                toListId: intent.toListId,
+                order: intent.order,
               });
+              continue;
             }
-            await refreshPendingMovementOperations();
-          } catch {
-            // Local persistence must not replace the committed cache placement.
+
+            await commitLocalListItemReorder({
+              userId: boot.userId,
+              listId: intent.listId,
+              orderedItemIds: intent.orderedItemIds,
+            });
           }
-          writeListItemOrderToCaches(nextLists);
-          return;
+          await refreshPendingMovementOperations();
+        } catch {
+          // Local persistence must not replace the committed cache placement.
         }
-
-        const savedItems = buildPersistedItemOrderPayload(nextLists);
-
-        if (savedItems.length === 0) return;
-
-        measureRequest("listItem.reorderListItems", {
-          count: savedItems.length,
-        });
-        await reorderListItemsMutation.mutateAsync({
-          items: savedItems
-        });
-        writeListItemOrderToCaches(nextLists);
+        writeListItemOrderToCaches(movementNext);
       }, { label: "listItem.reorderListItems" });
     }, 300);
   }, [
@@ -701,7 +809,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     optimisticSync,
     queryClient,
     refreshPendingMovementOperations,
-    reorderListItemsMutation,
     writeListItemOrderToCaches,
   ]);
 
@@ -870,7 +977,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                 listValues={list}
                 index={index}
                 userId={boot.userId}
-                enqueue={optimisticSync.enqueue}
                 activeDropTarget={activeDropTarget}
                 dashboardKeys={dashboardKeys}
                 shouldRevealOnMount={
@@ -885,7 +991,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                       listItem={item}
                       index={index}
                       userId={boot.userId}
-                      enqueue={optimisticSync.enqueue}
                       dashboardKeys={dashboardKeys}
                       shouldRevealOnMount={
                         Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
