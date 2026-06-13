@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.29-alpha",
-    "state":  "alpha",
+    "version":  "1.9.29",
+    "state":  "stable",
     "phase":  "1.9.29",
     "phaseTitle":  "Direct-Write Retirement \u0026 Default Dexie-First",
     "nextPhase":  "1.9.30 - Local-First Dashboard Architecture Closeout",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-12"
+    "lastUpdated":  "2026-06-13"
 }
