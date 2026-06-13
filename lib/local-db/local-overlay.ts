@@ -80,6 +80,15 @@ function isMovementOperation(operation: LocalOutboxOperation): boolean {
   );
 }
 
+function movementOperationKey(operation: LocalOutboxOperation): string {
+  return [
+    operation.userId,
+    operation.entityType,
+    operation.entityClientId,
+    operation.operationType,
+  ].join(":");
+}
+
 function cloneTag(tag: DashboardTag): DashboardTag {
   return { ...tag };
 }
@@ -527,6 +536,30 @@ export function isOutboxOperationServerConfirmed(
 
   if (operation.entityType === "listItem") {
     if (!allLists) return false;
+    if (operation.operationType === "move") {
+      const toListId = getString(operation.payload.toListClientId);
+      const order = getInteger(operation.payload.order);
+      if (!toListId || order === null) return false;
+
+      const targetList = allLists.lists.find((list) => list.id === toListId);
+      const item = targetList?.listItems.find(
+        (candidate) => candidate.id === operation.entityClientId,
+      );
+      return Boolean(item && item.order === order);
+    }
+    if (operation.operationType === "reorder") {
+      const listId = getString(operation.payload.listId);
+      const orderedIds = getStringArray(operation.payload.orderedIds);
+      if (!listId || !orderedIds) return false;
+
+      const list = allLists.lists.find((candidate) => candidate.id === listId);
+      return Boolean(
+        list &&
+        list.listItems.length === orderedIds.length &&
+        list.listItems.every((item, index) => item.id === orderedIds[index]),
+      );
+    }
+
     const findItem = () => {
       for (const list of allLists.lists) {
         const item = list.listItems.find(
@@ -549,6 +582,27 @@ export function isOutboxOperationServerConfirmed(
     }
     if (operation.operationType === "delete") return !item;
     return false;
+  }
+
+  if (
+    operation.entityType === "viewList" &&
+    operation.operationType === "reorder"
+  ) {
+    if (!views) return false;
+    const viewId = getString(operation.payload.viewId);
+    const orderedIds = getStringArray(operation.payload.orderedIds);
+    if (!viewId || !orderedIds) return false;
+
+    const target = views.find((view) => view.id === viewId);
+    const currentIds = target
+      ? [...target.viewLists]
+        .sort((left, right) =>
+          left.order - right.order || left.listId.localeCompare(right.listId)
+        )
+        .map((viewList) => viewList.listId)
+      : [];
+    return currentIds.length === orderedIds.length &&
+      currentIds.every((listId, index) => listId === orderedIds[index]);
   }
 
   if (operation.entityType === "listTag") {
@@ -640,6 +694,7 @@ export function relinquishConfirmedOperations(
   // later operations before comparing the remaining desired state to the server.
   const latestSelectedViewIndexByUser = new Map<string, number>();
   const latestListDeleteIndexByEntity = new Map<string, number>();
+  const latestMovementIndexByEntity = new Map<string, number>();
 
   operations.forEach((operation, index) => {
     if (
@@ -658,6 +713,10 @@ export function relinquishConfirmedOperations(
         `${operation.userId}:${operation.entityClientId}`,
         index,
       );
+    }
+
+    if (isMovementOperation(operation)) {
+      latestMovementIndexByEntity.set(movementOperationKey(operation), index);
     }
   });
 
@@ -681,7 +740,15 @@ export function relinquishConfirmedOperations(
     }
 
     if (isMovementOperation(operation)) {
-      return operation.status !== "synced";
+      if (
+        latestMovementIndexByEntity.get(movementOperationKey(operation)) !==
+        index
+      ) {
+        return false;
+      }
+
+      return operation.status !== "synced" ||
+        !isOutboxOperationServerConfirmed(operation, context);
     }
     return !isOutboxOperationServerConfirmed(operation, context);
   });
