@@ -184,6 +184,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
 - Authenticated E2E requires a Supabase user pool with at least as many users as Playwright workers (`tests/.auth/user-<index>.json` plus real env vars), with a legacy single-user fallback only for serial runs.
+- Authenticated E2E outbox-state assertions must verify a Dexie-first write was ENQUEUED (operation present for the entity + operationType) plus `directMutationRequests === []`, never that the op is still in transient `status: "pending"`: the flush scheduler can drain pending -> synced before a one-shot read, which caused the flaky failure in `dexie-first-tags-views.spec.ts` fixed in 1.9.31. The 1.9.30-carried "deterministic drag-drop:316 movement/reload product bug" was re-baselined on clean master as this same suite flakiness, not a product defect: drag-drop:316 passes in isolation and under the full suite because its pending-count assertions are poll-based and drain-directed.
 - No keyboard drag accessibility validation.
 - UI/UX polish is intentionally late, after projection correctness, ownership, optimistic behavior, and test baselines.
 - Register submit button says "Login".
