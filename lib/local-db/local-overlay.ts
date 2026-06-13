@@ -20,6 +20,12 @@ type OptimisticDashboardItem =
   };
 
 const PENDING_OUTBOX_STATUSES = new Set(["pending", "syncing", "failed"]);
+const ACTIVE_OUTBOX_STATUSES = new Set([
+  "pending",
+  "syncing",
+  "failed",
+  "synced",
+]);
 const TAG_COLORS = new Set<LocalTagColor>([
   "gray",
   "red",
@@ -136,6 +142,20 @@ export async function readPendingOutboxOperationsForUser(
 
   return operations.filter((operation) =>
     PENDING_OUTBOX_STATUSES.has(operation.status),
+  );
+}
+
+export async function readActiveOutboxOperationsForUser(
+  userId: string,
+  db: TidyLocalDatabase = getLocalDbOrThrow(),
+): Promise<LocalOutboxOperation[]> {
+  const operations = await db.outboxOperations
+    .where("userId")
+    .equals(userId)
+    .sortBy("createdAt");
+
+  return operations.filter((operation) =>
+    ACTIVE_OUTBOX_STATUSES.has(operation.status),
   );
 }
 
@@ -383,6 +403,166 @@ export function applyPendingOutboxOverlay(
   }
 
   return applyPendingMovementOverlay(result, movementOperations);
+}
+
+export type OutboxConfirmContext = {
+  allLists?: DashboardSnapshot | null;
+  views?: ViewsCache | null;
+};
+
+export function isOutboxOperationServerConfirmed(
+  operation: LocalOutboxOperation,
+  context: OutboxConfirmContext,
+): boolean {
+  const allLists = context.allLists ?? null;
+  const views = context.views ?? null;
+
+  if (!isOverlayPayload(operation.payload)) return false;
+
+  if (operation.entityType === "list") {
+    if (!allLists) return false;
+    const target = allLists.lists.find(
+      (list) => list.id === operation.entityClientId,
+    );
+    if (operation.operationType === "create") return Boolean(target);
+    if (operation.operationType === "update") {
+      const name = getString(operation.payload.name);
+      return name === null
+        ? Boolean(target)
+        : Boolean(target && target.name === name);
+    }
+    if (operation.operationType === "delete") return !target;
+    return false;
+  }
+
+  if (operation.entityType === "listItem") {
+    if (!allLists) return false;
+    const findItem = () => {
+      for (const list of allLists.lists) {
+        const item = list.listItems.find(
+          (candidate) => candidate.id === operation.entityClientId,
+        );
+        if (item) return item;
+      }
+      return undefined;
+    };
+    const item = findItem();
+    if (operation.operationType === "create") return Boolean(item);
+    if (operation.operationType === "update") {
+      if (!item) return false;
+      const name = getString(operation.payload.name);
+      const completed = getBoolean(operation.payload.completed);
+      const nameOk = name === null || item.name === name;
+      const completedOk =
+        completed === null || item.completed === completed;
+      return nameOk && completedOk;
+    }
+    if (operation.operationType === "delete") return !item;
+    return false;
+  }
+
+  if (operation.entityType === "listTag") {
+    if (!allLists) return false;
+    const listId = getString(operation.payload.listId);
+    const tagId = getString(operation.payload.tagId);
+    if (!listId || !tagId) return false;
+    const list = allLists.lists.find((candidate) => candidate.id === listId);
+    const attached = Boolean(
+      list && list.listTags.some((listTag) => listTag.tagId === tagId),
+    );
+    if (operation.operationType === "attach") return attached;
+    if (operation.operationType === "detach") return !attached;
+    return false;
+  }
+
+  if (operation.entityType === "tag") {
+    if (!allLists) return false;
+    const findTag = () => {
+      for (const list of allLists.lists) {
+        const listTag = list.listTags.find(
+          (candidate) => candidate.tagId === operation.entityClientId,
+        );
+        if (listTag) return listTag.tag;
+      }
+      return undefined;
+    };
+    if (operation.operationType === "update") {
+      const tag = findTag();
+      if (!tag) return false;
+      const name = getString(operation.payload.name);
+      const color = getTagColor(operation.payload.color);
+      const nameOk = name === null || tag.name === name;
+      const colorOk = color === null || tag.color === color;
+      return nameOk && colorOk;
+    }
+    if (operation.operationType === "delete") return !findTag();
+    return false;
+  }
+
+  if (
+    operation.entityType === "metadata" &&
+    operation.entityClientId === "selected-view"
+  ) {
+    if (!views) return false;
+    const selectedViewId = getString(operation.payload.selectedViewId);
+    if (!selectedViewId) return false;
+    const target = views.find((view) => view.id === selectedViewId);
+    return Boolean(target && target.isDefault);
+  }
+
+  if (operation.entityType === "view") {
+    if (!views) return false;
+    const target = views.find(
+      (view) => view.id === operation.entityClientId,
+    );
+    if (operation.operationType === "create") return Boolean(target);
+    if (operation.operationType === "delete") return !target;
+    if (operation.operationType === "update") {
+      if (!target) return false;
+      const name = getString(operation.payload.name);
+      const matchMode = getMatchMode(operation.payload.matchMode);
+      const tagIds =
+        operation.payload.tagIds === undefined
+          ? null
+          : getStringArray(operation.payload.tagIds);
+      const nameOk = name === null || target.name === name;
+      const matchModeOk =
+        matchMode === null || target.matchMode === matchMode;
+      const tagIdsOk =
+        tagIds === null ||
+        (target.viewTags.length === tagIds.length &&
+          tagIds.every((tagId) =>
+            target.viewTags.some((viewTag) => viewTag.tagId === tagId),
+          ));
+      return nameOk && matchModeOk && tagIdsOk;
+    }
+    return false;
+  }
+
+  return false;
+}
+
+export function relinquishConfirmedOperations(
+  operations: readonly LocalOutboxOperation[],
+  context: OutboxConfirmContext,
+): LocalOutboxOperation[] {
+  return operations.filter((operation) => {
+    if (isMovementOperation(operation)) {
+      return operation.status !== "synced";
+    }
+    return !isOutboxOperationServerConfirmed(operation, context);
+  });
+}
+
+export function outboxOperationsSignature(
+  operations: readonly LocalOutboxOperation[],
+): string {
+  return operations
+    .map(
+      (operation) =>
+        `${operation.operationId}:${operation.status}:${operation.updatedAt}`,
+    )
+    .join("|");
 }
 
 export function applyPendingViewOverlay(
