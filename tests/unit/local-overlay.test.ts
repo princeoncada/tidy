@@ -1184,8 +1184,114 @@ describe("relinquishConfirmedOperations", () => {
     expect(relinquished).toEqual([]);
     expect(
       applyPendingOutboxOverlay(confirmedServer, relinquished).lists[0]
-        .listTags,
+      .listTags,
     ).toEqual([]);
+  });
+
+  it("does not replay a list create superseded by a later delete", () => {
+    const create = operation({
+      operationId: "create-list-local",
+      entityType: "list",
+      entityClientId: "list-local",
+      operationType: "create",
+      payload: { name: "Local List" },
+      status: "synced",
+      createdAt: "2026-06-12T10:00:00.001Z",
+    });
+    const remove = operation({
+      operationId: "delete-list-local",
+      entityType: "list",
+      entityClientId: "list-local",
+      operationType: "delete",
+      status: "pending",
+      createdAt: "2026-06-12T10:00:00.002Z",
+    });
+    const staleServer = snapshot();
+    const retained = relinquishConfirmedOperations([create, remove], {
+      allLists: staleServer,
+    });
+
+    expect(retained).toEqual([]);
+    expect(
+      applyPendingOutboxOverlay(staleServer, retained).lists.some(
+        (list) => list.id === "list-local",
+      ),
+    ).toBe(false);
+
+    const serverWithList = snapshot();
+    serverWithList.lists.push({
+      id: "list-local",
+      userId: "user-1",
+      name: "Local List",
+      order: 2,
+      createdAt: new Date(timestamp),
+      updatedAt: new Date(timestamp),
+      listTags: [],
+      listItems: [],
+    });
+    const deleteRetained = relinquishConfirmedOperations([create, remove], {
+      allLists: serverWithList,
+    });
+
+    expect(deleteRetained).toEqual([remove]);
+    expect(
+      applyPendingOutboxOverlay(serverWithList, deleteRetained).lists.some(
+        (list) => list.id === "list-local",
+      ),
+    ).toBe(false);
+  });
+
+  it("keeps only the newest selected-view intent before confirmation", () => {
+    const selectAllLists = operation({
+      operationId: "select-all-lists",
+      entityType: "metadata",
+      entityClientId: "selected-view",
+      operationType: "update",
+      payload: { selectedViewId: "view-all" },
+      status: "synced",
+      createdAt: "2026-06-12T10:00:00.001Z",
+    });
+    const selectViewB = operation({
+      operationId: "select-view-b",
+      entityType: "metadata",
+      entityClientId: "selected-view",
+      operationType: "update",
+      payload: { selectedViewId: "view-b" },
+      status: "pending",
+      createdAt: "2026-06-12T10:00:00.002Z",
+    });
+    const currentServer = viewsSnapshot().map((candidate) => ({
+      ...candidate,
+      isDefault: candidate.id === "view-b",
+    }));
+
+    expect(
+      relinquishConfirmedOperations(
+        [selectAllLists, selectViewB],
+        { views: currentServer },
+      ),
+    ).toEqual([]);
+    expect(
+      applyPendingViewOverlay(currentServer, []).find(
+        (candidate) => candidate.isDefault,
+      )?.id,
+    ).toBe("view-b");
+
+    const staleServer = currentServer.map((candidate) => ({
+      ...candidate,
+      isDefault: candidate.id === "view-all",
+    }));
+    const retained = relinquishConfirmedOperations(
+      [selectAllLists, selectViewB],
+      { views: staleServer },
+    );
+
+    expect(retained).toEqual([selectViewB]);
+    expect(
+      applyPendingViewOverlay(staleServer, retained).find(
+        (candidate) => candidate.isDefault,
+      )?.id,
+    ).toBe("view-b");
   });
 
   it("drops synced movement and keeps other movement statuses", () => {
