@@ -485,6 +485,96 @@ describe("applyPendingOutboxOverlay", () => {
     });
   });
 
+  it("projects a tagged list create only into matching custom views", () => {
+    const matching = snapshot();
+    matching.view = view({
+      id: "view-focus",
+      type: "CUSTOM",
+      matchMode: "ALL",
+      viewTags: [{
+        viewId: "view-focus",
+        tagId: "tag-a",
+        tag: tag("tag-a", "Focus"),
+      }],
+    });
+    matching.lists = [];
+    const hidden = structuredClone(matching);
+    hidden.view = view({
+      id: "view-other",
+      type: "CUSTOM",
+      matchMode: "ALL",
+      viewTags: [{
+        viewId: "view-other",
+        tagId: "tag-b",
+        tag: tag("tag-b", "Other"),
+      }],
+    });
+    const create = operation({
+      entityType: "list",
+      entityClientId: "list-local",
+      operationType: "create",
+      payload: { name: "Local List", tagIds: ["tag-a"] },
+    });
+
+    expect(applyPendingOutboxOverlay(matching, [create]).lists[0])
+      .toMatchObject({
+        id: "list-local",
+        listTags: [{
+          listId: "list-local",
+          tagId: "tag-a",
+          tag: expect.objectContaining({ name: "Focus" }),
+        }],
+      });
+    expect(applyPendingOutboxOverlay(hidden, [create]).lists).toEqual([]);
+  });
+
+  it("does not project an untagged All Lists create into a custom view", () => {
+    const custom = snapshot();
+    custom.view = view({
+      id: "view-focus",
+      type: "CUSTOM",
+      viewTags: [{
+        viewId: "view-focus",
+        tagId: "tag-a",
+        tag: tag("tag-a", "Focus"),
+      }],
+    });
+    custom.lists = [];
+
+    const result = applyPendingOutboxOverlay(custom, [
+      operation({
+        entityType: "list",
+        entityClientId: "list-local",
+        operationType: "create",
+        payload: { name: "Local List" },
+      }),
+    ]);
+
+    expect(result.lists).toEqual([]);
+  });
+
+  it("keeps a tagged create active until the server snapshot has its tags", () => {
+    const create = operation({
+      entityType: "list",
+      entityClientId: "list-a",
+      operationType: "create",
+      payload: { name: "List A", tagIds: ["tag-b"] },
+      status: "synced",
+    });
+    const stale = snapshot();
+    const confirmed = snapshot();
+    confirmed.lists[0].listTags.push({
+      listId: "list-a",
+      tagId: "tag-b",
+      tag: tag("tag-b", "Other"),
+    });
+
+    expect(relinquishConfirmedOperations([create], { allLists: stale }))
+      .toEqual([create]);
+    expect(relinquishConfirmedOperations([create], { allLists: confirmed }))
+      .toEqual([]);
+  });
+
   it("uses active tag-create metadata when attaching a freshly-created tag", () => {
     const result = applyPendingOutboxOverlay(snapshot(), [
       operation({
