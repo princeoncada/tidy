@@ -28,6 +28,7 @@ export type CommitLocalListCreateArgs = {
   userId: string;
   listId: string;
   name: string;
+  inheritedTagIds?: string[];
   db?: TidyLocalDatabase;
 };
 
@@ -207,33 +208,58 @@ export async function commitLocalListCreate({
   userId,
   listId,
   name,
+  inheritedTagIds = [],
   db = getLocalDbOrThrow(),
 }: CommitLocalListCreateArgs): Promise<void> {
-  await db.transaction("rw", [db.lists, db.outboxOperations], async () => {
-    const now = createLocalTimestamp();
+  await db.transaction(
+    "rw",
+    [db.lists, db.listTags, db.outboxOperations],
+    async () => {
+      const now = createLocalTimestamp();
+      const uniqueTagIds = [...new Set(inheritedTagIds)];
 
-    await db.lists.put({
-      ...createLocalEntityBase({
-        clientId: listId,
-        userId,
-        syncStatus: "local",
-        createdAt: now,
-        updatedAt: now,
-      }),
-      name,
-    });
-    await appendCoalescedOutbox(
-      db,
-      {
-        userId,
-        entityType: "list",
-        entityClientId: listId,
-        operationType: "create",
-        payload: { name },
-      },
-      now,
-    );
-  });
+      await db.lists.put({
+        ...createLocalEntityBase({
+          clientId: listId,
+          userId,
+          syncStatus: "local",
+          createdAt: now,
+          updatedAt: now,
+        }),
+        name,
+      });
+      for (const tagId of uniqueTagIds) {
+        const entityClientId = `${listId}:${tagId}`;
+        await db.listTags.put({
+          ...createLocalEntityBase({
+            clientId: entityClientId,
+            userId,
+            syncStatus: "local",
+            createdAt: now,
+            updatedAt: now,
+          }),
+          listClientId: listId,
+          listServerId: null,
+          tagClientId: tagId,
+          tagServerId: null,
+        });
+      }
+      await appendCoalescedOutbox(
+        db,
+        {
+          userId,
+          entityType: "list",
+          entityClientId: listId,
+          operationType: "create",
+          payload: {
+            name,
+            ...(uniqueTagIds.length > 0 ? { tagIds: uniqueTagIds } : {}),
+          },
+        },
+        now,
+      );
+    },
+  );
 }
 
 export async function commitLocalListRename({
