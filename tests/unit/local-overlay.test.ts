@@ -485,6 +485,55 @@ describe("applyPendingOutboxOverlay", () => {
     });
   });
 
+  it("uses active tag-create metadata when attaching a freshly-created tag", () => {
+    const result = applyPendingOutboxOverlay(snapshot(), [
+      operation({
+        entityType: "tag",
+        entityClientId: "tag-local",
+        operationType: "create",
+        payload: { name: "Local Tag", color: "purple" },
+        status: "synced",
+      }),
+      operation({
+        entityType: "listTag",
+        entityClientId: "list-b:tag-local",
+        operationType: "attach",
+        payload: { listId: "list-b", tagId: "tag-local" },
+      }),
+    ]);
+
+    expect(result.lists[1].listTags[0].tag).toMatchObject({
+      id: "tag-local",
+      name: "Local Tag",
+      color: "purple",
+      userId: "optimistic",
+    });
+  });
+
+  it("prefers snapshot tag metadata over active tag-create metadata", () => {
+    const result = applyPendingOutboxOverlay(snapshot(), [
+      operation({
+        entityType: "tag",
+        entityClientId: "tag-a",
+        operationType: "create",
+        payload: { name: "Stale Local Name", color: "red" },
+        status: "synced",
+      }),
+      operation({
+        entityType: "listTag",
+        entityClientId: "list-b:tag-a",
+        operationType: "attach",
+        payload: { listId: "list-b", tagId: "tag-a" },
+      }),
+    ]);
+
+    expect(result.lists[1].listTags[0].tag).toMatchObject({
+      id: "tag-a",
+      name: "Focus",
+      color: "gray",
+    });
+  });
+
   it("synthesizes minimal tag metadata when attaching an unknown tag", () => {
     const result = applyPendingOutboxOverlay(snapshot(), [
       operation({
