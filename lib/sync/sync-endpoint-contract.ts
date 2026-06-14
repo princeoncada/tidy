@@ -78,9 +78,17 @@ function validateOperationPayload(operation: LocalOutboxOperation): string[] {
   }
 
   if (operation.operationType === "reorder") {
+    const orderKey = operation.payload.orderKey;
     const orderedIds = operation.payload.orderedIds;
 
-    if (!Array.isArray(orderedIds) || !orderedIds.every((id) => typeof id === "string")) {
+    if (typeof orderKey === "string" && orderKey.length > 0) {
+      return errors;
+    }
+
+    if (
+      !Array.isArray(orderedIds) ||
+      !orderedIds.every((id) => typeof id === "string")
+    ) {
       errors.push("Reorder operations must include orderedIds as a string array.");
     }
   }
