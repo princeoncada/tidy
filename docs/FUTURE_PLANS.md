@@ -293,6 +293,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.5 - Share Redeem Error UX Hardening (active) - see Planned
 ---
 
 ## Planned
