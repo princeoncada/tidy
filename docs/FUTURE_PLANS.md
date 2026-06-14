@@ -276,6 +276,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)~~ (stable 2026-06-14)
 
+- ~~2.0.1 - Fractional Indexing for Order~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -285,21 +287,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.1 - Fractional Indexing for Order (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.1 - Fractional Indexing for Order
-- **Status:** In progress | Priority: P1 2.0 local-first render
-- **Type:** product behavior
-- **Files:** lib/sync/*, lib/dashboard-cache.ts, components/list/*, prisma/schema.prisma (order columns)
-- **Implementation goal:** replace coarse `orderedIds` reorder operations with client-generated fractional indices for list, item, and view order.
-- **Product impact:** conflict-friendly local reordering without full-list reorder operations.
-- **Runtime integration target:** order is a local fractional value reconciled per entity; reorder no longer ships an ordered-id array.
-- **Deferral boundary:** realtime convergence across clients -> 2.0.2.
-- **Validation target:** targeted alpha + manual reorder proof; full test:ci before stable.
-- **Acceptance:** reorder is represented by fractional indices and survives concurrent edits deterministically.
 
 ### 2.0.2 - Supabase Broadcast Realtime Poke
 - **Status:** Open | Priority: P1 2.0 realtime
