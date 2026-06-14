@@ -22,6 +22,8 @@ import { commitLocalListCreate } from "@/lib/local-db/local-write";
 import { Skeleton } from "../ui/skeleton";
 import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
+import { keyBetween } from "@/lib/sync/fractional-index";
+import { replicacheKeys } from "@/lib/sync/replicache/keys";
 
 
 type ListAdderProps = {
@@ -126,12 +128,18 @@ const ListAdder = ({ boot }: ListAdderProps) => {
     };
 
     if (dashboardMutations.enabled && dashboardMutations.mutate && allListsView) {
+      const firstListId = previousAllLists?.lists[0]?.id;
+      const firstOrderKey = firstListId
+        ? replicacheDashboard.orderKeys.viewLists.get(
+            replicacheKeys.viewList(allListsView.id, firstListId),
+          ) ?? null
+        : null;
       void dashboardMutations.mutate.createList({
         id: newListId,
         userId,
         name,
         allListsViewId: allListsView.id,
-        order: optimisticList.order,
+        order: keyBetween(null, firstOrderKey),
         inheritedTagIds: inheritedListTags.map((listTag) => listTag.tagId),
         now: new Date().toISOString(),
       });

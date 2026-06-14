@@ -72,6 +72,7 @@ import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
+import { keyBetween } from "@/lib/sync/fractional-index";
 
 type ViewItem = RouterOutputs["view"]["getAll"][number];
 type TagItem = RouterOutputs["tag"]["getAll"][number];
@@ -475,7 +476,10 @@ export default function ViewsSidebarPreview({
     setDragPreviewViews(nextViews);
   }, [setDragPreviewViews]);
 
-  const scheduleReorderSave = useCallback((nextViews: ViewItem[]) => {
+  const scheduleReorderSave = useCallback((
+    nextViews: ViewItem[],
+    movedViewId: string,
+  ) => {
     if (reorderTimeoutRef.current) {
       clearTimeout(reorderTimeoutRef.current);
     }
@@ -484,8 +488,25 @@ export default function ViewsSidebarPreview({
       if (!userId || nextViews.length === 0) return;
 
       if (dashboardMutations.enabled && dashboardMutations.mutate) {
+        const movedIndex = nextViews.findIndex(
+          (view) => view.id === movedViewId,
+        );
+        const beforeId = movedIndex > 0
+          ? nextViews[movedIndex - 1]?.id
+          : allListsView?.id;
+        const afterId = movedIndex >= 0 && movedIndex < nextViews.length - 1
+          ? nextViews[movedIndex + 1]?.id
+          : undefined;
         void dashboardMutations.mutate.reorderViews({
-          orderedIds: nextViews.map((view) => view.id),
+          id: movedViewId,
+          orderKey: keyBetween(
+            beforeId
+              ? replicacheDashboard.orderKeys.views.get(beforeId) ?? null
+              : null,
+            afterId
+              ? replicacheDashboard.orderKeys.views.get(afterId) ?? null
+              : null,
+          ),
         });
         return;
       }
@@ -501,20 +522,29 @@ export default function ViewsSidebarPreview({
         }
       }, { label: "view.reorderViews" });
     }, 300);
-  }, [dashboardMutations, optimisticSync, userId]);
+  }, [
+    allListsView?.id,
+    dashboardMutations,
+    optimisticSync,
+    replicacheDashboard.orderKeys.views,
+    userId,
+  ]);
 
-  const commitViewOrder = useCallback((nextViews: ViewItem[]) => {
+  const commitViewOrder = useCallback((
+    nextViews: ViewItem[],
+    movedViewId: string,
+  ) => {
     if (!userId) return;
 
     if (dashboardMutations.enabled) {
-      scheduleReorderSave(nextViews);
+      scheduleReorderSave(nextViews, movedViewId);
       return;
     }
 
     // Only save the final dropped order. Older drag positions do not matter.
     measureCacheWrite("views.drop.order", nextViews);
     commitViewOrderToViewsCache(queryClient, dashboardKeys, nextViews);
-    scheduleReorderSave(nextViews);
+    scheduleReorderSave(nextViews, movedViewId);
   }, [
     dashboardMutations.enabled,
     queryClient,
@@ -570,11 +600,20 @@ export default function ViewsSidebarPreview({
     });
 
     if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      const firstCustomViewId = savedCustomViews[0]?.id;
+      const allListsOrderKey = allListsView
+        ? replicacheDashboard.orderKeys.views.get(allListsView.id) ?? null
+        : null;
+      const firstCustomOrderKey = firstCustomViewId
+        ? replicacheDashboard.orderKeys.views.get(firstCustomViewId) ?? null
+        : null;
       void dashboardMutations.mutate.createView({
         id: viewId,
         userId,
         name,
-        order: optimisticView.order,
+        order: firstCustomOrderKey
+          ? keyBetween(allListsOrderKey, firstCustomOrderKey)
+          : keyBetween(allListsOrderKey, null),
         tagIds,
         matchMode: "ALL",
         now: new Date().toISOString(),
@@ -770,7 +809,10 @@ export default function ViewsSidebarPreview({
               measureOptimisticEvent("views.drag.end", {
                 count: finalPreview.length,
               });
-              commitViewOrder(finalPreview);
+              commitViewOrder(
+                finalPreview,
+                String(event.operation.source.id),
+              );
             }}
             onDragOver={(event) => {
               const { source, target } = event.operation;

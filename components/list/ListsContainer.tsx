@@ -60,6 +60,8 @@ import { CurrentView, List, Lists, OptimisticList, OptimisticListItem } from './
 import ListEmpty from './ListEmpty';
 import { useReplicacheDashboard } from '@/hooks/useReplicacheDashboard';
 import { useDashboardMutations } from '@/hooks/useDashboardMutations';
+import { keyBetween } from '@/lib/sync/fractional-index';
+import { replicacheKeys } from '@/lib/sync/replicache/keys';
 
 type DragPreviewLists = Lists;
 type ListsContainerProps = {
@@ -273,6 +275,23 @@ function itemPlacementMatches(left: Lists, right: Lists) {
         item.listId === right[listIndex]?.listItems[itemIndex]?.listId
       )
     );
+}
+
+function movedEntityOrderKey(
+  orderedIds: string[],
+  movedId: string,
+  currentKeys: ReadonlyMap<string, string>,
+) {
+  const movedIndex = orderedIds.indexOf(movedId);
+  const beforeId = movedIndex > 0 ? orderedIds[movedIndex - 1] : undefined;
+  const afterId = movedIndex >= 0 && movedIndex < orderedIds.length - 1
+    ? orderedIds[movedIndex + 1]
+    : undefined;
+
+  return keyBetween(
+    beforeId ? currentKeys.get(beforeId) ?? null : null,
+    afterId ? currentKeys.get(afterId) ?? null : null,
+  );
 }
 
 const EMPTY_VIEW_ID = "00000000-0000-0000-0000-000000000000";
@@ -699,7 +718,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     }
   }, [currentView?.view.id, currentView?.view.type, currentViewQueryKey, queryClient, queryKey, viewsQueryKey]);
 
-  const scheduleReorderListsSave = useCallback(async (nextLists: Lists) => {
+  const scheduleReorderListsSave = useCallback(async (
+    nextLists: Lists,
+    movedListId: string,
+  ) => {
     if (!boot.userId) return;
 
     if (
@@ -707,9 +729,21 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
       dashboardMutations.mutate &&
       currentView
     ) {
+      const currentKeys = new Map<string, string>();
+      for (const list of nextLists) {
+        const key = replicacheDashboard.orderKeys.viewLists.get(
+          replicacheKeys.viewList(currentView.view.id, list.id),
+        );
+        if (key) currentKeys.set(list.id, key);
+      }
       await dashboardMutations.mutate.reorderLists({
         viewId: currentView.view.id,
-        orderedIds: nextLists.map((list) => list.id),
+        listId: movedListId,
+        orderKey: movedEntityOrderKey(
+          nextLists.map((list) => list.id),
+          movedListId,
+          currentKeys,
+        ),
       });
       return;
     }
@@ -748,6 +782,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     currentViewQueryKey,
     currentView,
     dashboardMutations,
+    replicacheDashboard.orderKeys.viewLists,
     boot.userId,
     optimisticSync,
     queryClient,
@@ -776,65 +811,41 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const scheduleReorderListItemsSave = useCallback(async (
     previousLists: Lists,
     nextLists: Lists,
+    movedItemId: string,
   ) => {
     if (!boot.userId) return;
 
     if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      const previousPlacement = new Map(
-        previousLists.flatMap((list) =>
-          list.listItems.map((item) => [
-            item.id,
-            { listId: list.id, order: item.order },
-          ] as const)
-        ),
+      const previousList = previousLists.find((list) =>
+        list.listItems.some((item) => item.id === movedItemId)
       );
-      const moved = nextLists
-        .flatMap((list) =>
-          list.listItems.map((item, order) => ({
-            item,
-            listId: list.id,
-            order,
-            previous: previousPlacement.get(item.id),
-          }))
-        )
-        .find((entry) => entry.previous?.listId !== entry.listId);
+      const destinationList = nextLists.find((list) =>
+        list.listItems.some((item) => item.id === movedItemId)
+      );
+      if (!previousList || !destinationList) return;
 
-      if (moved?.previous) {
-        const sourceList = nextLists.find(
-          (list) => list.id === moved.previous?.listId,
-        );
-        const destinationList = nextLists.find(
-          (list) => list.id === moved.listId,
-        );
+      const orderKey = movedEntityOrderKey(
+        destinationList.listItems.map((item) => item.id),
+        movedItemId,
+        replicacheDashboard.orderKeys.listItems,
+      );
+
+      if (previousList.id !== destinationList.id) {
         await dashboardMutations.mutate.moveItem({
-          id: moved.item.id,
-          fromListId: moved.previous.listId,
-          toListId: moved.listId,
-          order: moved.order,
-          destinationOrderedIds:
-            destinationList?.listItems.map((item) => item.id) ?? [],
-          sourceOrderedIds:
-            sourceList?.listItems.map((item) => item.id) ?? [],
+          id: movedItemId,
+          fromListId: previousList.id,
+          toListId: destinationList.id,
+          order: orderKey,
           now: new Date().toISOString(),
         });
         return;
       }
 
-      const changedList = nextLists.find((list) => {
-        const previousList = previousLists.find(
-          (candidate) => candidate.id === list.id,
-        );
-        return previousList &&
-          !list.listItems.every(
-            (item, index) => item.id === previousList.listItems[index]?.id,
-          );
+      await dashboardMutations.mutate.reorderItems({
+        listId: destinationList.id,
+        id: movedItemId,
+        orderKey,
       });
-      if (changedList) {
-        await dashboardMutations.mutate.reorderItems({
-          listId: changedList.id,
-          orderedIds: changedList.listItems.map((item) => item.id),
-        });
-      }
       return;
     }
 
@@ -899,6 +910,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     allListsQueryKey,
     currentViewQueryKey,
     dashboardMutations,
+    replicacheDashboard.orderKeys.listItems,
     boot.userId,
     optimisticSync,
     queryClient,
@@ -1008,13 +1020,20 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         switch (source.type) {
           case "list":
             if (!listOrderMatches(finalPreview, lists)) {
-              void scheduleReorderListsSave(finalPreview);
+              void scheduleReorderListsSave(
+                finalPreview,
+                String(source.id).replace("list-", ""),
+              );
             }
             break;
 
           case "list-item":
             if (!itemPlacementMatches(finalPreview, lists)) {
-              void scheduleReorderListItemsSave(lists, finalPreview);
+              void scheduleReorderListItemsSave(
+                lists,
+                finalPreview,
+                String(source.id).replace("list-item-", ""),
+              );
             }
             break;
 

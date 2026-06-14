@@ -30,6 +30,8 @@ import {
   commitLocalListRename,
 } from "@/lib/local-db/local-write";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
+import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
+import { keyBetween } from "@/lib/sync/fractional-index";
 
 interface ListComponentProps {
   children: ReactNode;
@@ -77,6 +79,7 @@ const ListComponent = ({
   const [newItemId, setNewItemId] = useState(() => crypto.randomUUID());
   const queryClient = useQueryClient();
   const dashboardMutations = useDashboardMutations();
+  const replicacheDashboard = useReplicacheDashboard();
 
   const handleRenameList = (input: { id: string; name: string }) => {
     if (!userId) return;
@@ -137,12 +140,16 @@ const ListComponent = ({
     };
 
     if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      const firstItemId = list.listItems[0]?.id;
+      const firstOrderKey = firstItemId
+        ? replicacheDashboard.orderKeys.listItems.get(firstItemId) ?? null
+        : null;
       setCreateListItemName("");
       void dashboardMutations.mutate.createItem({
         id: itemId,
         listId: list.id,
         name: itemName,
-        order,
+        order: keyBetween(null, firstOrderKey),
         now: new Date().toISOString(),
       });
       return;
