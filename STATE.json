@@ -1,9 +1,9 @@
 {
-    "version":  "2.0.4",
-    "state":  "stable",
-    "phase":  "2.0.4",
-    "phaseTitle":  "Replicache Pull Cookie Monotonicity Fix",
-    "nextPhase":  "2.0.5 - Yjs Collaborative Item Notes",
+    "version":  "2.0.5-alpha",
+    "state":  "alpha",
+    "phase":  "2.0.5",
+    "phaseTitle":  "Share Redeem Error UX Hardening",
+    "nextPhase":  "2.0.6 - Yjs Collaborative Item Notes",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-14"
 }

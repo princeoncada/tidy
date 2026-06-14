@@ -4,7 +4,7 @@ import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ListAdder from "./list/ListAdder";
 import ListsContainer from "./list/ListsContainer";
 import { Separator } from "./ui/separator";
@@ -22,10 +22,21 @@ const supabase = createClient();
 const Dashboard = () => {
 
   const [loggingOut, setLoggingOut] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   const queryClient = useQueryClient();
   const router = useRouter();
   const localFirstBoot = useLocalFirstDashboardBoot();
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setHydrated(true);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, []);
 
   function handleLogout() {
     setLoggingOut(true);
@@ -34,7 +45,7 @@ const Dashboard = () => {
     router.replace("/");
   }
 
-  if (loggingOut) {
+  if (!hydrated || loggingOut) {
     return <MaxWidthWrapper singleItemPage={true}>
       <Loader2 className="w-5 h-5 animate-spin" />
     </MaxWidthWrapper>;
