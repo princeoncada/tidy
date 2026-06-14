@@ -1,11 +1,11 @@
-<!-- Current Version: 1.10.1 -->
+<!-- Current Version: 2.0.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.10.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.10.1 - Landing Page Branding Polish
-**Next**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
+**Current Version**: 2.0.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
+**Next**: 2.0.1 - Fractional Indexing for Order
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
