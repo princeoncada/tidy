@@ -1,9 +1,9 @@
 {
-    "version":  "2.0.2",
-    "state":  "stable",
-    "phase":  "2.0.2",
-    "phaseTitle":  "Supabase Broadcast Realtime Poke",
-    "nextPhase":  "2.0.3 - Sharing \u0026 Permissions",
+    "version":  "2.0.3-alpha",
+    "state":  "alpha",
+    "phase":  "2.0.3",
+    "phaseTitle":  "Sharing \u0026 Permissions",
+    "nextPhase":  "2.0.4 - Yjs Collaborative Item Notes",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-14"
 }
