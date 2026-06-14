@@ -1,4 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const permissionMocks = vi.hoisted(() => ({
+  getEffectiveListRole: vi.fn(),
+}));
+
+vi.mock("@/lib/sync/permissions", () => ({
+  canEditContent: (role: string | null) =>
+    role === "OWNER" || role === "EDITOR",
+  getEffectiveListRole: permissionMocks.getEffectiveListRole,
+}));
 
 import type { LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
 import type { SyncBatchOperationDecision } from "@/lib/sync/sync-batch-contract";
@@ -111,6 +121,11 @@ function createDb(tx: ReturnType<typeof createTx>): ApplyDatabase {
 }
 
 describe("server sync apply", () => {
+  beforeEach(() => {
+    permissionMocks.getEffectiveListRole.mockReset();
+    permissionMocks.getEffectiveListRole.mockResolvedValue("OWNER");
+  });
+
   it("updates lists with an id-and-user scoped write", async () => {
     const tx = createTx();
     tx.list.findUnique.mockResolvedValue({
@@ -132,7 +147,7 @@ describe("server sync apply", () => {
     }]);
 
     expect(tx.list.updateMany).toHaveBeenCalledWith({
-      where: { id: "list-1", userId: "user-1" },
+      where: { id: "list-1" },
       data: { name: "Inbox" },
     });
   });
@@ -257,6 +272,7 @@ describe("server sync apply", () => {
       userId: "user-2",
       name: "Foreign",
     });
+    permissionMocks.getEffectiveListRole.mockResolvedValueOnce(null);
 
     const results = await applySyncOperations({
       userId: "user-1",
@@ -267,9 +283,111 @@ describe("server sync apply", () => {
     expect(results[0]).toEqual({
       operationId: "op-1",
       status: "rejected",
-      errorMessage: "List update target belongs to another user.",
+      errorMessage: "List update requires edit access.",
     });
     expect(tx.list.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("rejects viewer list rename and allows editor list rename", async () => {
+    const viewerTx = createTx();
+    viewerTx.list.findUnique.mockResolvedValue({
+      userId: "user-2",
+      name: "Old",
+    });
+    permissionMocks.getEffectiveListRole.mockResolvedValueOnce("VIEWER");
+
+    const viewerResults = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted()],
+      db: createDb(viewerTx),
+    });
+
+    expect(viewerResults[0]).toMatchObject({
+      status: "rejected",
+      errorMessage: "List update requires edit access.",
+    });
+    expect(viewerTx.list.updateMany).not.toHaveBeenCalled();
+
+    const editorTx = createTx();
+    editorTx.list.findUnique.mockResolvedValue({
+      userId: "user-2",
+      name: "Old",
+    });
+    permissionMocks.getEffectiveListRole.mockResolvedValueOnce("EDITOR");
+
+    const editorResults = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted()],
+      db: createDb(editorTx),
+    });
+
+    expect(editorResults[0]).toMatchObject({ status: "applied" });
+    expect(editorTx.list.updateMany).toHaveBeenCalledWith({
+      where: { id: "list-1" },
+      data: { name: "Inbox" },
+    });
+  });
+
+  it("gates item updates by effective role and keeps list delete owner-only", async () => {
+    const viewerTx = createTx();
+    viewerTx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Old",
+      completed: false,
+      notes: null,
+    });
+    permissionMocks.getEffectiveListRole.mockResolvedValueOnce("VIEWER");
+
+    const viewerResults = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { name: "New" },
+      })],
+      db: createDb(viewerTx),
+    });
+
+    expect(viewerResults[0]).toMatchObject({
+      status: "rejected",
+      errorMessage: "List item update requires edit access.",
+    });
+
+    const editorTx = createTx();
+    editorTx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Old",
+      completed: false,
+      notes: null,
+    });
+    permissionMocks.getEffectiveListRole.mockResolvedValueOnce("EDITOR");
+
+    const editorResults = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { name: "New" },
+      })],
+      db: createDb(editorTx),
+    });
+    expect(editorResults[0]).toMatchObject({ status: "applied" });
+
+    const deleteTx = createTx();
+    deleteTx.list.findUnique.mockResolvedValue({ userId: "user-2" });
+    permissionMocks.getEffectiveListRole.mockResolvedValueOnce("OWNER");
+    const deleteResults = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        operationType: "delete",
+        payload: { deleted: true },
+      })],
+      db: createDb(deleteTx),
+    });
+    expect(deleteResults[0]).toMatchObject({
+      status: "rejected",
+      errorMessage: "List delete target belongs to another user.",
+    });
   });
 
   it("creates an item only after checking the owned parent list", async () => {
@@ -289,10 +407,11 @@ describe("server sync apply", () => {
       db: createDb(tx),
     });
 
-    expect(tx.list.findFirst).toHaveBeenCalledWith({
-      where: { id: "list-1", userId: "user-1" },
-      select: { id: true },
-    });
+    expect(permissionMocks.getEffectiveListRole).toHaveBeenCalledWith(
+      tx,
+      "user-1",
+      "list-1",
+    );
     expect(tx.listItem.create).toHaveBeenCalledWith({
       data: {
         id: "item-1",
@@ -326,10 +445,7 @@ describe("server sync apply", () => {
     });
 
     expect(tx.listItem.updateMany).toHaveBeenCalledWith({
-      where: {
-        id: "item-1",
-        parentList: { userId: "user-1" },
-      },
+      where: { id: "item-1" },
       data: {
         listId: "list-2",
         order: 0,
@@ -360,10 +476,7 @@ describe("server sync apply", () => {
     });
 
     expect(tx.listItem.updateMany).toHaveBeenCalledWith({
-      where: {
-        id: "item-1",
-        parentList: { userId: "user-1" },
-      },
+      where: { id: "item-1" },
       data: {
         listId: "list-2",
         orderKey: "a1",
@@ -464,7 +577,6 @@ describe("server sync apply", () => {
       where: {
         id: "item-1",
         listId: "list-1",
-        parentList: { userId: "user-1" },
       },
       data: { orderKey: "a1" },
     });
