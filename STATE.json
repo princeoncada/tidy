@@ -1,6 +1,6 @@
 {
-    "version":  "2.0.3-alpha",
-    "state":  "alpha",
+    "version":  "2.0.3",
+    "state":  "stable",
     "phase":  "2.0.3",
     "phaseTitle":  "Sharing \u0026 Permissions",
     "nextPhase":  "2.0.4 - Yjs Collaborative Item Notes",
