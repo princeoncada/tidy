@@ -68,6 +68,17 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `lib/sync/permissions.ts`, `trpc/routers/shareRouter.ts`, `components/sharing/*`, `app/share/[token]/page.tsx` - sharing role authority, management API, owner controls, and invite redemption.
 - `prisma/sql/2_0_3_realtime_poke_rls.sql` - manually applied private-channel receive policy for per-user poke topics.
 
+2.0.5 hardens the sharing transition path: rejected redemption stores and renders
+its caught error locally, while successful redemption redirects immediately.
+The share page no longer starts Replicache; the dashboard is the single owner of
+the post-redemption client and pull. Dashboard hydration uses a
+server/client-stable loading render until the browser effect runs. When the
+offline app-shell gate is disabled, registration removes an old service worker
+and all Tidy app-shell caches. The cache is versioned at `v2`, and localhost
+service workers no longer cache Next static chunks, so stale development assets
+cannot survive. `lib/db.ts` reuses one development Prisma client backed by a
+three-connection pg pool.
+
 ---
 
 ## Architecture Invariants
@@ -210,7 +221,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Authenticated E2E requires a Supabase user pool with at least as many users as Playwright workers (`tests/.auth/user-<index>.json` plus real env vars), with a legacy single-user fallback only for serial runs.
 - Authenticated E2E outbox-state assertions must verify a Dexie-first write was ENQUEUED (operation present for the entity + operationType) plus `directMutationRequests === []`, never that the op is still in transient `status: "pending"`: the flush scheduler can drain pending -> synced before a one-shot read, which caused the flaky failure in `dexie-first-tags-views.spec.ts` fixed in 1.9.31.
 - `drag-drop.spec.ts` asserts the real drag contract: bounded coalescing plus final settled placement across view switch/reload, not per-drop intermediate placement during the rapid three-drop sequence. `dragByMouse` engages dnd-kit with an activation move, briefly settles at the final pointer position, and then awaits removal of the `data-dnd-dragging="true"` feedback clone and hidden/inert `data-dnd-placeholder`. Raw-mouse dnd-kit simulation remains inherently flaky, so this spec alone carries file-scoped retries (`2`); affected movement tests retain a 60-second timeout.
-- Repeating the full authenticated suite many times back-to-back can exhaust the Postgres session-mode pool (`EMAXCONNSESSION`, pool size 15) because specs use the shared Prisma client for setup/cleanup without per-spec connection release. This is an environment/connection-hygiene constraint, not a product defect; a dedicated test-database connection-hygiene pass is a candidate follow-up.
+- Repeating the full authenticated suite across multiple processes can still exhaust the Postgres session-mode pool (`EMAXCONNSESSION`, pool size 15). 2.0.5 bounds each app-process pg pool to three connections and reuses the Prisma client across development hot reloads, but separate Playwright/Next processes still share the external 15-session ceiling; a dedicated test-database connection-hygiene pass remains a candidate follow-up.
 - Repeated authenticated-suite runs then exposed a separate product read-correctness gap: synced movement operations were relinquished before the authoritative query snapshot confirmed their placement, so a stale snapshot could briefly render the moving item in neither list. Movement handoff now keeps only the latest intent per entity and retains a synced intent until the server snapshot confirms its destination/order.
 - The movement overlay also retains the moving item defensively if no destination placement is available. Unit coverage proves both the partial-sync retention guard and stale-versus-confirmed movement handoff.
 - No keyboard drag accessibility validation.
