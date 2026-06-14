@@ -27,6 +27,11 @@ export function ShareRedeemer({ token }: { token: string }) {
       .then(async () => {
         await rep?.pull();
         router.replace("/dashboard");
+      })
+      .catch(() => {
+        // Failure is surfaced in-page via redeem.isError below; swallow the
+        // rejection so it does not escape as an unhandled promise rejection
+        // (which surfaces the Next.js error overlay / leaves the page stuck).
       });
   }, [redeem, rep, router, token]);
 
