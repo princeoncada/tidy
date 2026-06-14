@@ -1,9 +1,9 @@
 {
-    "version":  "1.10.0",
-    "state":  "stable",
-    "phase":  "1.10.0",
-    "phaseTitle":  "Copy and Metadata Hygiene",
-    "nextPhase":  "1.10.1 - Auth Flow Copy Polish",
+    "version":  "1.10.1-alpha",
+    "state":  "alpha",
+    "phase":  "1.10.1",
+    "phaseTitle":  "Landing Page Branding Polish",
+    "nextPhase":  "2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-14"
 }
