@@ -69,7 +69,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `prisma/sql/2_0_3_realtime_poke_rls.sql` - manually applied private-channel receive policy for per-user poke topics.
 
 2.0.5 hardens the sharing transition path: rejected redemption stores and renders
-its caught error locally, while successful redemption redirects immediately.
+its caught error locally with a Back to dashboard action, while successful
+redemption redirects immediately.
 The share page no longer starts Replicache; the dashboard is the single owner of
 the post-redemption client and pull. Dashboard hydration uses a
 server/client-stable loading render until the browser effect runs. When the
