@@ -27,6 +27,7 @@ model View {
   id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
   order     Int
+  orderKey  String?
   userId    String        @db.Uuid
   type      ViewType      @default(CUSTOM)
   isDefault Boolean       @default(false)
@@ -40,19 +41,22 @@ model View {
   @@unique([userId, name])
   @@index([userId])
   @@index([userId, order])
+  @@index([userId, orderKey])
   @@index([userId, type])
 }
 
 model ViewList {
-  viewId String @db.Uuid
-  listId String @db.Uuid
-  order  Int
+  viewId  String  @db.Uuid
+  listId  String  @db.Uuid
+  order   Int
+  orderKey String?
 
   view View @relation(fields: [viewId], references: [id], onDelete: Cascade)
   list List @relation(fields: [listId], references: [id], onDelete: Cascade)
 
   @@id([viewId, listId])
   @@index([viewId, order])
+  @@index([viewId, orderKey])
   @@index([listId])
 }
 
@@ -75,6 +79,7 @@ model ListItem {
   name      String
   completed Boolean  @default(false)
   order     Int
+  orderKey  String?
   notes     String?
   listId    String   @db.Uuid
   createdAt DateTime @default(now())
@@ -84,6 +89,7 @@ model ListItem {
 
   @@index([listId])
   @@index([listId, order])
+  @@index([listId, orderKey])
 }
 
 model Tag {
