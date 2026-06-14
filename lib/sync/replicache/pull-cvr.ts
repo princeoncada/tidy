@@ -188,6 +188,8 @@ export function diffReplicacheClientViews({
   return patch;
 }
 
+const COOKIE_SEQUENCE_WIDTH = 16;
+
 export function nextReplicacheCookie(
   latestCookie: string | null | undefined,
   clientGroupID = "",
@@ -195,5 +197,6 @@ export function nextReplicacheCookie(
   const suffix = latestCookie?.split(":").at(-1);
   const parsed = Number(suffix);
   const next = Number.isSafeInteger(parsed) && parsed >= 0 ? parsed + 1 : 1;
-  return clientGroupID ? `${clientGroupID}:${next}` : String(next);
+  const sequence = String(next).padStart(COOKIE_SEQUENCE_WIDTH, "0");
+  return clientGroupID ? `${clientGroupID}:${sequence}` : sequence;
 }
