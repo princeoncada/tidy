@@ -1,6 +1,6 @@
 {
-    "version":  "1.9.32-alpha",
-    "state":  "alpha",
+    "version":  "1.9.32",
+    "state":  "stable",
     "phase":  "1.9.32",
     "phaseTitle":  "Local-First Dashboard Architecture Closeout",
     "nextPhase":  "1.10.0 - Copy and Metadata Hygiene",
