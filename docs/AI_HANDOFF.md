@@ -1,9 +1,9 @@
-<!-- Current Version: 2.0.0-alpha -->
+<!-- Current Version: 2.0.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.0.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
 **Next**: 2.0.1 - Fractional Indexing for Order
 
