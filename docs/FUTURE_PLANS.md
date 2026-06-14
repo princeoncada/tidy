@@ -277,92 +277,159 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.32 - Local-First Dashboard Architecture Closeout (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.32 - Local-First Dashboard Architecture Closeout
-- **Status:** Open | Priority: P1 decision
+- **Status:** In progress | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
 - **Implementation goal:** evaluate the shipped reconciled read graph, Dexie-first dashboard writes, and bounded server batch sync; record residual limitations and whether the 1.9.x local-first series is complete.
-- **Product impact:** none directly - closes the architecture only after both requested product outcomes have shipped and been proven.
-- **Runtime integration target:** none (decision); records the delivered runtime contract and names any follow-up outside dashboard local-first behavior.
-- **Deferral boundary:** production-readiness work remains in 1.10.x; no missing dashboard mutation may be silently deferred through this decision.
+- **Product impact:** none directly - closes the architecture only after the remaining product outcome is named and sequenced.
+- **Runtime integration target:** none (decision); records the delivered runtime contract and names the follow-up (the 2.0 arc).
+- **Deferral boundary:** production-readiness work moves to 2.1.x; the local-first RENDER product work is the 2.0 arc; no missing dashboard mutation may be silently deferred through this decision.
 - **Validation target:** targeted alpha (validate.ps1 + decision recorded); full validate.ps1 at the gate.
-- **Acceptance:** the decision records proof that immediate list/item correctness and Dexie-first bounded batch sync are delivered, or keeps seriesComplete false with an explicitly versioned remaining product phase. Phase 1.9.31 separates and fixes the authenticated-suite timing races from the synced-movement authoritative-snapshot handoff defect, so this decision may record seriesComplete=true once a deterministically green `npm run test:e2e:auth` is presented.
+- **Acceptance:** the decision records that immediate list/item correctness and Dexie-first bounded batch sync are delivered while the local-first RENDER goal is not, keeps `seriesComplete` FALSE, and names the 2.0 arc (Replicache + Yjs + Supabase Broadcast) as the explicitly-versioned remaining product work.
 
-### 1.10.0 - Deploy Env Documentation
-- **Status:** Open | Priority: P2 production readiness
+### 1.10.0 - Copy and Metadata Hygiene
+- **Status:** Open | Priority: P3 quick polish (pulled forward from 1.11.0)
+- **Type:** product behavior (polish)
+- **Files:** app/layout.tsx, public/*, README.md if needed
+- **Implementation goal:** fix missing asset references (e.g. the missing `apple-icon.png`) and metadata consistency.
+- **Product impact:** correct metadata / asset references; no behavior change.
+- **Runtime integration target:** metadata references existing assets.
+- **Deferral boundary:** auth copy -> 1.10.1; landing copy -> 1.10.2.
+- **Validation target:** targeted alpha (asset / metadata checks + manual proof); full test:ci before stable.
+- **Acceptance:** metadata references existing assets; no behavior change.
+
+### 1.10.1 - Auth Flow Copy Polish
+- **Status:** Open | Priority: P3 quick polish (pulled forward from 1.11.1)
+- **Type:** product behavior (polish)
+- **Files:** components/auth/Register.tsx, auth components if needed
+- **Implementation goal:** fix misleading auth copy such as the Register submit button saying "Login".
+- **Product impact:** clearer auth copy; auth behavior unchanged.
+- **Runtime integration target:** none beyond copy.
+- **Deferral boundary:** landing copy -> 1.10.2.
+- **Validation target:** targeted alpha (copy checks + manual proof); full test:ci before stable.
+- **Acceptance:** copy is clear; auth behavior unchanged.
+
+### 1.10.2 - Landing Page Branding Polish
+- **Status:** Open | Priority: P3 quick polish (pulled forward from 1.11.2)
+- **Type:** product behavior (polish)
+- **Files:** app/page.tsx
+- **Implementation goal:** fix the landing typo and improve lightweight Tidy positioning.
+- **Product impact:** improved landing copy; no behavior change.
+- **Runtime integration target:** none beyond copy.
+- **Deferral boundary:** broader visual review -> 2.2.0 (post-2.0).
+- **Validation target:** targeted alpha (copy checks + manual proof); full test:ci before stable.
+- **Acceptance:** copy improves without changing app behavior.
+
+### 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
+- **Status:** Open | Priority: P1 2.0 local-first render
+- **Type:** product behavior
+- **Files:** lib/sync/*, lib/dashboard-cache.ts, app/api/* (push / pull), components/list/*, prisma/schema.prisma (Replicache client / version tracking)
+- **Implementation goal:** adopt Replicache as the sync spine - one local store, deterministic mutators applied optimistically, batched `/push`, diff `/pull`, client rebase; the dashboard reads the local store via reactive queries and never a raw server payload.
+- **Product impact:** immediate local-first render; the optimistic / overlay / refetch flicker is eliminated.
+- **Runtime integration target:** dashboard renders from the Replicache local store; `/push` reuses `lib/sync/server-apply.ts`; Postgres / Prisma remain the durable source.
+- **Deferral boundary:** order representation -> 2.0.1; realtime poke -> 2.0.2; legacy overlay / outbox-render removal -> 2.0.5.
+- **Validation target:** targeted alpha + manual local-first render proof; full test:ci before stable.
+- **Acceptance:** create / edit / move renders instantly from the local store with no flicker; server rejections surface as background corrections, not UI rollbacks.
+
+### 2.0.1 - Fractional Indexing for Order
+- **Status:** Open | Priority: P1 2.0 local-first render
+- **Type:** product behavior
+- **Files:** lib/sync/*, lib/dashboard-cache.ts, components/list/*, prisma/schema.prisma (order columns)
+- **Implementation goal:** replace coarse `orderedIds` reorder operations with client-generated fractional indices for list, item, and view order.
+- **Product impact:** conflict-friendly local reordering without full-list reorder operations.
+- **Runtime integration target:** order is a local fractional value reconciled per entity; reorder no longer ships an ordered-id array.
+- **Deferral boundary:** realtime convergence across clients -> 2.0.2.
+- **Validation target:** targeted alpha + manual reorder proof; full test:ci before stable.
+- **Acceptance:** reorder is represented by fractional indices and survives concurrent edits deterministically.
+
+### 2.0.2 - Supabase Broadcast Realtime Poke
+- **Status:** Open | Priority: P1 2.0 realtime
+- **Type:** product behavior
+- **Files:** lib/sync/*, app/api/sync/route.ts, lib/realtime/* (new), components/*
+- **Implementation goal:** emit one Supabase Broadcast message per `/api/sync` batch ("changed, cursor=N") on a per-workspace / list channel; receivers PULL the delta. Doorbell, not delivery.
+- **Product impact:** near-real-time multi-client / multi-tab convergence.
+- **Runtime integration target:** a batch flush pokes the channel; receivers pull; missed messages self-heal on the next pull.
+- **Deferral boundary:** multi-user access control -> 2.0.3.
+- **Validation target:** targeted alpha + manual two-client convergence proof; full test:ci before stable.
+- **Acceptance:** a change in one client appears in another via poke + pull without per-row CDC.
+
+### 2.0.3 - Sharing & Permissions
+- **Status:** Open | Priority: P1 2.0 collaboration
+- **Type:** product behavior
+- **Files:** prisma/schema.prisma, trpc/routers/*, lib/sync/server-apply.ts, app/api/*
+- **Implementation goal:** introduce shared workspaces / lists with per-user permissions enforced server-side in push / pull and the broadcast channel scope.
+- **Product impact:** users can share lists and collaborate.
+- **Runtime integration target:** push / pull and broadcast are permission-scoped; ownership checks remain server-authoritative.
+- **Deferral boundary:** live text co-editing -> 2.0.4.
+- **Validation target:** targeted alpha + ownership / permission tests + manual proof; full test:ci before stable.
+- **Acceptance:** only permitted users can read / write a shared list; unauthorized push / pull is rejected.
+
+### 2.0.4 - Yjs Collaborative Item Notes
+- **Status:** Open | Priority: P2 2.0 collaboration
+- **Type:** product behavior
+- **Files:** components/list/*, lib/collab/* (new Yjs provider), prisma/schema.prisma (binary note doc), app/api/*
+- **Implementation goal:** add live concurrent co-editing of item NOTES only via per-field `Y.Doc` keyed by item id, persisted as binary in Postgres, synced through its own provider. Structure stays server-authoritative + per-entity LWW.
+- **Product impact:** real-time collaborative note editing on items.
+- **Runtime integration target:** item notes are a CRDT field; names and structure remain LWW.
+- **Deferral boundary:** does NOT convert names or relational structure to CRDTs.
+- **Validation target:** targeted alpha + manual concurrent-edit proof; full test:ci before stable.
+- **Acceptance:** two users editing the same item note converge without lost text.
+
+### 2.0.5 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
+- **Status:** Open | Priority: P1 2.0 cleanup
+- **Type:** cleanup
+- **Files:** lib/local-db/local-overlay.ts, lib/dashboard-cache.ts, hooks/useOptimisticSync.ts, lib/sync/offline-write-prototype.ts, components/*
+- **Implementation goal:** remove the 1.9.x pending-outbox overlay, the outbox-as-render-source fallback, and the server-payload tRPC render path now superseded by Replicache; retire the `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate.
+- **Product impact:** none beyond removing dead / duplicate render paths; render is wholly local-store driven.
+- **Runtime integration target:** only the Replicache render / sync path remains.
+- **Deferral boundary:** none - final 2.0 architecture cleanup. This is the phase that flips `seriesComplete = true`.
+- **Validation target:** full test:ci + manual regression of the dashboard; full validate.ps1 before stable.
+- **Acceptance:** the legacy overlay / outbox-render / tRPC-render paths are gone and the dashboard still passes the full suite; `seriesComplete` flips true.
+
+### 2.1.0 - Deploy Env Documentation
+- **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.0; deploy docs written once against the 2.0 architecture)
 - **Type:** docs
 - **Files:** README.md, .env.example
-- **Implementation goal:** document DATABASE_URL, Supabase env vars, site URL, and local/prod differences so deployment expectations are clear.
+- **Implementation goal:** document DATABASE_URL, Supabase env vars (incl. Broadcast / Replicache), site URL, and local / prod differences.
 - **Product impact:** none - enables correct deployment.
 - **Runtime integration target:** none.
-- **Deferral boundary:** build/migration path -> 1.10.1.
+- **Deferral boundary:** build / migration path -> 2.1.1.
 - **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
 - **Acceptance:** a new setup can follow the docs without guessing.
 
-### 1.10.1 - Build/Migration Readiness
-- **Status:** Open | Priority: P2 production readiness
+### 2.1.1 - Build/Migration Readiness
+- **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.1)
 - **Type:** docs
 - **Files:** README.md, prisma/*, package.json only if needed
-- **Implementation goal:** document Prisma generate, migration, and build steps for a repeatable release path.
+- **Implementation goal:** document Prisma generate, migration, and build steps (including any Replicache / Yjs persistence migrations) for a repeatable release path.
 - **Product impact:** none - enables repeatable releases.
 - **Runtime integration target:** none.
-- **Deferral boundary:** smoke checklist -> 1.10.2.
+- **Deferral boundary:** smoke checklist -> 2.1.2.
 - **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
-- **Acceptance:** the production build/migration flow is clear and repeatable.
+- **Acceptance:** the production build / migration flow is clear and repeatable.
 
-### 1.10.2 - Production Smoke Checklist
-- **Status:** Open | Priority: P2 production readiness
+### 2.1.2 - Production Smoke Checklist
+- **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.2)
 - **Type:** docs
 - **Files:** README.md, docs/FUTURE_PLANS.md
-- **Implementation goal:** document a small post-deploy smoke checklist (login, dashboard load, create list, create item, tag view, reorder, refresh).
+- **Implementation goal:** document a small post-deploy smoke checklist (login, dashboard load, create list / item, tag view, reorder, refresh, two-client sync).
 - **Product impact:** none - guards releases.
 - **Runtime integration target:** none.
 - **Deferral boundary:** does not duplicate full test docs.
 - **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
 - **Acceptance:** a smoke checklist exists and does not duplicate full test docs.
 
-### 1.11.0 - Copy and Metadata Hygiene
-- **Status:** Open | Priority: P3 late polish
-- **Type:** product behavior (polish)
-- **Files:** app/layout.tsx, public/*, README.md if needed
-- **Implementation goal:** fix missing asset references and metadata consistency.
-- **Product impact:** correct metadata/asset references; no behavior change.
-- **Runtime integration target:** metadata references existing assets.
-- **Deferral boundary:** auth copy -> 1.11.1; landing copy -> 1.11.2.
-- **Validation target:** targeted alpha (asset/metadata checks + manual proof); full test:ci before stable.
-- **Acceptance:** metadata references existing assets; no behavior change.
-
-### 1.11.1 - Auth Flow Copy Polish
-- **Status:** Open | Priority: P3 late polish
-- **Type:** product behavior (polish)
-- **Files:** components/auth/Register.tsx, auth components if needed
-- **Implementation goal:** fix misleading auth copy such as the Register submit language.
-- **Product impact:** clearer auth copy; auth behavior unchanged.
-- **Runtime integration target:** none beyond copy.
-- **Deferral boundary:** landing copy -> 1.11.2.
-- **Validation target:** targeted alpha (copy checks + manual proof); full test:ci before stable.
-- **Acceptance:** copy is clear; auth behavior unchanged.
-
-### 1.11.2 - Landing Page Branding Polish
-- **Status:** Open | Priority: P3 late polish
-- **Type:** product behavior (polish)
-- **Files:** app/page.tsx
-- **Implementation goal:** fix the typo and improve lightweight Tidy positioning on the landing page.
-- **Product impact:** improved landing copy; no behavior change.
-- **Runtime integration target:** none beyond copy.
-- **Deferral boundary:** broader visual review -> 1.11.3.
-- **Validation target:** targeted alpha (copy checks + manual proof); full test:ci before stable.
-- **Acceptance:** copy improves without changing app behavior.
-
-### 1.11.3 - Visual Review Pass
-- **Status:** Open | Priority: P3 late UI/UX
+### 2.2.0 - Visual Review Pass
+- **Status:** Open | Priority: P3 late UI/UX (pushed back from 1.11.3)
 - **Type:** product behavior (polish)
 - **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, app/page.tsx
-- **Implementation goal:** perform a small visual review pass only after state correctness, ownership, optimistic behavior, and tests are stable.
+- **Implementation goal:** small visual review pass after the 2.0 local-first render and collaboration are stable.
 - **Product impact:** small visual improvements; no data behavior change.
 - **Runtime integration target:** none beyond presentation.
 - **Deferral boundary:** none - last polish phase.
@@ -390,7 +457,8 @@ Assigned a version only when scoped.
 
 ## Discarded / Won't Do
 
-(none recorded yet)
+- **1.9.x server-authoritative render + pending-outbox overlay as the local-first UX path** - superseded 2026-06-14. Rendering from the tRPC server payload plus `lib/local-db/local-overlay.ts`, with Dexie only as an offline fallback, leaves the optimistic / overlay / refetch three-way race (the perceived flicker). The 2.0 arc replaces it with a Replicache local-store render; the overlay / outbox-render / tRPC-render paths are retired in 2.0.5. The Dexie-first WRITE path and bounded batch sync are NOT discarded - those concepts carry forward into Replicache's push handler. See `docs/DECISIONS.md` (2026-06-14).
+- **Roadmap renumber (2026-06-14):** old 1.11.0-1.11.2 polish pulled forward to 1.10.0-1.10.2; old 1.10.0-1.10.2 deploy readiness pushed to 2.1.0-2.1.2 and old 1.11.3 visual review to 2.2.0, so deployment docs are written once against the 2.0 architecture. No work item is dropped; only resequenced.
 
 ---
 
