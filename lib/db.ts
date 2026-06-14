@@ -1,8 +1,22 @@
 import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
-});
+const globalForDb = globalThis as typeof globalThis & {
+  tidyPrisma?: PrismaClient;
+};
 
-export const db = new PrismaClient({ adapter });
+function createDbClient() {
+  const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL!,
+    max: 3,
+    idleTimeoutMillis: 10_000,
+  });
+
+  return new PrismaClient({ adapter });
+}
+
+export const db = globalForDb.tidyPrisma ?? createDbClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.tidyPrisma = db;
+}
