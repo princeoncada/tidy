@@ -2,15 +2,16 @@ import { createHash } from "node:crypto";
 import type { PatchOperation, ReadonlyJSONValue } from "replicache";
 
 import type {
-  readAllListsSnapshotForUser,
+  readReplicacheAllListsSnapshotForUser,
+  readReplicacheViewsForUser,
   readTagsForUser,
-  readViewsForUser,
 } from "@/lib/dashboard/server-read";
+import { initialKeys } from "@/lib/sync/fractional-index";
 import { replicacheKeys } from "@/lib/sync/replicache/keys";
 
-type ServerViews = Awaited<ReturnType<typeof readViewsForUser>>;
+type ServerViews = Awaited<ReturnType<typeof readReplicacheViewsForUser>>;
 type ServerAllLists = NonNullable<
-  Awaited<ReturnType<typeof readAllListsSnapshotForUser>>
+  Awaited<ReturnType<typeof readReplicacheAllListsSnapshotForUser>>
 >;
 type ServerTags = Awaited<ReturnType<typeof readTagsForUser>>;
 
@@ -57,6 +58,7 @@ export function buildReplicacheClientView({
   const entities: ReplicacheClientView = {};
 
   for (const list of allLists.lists) {
+    const itemFallbackKeys = initialKeys(list.listItems.length);
     put(entities, replicacheKeys.list(list.id), {
       id: list.id,
       userId: list.userId,
@@ -65,12 +67,12 @@ export function buildReplicacheClientView({
       updatedAt: toIso(list.updatedAt),
     });
 
-    for (const item of list.listItems) {
+    for (const [index, item] of list.listItems.entries()) {
       put(entities, replicacheKeys.listItem(item.id), {
         id: item.id,
         name: item.name,
         completed: item.completed,
-        order: item.order,
+        order: item.orderKey ?? itemFallbackKeys[index],
         notes: item.notes,
         listId: item.listId,
         createdAt: toIso(item.createdAt),
@@ -97,11 +99,12 @@ export function buildReplicacheClientView({
     });
   }
 
-  for (const view of views) {
+  const viewFallbackKeys = initialKeys(views.length);
+  for (const [viewIndex, view] of views.entries()) {
     put(entities, replicacheKeys.view(view.id), {
       id: view.id,
       name: view.name,
-      order: view.order,
+      order: view.orderKey ?? viewFallbackKeys[viewIndex],
       userId: view.userId,
       type: view.type,
       isDefault: view.isDefault,
@@ -110,14 +113,16 @@ export function buildReplicacheClientView({
       updatedAt: toIso(view.updatedAt),
     });
 
-    for (const viewList of view.viewLists) {
+    const viewListFallbackKeys = initialKeys(view.viewLists.length);
+    for (const [viewListIndex, viewList] of view.viewLists.entries()) {
       put(
         entities,
         replicacheKeys.viewList(view.id, viewList.listId),
         {
           viewId: view.id,
           listId: viewList.listId,
-          order: viewList.order,
+          order:
+            viewList.orderKey ?? viewListFallbackKeys[viewListIndex],
         },
       );
     }

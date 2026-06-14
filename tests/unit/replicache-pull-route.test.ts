@@ -17,8 +17,8 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 vi.mock("@/lib/dashboard/server-read", () => ({
-  readViewsForUser: mocks.readViews,
-  readAllListsSnapshotForUser: mocks.readAllLists,
+  readReplicacheViewsForUser: mocks.readViews,
+  readReplicacheAllListsSnapshotForUser: mocks.readAllLists,
   readTagsForUser: mocks.readTags,
 }));
 
@@ -48,8 +48,9 @@ describe("Replicache pull route", () => {
       matchMode: "ALL",
       createdAt: now,
       updatedAt: now,
+      orderKey: null,
       viewTags: [],
-      viewLists: [{ listId: "list-1", order: 0 }],
+      viewLists: [{ listId: "list-1", order: 0, orderKey: null }],
     };
     mocks.readViews.mockResolvedValue([allListsView]);
     mocks.readAllLists.mockResolvedValue({
@@ -59,6 +60,7 @@ describe("Replicache pull route", () => {
         userId: "user-1",
         name: "Inbox",
         order: 0,
+        orderKey: null,
         createdAt: now,
         updatedAt: now,
         listItems: [],
