@@ -1,9 +1,9 @@
-<!-- Current Version: 1.10.1-alpha -->
+<!-- Current Version: 1.10.1 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.10.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.10.1 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.10.1 - Landing Page Branding Polish
 **Next**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
 
