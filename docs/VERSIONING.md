@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.9.32
-- **Current phase:** 1.9.32 - Local-First Dashboard Architecture Closeout
-- **Next phase:** 1.10.0 - Copy and Metadata Hygiene
+- **Current version:** 1.10.0-alpha
+- **Current phase:** 1.10.0 - Copy and Metadata Hygiene
+- **Next phase:** 1.10.1 - Auth Flow Copy Polish
 
 ---
 
