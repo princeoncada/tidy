@@ -21,14 +21,19 @@ export type SyncApplyOperationResult = {
   errorMessage: string | null;
 };
 
-type AcceptedDecision = Extract<SyncBatchOperationDecision, { accepted: true }>;
-type SyncTransaction = Prisma.TransactionClient;
+export type AcceptedSyncDecision = Extract<
+  SyncBatchOperationDecision,
+  { accepted: true }
+>;
+type AcceptedDecision = AcceptedSyncDecision;
+export type SyncTransaction = Prisma.TransactionClient;
 type ApplyStatus = SyncApplyOperationResult["status"];
 
-type PostCommitEffects = {
+export type SyncPostCommitEffects = {
   tagIds: Set<string>;
   viewIds: Set<string>;
 };
+type PostCommitEffects = SyncPostCommitEffects;
 
 const TAG_COLORS = new Set([
   "gray",
@@ -1474,23 +1479,60 @@ export async function applySyncOperations({
     return [];
   }
 
-  const effects: PostCommitEffects = {
+  const effects = createSyncPostCommitEffects();
+
+  const results = await database.$transaction(async (tx) => {
+    return applyAcceptedSyncOperationsWithinTransaction({
+      userId,
+      decisions,
+      tx,
+      effects,
+    });
+  });
+
+  await runSyncPostCommitEffects({ userId, effects, db: database });
+
+  return results;
+}
+
+export function createSyncPostCommitEffects(): SyncPostCommitEffects {
+  return {
     tagIds: new Set(),
     viewIds: new Set(),
   };
+}
 
-  const results = await database.$transaction(async (tx) => {
-    const operationResults: SyncApplyOperationResult[] = [];
+export async function applyAcceptedSyncOperationsWithinTransaction({
+  userId,
+  decisions,
+  tx,
+  effects,
+}: {
+  userId: string;
+  decisions: AcceptedSyncDecision[];
+  tx: SyncTransaction;
+  effects: SyncPostCommitEffects;
+}): Promise<SyncApplyOperationResult[]> {
+  const operationResults: SyncApplyOperationResult[] = [];
 
-    for (const decision of decisions) {
-      operationResults.push(
-        await applyAcceptedOperation(userId, decision, tx, effects),
-      );
-    }
+  for (const decision of decisions) {
+    operationResults.push(
+      await applyAcceptedOperation(userId, decision, tx, effects),
+    );
+  }
 
-    return operationResults;
-  });
+  return operationResults;
+}
 
+export async function runSyncPostCommitEffects({
+  userId,
+  effects,
+  db: database = db,
+}: {
+  userId: string;
+  effects: SyncPostCommitEffects;
+  db?: typeof db;
+}) {
   try {
     if (effects.tagIds.size > 0) {
       await recomputeCustomViewsForTags(
@@ -1514,6 +1556,4 @@ export async function applySyncOperations({
       viewIds: [...effects.viewIds],
     });
   }
-
-  return results;
 }
