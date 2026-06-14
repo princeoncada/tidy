@@ -281,6 +281,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.10.1 - Landing Page Branding Polish (active) - see Planned
 ---
 
 ## Planned
