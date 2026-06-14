@@ -272,6 +272,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.10.0 - Copy and Metadata Hygiene~~ (stable 2026-06-14)
 
+- ~~1.10.1 - Landing Page Branding Polish~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -281,21 +283,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.10.1 - Landing Page Branding Polish (active) - see Planned
 ---
 
 ## Planned
-
-### 1.10.1 - Landing Page Branding Polish
-- **Status:** In progress | Priority: P3 quick polish (pulled forward from 1.11.2)
-- **Type:** product behavior (polish)
-- **Files:** app/page.tsx
-- **Implementation goal:** fix the landing typo and improve lightweight Tidy positioning.
-- **Product impact:** improved landing copy; no behavior change.
-- **Runtime integration target:** none beyond copy.
-- **Deferral boundary:** broader visual review -> 2.2.0 (post-2.0).
-- **Validation target:** targeted alpha (copy checks + manual proof); full test:ci before stable.
-- **Acceptance:** copy improves without changing app behavior.
 
 ### 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
 - **Status:** Open | Priority: P1 2.0 local-first render
