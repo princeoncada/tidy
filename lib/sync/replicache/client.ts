@@ -73,7 +73,7 @@ export function createReplicacheClient({
 }) {
   return new Replicache({
     name: `tidy:${userId}`,
-    schemaVersion: "2.0.0",
+    schemaVersion: "2.0.4",
     pushURL: "/api/replicache/push",
     pullURL: "/api/replicache/pull",
     pullInterval: 60_000,
