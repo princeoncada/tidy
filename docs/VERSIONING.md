@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.0.0
-- **Current phase:** 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
-- **Next phase:** 2.0.1 - Fractional Indexing for Order
+- **Current version:** 2.0.1-alpha
+- **Current phase:** 2.0.1 - Fractional Indexing for Order
+- **Next phase:** 2.0.2 - Supabase Broadcast Realtime Poke
 
 ---
 
