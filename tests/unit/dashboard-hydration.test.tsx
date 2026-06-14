@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { hydrateRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -92,9 +93,37 @@ describe("dashboard hydration", () => {
     expect(html).not.toContain('data-testid="app-shell"');
   });
 
-  it("renders the dashboard after mounting", () => {
-    render(<Dashboard />);
+  it("hydrates the loading shell before rendering the dashboard", async () => {
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(<Dashboard />);
+    document.body.appendChild(container);
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    let root: Root | undefined;
 
-    expect(screen.getByTestId("app-shell")).toBeInTheDocument();
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <Dashboard />);
+      });
+      await act(async () => {
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      });
+
+      expect(screen.getByTestId("app-shell")).toBeInTheDocument();
+      expect(
+        consoleError.mock.calls.some(([message]) =>
+          String(message).includes("Hydration failed")
+        ),
+      ).toBe(false);
+    } finally {
+      if (root) {
+        await act(async () => {
+          root?.unmount();
+        });
+      }
+      consoleError.mockRestore();
+      container.remove();
+    }
   });
 });
