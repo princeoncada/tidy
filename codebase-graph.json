@@ -779,6 +779,7 @@
         "next/navigation",
         "react",
         "@/components/MaxWidthWrapper",
+        "@/components/ui/button",
         "@/trpc/client"
       ]
     },
@@ -4814,6 +4815,12 @@
       "to": "components/MaxWidthWrapper.tsx",
       "type": "imports",
       "import": "@/components/MaxWidthWrapper"
+    },
+    {
+      "from": "components/sharing/ShareRedeemer.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
     },
     {
       "from": "components/sharing/ShareRedeemer.tsx",
