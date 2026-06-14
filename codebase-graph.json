@@ -3330,6 +3330,17 @@
       ]
     },
     {
+      "path": "tests/unit/share-dialog-layout.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "node:fs",
+        "node:path",
+        "vitest"
+      ]
+    },
+    {
       "path": "tests/unit/share-redeemer.test.tsx",
       "kind": "test",
       "extension": ".tsx",
