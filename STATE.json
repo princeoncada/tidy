@@ -1,6 +1,6 @@
 {
-    "version":  "1.10.1-alpha",
-    "state":  "alpha",
+    "version":  "1.10.1",
+    "state":  "stable",
     "phase":  "1.10.1",
     "phaseTitle":  "Landing Page Branding Polish",
     "nextPhase":  "2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)",
