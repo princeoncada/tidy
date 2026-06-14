@@ -2352,6 +2352,7 @@
       "imports": [
         "../app/generated/prisma/client",
         "@prisma/adapter-pg",
+        "dotenv",
         "../lib/sync/fractional-index"
       ]
     },
