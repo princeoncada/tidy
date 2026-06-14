@@ -11,7 +11,13 @@ import { useRenderMeasure } from "@/lib/optimistic-debug";
 import { useDroppable } from "@dnd-kit/react";
 import { useSortable } from '@dnd-kit/react/sortable';
 import { useQueryClient } from "@tanstack/react-query";
-import { Calendar1, GripVertical, Plus, StickyNote } from "lucide-react";
+import {
+  Calendar1,
+  GripVertical,
+  Plus,
+  StickyNote,
+  UserRoundPlus,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { memo, ReactNode, useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
@@ -304,8 +310,13 @@ const ListComponent = ({
                       resourceId={list.id}
                       title={list.name}
                       trigger={
-                        <Button size="icon-sm" variant="ghost">
-                          <span className="text-xs">Share</span>
+                        <Button
+                          size="icon-sm"
+                          variant="ghost"
+                          aria-label={`Share ${list.name}`}
+                          title="Share list"
+                        >
+                          <UserRoundPlus />
                         </Button>
                       }
                     />
