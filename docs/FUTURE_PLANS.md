@@ -280,6 +280,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.2 - Supabase Broadcast Realtime Poke~~ (stable 2026-06-14)
 
+- ~~2.0.3 - Sharing & Permissions~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -289,21 +291,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.3 - Sharing & Permissions (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.3 - Sharing & Permissions
-- **Status:** In progress | Priority: P1 2.0 collaboration
-- **Type:** product behavior
-- **Files:** prisma/schema.prisma, prisma/sql/2_0_3_realtime_poke_rls.sql, lib/sync/permissions.ts, lib/sync/server-apply.ts, lib/sync/replicache/*, lib/dashboard/server-read.ts, lib/realtime/*, app/api/replicache/*, trpc/routers/shareRouter.ts, app/share/[token]/*, components/sharing/*, components/list/*, components/ReplicacheProvider.tsx
-- **Implementation goal:** introduce shared workspaces / lists, role-aware Replicache content writes and computed recipient reads, protected link/member management, permission-scoped poke fan-out, and private per-user Realtime authorization.
-- **Product impact:** owners can share lists or workspaces through Viewer/Editor links; recipients redeem links, see shared lists, and collaborate within their granted role.
-- **Runtime integration target:** push / pull, owner management, UI controls, and private broadcast authorization are permission-scoped; ownership checks remain server-authoritative.
-- **Deferral boundary:** tag/view sharing and recipient-side shared-list ordering remain unversioned Potential Next Directions; live text co-editing -> 2.0.4.
-- **Validation target:** targeted alpha + ownership / permission tests + manual proof; full test:ci before stable.
-- **Acceptance:** only permitted users can read / write a shared list; unauthorized push / pull is rejected.
 
 ### 2.0.4 - Yjs Collaborative Item Notes
 - **Status:** Open | Priority: P2 2.0 collaboration
