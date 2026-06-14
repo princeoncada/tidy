@@ -1,9 +1,9 @@
 {
-    "version":  "1.9.31",
-    "state":  "stable",
-    "phase":  "1.9.31",
-    "phaseTitle":  "E2E Auth-Suite Sync-Timing Assertion Hardening",
-    "nextPhase":  "1.9.32 - Local-First Dashboard Architecture Closeout",
+    "version":  "1.9.32-alpha",
+    "state":  "alpha",
+    "phase":  "1.9.32",
+    "phaseTitle":  "Local-First Dashboard Architecture Closeout",
+    "nextPhase":  "1.10.0 - Copy and Metadata Hygiene",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-13"
+    "lastUpdated":  "2026-06-14"
 }
