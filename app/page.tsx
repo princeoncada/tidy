@@ -8,11 +8,11 @@ export default function Home() {
     <MaxWidthWrapper singleItemPage={true}>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Simple Todo App</CardTitle>
+          <CardTitle>Tidy</CardTitle>
         </CardHeader>
         <CardContent>
           <p>
-            Organize your tasks with multiple lists, drag-and-drop reordering, and optimisic updates.
+            Tidy organizes your tasks with multiple lists, drag-and-drop reordering, and optimistic updates.
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
