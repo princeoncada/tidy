@@ -1,5 +1,7 @@
+import { db } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { pokeUser } from "@/lib/realtime/poke-server";
+import { getUsersWithListAccess } from "@/lib/sync/permissions";
 import {
   processReplicachePush,
   type ReplicachePushMutation,
@@ -77,7 +79,12 @@ export async function POST(request: Request) {
       mutations: parsed.mutations,
     });
     if (result.applied > 0) {
-      await pokeUser(user.id);
+      const recipients = await getUsersWithListAccess(
+        db,
+        result.affectedListIds,
+      );
+      recipients.add(user.id);
+      await Promise.all([...recipients].map((id) => pokeUser(id)));
     }
     return Response.json(result, { status: 200 });
   } catch (error) {
