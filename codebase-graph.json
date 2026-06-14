@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.10.1",
+  "version": "2.0.0-alpha",
   "generatedAt": "2026-06-14",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -187,6 +187,33 @@
       "imports": [
         "@/lib/supabase/auth-confirm",
         "next/server"
+      ]
+    },
+    {
+      "path": "app/api/replicache/pull/route.ts",
+      "kind": "api_route",
+      "extension": ".ts",
+      "symbols": [
+        "POST"
+      ],
+      "imports": [
+        "@/app/generated/prisma/client",
+        "@/lib/dashboard/server-read",
+        "@/lib/db",
+        "@/lib/sync/replicache/pull-cvr",
+        "@/lib/supabase/server"
+      ]
+    },
+    {
+      "path": "app/api/replicache/push/route.ts",
+      "kind": "api_route",
+      "extension": ".ts",
+      "symbols": [
+        "POST"
+      ],
+      "imports": [
+        "@/lib/supabase/server",
+        "@/lib/sync/replicache/push"
       ]
     },
     {
@@ -448,7 +475,9 @@
         "@tanstack/react-query",
         "./views/ViewsSidebarPreview",
         "./SyncStatusBadge",
-        "@/hooks/useLocalFirstDashboardBoot"
+        "@/hooks/useLocalFirstDashboardBoot",
+        "@/components/ReplicacheProvider",
+        "@/lib/sync/replicache/client"
       ]
     },
     {
@@ -471,7 +500,9 @@
         "@/lib/dashboard-cache",
         "@/lib/local-first-dashboard",
         "@/lib/local-db/local-write",
-        "../ui/skeleton"
+        "../ui/skeleton",
+        "@/hooks/useReplicacheDashboard",
+        "@/hooks/useDashboardMutations"
       ]
     },
     {
@@ -499,7 +530,8 @@
         "./ListMenu",
         "./ListTagPicker",
         "./types",
-        "@/lib/local-db/local-write"
+        "@/lib/local-db/local-write",
+        "@/hooks/useDashboardMutations"
       ]
     },
     {
@@ -544,7 +576,8 @@
         "@/lib/utils",
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
-        "@/lib/local-db/local-write"
+        "@/lib/local-db/local-write",
+        "@/hooks/useDashboardMutations"
       ]
     },
     {
@@ -583,7 +616,9 @@
         "./ListItemComponent",
         "./ListSkeleton",
         "./types",
-        "./ListEmpty"
+        "./ListEmpty",
+        "@/hooks/useReplicacheDashboard",
+        "@/hooks/useDashboardMutations"
       ]
     },
     {
@@ -628,7 +663,9 @@
         "./types",
         "@/lib/dashboard-cache",
         "@/lib/local-db/local-write",
-        "@/lib/optimistic-debug"
+        "@/lib/optimistic-debug",
+        "@/hooks/useReplicacheDashboard",
+        "@/hooks/useDashboardMutations"
       ]
     },
     {
@@ -671,12 +708,26 @@
       ]
     },
     {
+      "path": "components/ReplicacheProvider.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ReplicacheProvider",
+        "useTidyReplicache"
+      ],
+      "imports": [
+        "react",
+        "@/lib/sync/replicache/client"
+      ]
+    },
+    {
       "path": "components/SyncStatusBadge.tsx",
       "kind": "component",
       "extension": ".tsx",
       "symbols": [],
       "imports": [
-        "@/hooks/use-sync-status-surface"
+        "@/hooks/use-sync-status-surface",
+        "@/components/ReplicacheProvider"
       ]
     },
     {
@@ -958,7 +1009,9 @@
         "@/lib/local-db/local-write",
         "@/lib/trpc",
         "@/lib/utils",
-        "@/trpc/client"
+        "@/trpc/client",
+        "@/hooks/useReplicacheDashboard",
+        "@/hooks/useDashboardMutations"
       ]
     },
     {
@@ -1313,6 +1366,18 @@
       ]
     },
     {
+      "path": "hooks/useDashboardMutations.ts",
+      "kind": "hook",
+      "extension": ".ts",
+      "symbols": [
+        "useDashboardMutations"
+      ],
+      "imports": [
+        "react",
+        "@/components/ReplicacheProvider"
+      ]
+    },
+    {
       "path": "hooks/useLocalFirstDashboardBoot.ts",
       "kind": "hook",
       "extension": ".ts",
@@ -1342,6 +1407,22 @@
         "react",
         "@/lib/sync/offline-write-prototype",
         "@/lib/local-db/outbox-repository"
+      ]
+    },
+    {
+      "path": "hooks/useReplicacheDashboard.ts",
+      "kind": "hook",
+      "extension": ".ts",
+      "symbols": [
+        "ReplicacheDashboardGraph",
+        "assembleReplicacheDashboard",
+        "useReplicacheDashboard"
+      ],
+      "imports": [
+        "replicache-react",
+        "@/components/ReplicacheProvider",
+        "@/lib/dashboard-cache",
+        "@/lib/sync/replicache/keys"
       ]
     },
     {
@@ -1386,7 +1467,35 @@
         "@tanstack/react-query",
         "@/lib/trpc",
         "@/lib/local-db/local-repositories",
-        "@/lib/local-db/local-schema"
+        "@/lib/local-db/local-schema",
+        "@/lib/dashboard/projection"
+      ]
+    },
+    {
+      "path": "lib/dashboard/projection.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "listMatchesView",
+        "projectView"
+      ],
+      "imports": [
+        "@/lib/dashboard-cache"
+      ]
+    },
+    {
+      "path": "lib/dashboard/server-read.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "readAllListsSnapshotForUser",
+        "readTagsForUser",
+        "readViewSnapshotForUser",
+        "readViewsForUser"
+      ],
+      "imports": [
+        "@/lib/db",
+        "@/trpc/routers/viewHelpers"
       ]
     },
     {
@@ -1899,6 +2008,95 @@
       "imports": []
     },
     {
+      "path": "lib/sync/replicache/client.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "TidyReplicache",
+        "createReplicacheClient",
+        "isReplicacheRenderEnabled"
+      ],
+      "imports": [
+        "replicache",
+        "@/lib/sync/replicache/mutators"
+      ]
+    },
+    {
+      "path": "lib/sync/replicache/keys.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "REPLICACHE_KEY_PREFIXES",
+        "REPLICACHE_SELECTED_VIEW_KEY",
+        "ReplicacheListItemValue",
+        "ReplicacheListTagValue",
+        "ReplicacheListValue",
+        "ReplicacheTagValue",
+        "ReplicacheViewListValue",
+        "ReplicacheViewTagValue",
+        "ReplicacheViewValue",
+        "replicacheKeys"
+      ],
+      "imports": []
+    },
+    {
+      "path": "lib/sync/replicache/mutators.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "ReplicacheMutationArgs",
+        "ReplicacheMutationName",
+        "isReplicacheMutationName",
+        "replicacheMutators",
+        "translateReplicacheMutation"
+      ],
+      "imports": [
+        "replicache",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/sync-batch-contract",
+        "@/lib/sync/sync-endpoint-contract",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "lib/sync/replicache/pull-cvr.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "ReplicacheClientView",
+        "ReplicacheClientViewEntry",
+        "ReplicacheClientViewRecordHashes",
+        "buildReplicacheClientView",
+        "diffReplicacheClientViews",
+        "nextReplicacheCookie",
+        "toReplicacheClientViewRecordHashes"
+      ],
+      "imports": [
+        "node:crypto",
+        "replicache",
+        "@/lib/dashboard/server-read",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "lib/sync/replicache/push.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "ReplicachePushCorrection",
+        "ReplicachePushDatabase",
+        "ReplicachePushMutation",
+        "processReplicachePush"
+      ],
+      "imports": [
+        "@/app/generated/prisma/client",
+        "@/lib/db",
+        "@/lib/sync/server-apply",
+        "@/lib/sync/replicache/mutators",
+        "@/lib/sync/sync-batch-contract"
+      ]
+    },
+    {
       "path": "lib/sync/retry-backoff.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1919,8 +2117,14 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "AcceptedSyncDecision",
         "SyncApplyOperationResult",
-        "applySyncOperations"
+        "SyncPostCommitEffects",
+        "SyncTransaction",
+        "applyAcceptedSyncOperationsWithinTransaction",
+        "applySyncOperations",
+        "createSyncPostCommitEffects",
+        "runSyncPostCommitEffects"
       ],
       "imports": [
         "@/app/generated/prisma/client",
@@ -2367,6 +2571,20 @@
       ]
     },
     {
+      "path": "tests/e2e/replicache-render.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "./utils/fixtures",
+        "@playwright/test",
+        "./utils/assertions",
+        "./utils/drag",
+        "./utils/seed",
+        "./utils/test-ids"
+      ]
+    },
+    {
       "path": "tests/e2e/smoke.spec.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2774,6 +2992,58 @@
       ]
     },
     {
+      "path": "tests/unit/replicache-mutators.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/replicache/mutators",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "tests/unit/replicache-projection-parity.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/hooks/useReplicacheDashboard",
+        "@/lib/dashboard/projection"
+      ]
+    },
+    {
+      "path": "tests/unit/replicache-pull-cvr.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/replicache/pull-cvr"
+      ]
+    },
+    {
+      "path": "tests/unit/replicache-pull-route.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/app/api/replicache/pull/route"
+      ]
+    },
+    {
+      "path": "tests/unit/replicache-push.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/replicache/push"
+      ]
+    },
+    {
       "path": "tests/unit/retry-backoff.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3094,7 +3364,8 @@
         "@trpc/server",
         "@/lib/db",
         "../init",
-        "./viewHelpers"
+        "./viewHelpers",
+        "@/lib/dashboard/server-read"
       ]
     },
     {
@@ -3160,7 +3431,8 @@
         "@trpc/server",
         "zod",
         "../init",
-        "./viewHelpers"
+        "./viewHelpers",
+        "@/lib/dashboard/server-read"
       ]
     },
     {
@@ -3208,6 +3480,42 @@
       "to": "lib/supabase/auth-confirm.ts",
       "type": "imports",
       "import": "@/lib/supabase/auth-confirm"
+    },
+    {
+      "from": "app/api/replicache/pull/route.ts",
+      "to": "lib/dashboard/server-read.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/server-read"
+    },
+    {
+      "from": "app/api/replicache/pull/route.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "app/api/replicache/pull/route.ts",
+      "to": "lib/supabase/server.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/server"
+    },
+    {
+      "from": "app/api/replicache/pull/route.ts",
+      "to": "lib/sync/replicache/pull-cvr.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/pull-cvr"
+    },
+    {
+      "from": "app/api/replicache/push/route.ts",
+      "to": "lib/supabase/server.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/server"
+    },
+    {
+      "from": "app/api/replicache/push/route.ts",
+      "to": "lib/sync/replicache/push.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/push"
     },
     {
       "from": "app/api/sync/route.ts",
@@ -3499,6 +3807,12 @@
     },
     {
       "from": "components/Dashboard.tsx",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
+    },
+    {
+      "from": "components/Dashboard.tsx",
       "to": "components/SyncStatusBadge.tsx",
       "type": "imports",
       "import": "./SyncStatusBadge"
@@ -3532,6 +3846,12 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "components/Dashboard.tsx",
+      "to": "lib/sync/replicache/client.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/client"
     },
     {
       "from": "components/list/ListAdder.tsx",
@@ -3577,9 +3897,21 @@
     },
     {
       "from": "components/list/ListAdder.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
       "to": "hooks/useLocalFirstDashboardBoot.ts",
       "type": "imports",
       "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
     },
     {
       "from": "components/list/ListAdder.tsx",
@@ -3667,6 +3999,12 @@
     },
     {
       "from": "components/list/ListComponent.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/list/ListComponent.tsx",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
@@ -3739,6 +4077,12 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/list/ListItemComponent.tsx",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
@@ -3805,6 +4149,12 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
       "to": "hooks/useLocalFirstDashboardBoot.ts",
       "type": "imports",
       "import": "@/hooks/useLocalFirstDashboardBoot"
@@ -3814,6 +4164,12 @@
       "to": "hooks/useOptimisticSync.ts",
       "type": "imports",
       "import": "@/hooks/useOptimisticSync"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -3937,6 +4293,18 @@
     },
     {
       "from": "components/list/ListTagPicker.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/list/ListTagPicker.tsx",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
+    },
+    {
+      "from": "components/list/ListTagPicker.tsx",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
@@ -3988,6 +4356,18 @@
       "to": "hooks/use-offline-replay-trigger.ts",
       "type": "imports",
       "import": "@/hooks/use-offline-replay-trigger"
+    },
+    {
+      "from": "components/ReplicacheProvider.tsx",
+      "to": "lib/sync/replicache/client.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/client"
+    },
+    {
+      "from": "components/SyncStatusBadge.tsx",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
     },
     {
       "from": "components/SyncStatusBadge.tsx",
@@ -4273,9 +4653,21 @@
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/views/ViewsSidebarPreview.tsx",
       "to": "hooks/useOptimisticSync.ts",
       "type": "imports",
       "import": "@/hooks/useOptimisticSync"
+    },
+    {
+      "from": "components/views/ViewsSidebarPreview.tsx",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
@@ -4368,6 +4760,12 @@
       "import": "@/lib/sync/sync-status-surface"
     },
     {
+      "from": "hooks/useDashboardMutations.ts",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
+    },
+    {
       "from": "hooks/useLocalFirstDashboardBoot.ts",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
@@ -4404,10 +4802,34 @@
       "import": "@/lib/sync/offline-write-prototype"
     },
     {
+      "from": "hooks/useReplicacheDashboard.ts",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
+    },
+    {
+      "from": "hooks/useReplicacheDashboard.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "hooks/useReplicacheDashboard.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
       "from": "hooks/useUser.ts",
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "lib/dashboard-cache.ts",
+      "to": "lib/dashboard/projection.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/projection"
     },
     {
       "from": "lib/dashboard-cache.ts",
@@ -4426,6 +4848,24 @@
       "to": "lib/trpc.ts",
       "type": "imports",
       "import": "@/lib/trpc"
+    },
+    {
+      "from": "lib/dashboard/projection.ts",
+      "to": "lib/dashboard-cache.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard-cache"
+    },
+    {
+      "from": "lib/dashboard/server-read.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "lib/dashboard/server-read.ts",
+      "to": "trpc/routers/viewHelpers.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/viewHelpers"
     },
     {
       "from": "lib/local-db/local-db-diagnostics.ts",
@@ -4758,6 +5198,72 @@
       "import": "@/lib/sync/sync-status-surface"
     },
     {
+      "from": "lib/sync/replicache/client.ts",
+      "to": "lib/sync/replicache/mutators.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/mutators"
+    },
+    {
+      "from": "lib/sync/replicache/mutators.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "lib/sync/replicache/mutators.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "lib/sync/replicache/mutators.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
+      "from": "lib/sync/replicache/mutators.ts",
+      "to": "lib/sync/sync-endpoint-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-endpoint-contract"
+    },
+    {
+      "from": "lib/sync/replicache/pull-cvr.ts",
+      "to": "lib/dashboard/server-read.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/server-read"
+    },
+    {
+      "from": "lib/sync/replicache/pull-cvr.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "lib/sync/replicache/push.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "lib/sync/replicache/push.ts",
+      "to": "lib/sync/replicache/mutators.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/mutators"
+    },
+    {
+      "from": "lib/sync/replicache/push.ts",
+      "to": "lib/sync/server-apply.ts",
+      "type": "imports",
+      "import": "@/lib/sync/server-apply"
+    },
+    {
+      "from": "lib/sync/replicache/push.ts",
+      "to": "lib/sync/sync-batch-contract.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
       "from": "lib/sync/retry-backoff.ts",
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
@@ -5086,6 +5592,36 @@
       "to": "tests/e2e/utils/seed.ts",
       "type": "imports",
       "import": "./utils/seed"
+    },
+    {
+      "from": "tests/e2e/replicache-render.spec.ts",
+      "to": "tests/e2e/utils/assertions.ts",
+      "type": "imports",
+      "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/replicache-render.spec.ts",
+      "to": "tests/e2e/utils/drag.ts",
+      "type": "imports",
+      "import": "./utils/drag"
+    },
+    {
+      "from": "tests/e2e/replicache-render.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/replicache-render.spec.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
+      "from": "tests/e2e/replicache-render.spec.ts",
+      "to": "tests/e2e/utils/test-ids.ts",
+      "type": "imports",
+      "import": "./utils/test-ids"
     },
     {
       "from": "tests/e2e/utils/app.ts",
@@ -5460,6 +5996,48 @@
       "import": "@/lib/local-db/outbox-schema"
     },
     {
+      "from": "tests/unit/replicache-mutators.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "tests/unit/replicache-mutators.test.ts",
+      "to": "lib/sync/replicache/mutators.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/mutators"
+    },
+    {
+      "from": "tests/unit/replicache-projection-parity.test.ts",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
+    },
+    {
+      "from": "tests/unit/replicache-projection-parity.test.ts",
+      "to": "lib/dashboard/projection.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/projection"
+    },
+    {
+      "from": "tests/unit/replicache-pull-cvr.test.ts",
+      "to": "lib/sync/replicache/pull-cvr.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/pull-cvr"
+    },
+    {
+      "from": "tests/unit/replicache-pull-route.test.ts",
+      "to": "app/api/replicache/pull/route.ts",
+      "type": "imports",
+      "import": "@/app/api/replicache/pull/route"
+    },
+    {
+      "from": "tests/unit/replicache-push.test.ts",
+      "to": "lib/sync/replicache/push.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/push"
+    },
+    {
       "from": "tests/unit/retry-backoff.test.ts",
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
@@ -5809,6 +6387,12 @@
     },
     {
       "from": "trpc/routers/tagRouter.ts",
+      "to": "lib/dashboard/server-read.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/server-read"
+    },
+    {
+      "from": "trpc/routers/tagRouter.ts",
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
@@ -5842,6 +6426,12 @@
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
+    },
+    {
+      "from": "trpc/routers/viewRouter.ts",
+      "to": "lib/dashboard/server-read.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/server-read"
     },
     {
       "from": "trpc/routers/viewRouter.ts",

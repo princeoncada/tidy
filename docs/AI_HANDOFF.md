@@ -1,11 +1,11 @@
-<!-- Current Version: 1.10.1 -->
+<!-- Current Version: 2.0.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.10.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.10.1 - Landing Page Branding Polish
-**Next**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
+**Current Version**: 2.0.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
+**Next**: 2.0.1 - Fractional Indexing for Order
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -14,7 +14,9 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 - `docs/VERSIONING.md` - version rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
 - `docs/PHASE_LOG.md` - historical traceability only, not active implementation guidance.
 
-Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. However, `seriesComplete` stays FALSE by decision: the dashboard still RENDERS server-authoritatively (TanStack payload + pending-outbox overlay; Dexie is only an offline fallback), which leaves the optimistic / overlay / refetch three-way race the user perceives as flicker / lag. True local-first RENDER + collaboration is a new 2.0 arc (Replicache + Yjs + Supabase Broadcast); see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.5).
+Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. At that closeout, `seriesComplete` stayed FALSE because the dashboard still rendered server-authoritatively (TanStack payload + pending-outbox overlay; Dexie only as an offline fallback), leaving the optimistic / overlay / refetch race perceived as flicker / lag. The 2.0 arc addresses local-first render and collaboration; see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.5).
+
+2.0.0 adds the Replicache render/write path behind `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED`, default ON. The dashboard now has one per-user Replicache store, named deterministic mutators, reactive local projection, authenticated `/api/replicache/push` and `/api/replicache/pull` handlers, and Prisma client/client-group/CVR tracking. Gate OFF retains the 1.9.x tRPC + overlay + Dexie path for compatibility until 2.0.5.
 
 ---
 
@@ -56,6 +58,9 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `hooks/useOptimisticSync.ts` - module-level write queue.
 - `lib/dashboard-cache.ts` - centralized TanStack Query cache helpers.
 - `lib/sync/sync-batch-contract.ts`, `lib/sync/server-apply.ts` - bounded sync validation and authenticated PostgreSQL apply matrix.
+- `lib/sync/replicache/*`, `hooks/useReplicacheDashboard.ts`, `hooks/useDashboardMutations.ts`, `components/ReplicacheProvider.tsx` - Replicache keys, mutators/translation, CVR diff, per-user client, reactive render model, and gated mutation seam.
+- `app/api/replicache/push/route.ts`, `app/api/replicache/pull/route.ts` - protected Replicache sync endpoints.
+- `lib/dashboard/server-read.ts` - shared user-scoped server reads used by both tRPC and Replicache pull.
 - `trpc/routers/_app.ts`, `trpc/init.ts`, `trpc/routers/*` - tRPC API and auth context.
 - `prisma/schema.prisma` - database schema.
 
@@ -71,6 +76,10 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Sparse/negative order values are used for top insertion. No order compaction is implemented yet.
 
 **Cache and state:**
+- With `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED` ON (default), the dashboard renders only from the Replicache local store via `useSubscribe`; server payloads are converted to key/value pull patches and never rendered directly. The shared `lib/dashboard/projection.ts` preserves ALL_LISTS, CUSTOM ALL/ANY, UNTAGGED, per-view order fallback, and deterministic tie-breaking for both paths.
+- Replicache keys are `list/{id}`, `listItem/{id}`, `tag/{id}`, `view/{id}`, `viewList/{viewId}/{listId}`, `viewTag/{viewId}/{tagId}`, `listTag/{listId}/{tagId}`, and `metadata/selectedView`.
+- Replicache push translates each named mutation to the existing `LocalOutboxOperation` decision shape and calls the same `server-apply.ts` ownership/apply matrix. The data write and `lastMutationID` advance share one Prisma transaction; rejected writes advance as no-op background corrections and the next pull rebases the optimistic local state.
+- Replicache pull uses a client-view-record hash snapshot because Tidy retains hard deletes and cascades. Changed/new keys return `put`, absent keys return `del`, cookies advance monotonically per client group, and older CVRs are bounded/pruned.
 - `view.getViewListsWithItems({ viewId: allListsView.id })` is the canonical full dashboard payload.
 - Selected view payloads are explicit server/query payloads, not filtered copies of All Lists.
 - Dashboard cache key aliases are stable: `views`, `allLists`, `currentView`, and `selectedView`.
@@ -180,7 +189,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Custom-view recompute runs after the atomic write transaction. If recompute fails, the writes remain durable and are reported applied; the projection may remain stale until a later successful recompute.
 - 1.9.26 closes the replay-reader gap: the batch flush selects pending plus backoff-ready `failed` operations via `lib/sync/retry-backoff.ts`, and `reconcilePendingWritesOnLoad` resets stranded `syncing` rows to `pending` before flushing. Permanent rejections still stay `failed` and visible, and operations beyond `RETRY_MAX_ATTEMPTS` stop auto-retrying until an explicit retry.
 - Concurrent-flush suppression is in-tab single-flight owned by the per-user `useOfflineReplayTrigger` scheduler; cross-tab concurrent flushes (multiple open tabs) are not yet coordinated and remain a follow-up.
-- Local-first RENDER is not delivered: the dashboard reads the server payload plus a pending-outbox overlay, with Dexie as an offline fallback only. The resulting optimistic / overlay / refetch race is the perceived flicker / lag. This is deferred to the 2.0 arc (Replicache render inversion + fractional indexing + Supabase Broadcast poke + Yjs notes), which retires the overlay / outbox-render path; see `docs/DECISIONS.md` (2026-06-14).
+- The Replicache gate now addresses the render race by making the local store the default render source. The legacy overlay/outbox-render/tRPC-render path remains intentionally intact under gate OFF and is retired only in 2.0.5.
+- Order remains integer `orderedIds` in 2.0.0; fractional indexing is deferred to 2.0.1. Periodic pull is the only Replicache refresh trigger; Supabase Broadcast poke is deferred to 2.0.2. Sharing/permissions and Yjs notes remain deferred to 2.0.3/2.0.4.
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.

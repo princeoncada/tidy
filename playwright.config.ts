@@ -2,6 +2,16 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.PORT ?? 3000);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
+const replicacheProjectRequested = process.argv.some((argument, index) =>
+  argument === "--project=replicache-render" ||
+  (
+    argument === "--project" &&
+    process.argv[index + 1] === "replicache-render"
+  )
+);
+const webServerCommand = replicacheProjectRequested
+  ? `npx prisma generate && npm run dev -- --hostname 127.0.0.1 --port ${port}`
+  : `npm run dev -- --hostname 127.0.0.1 --port ${port}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -18,13 +28,16 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   webServer: {
-    command: `npm run dev -- --hostname 127.0.0.1 --port ${port}`,
+    command: webServerCommand,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env.CI && !replicacheProjectRequested,
     timeout: 120_000,
     env: {
       ...(process.env as Record<string, string>),
       NEXT_PUBLIC_OFFLINE_APP_SHELL_ENABLED: "true",
+      NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED:
+        process.env.NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED ??
+        (replicacheProjectRequested ? "true" : "false"),
     },
   },
   projects: [
@@ -61,7 +74,16 @@ export default defineConfig({
         /offline-shell\.spec\.ts/,
         /auth\.setup\.ts/,
         /data-reset\.setup\.ts/,
+        /replicache-render\.spec\.ts/,
       ],
+      dependencies: ["e2e-reset"],
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
+    {
+      name: "replicache-render",
+      testMatch: /replicache-render\.spec\.ts/,
       dependencies: ["e2e-reset"],
       use: {
         ...devices["Desktop Chrome"],

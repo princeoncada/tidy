@@ -29,6 +29,7 @@ import {
   commitLocalListItemCreate,
   commitLocalListRename,
 } from "@/lib/local-db/local-write";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 interface ListComponentProps {
   children: ReactNode;
@@ -75,9 +76,19 @@ const ListComponent = ({
   const [viewListItemAdder, setViewListItemAdder] = useState<boolean>(false);
   const [newItemId, setNewItemId] = useState(() => crypto.randomUUID());
   const queryClient = useQueryClient();
+  const dashboardMutations = useDashboardMutations();
 
   const handleRenameList = (input: { id: string; name: string }) => {
     if (!userId) return;
+
+    if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      void dashboardMutations.mutate.renameList({
+        id: input.id,
+        name: input.name,
+        now: new Date().toISOString(),
+      });
+      return;
+    }
 
     updateListInDashboardCaches(queryClient, dashboardKeys, input.id, (currentList) => ({
       ...currentList,
@@ -92,6 +103,11 @@ const ListComponent = ({
 
   const deleteList = (listId: string) => {
     if (!userId) return;
+
+    if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      void dashboardMutations.mutate.deleteList({ id: listId });
+      return;
+    }
 
     removeListFromDashboardCaches(queryClient, dashboardKeys, listId);
     void commitLocalListDelete({ userId, listId }).catch(() => {});
@@ -119,6 +135,18 @@ const ListComponent = ({
       isOptimistic: true,
       notes: "",
     };
+
+    if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      setCreateListItemName("");
+      void dashboardMutations.mutate.createItem({
+        id: itemId,
+        listId: list.id,
+        name: itemName,
+        order,
+        now: new Date().toISOString(),
+      });
+      return;
+    }
 
     updateListInDashboardCaches(queryClient, dashboardKeys, list.id, (currentList) => ({
       ...currentList,

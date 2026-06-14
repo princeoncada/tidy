@@ -20,6 +20,8 @@ import {
 import { LOCAL_ALL_LISTS_VIEW_ID } from "@/lib/local-first-dashboard";
 import { commitLocalListCreate } from "@/lib/local-db/local-write";
 import { Skeleton } from "../ui/skeleton";
+import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 
 type ListAdderProps = {
@@ -35,11 +37,18 @@ const ListAdder = ({ boot }: ListAdderProps) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { data: views, isLoading: viewsLoading } = useQuery(trpc.view.getAll.queryOptions());
+  const replicacheDashboard = useReplicacheDashboard();
+  const dashboardMutations = useDashboardMutations();
+  const { data: views, isLoading: viewsLoading } = useQuery({
+    ...trpc.view.getAll.queryOptions(),
+    enabled: !replicacheDashboard.enabled,
+  });
   const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
     ? undefined
     : views;
-  const effectiveViews = views ?? boot.localViews;
+  const effectiveViews = replicacheDashboard.enabled
+    ? replicacheDashboard.views
+    : views ?? boot.localViews;
   const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
   const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
   const selectedView = selectedViewFromCache(effectiveViews);
@@ -52,20 +61,29 @@ const ListAdder = ({ boot }: ListAdderProps) => {
   const { views: viewsQueryKey } = dashboardKeys;
 
   const { isLoading: bootListsLoading } = useQuery(
-    trpc.view.getCurrentViewListsWithItems.queryOptions()
+    {
+      ...trpc.view.getCurrentViewListsWithItems.queryOptions(),
+      enabled: !replicacheDashboard.enabled,
+    }
   );
 
   const { isLoading: allListsLoading } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: serverAllListsView?.id ?? EMPTY_VIEW_ID },
-      { enabled: Boolean(serverAllListsView?.id) }
+      {
+        enabled:
+          !replicacheDashboard.enabled && Boolean(serverAllListsView?.id),
+      }
     )
   );
 
   const { isLoading: selectedViewLoading } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: serverSelectedView?.id ?? EMPTY_VIEW_ID },
-      { enabled: Boolean(serverSelectedView?.id) }
+      {
+        enabled:
+          !replicacheDashboard.enabled && Boolean(serverSelectedView?.id),
+      }
     )
   );
 
@@ -76,9 +94,15 @@ const ListAdder = ({ boot }: ListAdderProps) => {
     if (!name || !userId) return;
 
     const newListId = crypto.randomUUID();
-    const activeView = selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
-    const previousAllLists = queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
-    const previousCurrentView = queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
+    const activeView = replicacheDashboard.enabled
+      ? replicacheDashboard.selectedView
+      : selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
+    const previousAllLists = replicacheDashboard.enabled
+      ? replicacheDashboard.allLists
+      : queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
+    const previousCurrentView = replicacheDashboard.enabled
+      ? replicacheDashboard.currentView
+      : queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
     const baseLists = previousCurrentView?.lists ?? previousAllLists?.lists ?? [];
     const inheritedListTags = activeView?.type === "CUSTOM"
       ? activeView.viewTags.map((viewTag) => ({
@@ -100,6 +124,20 @@ const ListAdder = ({ boot }: ListAdderProps) => {
       listItems: [],
       isOptimistic: true,
     };
+
+    if (dashboardMutations.enabled && dashboardMutations.mutate && allListsView) {
+      void dashboardMutations.mutate.createList({
+        id: newListId,
+        userId,
+        name,
+        allListsViewId: allListsView.id,
+        order: optimisticList.order,
+        inheritedTagIds: inheritedListTags.map((listTag) => listTag.tagId),
+        now: new Date().toISOString(),
+      });
+      setCreateListName("");
+      return;
+    }
 
     insertOptimisticListIntoDashboardCaches(
       queryClient,
@@ -133,7 +171,9 @@ const ListAdder = ({ boot }: ListAdderProps) => {
     }, 200);
   };
 
-  const serverStillLoading = viewsLoading || bootListsLoading || allListsLoading || selectedViewLoading;
+  const serverStillLoading = replicacheDashboard.enabled
+    ? !replicacheDashboard.ready
+    : viewsLoading || bootListsLoading || allListsLoading || selectedViewLoading;
   if (!effectiveViews || !allListsView || (!boot.localBootReady && serverStillLoading)) {
     return (
       <div className="h-full flex items-end">

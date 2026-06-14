@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncStatusSurface } from "@/hooks/use-sync-status-surface";
+import { useTidyReplicache } from "@/components/ReplicacheProvider";
 
 const STATE_STYLES: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800 border-amber-200",
@@ -12,6 +13,25 @@ const STATE_STYLES: Record<string, string> = {
 
 const SyncStatusBadge = () => {
   const surface = useSyncStatusSurface();
+  const { correctionCount } = useTidyReplicache();
+
+  if (correctionCount > 0) {
+    return (
+      <span
+        data-testid="sync-status-badge"
+        data-state="failed"
+        role="status"
+        aria-live="polite"
+        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${STATE_STYLES.failed}`}
+      >
+        <span className="font-semibold">Sync corrected</span>
+        <span className="text-[11px] opacity-80">
+          Server rejected {correctionCount} local change
+          {correctionCount === 1 ? "" : "s"}.
+        </span>
+      </span>
+    );
+  }
 
   if (!surface) {
     return null;

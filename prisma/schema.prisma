@@ -124,6 +124,38 @@ model ViewTag {
   @@index([tagId])
 }
 
+model ReplicacheClientGroup {
+  id        String   @id
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  clients           ReplicacheClient[]
+  clientViewRecords ReplicacheClientViewRecord[]
+
+  @@index([userId])
+}
+
+model ReplicacheClient {
+  id             String @id
+  clientGroupId  String
+  lastMutationID Int    @default(0)
+
+  clientGroup ReplicacheClientGroup @relation(fields: [clientGroupId], references: [id], onDelete: Cascade)
+
+  @@index([clientGroupId])
+}
+
+model ReplicacheClientViewRecord {
+  id            String   @id
+  clientGroupId String
+  entities      Json
+  createdAt     DateTime @default(now())
+
+  clientGroup ReplicacheClientGroup @relation(fields: [clientGroupId], references: [id], onDelete: Cascade)
+
+  @@index([clientGroupId, createdAt])
+}
+
 enum ViewType {
   ALL_LISTS
   UNTAGGED

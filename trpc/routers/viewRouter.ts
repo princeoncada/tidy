@@ -9,6 +9,10 @@ import {
   recomputeCustomView,
   setSelectedView,
 } from "./viewHelpers";
+import {
+  readViewSnapshotForUser,
+  readViewsForUser,
+} from "@/lib/dashboard/server-read";
 
 const viewTagIdsInput = z.array(z.uuid()).min(1, {
   message: "Custom views must require at least one tag.",
@@ -20,74 +24,15 @@ function isPrismaKnownError(error: unknown) {
 
 export const viewRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx: { userId } }) => {
-    await ensureDefaultView(userId);
-
-    return await db.view.findMany({
-      where: { userId },
-      orderBy: { order: "asc" },
-      include: {
-        viewTags: {
-          include: {
-            tag: true,
-          },
-        },
-        viewLists: {
-          select: {
-            listId: true,
-            order: true,
-          },
-          orderBy: {
-            order: "asc",
-          },
-        },
-      },
-    });
+    return readViewsForUser(userId);
   }),
 
   getViewListsWithItems: protectedProcedure
     .input(z.object({ viewId: z.uuid() }))
     .query(async ({ ctx: { userId }, input: { viewId } }) => {
-      const view = await db.view.findFirst({
-        where: {
-          id: viewId,
-          userId,
-        },
-        include: {
-          viewTags: {
-            include: { tag: true },
-          },
-          viewLists: {
-            select: { listId: true, order: true },
-            orderBy: { order: "asc" },
-          },
-        },
-      });
-
-      if (!view) throw new TRPCError({ code: "NOT_FOUND" });
-
-      const viewLists = await db.viewList.findMany({
-        where: {
-          viewId,
-          list: { userId },
-        },
-        orderBy: { order: "asc" },
-        include: {
-          list: {
-            include: {
-              listTags: { include: { tag: true } },
-              listItems: { orderBy: { order: "asc" } },
-            },
-          },
-        },
-      });
-
-      return {
-        view,
-        lists: viewLists.map((vl) => ({
-          ...vl.list,
-          order: vl.order,
-        })),
-      };
+      const snapshot = await readViewSnapshotForUser(userId, viewId);
+      if (!snapshot) throw new TRPCError({ code: "NOT_FOUND" });
+      return snapshot;
     }),
 
   getCurrentViewListsWithItems: protectedProcedure.query(
@@ -99,57 +44,14 @@ export const viewRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const selectedView = await db.view.findUniqueOrThrow({
-        where: { id: selectedDefaultView.id },
-        include: {
-          viewTags: {
-            include: {
-              tag: true,
-            },
-          },
-          viewLists: {
-            select: {
-              listId: true,
-              order: true,
-            },
-            orderBy: {
-              order: "asc",
-            },
-          },
-        },
-      });
-
-      const viewLists = await db.viewList.findMany({
-        where: {
-          viewId: selectedView.id,
-          list: { userId },
-        },
-        orderBy: { order: "asc" },
-        include: {
-          list: {
-            include: {
-              listTags: {
-                include: {
-                  tag: true,
-                },
-              },
-              listItems: {
-                orderBy: {
-                  order: "asc",
-                },
-              },
-            },
-          },
-        },
-      });
-
-      return {
-        view: selectedView,
-        lists: viewLists.map((viewList) => ({
-          ...viewList.list,
-          order: viewList.order,
-        })),
-      };
+      const snapshot = await readViewSnapshotForUser(
+        userId,
+        selectedDefaultView.id,
+      );
+      if (!snapshot) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+      return snapshot;
     }
   ),
 

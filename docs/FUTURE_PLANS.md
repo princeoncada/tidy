@@ -283,12 +283,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source) (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
-- **Status:** Open | Priority: P1 2.0 local-first render
+- **Status:** In progress | Priority: P1 2.0 local-first render
 - **Type:** product behavior
 - **Files:** lib/sync/*, lib/dashboard-cache.ts, app/api/* (push / pull), components/list/*, prisma/schema.prisma (Replicache client / version tracking)
 - **Implementation goal:** adopt Replicache as the sync spine - one local store, deterministic mutators applied optimistically, batched `/push`, diff `/pull`, client rebase; the dashboard reads the local store via reactive queries and never a raw server payload.

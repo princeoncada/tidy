@@ -13,6 +13,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import ViewsSidebarPreview from "./views/ViewsSidebarPreview";
 import SyncStatusBadge from "./SyncStatusBadge";
 import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
+import { ReplicacheProvider } from "@/components/ReplicacheProvider";
+import { isReplicacheRenderEnabled } from "@/lib/sync/replicache/client";
 
 const supabase = createClient();
 
@@ -37,7 +39,7 @@ const Dashboard = () => {
     </MaxWidthWrapper>;
   }
 
-  return (
+  const dashboard = (
     <MaxWidthWrapper>
       <div className="flex gap-4">
         <main data-testid="app-shell" className="min-w-0 flex-1 flex flex-col gap-3 py-10">
@@ -75,6 +77,25 @@ const Dashboard = () => {
       </div>
     </MaxWidthWrapper>
   );
+
+  if (isReplicacheRenderEnabled()) {
+    if (!localFirstBoot.localBootReady) {
+      return (
+        <MaxWidthWrapper singleItemPage={true}>
+          <Loader2 className="w-5 h-5 animate-spin" />
+        </MaxWidthWrapper>
+      );
+    }
+    if (localFirstBoot.userId) {
+      return (
+        <ReplicacheProvider userId={localFirstBoot.userId}>
+          {dashboard}
+        </ReplicacheProvider>
+      );
+    }
+  }
+
+  return dashboard;
 };
 
 export default Dashboard;

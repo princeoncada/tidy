@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.10.1
-- **Current phase:** 1.10.1 - Landing Page Branding Polish
-- **Next phase:** 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
+- **Current version:** 2.0.0-alpha
+- **Current phase:** 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
+- **Next phase:** 2.0.1 - Fractional Indexing for Order
 
 ---
 

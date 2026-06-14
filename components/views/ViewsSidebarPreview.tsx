@@ -70,6 +70,8 @@ import {
 import type { RouterOutputs } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
+import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 type ViewItem = RouterOutputs["view"]["getAll"][number];
 type TagItem = RouterOutputs["tag"]["getAll"][number];
@@ -415,6 +417,8 @@ export default function ViewsSidebarPreview({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const optimisticSync = useOptimisticSync();
+  const replicacheDashboard = useReplicacheDashboard();
+  const dashboardMutations = useDashboardMutations();
   const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dragPreviewViewsRef = useRef<ViewItem[] | null>(null);
 
@@ -423,8 +427,20 @@ export default function ViewsSidebarPreview({
 
   useRenderMeasure("ViewsSidebarPreview");
 
-  const { data: views = [], isLoading: viewsLoading } = useQuery(trpc.view.getAll.queryOptions());
-  const { data: tags = [], isLoading: tagsLoading } = useQuery(trpc.tag.getAll.queryOptions());
+  const { data: serverViews = [], isLoading: viewsLoading } = useQuery({
+    ...trpc.view.getAll.queryOptions(),
+    enabled: !replicacheDashboard.enabled,
+  });
+  const { data: serverTags = [], isLoading: tagsLoading } = useQuery({
+    ...trpc.tag.getAll.queryOptions(),
+    enabled: !replicacheDashboard.enabled,
+  });
+  const views = replicacheDashboard.enabled
+    ? replicacheDashboard.views
+    : serverViews;
+  const tags = replicacheDashboard.enabled
+    ? replicacheDashboard.tags
+    : serverTags;
 
   const allListsView = useMemo(
     () => views.find((view) => view.type === "ALL_LISTS"),
@@ -433,7 +449,10 @@ export default function ViewsSidebarPreview({
   const { isLoading: allListsLoading } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
-      { enabled: Boolean(allListsView?.id) }
+      {
+        enabled:
+          !replicacheDashboard.enabled && Boolean(allListsView?.id),
+      }
     )
   );
   const savedCustomViews = useMemo(
@@ -464,6 +483,13 @@ export default function ViewsSidebarPreview({
     reorderTimeoutRef.current = setTimeout(() => {
       if (!userId || nextViews.length === 0) return;
 
+      if (dashboardMutations.enabled && dashboardMutations.mutate) {
+        void dashboardMutations.mutate.reorderViews({
+          orderedIds: nextViews.map((view) => view.id),
+        });
+        return;
+      }
+
       optimisticSync.replacePending("views", async () => {
         try {
           await commitLocalViewReorder({
@@ -475,16 +501,27 @@ export default function ViewsSidebarPreview({
         }
       }, { label: "view.reorderViews" });
     }, 300);
-  }, [optimisticSync, userId]);
+  }, [dashboardMutations, optimisticSync, userId]);
 
   const commitViewOrder = useCallback((nextViews: ViewItem[]) => {
     if (!userId) return;
+
+    if (dashboardMutations.enabled) {
+      scheduleReorderSave(nextViews);
+      return;
+    }
 
     // Only save the final dropped order. Older drag positions do not matter.
     measureCacheWrite("views.drop.order", nextViews);
     commitViewOrderToViewsCache(queryClient, dashboardKeys, nextViews);
     scheduleReorderSave(nextViews);
-  }, [queryClient, scheduleReorderSave, dashboardKeys, userId]);
+  }, [
+    dashboardMutations.enabled,
+    queryClient,
+    scheduleReorderSave,
+    dashboardKeys,
+    userId,
+  ]);
 
   const moveViewPreview = useCallback((sourceId: string, targetId: string) => {
     const baseViews = dragPreviewViewsRef.current ?? customViews;
@@ -495,6 +532,11 @@ export default function ViewsSidebarPreview({
 
   function selectView(id: string | undefined) {
     if (!id || selectedViewId === id || !userId) return;
+
+    if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      void dashboardMutations.mutate.setSelectedView({ viewId: id });
+      return;
+    }
 
     applyViewSelection(queryClient, dashboardKeys, id);
     optimisticSync.replacePending(
@@ -515,7 +557,9 @@ export default function ViewsSidebarPreview({
 
     const viewId = crypto.randomUUID();
     const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
-    const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
+    const allListsSnapshot = replicacheDashboard.enabled
+      ? replicacheDashboard.allLists
+      : queryClient.getQueryData<DashboardSnapshot>(queryKey);
     const optimisticView = buildOptimisticView({
       id: viewId,
       name,
@@ -524,6 +568,20 @@ export default function ViewsSidebarPreview({
       tags,
       allListsSnapshot,
     });
+
+    if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      void dashboardMutations.mutate.createView({
+        id: viewId,
+        userId,
+        name,
+        order: optimisticView.order,
+        tagIds,
+        matchMode: "ALL",
+        now: new Date().toISOString(),
+      });
+      setDialogState(null);
+      return;
+    }
 
     insertOptimisticViewIntoDashboardCaches(
       queryClient,
@@ -554,6 +612,21 @@ export default function ViewsSidebarPreview({
     const nextTagIds = [...tagIds].sort();
     const nameChanged = view.name !== name;
     const tagsChanged = currentTagIds.join("|") !== nextTagIds.join("|");
+
+    if (
+      dashboardMutations.enabled &&
+      dashboardMutations.mutate &&
+      (nameChanged || tagsChanged)
+    ) {
+      void dashboardMutations.mutate.updateView({
+        id: view.id,
+        ...(nameChanged ? { name } : {}),
+        ...(tagsChanged ? { tagIds } : {}),
+        now: new Date().toISOString(),
+      });
+      setDialogState(null);
+      return;
+    }
 
     if (nameChanged) {
       applyViewRenameToViewsCache(queryClient, dashboardKeys, view.id, name);
@@ -586,6 +659,14 @@ export default function ViewsSidebarPreview({
   function deleteView(id: string) {
     if (!userId) return;
 
+    if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      void dashboardMutations.mutate.deleteView({
+        id,
+        fallbackViewId: allListsView?.id,
+      });
+      return;
+    }
+
     const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
 
     removeViewFromDashboardCaches(
@@ -609,7 +690,12 @@ export default function ViewsSidebarPreview({
     if (!open) setDialogState(null);
   }
 
-  if (viewsLoading || tagsLoading || !allListsView || allListsLoading) {
+  if (
+    (replicacheDashboard.enabled
+      ? !replicacheDashboard.ready
+      : viewsLoading || tagsLoading || allListsLoading) ||
+    !allListsView
+  ) {
     return <ViewsSidebarSkeleton />;
   }
 
