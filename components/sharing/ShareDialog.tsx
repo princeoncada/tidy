@@ -96,7 +96,7 @@ export function ShareDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] w-[min(32rem,calc(100%-2rem))] max-w-none overflow-y-auto sm:max-w-none">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Share {title}</DialogTitle>
           <DialogDescription>
