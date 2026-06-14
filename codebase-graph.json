@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "2.0.0",
+  "version": "2.0.1-alpha",
   "generatedAt": "2026-06-14",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -502,7 +502,9 @@
         "@/lib/local-db/local-write",
         "../ui/skeleton",
         "@/hooks/useReplicacheDashboard",
-        "@/hooks/useDashboardMutations"
+        "@/hooks/useDashboardMutations",
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys"
       ]
     },
     {
@@ -531,7 +533,9 @@
         "./ListTagPicker",
         "./types",
         "@/lib/local-db/local-write",
-        "@/hooks/useDashboardMutations"
+        "@/hooks/useDashboardMutations",
+        "@/hooks/useReplicacheDashboard",
+        "@/lib/sync/fractional-index"
       ]
     },
     {
@@ -618,7 +622,9 @@
         "./types",
         "./ListEmpty",
         "@/hooks/useReplicacheDashboard",
-        "@/hooks/useDashboardMutations"
+        "@/hooks/useDashboardMutations",
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys"
       ]
     },
     {
@@ -1011,7 +1017,8 @@
         "@/lib/utils",
         "@/trpc/client",
         "@/hooks/useReplicacheDashboard",
-        "@/hooks/useDashboardMutations"
+        "@/hooks/useDashboardMutations",
+        "@/lib/sync/fractional-index"
       ]
     },
     {
@@ -1415,6 +1422,7 @@
       "extension": ".ts",
       "symbols": [
         "ReplicacheDashboardGraph",
+        "ReplicacheOrderKeys",
         "assembleReplicacheDashboard",
         "useReplicacheDashboard"
       ],
@@ -1489,6 +1497,8 @@
       "extension": ".ts",
       "symbols": [
         "readAllListsSnapshotForUser",
+        "readReplicacheAllListsSnapshotForUser",
+        "readReplicacheViewsForUser",
         "readTagsForUser",
         "readViewSnapshotForUser",
         "readViewsForUser"
@@ -1968,6 +1978,19 @@
       "imports": []
     },
     {
+      "path": "lib/sync/fractional-index.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "initialKeys",
+        "keyBetween",
+        "keysBetween"
+      ],
+      "imports": [
+        "fractional-indexing"
+      ]
+    },
+    {
       "path": "lib/sync/offline-write-prototype.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2075,6 +2098,7 @@
         "node:crypto",
         "replicache",
         "@/lib/dashboard/server-read",
+        "@/lib/sync/fractional-index",
         "@/lib/sync/replicache/keys"
       ]
     },
@@ -2319,6 +2343,18 @@
       "extension": ".py",
       "symbols": [],
       "imports": []
+    },
+    {
+      "path": "scripts/backfill-order-keys.ts",
+      "kind": "script",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "../app/generated/prisma/client",
+        "@prisma/adapter-pg",
+        "dotenv",
+        "../lib/sync/fractional-index"
+      ]
     },
     {
       "path": "scripts/commit.ps1",
@@ -2769,6 +2805,16 @@
       ]
     },
     {
+      "path": "tests/unit/fractional-index.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/fractional-index"
+      ]
+    },
+    {
       "path": "tests/unit/landing-copy.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2999,7 +3045,8 @@
       "imports": [
         "vitest",
         "@/lib/sync/replicache/mutators",
-        "@/lib/sync/replicache/keys"
+        "@/lib/sync/replicache/keys",
+        "@/lib/sync/fractional-index"
       ]
     },
     {
@@ -3010,7 +3057,8 @@
       "imports": [
         "vitest",
         "@/hooks/useReplicacheDashboard",
-        "@/lib/dashboard/projection"
+        "@/lib/dashboard/projection",
+        "@/lib/sync/fractional-index"
       ]
     },
     {
@@ -3020,7 +3068,9 @@
       "symbols": [],
       "imports": [
         "vitest",
-        "@/lib/sync/replicache/pull-cvr"
+        "@/lib/sync/replicache/pull-cvr",
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys"
       ]
     },
     {
@@ -3933,6 +3983,18 @@
     },
     {
       "from": "components/list/ListAdder.tsx",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "components/list/ListAdder.tsx",
       "to": "trpc/client.tsx",
       "type": "imports",
       "import": "@/trpc/client"
@@ -4005,6 +4067,12 @@
     },
     {
       "from": "components/list/ListComponent.tsx",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
+    },
+    {
+      "from": "components/list/ListComponent.tsx",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
       "import": "@/lib/dashboard-cache"
@@ -4020,6 +4088,12 @@
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
+    },
+    {
+      "from": "components/list/ListComponent.tsx",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
     },
     {
       "from": "components/list/ListComponent.tsx",
@@ -4221,9 +4295,21 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
       "to": "lib/sync/outbox-capture-events.ts",
       "type": "imports",
       "import": "@/lib/sync/outbox-capture-events"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -4686,6 +4772,12 @@
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
+    },
+    {
+      "from": "components/views/ViewsSidebarPreview.tsx",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
@@ -5235,6 +5327,12 @@
     },
     {
       "from": "lib/sync/replicache/pull-cvr.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "lib/sync/replicache/pull-cvr.ts",
       "to": "lib/sync/replicache/keys.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/keys"
@@ -5328,6 +5426,12 @@
       "to": "lib/supabase/proxy.ts",
       "type": "imports",
       "import": "@/lib/supabase/proxy"
+    },
+    {
+      "from": "scripts/backfill-order-keys.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "../lib/sync/fractional-index"
     },
     {
       "from": "tests/e2e/auth.setup.ts",
@@ -5720,6 +5824,12 @@
       "import": "@/lib/sync/flush-scheduler"
     },
     {
+      "from": "tests/unit/fractional-index.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
       "from": "tests/unit/local-db-diagnostics.test.ts",
       "to": "lib/local-db/local-db-diagnostics.ts",
       "type": "imports",
@@ -5997,6 +6107,12 @@
     },
     {
       "from": "tests/unit/replicache-mutators.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "tests/unit/replicache-mutators.test.ts",
       "to": "lib/sync/replicache/keys.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/keys"
@@ -6018,6 +6134,24 @@
       "to": "lib/dashboard/projection.ts",
       "type": "imports",
       "import": "@/lib/dashboard/projection"
+    },
+    {
+      "from": "tests/unit/replicache-projection-parity.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "tests/unit/replicache-pull-cvr.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "tests/unit/replicache-pull-cvr.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
     },
     {
       "from": "tests/unit/replicache-pull-cvr.test.ts",

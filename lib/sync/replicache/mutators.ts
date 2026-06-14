@@ -31,18 +31,18 @@ export type ReplicacheMutationArgs = {
     userId: string;
     name: string;
     allListsViewId: string;
-    order: number;
+    order: string;
     inheritedTagIds?: string[];
     now: string;
   };
   renameList: { id: string; name: string; now: string };
   deleteList: { id: string };
-  reorderLists: { viewId: string; orderedIds: string[] };
+  reorderLists: { viewId: string; listId: string; orderKey: string };
   createItem: {
     id: string;
     listId: string;
     name: string;
-    order: number;
+    order: string;
     now: string;
   };
   updateItem: {
@@ -53,14 +53,12 @@ export type ReplicacheMutationArgs = {
     now: string;
   };
   deleteItem: { id: string };
-  reorderItems: { listId: string; orderedIds: string[] };
+  reorderItems: { listId: string; id: string; orderKey: string };
   moveItem: {
     id: string;
     fromListId: string;
     toListId: string;
-    order: number;
-    destinationOrderedIds: string[];
-    sourceOrderedIds: string[];
+    order: string;
     now: string;
   };
   createTag: {
@@ -83,7 +81,7 @@ export type ReplicacheMutationArgs = {
     id: string;
     userId: string;
     name: string;
-    order: number;
+    order: string;
     tagIds: string[];
     matchMode?: ViewMatchMode;
     now: string;
@@ -96,15 +94,15 @@ export type ReplicacheMutationArgs = {
     now: string;
   };
   deleteView: { id: string; fallbackViewId?: string };
-  reorderViews: { orderedIds: string[] };
-  reorderViewLists: { viewId: string; orderedIds: string[] };
+  reorderViews: { id: string; orderKey: string };
+  reorderViewLists: { viewId: string; listId: string; orderKey: string };
   moveViewList: {
     listId: string;
     fromViewId?: string;
     toViewId: string;
-    order: number;
+    order: string;
   };
-  attachViewList: { viewId: string; listId: string; order: number };
+  attachViewList: { viewId: string; listId: string; order: string };
   detachViewList: { viewId: string; listId: string };
   attachViewTag: { viewId: string; tagId: string };
   detachViewTag: { viewId: string; tagId: string };
@@ -132,20 +130,6 @@ async function deleteKeys(
   for (const [key, value] of entries) {
     if (predicate(key, value)) {
       await tx.del(key);
-    }
-  }
-}
-
-async function setViewListOrder(
-  tx: WriteTransaction,
-  viewId: string,
-  orderedIds: string[],
-) {
-  for (const [order, listId] of orderedIds.entries()) {
-    const key = replicacheKeys.viewList(viewId, listId);
-    const current = await tx.get<ReplicacheViewListValue>(key);
-    if (current) {
-      await tx.set(key, { ...current, order });
     }
   }
 }
@@ -221,7 +205,15 @@ export const replicacheMutators = {
     tx: WriteTransaction,
     args: ReplicacheMutationArgs["reorderLists"],
   ) {
-    await setViewListOrder(tx, args.viewId, args.orderedIds);
+    const key = replicacheKeys.viewList(args.viewId, args.listId);
+    const current = await tx.get<ReplicacheViewListValue>(key);
+    await tx.set(key, current
+      ? { ...current, order: args.orderKey }
+      : {
+          viewId: args.viewId,
+          listId: args.listId,
+          order: args.orderKey,
+        });
   },
 
   async createItem(
@@ -270,12 +262,10 @@ export const replicacheMutators = {
     tx: WriteTransaction,
     args: ReplicacheMutationArgs["reorderItems"],
   ) {
-    for (const [order, itemId] of args.orderedIds.entries()) {
-      const key = replicacheKeys.listItem(itemId);
-      const current = await tx.get<ReplicacheListItemValue>(key);
-      if (current && current.listId === args.listId) {
-        await tx.set(key, { ...current, order });
-      }
+    const key = replicacheKeys.listItem(args.id);
+    const current = await tx.get<ReplicacheListItemValue>(key);
+    if (current && current.listId === args.listId) {
+      await tx.set(key, { ...current, order: args.orderKey });
     }
   },
 
@@ -292,28 +282,6 @@ export const replicacheMutators = {
         order: args.order,
         updatedAt: args.now,
       });
-    }
-    for (const [order, itemId] of args.destinationOrderedIds.entries()) {
-      const itemKey = replicacheKeys.listItem(itemId);
-      const item = await tx.get<ReplicacheListItemValue>(itemKey);
-      if (item) {
-        await tx.set(itemKey, {
-          ...item,
-          listId: args.toListId,
-          order,
-        });
-      }
-    }
-    for (const [order, itemId] of args.sourceOrderedIds.entries()) {
-      const itemKey = replicacheKeys.listItem(itemId);
-      const item = await tx.get<ReplicacheListItemValue>(itemKey);
-      if (item) {
-        await tx.set(itemKey, {
-          ...item,
-          listId: args.fromListId,
-          order,
-        });
-      }
     }
   },
 
@@ -472,12 +440,10 @@ export const replicacheMutators = {
     tx: WriteTransaction,
     args: ReplicacheMutationArgs["reorderViews"],
   ) {
-    for (const [order, viewId] of args.orderedIds.entries()) {
-      const key = replicacheKeys.view(viewId);
-      const current = await tx.get<ReplicacheViewValue>(key);
-      if (current) {
-        await tx.set(key, { ...current, order });
-      }
+    const key = replicacheKeys.view(args.id);
+    const current = await tx.get<ReplicacheViewValue>(key);
+    if (current) {
+      await tx.set(key, { ...current, order: args.orderKey });
     }
   },
 
@@ -485,7 +451,15 @@ export const replicacheMutators = {
     tx: WriteTransaction,
     args: ReplicacheMutationArgs["reorderViewLists"],
   ) {
-    await setViewListOrder(tx, args.viewId, args.orderedIds);
+    const key = replicacheKeys.viewList(args.viewId, args.listId);
+    const current = await tx.get<ReplicacheViewListValue>(key);
+    await tx.set(key, current
+      ? { ...current, order: args.orderKey }
+      : {
+          viewId: args.viewId,
+          listId: args.listId,
+          order: args.orderKey,
+        });
   },
 
   async moveViewList(
@@ -576,6 +550,7 @@ function describeMutation<Name extends ReplicacheMutationName>(
         operationType: "create",
         payload: {
           name: value.name,
+          orderKey: value.order,
           ...(value.inheritedTagIds?.length
             ? { tagIds: value.inheritedTagIds }
             : {}),
@@ -605,9 +580,13 @@ function describeMutation<Name extends ReplicacheMutationName>(
       const value = args as ReplicacheMutationArgs["reorderLists"];
       return [{
         entityType: "viewList",
-        entityClientId: value.viewId,
+        entityClientId: `${value.viewId}:${value.listId}`,
         operationType: "reorder",
-        payload: { viewId: value.viewId, orderedIds: value.orderedIds },
+        payload: {
+          viewId: value.viewId,
+          listId: value.listId,
+          orderKey: value.orderKey,
+        },
       }];
     }
     case "createItem": {
@@ -619,7 +598,7 @@ function describeMutation<Name extends ReplicacheMutationName>(
         payload: {
           name: value.name,
           listId: value.listId,
-          order: value.order,
+          orderKey: value.order,
         },
       }];
     }
@@ -651,39 +630,26 @@ function describeMutation<Name extends ReplicacheMutationName>(
       const value = args as ReplicacheMutationArgs["reorderItems"];
       return [{
         entityType: "listItem",
-        entityClientId: value.listId,
+        entityClientId: value.id,
         operationType: "reorder",
-        payload: { listId: value.listId, orderedIds: value.orderedIds },
+        payload: {
+          listId: value.listId,
+          itemId: value.id,
+          orderKey: value.orderKey,
+        },
       }];
     }
     case "moveItem": {
       const value = args as ReplicacheMutationArgs["moveItem"];
-      return [
-        {
-          entityType: "listItem",
-          entityClientId: value.id,
-          operationType: "move",
-          payload: { toListClientId: value.toListId, order: value.order },
+      return [{
+        entityType: "listItem",
+        entityClientId: value.id,
+        operationType: "move",
+        payload: {
+          toListClientId: value.toListId,
+          orderKey: value.order,
         },
-        {
-          entityType: "listItem",
-          entityClientId: value.toListId,
-          operationType: "reorder",
-          payload: {
-            listId: value.toListId,
-            orderedIds: value.destinationOrderedIds,
-          },
-        },
-        {
-          entityType: "listItem",
-          entityClientId: value.fromListId,
-          operationType: "reorder",
-          payload: {
-            listId: value.fromListId,
-            orderedIds: value.sourceOrderedIds,
-          },
-        },
-      ];
+      }];
     }
     case "createTag": {
       const value = args as ReplicacheMutationArgs["createTag"];
@@ -735,7 +701,7 @@ function describeMutation<Name extends ReplicacheMutationName>(
           name: value.name,
           tagIds: value.tagIds,
           matchMode: value.matchMode ?? "ALL",
-          order: value.order,
+          orderKey: value.order,
         },
       }];
     }
@@ -767,9 +733,9 @@ function describeMutation<Name extends ReplicacheMutationName>(
       const value = args as ReplicacheMutationArgs["reorderViews"];
       return [{
         entityType: "view",
-        entityClientId: "view-order",
+        entityClientId: value.id,
         operationType: "reorder",
-        payload: { orderedIds: value.orderedIds },
+        payload: { viewId: value.id, orderKey: value.orderKey },
       }];
     }
     case "moveViewList": {
@@ -782,7 +748,7 @@ function describeMutation<Name extends ReplicacheMutationName>(
           listId: value.listId,
           ...(value.fromViewId ? { fromViewId: value.fromViewId } : {}),
           toViewClientId: value.toViewId,
-          order: value.order,
+          orderKey: value.order,
         },
       }];
     }
@@ -796,7 +762,7 @@ function describeMutation<Name extends ReplicacheMutationName>(
         payload: {
           viewId: value.viewId,
           listId: value.listId,
-          ...(name === "attachViewList" ? { order: value.order } : {}),
+          ...(name === "attachViewList" ? { orderKey: value.order } : {}),
         },
       }];
     }

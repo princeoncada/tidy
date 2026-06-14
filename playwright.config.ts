@@ -9,9 +9,8 @@ const replicacheProjectRequested = process.argv.some((argument, index) =>
     process.argv[index + 1] === "replicache-render"
   )
 );
-const webServerCommand = replicacheProjectRequested
-  ? `npx prisma generate && npm run dev -- --hostname 127.0.0.1 --port ${port}`
-  : `npm run dev -- --hostname 127.0.0.1 --port ${port}`;
+const webServerCommand =
+  `npm run dev -- --hostname 127.0.0.1 --port ${port}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",

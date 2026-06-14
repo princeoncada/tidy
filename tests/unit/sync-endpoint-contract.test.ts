@@ -240,4 +240,25 @@ describe("sync endpoint contract validation", () => {
       errors: ["Reorder operations must include orderedIds as a string array."],
     });
   });
+
+  it("accepts a single-entity fractional reorder key", () => {
+    const operation = createOperation({
+      entityType: "listItem",
+      operationType: "reorder",
+      payload: {
+        listId: "list-1",
+        itemId: "item-1",
+        orderKey: "a1",
+      },
+    });
+
+    expect(
+      validateSyncEndpointRequest(createRequest(operation), {
+        authenticatedUserId: "user-1",
+      }),
+    ).toEqual({
+      ok: true,
+      request: createRequest(operation),
+    });
+  });
 });

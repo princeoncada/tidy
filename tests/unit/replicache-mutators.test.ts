@@ -5,6 +5,7 @@ import {
   translateReplicacheMutation,
 } from "@/lib/sync/replicache/mutators";
 import { replicacheKeys } from "@/lib/sync/replicache/keys";
+import { initialKeys, keyBetween } from "@/lib/sync/fractional-index";
 
 function createTransaction(seed: Record<string, unknown> = {}) {
   const store = new Map(Object.entries(seed));
@@ -45,13 +46,14 @@ function createTransaction(seed: Record<string, unknown> = {}) {
 describe("Replicache dashboard mutators", () => {
   it("creates a list with All Lists membership and inherited tags", async () => {
     const { tx, store } = createTransaction();
+    const [orderKey] = initialKeys(1);
 
     await replicacheMutators.createList(tx, {
       id: "list-1",
       userId: "user-1",
       name: "Inbox",
       allListsViewId: "view-all",
-      order: -1,
+      order: orderKey,
       inheritedTagIds: ["tag-1"],
       now: "2026-06-14T12:00:00.000Z",
     });
@@ -63,19 +65,21 @@ describe("Replicache dashboard mutators", () => {
     expect(store.get(replicacheKeys.viewList("view-all", "list-1"))).toEqual({
       viewId: "view-all",
       listId: "list-1",
-      order: -1,
+      order: orderKey,
     });
     expect(store.has(replicacheKeys.listTag("list-1", "tag-1"))).toBe(true);
   });
 
-  it("uses one move mutator to update cross-list placement and both orders", async () => {
+  it("uses one move mutator to update only the moved item", async () => {
     const now = "2026-06-14T12:00:00.000Z";
+    const [firstKey, secondKey] = initialKeys(2);
+    const movedKey = keyBetween(firstKey, secondKey);
     const { tx, store } = createTransaction({
       [replicacheKeys.listItem("item-1")]: {
         id: "item-1",
         listId: "list-a",
         name: "Move me",
-        order: 0,
+        order: firstKey,
         completed: false,
         notes: null,
         createdAt: now,
@@ -85,7 +89,7 @@ describe("Replicache dashboard mutators", () => {
         id: "item-2",
         listId: "list-b",
         name: "Existing",
-        order: 0,
+        order: secondKey,
         completed: false,
         notes: null,
         createdAt: now,
@@ -97,19 +101,17 @@ describe("Replicache dashboard mutators", () => {
       id: "item-1",
       fromListId: "list-a",
       toListId: "list-b",
-      order: 1,
-      destinationOrderedIds: ["item-2", "item-1"],
-      sourceOrderedIds: [],
+      order: movedKey,
       now,
     });
 
     expect(store.get(replicacheKeys.listItem("item-1"))).toMatchObject({
       listId: "list-b",
-      order: 1,
+      order: movedKey,
     });
     expect(store.get(replicacheKeys.listItem("item-2"))).toMatchObject({
       listId: "list-b",
-      order: 0,
+      order: secondKey,
     });
   });
 
@@ -127,7 +129,7 @@ describe("Replicache dashboard mutators", () => {
       [replicacheKeys.viewList("view-1", "list-1")]: {
         viewId: "view-1",
         listId: "list-1",
-        order: 0,
+        order: initialKeys(1)[0],
       },
     });
 
@@ -136,24 +138,27 @@ describe("Replicache dashboard mutators", () => {
     expect([...store.keys()]).toEqual([]);
   });
 
-  it("rewrites integer list and item order", async () => {
+  it("rewrites only the moved list and item fractional keys", async () => {
     const now = "2026-06-14T12:00:00.000Z";
+    const [firstKey, secondKey] = initialKeys(2);
+    const listOrderKey = keyBetween(secondKey, null);
+    const itemOrderKey = keyBetween(null, firstKey);
     const { tx, store } = createTransaction({
       [replicacheKeys.viewList("view-all", "list-a")]: {
         viewId: "view-all",
         listId: "list-a",
-        order: 0,
+        order: firstKey,
       },
       [replicacheKeys.viewList("view-all", "list-b")]: {
         viewId: "view-all",
         listId: "list-b",
-        order: 1,
+        order: secondKey,
       },
       [replicacheKeys.listItem("item-a")]: {
         id: "item-a",
         listId: "list-a",
         name: "A",
-        order: 0,
+        order: firstKey,
         completed: false,
         notes: null,
         createdAt: now,
@@ -163,7 +168,7 @@ describe("Replicache dashboard mutators", () => {
         id: "item-b",
         listId: "list-a",
         name: "B",
-        order: 1,
+        order: secondKey,
         completed: false,
         notes: null,
         createdAt: now,
@@ -173,24 +178,26 @@ describe("Replicache dashboard mutators", () => {
 
     await replicacheMutators.reorderLists(tx, {
       viewId: "view-all",
-      orderedIds: ["list-b", "list-a"],
+      listId: "list-a",
+      orderKey: listOrderKey,
     });
     await replicacheMutators.reorderItems(tx, {
       listId: "list-a",
-      orderedIds: ["item-b", "item-a"],
+      id: "item-b",
+      orderKey: itemOrderKey,
     });
 
-    expect(store.get(replicacheKeys.viewList("view-all", "list-b"))).toMatchObject({
-      order: 0,
-    });
     expect(store.get(replicacheKeys.viewList("view-all", "list-a"))).toMatchObject({
-      order: 1,
+      order: listOrderKey,
     });
     expect(store.get(replicacheKeys.listItem("item-b"))).toMatchObject({
-      order: 0,
+      order: itemOrderKey,
+    });
+    expect(store.get(replicacheKeys.viewList("view-all", "list-b"))).toMatchObject({
+      order: secondKey,
     });
     expect(store.get(replicacheKeys.listItem("item-a"))).toMatchObject({
-      order: 1,
+      order: firstKey,
     });
   });
 
@@ -215,12 +222,13 @@ describe("Replicache dashboard mutators", () => {
 
   it("creates and updates a view and switches selected-view metadata", async () => {
     const now = "2026-06-14T12:00:00.000Z";
+    const [allListsKey, customKey] = initialKeys(2);
     const { tx, store } = createTransaction({
       [replicacheKeys.view("view-all")]: {
         id: "view-all",
         userId: "user-1",
         name: "All Lists",
-        order: 0,
+        order: allListsKey,
         type: "ALL_LISTS",
         isDefault: true,
         matchMode: "ALL",
@@ -233,7 +241,7 @@ describe("Replicache dashboard mutators", () => {
       id: "view-custom",
       userId: "user-1",
       name: "Work",
-      order: 1,
+      order: customKey,
       tagIds: ["tag-a"],
       matchMode: "ALL",
       now,
@@ -268,7 +276,8 @@ describe("Replicache dashboard mutators", () => {
 });
 
 describe("Replicache server translation", () => {
-  it("translates one cross-list move into FIFO move and reorder decisions", () => {
+  it("translates one cross-list move into one fractional move decision", () => {
+    const [orderKey] = initialKeys(1);
     const decisions = translateReplicacheMutation({
       userId: "user-1",
       clientID: "client-1",
@@ -278,9 +287,7 @@ describe("Replicache server translation", () => {
         id: "item-1",
         fromListId: "list-a",
         toListId: "list-b",
-        order: 1,
-        destinationOrderedIds: ["item-2", "item-1"],
-        sourceOrderedIds: [],
+        order: orderKey,
         now: "2026-06-14T12:00:00.000Z",
       },
       timestamp: Date.parse("2026-06-14T12:00:00.000Z"),
@@ -300,23 +307,7 @@ describe("Replicache server translation", () => {
       [
         "listItem",
         "move",
-        { toListClientId: "list-b", order: 1 },
-      ],
-      [
-        "listItem",
-        "reorder",
-        {
-          listId: "list-b",
-          orderedIds: ["item-2", "item-1"],
-        },
-      ],
-      [
-        "listItem",
-        "reorder",
-        {
-          listId: "list-a",
-          orderedIds: [],
-        },
+        { toListClientId: "list-b", orderKey },
       ],
     ]);
   });

@@ -4,10 +4,17 @@ import {
   ensureDefaultView,
 } from "@/trpc/routers/viewHelpers";
 
+function omitOrderKey<T extends { orderKey: unknown }>(
+  value: T,
+): Omit<T, "orderKey"> {
+  const { orderKey: _orderKey, ...legacyValue } = value;
+  return legacyValue;
+}
+
 export async function readViewsForUser(userId: string) {
   await ensureDefaultView(userId);
 
-  return db.view.findMany({
+  const views = await db.view.findMany({
     where: { userId },
     orderBy: { order: "asc" },
     include: {
@@ -27,13 +34,15 @@ export async function readViewsForUser(userId: string) {
       },
     },
   });
+
+  return views.map(omitOrderKey);
 }
 
 export async function readViewSnapshotForUser(
   userId: string,
   viewId: string,
 ) {
-  const view = await db.view.findFirst({
+  const storedView = await db.view.findFirst({
     where: {
       id: viewId,
       userId,
@@ -49,7 +58,8 @@ export async function readViewSnapshotForUser(
     },
   });
 
-  if (!view) return null;
+  if (!storedView) return null;
+  const view = omitOrderKey(storedView);
 
   const viewLists = await db.viewList.findMany({
     where: {
@@ -72,6 +82,7 @@ export async function readViewSnapshotForUser(
     lists: viewLists.map((viewList) => ({
       ...viewList.list,
       order: viewList.order,
+      listItems: viewList.list.listItems.map(omitOrderKey),
     })),
   };
 }
@@ -79,6 +90,89 @@ export async function readViewSnapshotForUser(
 export async function readAllListsSnapshotForUser(userId: string) {
   const allListsView = await ensureAllListsView(userId);
   return readViewSnapshotForUser(userId, allListsView.id);
+}
+
+export async function readReplicacheViewsForUser(userId: string) {
+  await ensureDefaultView(userId);
+
+  return db.view.findMany({
+    where: { userId },
+    orderBy: [{ order: "asc" }, { id: "asc" }],
+    include: {
+      viewTags: {
+        include: {
+          tag: true,
+        },
+      },
+      viewLists: {
+        select: {
+          listId: true,
+          order: true,
+          orderKey: true,
+        },
+        orderBy: [{ order: "asc" }, { listId: "asc" }],
+      },
+    },
+  });
+}
+
+async function readReplicacheViewSnapshotForUser(
+  userId: string,
+  viewId: string,
+) {
+  const view = await db.view.findFirst({
+    where: {
+      id: viewId,
+      userId,
+    },
+    include: {
+      viewTags: {
+        include: { tag: true },
+      },
+      viewLists: {
+        select: {
+          listId: true,
+          order: true,
+          orderKey: true,
+        },
+        orderBy: [{ order: "asc" }, { listId: "asc" }],
+      },
+    },
+  });
+
+  if (!view) return null;
+
+  const viewLists = await db.viewList.findMany({
+    where: {
+      viewId,
+      list: { userId },
+    },
+    orderBy: [{ order: "asc" }, { listId: "asc" }],
+    include: {
+      list: {
+        include: {
+          listTags: { include: { tag: true } },
+          listItems: {
+            orderBy: [{ order: "asc" }, { id: "asc" }],
+          },
+        },
+      },
+    },
+  });
+
+  return {
+    view,
+    lists: viewLists.map((viewList) => ({
+      ...viewList.list,
+      order: viewList.order,
+      orderKey: viewList.orderKey,
+    })),
+  };
+}
+
+export async function readReplicacheAllListsSnapshotForUser(userId: string) {
+  const allListsView = await ensureAllListsView(userId);
+  return readReplicacheViewSnapshotForUser(userId, allListsView.id);
 }
 
 export function readTagsForUser(userId: string) {

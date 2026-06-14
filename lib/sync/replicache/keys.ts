@@ -36,7 +36,7 @@ export type ReplicacheListItemValue = {
   id: string;
   name: string;
   completed: boolean;
-  order: number;
+  order: string;
   notes: string | null;
   listId: string;
   createdAt: string;
@@ -55,7 +55,7 @@ export type ReplicacheTagValue = {
 export type ReplicacheViewValue = {
   id: string;
   name: string;
-  order: number;
+  order: string;
   userId: string;
   type: "ALL_LISTS" | "UNTAGGED" | "CUSTOM";
   isDefault: boolean;
@@ -67,7 +67,7 @@ export type ReplicacheViewValue = {
 export type ReplicacheViewListValue = {
   viewId: string;
   listId: string;
-  order: number;
+  order: string;
 };
 
 export type ReplicacheViewTagValue = {

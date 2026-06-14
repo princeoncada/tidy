@@ -95,6 +95,7 @@ function createTx() {
       findMany: vi.fn(async (): Promise<unknown[]> => []),
       createMany: vi.fn(async () => ({ count: 1 })),
       upsert: vi.fn(),
+      update: vi.fn(),
       deleteMany: vi.fn(async () => ({ count: 1 })),
     },
     $executeRaw: vi.fn(async () => 1),
@@ -334,6 +335,140 @@ describe("server sync apply", () => {
         order: 0,
       },
     });
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("moves one item with a fractional key without rewriting neighbors", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      order: 2,
+      orderKey: "a0",
+      parentList: { userId: "user-1" },
+    });
+    tx.list.findFirst.mockResolvedValue({ id: "list-2" });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        operationType: "move",
+        payload: { toListClientId: "list-2", orderKey: "a1" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.listItem.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "item-1",
+        parentList: { userId: "user-1" },
+      },
+      data: {
+        listId: "list-2",
+        orderKey: "a1",
+      },
+    });
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("creates the All Lists membership with a fractional key", async () => {
+    const tx = createTx();
+    tx.list.findUnique.mockResolvedValue(null);
+    tx.view.findFirst.mockResolvedValue({
+      id: "all-view",
+      isDefault: true,
+    });
+    tx.viewList.findFirst.mockResolvedValue({ order: 3 });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        operationType: "create",
+        entityServerId: null,
+        payload: {
+          name: "Inbox",
+          orderKey: "a1",
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.viewList.createMany).toHaveBeenCalledWith({
+      data: [{
+        viewId: "all-view",
+        listId: "list-1",
+        order: 2,
+        orderKey: "a1",
+      }],
+      skipDuplicates: true,
+    });
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("creates an item with a fractional key while retaining integer order", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue(null);
+    tx.list.findFirst.mockResolvedValue({ id: "list-1" });
+    tx.listItem.findFirst.mockResolvedValue({ order: 4 });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        operationType: "create",
+        payload: {
+          name: "Task",
+          listId: "list-1",
+          orderKey: "a1",
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.listItem.create).toHaveBeenCalledWith({
+      data: {
+        id: "item-1",
+        name: "Task",
+        listId: "list-1",
+        order: 3,
+        orderKey: "a1",
+        completed: false,
+      },
+    });
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("reorders one item with an owned fractional key write", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      orderKey: "a0",
+      parentList: { userId: "user-1" },
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        operationType: "reorder",
+        payload: { listId: "list-1", orderKey: "a1" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.listItem.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "item-1",
+        listId: "list-1",
+        parentList: { userId: "user-1" },
+      },
+      data: { orderKey: "a1" },
+    });
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
     expect(results[0]).toMatchObject({ status: "applied" });
   });
 
@@ -633,6 +768,160 @@ describe("server sync apply", () => {
       select: { id: true, order: true },
     });
     expect(tx.$executeRaw).toHaveBeenCalledTimes(1);
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("reorders one owned custom view with a fractional key", async () => {
+    const tx = createTx();
+    tx.view.findFirst.mockResolvedValue({ orderKey: "a0" });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "view",
+        entityClientId: "view-1",
+        operationType: "reorder",
+        payload: { viewId: "view-1", orderKey: "a1" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.view.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "view-1",
+        userId: "user-1",
+        type: "CUSTOM",
+      },
+      data: { orderKey: "a1" },
+    });
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("attaches a list with a fractional key and retained integer order", async () => {
+    const tx = createTx();
+    tx.list.findFirst.mockResolvedValue({ id: "list-1" });
+    tx.view.findFirst.mockResolvedValue({ id: "view-1" });
+    tx.viewList.findUnique.mockResolvedValue(null);
+    tx.viewList.findFirst.mockResolvedValue({ order: 4 });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "viewList",
+        entityClientId: "view-1:list-1",
+        operationType: "attach",
+        payload: {
+          viewId: "view-1",
+          listId: "list-1",
+          orderKey: "a1",
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.viewList.upsert).toHaveBeenCalledWith({
+      where: {
+        viewId_listId: {
+          viewId: "view-1",
+          listId: "list-1",
+        },
+      },
+      update: { orderKey: "a1" },
+      create: {
+        viewId: "view-1",
+        listId: "list-1",
+        order: 3,
+        orderKey: "a1",
+      },
+    });
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("creates a custom view with a fractional key and legacy integer order", async () => {
+    const tx = createTx();
+    tx.view.findUnique.mockResolvedValue(null);
+    tx.view.findFirst
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: "all-view",
+        type: "ALL_LISTS",
+        isDefault: true,
+      })
+      .mockResolvedValueOnce({ id: "all-view" })
+      .mockResolvedValueOnce({ order: 0 })
+      .mockResolvedValueOnce(null);
+    tx.tag.findMany.mockResolvedValue([{ id: "tag-1" }]);
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "view",
+        entityClientId: "view-1",
+        operationType: "create",
+        payload: {
+          name: "Errands",
+          tagIds: ["tag-1"],
+          orderKey: "a1",
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.view.create).toHaveBeenCalledWith({
+      data: {
+        id: "view-1",
+        name: "Errands",
+        userId: "user-1",
+        order: -1,
+        orderKey: "a1",
+        type: "CUSTOM",
+        matchMode: "ALL",
+        isDefault: true,
+        viewTags: {
+          createMany: {
+            data: [{ tagId: "tag-1" }],
+            skipDuplicates: true,
+          },
+        },
+      },
+    });
+    expect(results[0]).toMatchObject({ status: "applied" });
+  });
+
+  it("reorders one owned view-list membership with a fractional key", async () => {
+    const tx = createTx();
+    tx.viewList.findUnique.mockResolvedValue({
+      orderKey: "a0",
+      view: { userId: "user-1" },
+      list: { userId: "user-1" },
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "viewList",
+        entityClientId: "view-1:list-1",
+        operationType: "reorder",
+        payload: {
+          viewId: "view-1",
+          listId: "list-1",
+          orderKey: "a1",
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(tx.viewList.update).toHaveBeenCalledWith({
+      where: {
+        viewId_listId: {
+          viewId: "view-1",
+          listId: "list-1",
+        },
+      },
+      data: { orderKey: "a1" },
+    });
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
     expect(results[0]).toMatchObject({ status: "applied" });
   });
 

@@ -1,11 +1,11 @@
-<!-- Current Version: 2.0.0 -->
+<!-- Current Version: 2.0.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
-**Next**: 2.0.1 - Fractional Indexing for Order
+**Current Version**: 2.0.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.0.1 - Fractional Indexing for Order
+**Next**: 2.0.2 - Supabase Broadcast Realtime Poke
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -17,6 +17,8 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. At that closeout, `seriesComplete` stayed FALSE because the dashboard still rendered server-authoritatively (TanStack payload + pending-outbox overlay; Dexie only as an offline fallback), leaving the optimistic / overlay / refetch race perceived as flicker / lag. The 2.0 arc addresses local-first render and collaboration; see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.5).
 
 2.0.0 adds the Replicache render/write path behind `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED`, default ON. The dashboard now has one per-user Replicache store, named deterministic mutators, reactive local projection, authenticated `/api/replicache/push` and `/api/replicache/pull` handlers, and Prisma client/client-group/CVR tracking. Gate OFF retains the 1.9.x tRPC + overlay + Dexie path for compatibility until 2.0.5.
+
+2.0.1 changes Replicache ordering to `fractional-indexing` string keys. `View.orderKey`, `ViewList.orderKey`, and `ListItem.orderKey` are nullable during rollout; pull supplies deterministic string fallbacks for null rows, while gated create/reorder/move mutations write one entity key rather than shipping a full `orderedIds` array. Dedicated Replicache readers in `lib/dashboard/server-read.ts` expose those fields to pull while the legacy reader return shapes omit them, preventing generated Prisma scalars from widening the gate-OFF tRPC/cache contracts. The legacy gate-OFF path and integer `order` columns remain intact through 2.0.5. Apply the migration, regenerate Prisma, then run `scripts/backfill-order-keys.ts` once before relying on persisted keys for every existing row.
 
 ---
 
@@ -70,16 +72,17 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 **Data model:**
 - Models: `List`, `ListItem`, `Tag`, `View`, `ViewList`, `ViewTag`, `ListTag`.
-- `ViewList` owns list order per view; `ListItem.order` owns item order inside a list; `View.order` owns custom view order.
+- On the Replicache path, `ViewList.orderKey` owns list order per view, `ListItem.orderKey` owns item order inside a list, and `View.orderKey` owns view order. The integer `order` fields remain the gate-OFF compatibility authority until legacy retirement.
 - Unique constraints: `View.name` per user, `Tag.name` per user, and `ViewList` primary key `[viewId, listId]`.
 - Cascades remove dependent list items, list-tags, view-list memberships, view-tags, and list-tags as defined by Prisma relations.
-- Sparse/negative order values are used for top insertion. No order compaction is implemented yet.
+- Replicache top/middle/bottom insertion generates a key between adjacent entities and updates only the moved or created entity. Legacy integer paths still use sparse/negative top insertion.
 
 **Cache and state:**
 - With `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED` ON (default), the dashboard renders only from the Replicache local store via `useSubscribe`; server payloads are converted to key/value pull patches and never rendered directly. The shared `lib/dashboard/projection.ts` preserves ALL_LISTS, CUSTOM ALL/ANY, UNTAGGED, per-view order fallback, and deterministic tie-breaking for both paths.
 - Replicache keys are `list/{id}`, `listItem/{id}`, `tag/{id}`, `view/{id}`, `viewList/{viewId}/{listId}`, `viewTag/{viewId}/{tagId}`, `listTag/{listId}/{tagId}`, and `metadata/selectedView`.
 - Replicache push translates each named mutation to the existing `LocalOutboxOperation` decision shape and calls the same `server-apply.ts` ownership/apply matrix. The data write and `lastMutationID` advance share one Prisma transaction; rejected writes advance as no-op background corrections and the next pull rebases the optimistic local state.
 - Replicache pull uses a client-view-record hash snapshot because Tidy retains hard deletes and cascades. Changed/new keys return `put`, absent keys return `del`, cookies advance monotonically per client group, and older CVRs are bounded/pruned.
+- Replicache pull exposes only string order values. Nullable database `orderKey` rows receive deterministic per-group fallback keys derived from the existing integer order and stable id tie-breakers.
 - `view.getViewListsWithItems({ viewId: allListsView.id })` is the canonical full dashboard payload.
 - Selected view payloads are explicit server/query payloads, not filtered copies of All Lists.
 - Dashboard cache key aliases are stable: `views`, `allLists`, `currentView`, and `selectedView`.
@@ -123,8 +126,8 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 
 **Drag and drop:**
 - Drag ids: `list-${id}` for list cards, `list-item-${id}` for item rows, and `list-drop-${id}` for list drop zones.
-- List reorder writes `ViewList.order`, not `List.order`.
-- Item cross-list move writes both `ListItem.listId` and `ListItem.order`.
+- With Replicache enabled, list reorder writes one `ViewList.orderKey`; item reorder writes one `ListItem.orderKey`; cross-list movement writes the moved item `listId` plus `orderKey`; custom-view reorder writes one `View.orderKey`.
+- With Replicache disabled, list reorder still writes `ViewList.order`, and item movement still writes `ListItem.listId` plus integer `ListItem.order`.
 - 1.9.24 routes committed list, item, and custom-view movement through atomic Dexie entity/relationship plus coalesced operation writes when `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` and `userId` are present. The default gate-off path retains the existing per-drop tRPC mutations.
 - Cross-list movement appends the item move before destination and source list reorders; movement timestamps are monotonic so batch replay preserves that dependency order. Custom-view reorder uses the stable per-user `entityClientId = "view-order"` key.
 - Pending, syncing, or failed outbox operations overlay incoming current/selected-view snapshots and the views cache before render via `lib/local-db/local-overlay.ts`. This protects pending work, but it is not sufficient after a create op flushes: the online read must retain the corresponding local entity and its relationships until the server snapshot includes them.
@@ -139,7 +142,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `absoluteUrl` resolves from `window.location.origin`, `NEXT_PUBLIC_SITE_URL`, `VERCEL_URL`, then localhost fallback.
 
 **Performance and local-first boundary:**
-- Reorder endpoints use batch raw SQL (`UPDATE ... FROM (VALUES ...)`) because individual Prisma updates timed out.
+- Legacy integer reorder endpoints retain batch raw SQL (`UPDATE ... FROM (VALUES ...)`). Fractional Replicache reorder applies one ownership-scoped entity update.
 - Heavy custom view recompute should stay outside short Prisma interactive transactions unless proven safe.
 - The offline app-shell landed in 1.9.19: `public/sw.js` is registered through `AppShellServiceWorker` when `NODE_ENV=production` or `NEXT_PUBLIC_OFFLINE_APP_SHELL_ENABLED=true`; navigations are network-first with a cached shell fallback, while only `/_next/static/` assets are cache-first. `app/manifest.ts` provides the native Next manifest.
 - The Dexie runtime read fallback now assembles a complete dashboard graph: list items, tags, list-tags, view-tags, view-list membership, and ordering are always defined before rendering. Custom views use the same tag projection and deterministic order semantics as the server-backed dashboard.
@@ -190,7 +193,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - 1.9.26 closes the replay-reader gap: the batch flush selects pending plus backoff-ready `failed` operations via `lib/sync/retry-backoff.ts`, and `reconcilePendingWritesOnLoad` resets stranded `syncing` rows to `pending` before flushing. Permanent rejections still stay `failed` and visible, and operations beyond `RETRY_MAX_ATTEMPTS` stop auto-retrying until an explicit retry.
 - Concurrent-flush suppression is in-tab single-flight owned by the per-user `useOfflineReplayTrigger` scheduler; cross-tab concurrent flushes (multiple open tabs) are not yet coordinated and remain a follow-up.
 - The Replicache gate now addresses the render race by making the local store the default render source. The legacy overlay/outbox-render/tRPC-render path remains intentionally intact under gate OFF and is retired only in 2.0.5.
-- Order remains integer `orderedIds` in 2.0.0; fractional indexing is deferred to 2.0.1. Periodic pull is the only Replicache refresh trigger; Supabase Broadcast poke is deferred to 2.0.2. Sharing/permissions and Yjs notes remain deferred to 2.0.3/2.0.4.
+- Fractional keys are nullable in PostgreSQL for rollout compatibility. The migration and one-time backfill must complete before assuming every persisted row has a key; pull fallback prevents null rows from entering the Replicache store. Periodic pull remains the only Replicache refresh trigger; Supabase Broadcast poke is deferred to 2.0.2. Sharing/permissions and Yjs notes remain deferred to 2.0.3/2.0.4.
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.

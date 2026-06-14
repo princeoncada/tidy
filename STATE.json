@@ -1,9 +1,9 @@
 {
-    "version":  "2.0.0",
-    "state":  "stable",
-    "phase":  "2.0.0",
-    "phaseTitle":  "Replicache Read-Path Inversion (Local Store as Render Source)",
-    "nextPhase":  "2.0.1 - Fractional Indexing for Order",
+    "version":  "2.0.1-alpha",
+    "state":  "alpha",
+    "phase":  "2.0.1",
+    "phaseTitle":  "Fractional Indexing for Order",
+    "nextPhase":  "2.0.2 - Supabase Broadcast Realtime Poke",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-14"
 }

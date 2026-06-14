@@ -1,8 +1,8 @@
 import type { Prisma } from "@/app/generated/prisma/client";
 import {
-  readAllListsSnapshotForUser,
+  readReplicacheAllListsSnapshotForUser,
+  readReplicacheViewsForUser,
   readTagsForUser,
-  readViewsForUser,
 } from "@/lib/dashboard/server-read";
 import { db } from "@/lib/db";
 import {
@@ -109,9 +109,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const views = await readViewsForUser(user.id);
+  const views = await readReplicacheViewsForUser(user.id);
   const [allLists, tags] = await Promise.all([
-    readAllListsSnapshotForUser(user.id),
+    readReplicacheAllListsSnapshotForUser(user.id),
     readTagsForUser(user.id),
   ]);
   if (!allLists) {

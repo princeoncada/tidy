@@ -33,6 +33,12 @@ export type ReplicacheDashboardGraph = {
   selectedViewId: string | undefined;
 };
 
+export type ReplicacheOrderKeys = {
+  views: ReadonlyMap<string, string>;
+  viewLists: ReadonlyMap<string, string>;
+  listItems: ReadonlyMap<string, string>;
+};
+
 const EMPTY_GRAPH: ReplicacheDashboardGraph = {
   lists: [],
   listItems: [],
@@ -46,6 +52,17 @@ const EMPTY_GRAPH: ReplicacheDashboardGraph = {
 
 function toDate(value: string) {
   return new Date(value);
+}
+
+function compareOrderKeys(
+  leftKey: string,
+  rightKey: string,
+  leftId: string,
+  rightId: string,
+) {
+  if (leftKey < rightKey) return -1;
+  if (leftKey > rightKey) return 1;
+  return leftId.localeCompare(rightId);
 }
 
 export function assembleReplicacheDashboard(
@@ -65,9 +82,13 @@ export function assembleReplicacheDashboard(
     }))
     .sort((left, right) => left.name.localeCompare(right.name));
   const tagById = new Map(tags.map((tag) => [tag.id, tag]));
-  const views: ViewsCache = graph.views
-    .map((view) => ({
+  const sortedGraphViews = [...graph.views].sort((left, right) =>
+    compareOrderKeys(left.order, right.order, left.id, right.id)
+  );
+  const views: ViewsCache = sortedGraphViews
+    .map((view, viewIndex) => ({
       ...view,
+      order: viewIndex,
       isDefault: graph.selectedViewId
         ? view.id === graph.selectedViewId
         : view.isDefault,
@@ -75,13 +96,18 @@ export function assembleReplicacheDashboard(
       updatedAt: toDate(view.updatedAt),
       viewLists: graph.viewLists
         .filter((viewList) => viewList.viewId === view.id)
-        .map((viewList) => ({
-          listId: viewList.listId,
-          order: viewList.order,
-        }))
         .sort((left, right) =>
-          left.order - right.order || left.listId.localeCompare(right.listId)
-        ),
+          compareOrderKeys(
+            left.order,
+            right.order,
+            left.listId,
+            right.listId,
+          )
+        )
+        .map((viewList, index) => ({
+          listId: viewList.listId,
+          order: index,
+        })),
       viewTags: graph.viewTags
         .filter((viewTag) => viewTag.viewId === view.id)
         .flatMap((viewTag) => {
@@ -95,10 +121,7 @@ export function assembleReplicacheDashboard(
             : [];
         })
         .sort((left, right) => left.tagId.localeCompare(right.tagId)),
-    }))
-    .sort((left, right) =>
-      left.order - right.order || left.id.localeCompare(right.id)
-    );
+    }));
   const allListsView = views.find((view) => view.type === "ALL_LISTS");
   const allListsOrders = new Map(
     allListsView?.viewLists.map((viewList) => [
@@ -117,14 +140,20 @@ export function assembleReplicacheDashboard(
             updatedAt: toDate(list.updatedAt),
             listItems: graph.listItems
               .filter((item) => item.listId === list.id)
-              .map((item) => ({
+              .sort((left, right) =>
+                compareOrderKeys(
+                  left.order,
+                  right.order,
+                  left.id,
+                  right.id,
+                )
+              )
+              .map((item, itemIndex) => ({
                 ...item,
+                order: itemIndex,
                 createdAt: toDate(item.createdAt),
                 updatedAt: toDate(item.updatedAt),
-              }))
-              .sort((left, right) =>
-                left.order - right.order || left.id.localeCompare(right.id)
-              ),
+              })),
             listTags: graph.listTags
               .filter((listTag) => listTag.listId === list.id)
               .flatMap((listTag) => {
@@ -145,6 +174,18 @@ export function assembleReplicacheDashboard(
       }
     : undefined;
   const selectedView = selectedViewFromCache(views);
+  const orderKeys: ReplicacheOrderKeys = {
+    views: new Map(graph.views.map((view) => [view.id, view.order])),
+    viewLists: new Map(
+      graph.viewLists.map((viewList) => [
+        replicacheKeys.viewList(viewList.viewId, viewList.listId),
+        viewList.order,
+      ]),
+    ),
+    listItems: new Map(
+      graph.listItems.map((item) => [item.id, item.order]),
+    ),
+  };
 
   return {
     views,
@@ -152,6 +193,7 @@ export function assembleReplicacheDashboard(
     allLists,
     selectedView,
     currentView: projectView(selectedView, allLists),
+    orderKeys,
   };
 }
 
