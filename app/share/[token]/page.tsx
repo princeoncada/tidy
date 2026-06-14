@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 
-import { ReplicacheProvider } from "@/components/ReplicacheProvider";
 import { ShareRedeemer } from "@/components/sharing/ShareRedeemer";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,9 +18,5 @@ export default async function SharePage({
     redirect(`/login?next=${encodeURIComponent(`/share/${token}`)}`);
   }
 
-  return (
-    <ReplicacheProvider userId={user.id}>
-      <ShareRedeemer token={token} />
-    </ReplicacheProvider>
-  );
+  return <ShareRedeemer token={token} />;
 }
