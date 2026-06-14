@@ -285,12 +285,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.1 - Fractional Indexing for Order (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.0.1 - Fractional Indexing for Order
-- **Status:** Open | Priority: P1 2.0 local-first render
+- **Status:** In progress | Priority: P1 2.0 local-first render
 - **Type:** product behavior
 - **Files:** lib/sync/*, lib/dashboard-cache.ts, components/list/*, prisma/schema.prisma (order columns)
 - **Implementation goal:** replace coarse `orderedIds` reorder operations with client-generated fractional indices for list, item, and view order.
