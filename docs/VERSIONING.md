@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.10.0
-- **Current phase:** 1.10.0 - Copy and Metadata Hygiene
-- **Next phase:** 1.10.1 - Auth Flow Copy Polish
+- **Current version:** 1.10.1-alpha
+- **Current phase:** 1.10.1 - Landing Page Branding Polish
+- **Next phase:** 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
 
 ---
 
