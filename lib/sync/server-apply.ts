@@ -6,6 +6,10 @@ import {
 } from "@/app/generated/prisma/client";
 import { db } from "@/lib/db";
 import type { LocalJsonValue, LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
+import {
+  canEditContent,
+  getEffectiveListRole,
+} from "@/lib/sync/permissions";
 import type { SyncBatchOperationDecision } from "@/lib/sync/sync-batch-contract";
 import {
   ensureAllListsView,
@@ -268,21 +272,26 @@ async function applyListOperation(
       if (!existing) {
         return rejected(decision, "List update target was not found.");
       }
-      if (existing.userId !== userId) {
-        return rejected(decision, "List update target belongs to another user.");
+      const role = await getEffectiveListRole(
+        tx,
+        userId,
+        operation.entityClientId,
+      );
+      if (!canEditContent(role)) {
+        return rejected(decision, "List update requires edit access.");
       }
       if (existing.name === name) {
         return result(decision.operationId, "already-applied");
       }
 
       const update = await tx.list.updateMany({
-        where: { id: operation.entityClientId, userId },
+        where: { id: operation.entityClientId },
         data: { name },
       });
 
       return update.count > 0
         ? result(decision.operationId, "applied")
-        : rejected(decision, "List update ownership check failed.");
+        : rejected(decision, "List update edit access check failed.");
     }
 
     case "delete": {
@@ -411,21 +420,23 @@ async function applyListItemOperation(
         where: { id: operation.entityClientId },
         select: {
           id: true,
-          parentList: { select: { userId: true } },
+          listId: true,
         },
       });
       if (existing) {
-        return existing.parentList.userId === userId
+        const existingRole = await getEffectiveListRole(
+          tx,
+          userId,
+          existing.listId,
+        );
+        return canEditContent(existingRole)
           ? result(decision.operationId, "already-applied")
-          : rejected(decision, "List item id belongs to another user.");
+          : rejected(decision, "List item id requires edit access.");
       }
 
-      const parentList = await tx.list.findFirst({
-        where: { id: listId, userId },
-        select: { id: true },
-      });
-      if (!parentList) {
-        return rejected(decision, "List item parent list was not found for this user.");
+      const parentRole = await getEffectiveListRole(tx, userId, listId);
+      if (!canEditContent(parentRole)) {
+        return rejected(decision, "List item parent list requires edit access.");
       }
 
       const topItem = await tx.listItem.findFirst({
@@ -467,14 +478,15 @@ async function applyListItemOperation(
           name: true,
           completed: true,
           notes: true,
-          parentList: { select: { userId: true } },
+          listId: true,
         },
       });
       if (!existing) {
         return rejected(decision, "List item update target was not found.");
       }
-      if (existing.parentList.userId !== userId) {
-        return rejected(decision, "List item update target belongs to another user.");
+      const role = await getEffectiveListRole(tx, userId, existing.listId);
+      if (!canEditContent(role)) {
+        return rejected(decision, "List item update requires edit access.");
       }
 
       const unchanged =
@@ -486,10 +498,7 @@ async function applyListItemOperation(
       }
 
       const update = await tx.listItem.updateMany({
-        where: {
-          id: operation.entityClientId,
-          parentList: { userId },
-        },
+        where: { id: operation.entityClientId },
         data: {
           ...(name !== null ? { name } : {}),
           ...(completed !== undefined ? { completed } : {}),
@@ -499,28 +508,24 @@ async function applyListItemOperation(
 
       return update.count > 0
         ? result(decision.operationId, "applied")
-        : rejected(decision, "List item update ownership check failed.");
+        : rejected(decision, "List item update edit access check failed.");
     }
 
     case "delete": {
       const existing = await tx.listItem.findUnique({
         where: { id: operation.entityClientId },
-        select: {
-          parentList: { select: { userId: true } },
-        },
+        select: { listId: true },
       });
       if (!existing) {
         return result(decision.operationId, "already-applied");
       }
-      if (existing.parentList.userId !== userId) {
-        return rejected(decision, "List item delete target belongs to another user.");
+      const role = await getEffectiveListRole(tx, userId, existing.listId);
+      if (!canEditContent(role)) {
+        return rejected(decision, "List item delete requires edit access.");
       }
 
       await tx.listItem.deleteMany({
-        where: {
-          id: operation.entityClientId,
-          parentList: { userId },
-        },
+        where: { id: operation.entityClientId },
       });
       return result(decision.operationId, "applied");
     }
@@ -541,17 +546,19 @@ async function applyListItemOperation(
           select: {
             listId: true,
             orderKey: true,
-            parentList: { select: { userId: true } },
           },
         });
+        const role = existing
+          ? await getEffectiveListRole(tx, userId, existing.listId)
+          : null;
         if (
           !existing ||
-          existing.parentList.userId !== userId ||
+          !canEditContent(role) ||
           existing.listId !== listId
         ) {
           return rejected(
             decision,
-            "Fractional list item reorder target is not in the owned list.",
+            "Fractional list item reorder requires edit access to the target list.",
           );
         }
         if (existing.orderKey === orderKey) {
@@ -562,13 +569,12 @@ async function applyListItemOperation(
           where: {
             id: operation.entityClientId,
             listId,
-            parentList: { userId },
           },
           data: { orderKey },
         });
         return update.count > 0
           ? result(decision.operationId, "applied")
-          : rejected(decision, "List item reorder ownership check failed.");
+          : rejected(decision, "List item reorder edit access check failed.");
       }
 
       const orderedIds = getStringArray(operation, "orderedIds");
@@ -582,26 +588,22 @@ async function applyListItemOperation(
         return result(decision.operationId, "already-applied");
       }
 
-      const parentList = await tx.list.findFirst({
-        where: { id: listId, userId },
-        select: { id: true },
-      });
-      if (!parentList) {
-        return rejected(decision, "List item reorder target list is not owned.");
+      const role = await getEffectiveListRole(tx, userId, listId);
+      if (!canEditContent(role)) {
+        return rejected(decision, "List item reorder requires edit access.");
       }
 
       const items = await tx.listItem.findMany({
         where: {
           id: { in: orderedIds },
           listId,
-          parentList: { userId },
         },
         select: { id: true, listId: true, order: true },
       });
       if (items.length !== orderedIds.length) {
         return rejected(
           decision,
-          "List item reorder includes an item outside the owned target list.",
+          "List item reorder includes an item outside the permitted target list.",
         );
       }
 
@@ -644,29 +646,26 @@ async function applyListItemOperation(
         );
       }
 
-      const [existing, targetList] = await Promise.all([
-        tx.listItem.findUnique({
-          where: { id: operation.entityClientId },
-          select: {
-            listId: true,
-            order: true,
-            orderKey: true,
-            parentList: { select: { userId: true } },
-          },
-        }),
-        tx.list.findFirst({
-          where: { id: toListId, userId },
-          select: { id: true },
-        }),
-      ]);
+      const existing = await tx.listItem.findUnique({
+        where: { id: operation.entityClientId },
+        select: {
+          listId: true,
+          order: true,
+          orderKey: true,
+        },
+      });
 
       if (!existing) {
         return rejected(decision, "List item move target was not found.");
       }
-      if (existing.parentList.userId !== userId || !targetList) {
+      const [sourceRole, targetRole] = await Promise.all([
+        getEffectiveListRole(tx, userId, existing.listId),
+        getEffectiveListRole(tx, userId, toListId),
+      ]);
+      if (!canEditContent(sourceRole) || !canEditContent(targetRole)) {
         return rejected(
           decision,
-          "List item move ownership or target-list check failed.",
+          "List item move requires edit access to source and destination lists.",
         );
       }
       const unchanged = orderKey
@@ -677,10 +676,7 @@ async function applyListItemOperation(
       }
 
       const update = await tx.listItem.updateMany({
-        where: {
-          id: operation.entityClientId,
-          parentList: { userId },
-        },
+        where: { id: operation.entityClientId },
         data: {
           listId: toListId,
           ...(orderKey ? { orderKey } : { order: order! }),
@@ -689,7 +685,7 @@ async function applyListItemOperation(
 
       return update.count > 0
         ? result(decision.operationId, "applied")
-        : rejected(decision, "List item move ownership check failed.");
+        : rejected(decision, "List item move edit access check failed.");
     }
 
     case "upsert":
