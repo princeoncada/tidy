@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.0.2-alpha
+- **Current version:** 2.0.2
 - **Current phase:** 2.0.2 - Supabase Broadcast Realtime Poke
 - **Next phase:** 2.0.3 - Sharing & Permissions
 
