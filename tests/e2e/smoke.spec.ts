@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("app loads successfully", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("Simple Todo App")).toBeVisible();
+  await expect(page.getByText("Tidy", { exact: true })).toBeVisible();
 });
 
 test("no critical console errors on initial page load", async ({ page }) => {
@@ -28,7 +28,7 @@ test("no critical console errors on initial page load", async ({ page }) => {
   });
 
   await page.goto("/");
-  await expect(page.getByText("Simple Todo App")).toBeVisible();
+  await expect(page.getByText("Tidy", { exact: true })).toBeVisible();
 
   expect(errors).toEqual([]);
 });

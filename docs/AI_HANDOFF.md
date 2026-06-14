@@ -1,11 +1,11 @@
-<!-- Current Version: 1.10.0 -->
+<!-- Current Version: 1.10.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.10.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.10.0 - Copy and Metadata Hygiene
-**Next**: 1.10.1 - Auth Flow Copy Polish
+**Current Version**: 1.10.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.10.1 - Landing Page Branding Polish
+**Next**: 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -192,7 +192,6 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - The movement overlay also retains the moving item defensively if no destination placement is available. Unit coverage proves both the partial-sync retention guard and stale-versus-confirmed movement handoff.
 - No keyboard drag accessibility validation.
 - UI/UX polish is intentionally late, after projection correctness, ownership, optimistic behavior, and test baselines.
-- Register submit button says "Login".
 - Landing page has typo/generic branding.
 
 **Workflow:**
