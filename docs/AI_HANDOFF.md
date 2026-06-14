@@ -1,9 +1,9 @@
-<!-- Current Version: 2.0.4-alpha -->
+<!-- Current Version: 2.0.4 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.0.4 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.0.4 - Replicache Pull Cookie Monotonicity Fix
 **Next**: 2.0.5 - Yjs Collaborative Item Notes
 
