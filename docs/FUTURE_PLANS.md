@@ -277,12 +277,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.9.32 - Local-First Dashboard Architecture Closeout (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.9.32 - Local-First Dashboard Architecture Closeout
-- **Status:** Open | Priority: P1 decision
+- **Status:** In progress | Priority: P1 decision
 - **Type:** decision
 - **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
 - **Implementation goal:** evaluate the shipped reconciled read graph, Dexie-first dashboard writes, and bounded server batch sync; record residual limitations and whether the 1.9.x local-first series is complete.
