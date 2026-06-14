@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "1.9.32",
+  "version": "1.10.0-alpha",
   "generatedAt": "2026-06-14",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -2673,6 +2673,17 @@
         "@/lib/local-db/outbox-schema",
         "@/lib/local-db/tidy-db",
         "@/lib/local-db/local-write"
+      ]
+    },
+    {
+      "path": "tests/unit/metadata-assets.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "node:fs",
+        "node:path",
+        "vitest"
       ]
     },
     {
