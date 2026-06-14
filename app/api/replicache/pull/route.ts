@@ -1,10 +1,12 @@
 import type { Prisma } from "@/app/generated/prisma/client";
 import {
+  readReplicacheAccessibleListsForUser,
   readReplicacheAllListsSnapshotForUser,
   readReplicacheViewsForUser,
   readTagsForUser,
 } from "@/lib/dashboard/server-read";
 import { db } from "@/lib/db";
+import { initialKeys, keyBetween } from "@/lib/sync/fractional-index";
 import {
   buildReplicacheClientView,
   diffReplicacheClientViews,
@@ -109,9 +111,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const views = await readReplicacheViewsForUser(user.id);
-  const [allLists, tags] = await Promise.all([
+  const [views, allLists, accessibleLists, tags] = await Promise.all([
+    readReplicacheViewsForUser(user.id),
     readReplicacheAllListsSnapshotForUser(user.id),
+    readReplicacheAccessibleListsForUser(user.id),
     readTagsForUser(user.id),
   ]);
   if (!allLists) {
@@ -121,7 +124,43 @@ export async function POST(request: Request) {
     );
   }
 
-  const current = buildReplicacheClientView({ views, allLists, tags });
+  const allListsView = views.find((view) => view.type === "ALL_LISTS");
+  const ownedFallbackKeys = initialKeys(allListsView?.viewLists.length ?? 0);
+  const ownedOrderKeys = (allListsView?.viewLists ?? []).map(
+    (membership, index) => membership.orderKey ?? ownedFallbackKeys[index],
+  );
+  let trailingOrderKey = ownedOrderKeys.reduce<string | null>(
+    (largest, key) => !largest || key > largest ? key : largest,
+    null,
+  );
+  const sharedMemberships = accessibleLists.map((list, index) => {
+    trailingOrderKey = keyBetween(trailingOrderKey, null);
+    return {
+      listId: list.id,
+      order: (allListsView?.viewLists.length ?? 0) + index,
+      orderKey: trailingOrderKey,
+    };
+  });
+  const mergedViews = views.map((view) =>
+    view.type === "ALL_LISTS"
+      ? { ...view, viewLists: [...view.viewLists, ...sharedMemberships] }
+      : view
+  );
+  const mergedAllLists = {
+    ...allLists,
+    lists: [
+      ...allLists.lists.map((list) => ({
+        ...list,
+        accessRole: "OWNER" as const,
+      })),
+      ...accessibleLists,
+    ],
+  };
+  const current = buildReplicacheClientView({
+    views: mergedViews,
+    allLists: mergedAllLists,
+    tags,
+  });
   const database = db as unknown as PullDatabase;
 
   try {
