@@ -58,6 +58,8 @@ import ListItemComponent from './ListItemComponent';
 import ListSkeleton from './ListSkeleton';
 import { CurrentView, List, Lists, OptimisticList, OptimisticListItem } from './types';
 import ListEmpty from './ListEmpty';
+import { useReplicacheDashboard } from '@/hooks/useReplicacheDashboard';
+import { useDashboardMutations } from '@/hooks/useDashboardMutations';
 
 type DragPreviewLists = Lists;
 type ListsContainerProps = {
@@ -279,7 +281,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const movementCaptureEnabled = Boolean(boot.userId);
+  const replicacheDashboard = useReplicacheDashboard();
+  const dashboardMutations = useDashboardMutations();
+  const movementCaptureEnabled =
+    !replicacheDashboard.enabled && Boolean(boot.userId);
   const [pendingMovementOperations, setPendingMovementOperations] = useState<
     Parameters<typeof applyPendingOutboxOverlay>[1]
   >([]);
@@ -297,12 +302,17 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     isError: viewsError,
     isSuccess: viewsSucceeded,
     failureCount: viewsFailureCount,
-  } = useQuery(trpc.view.getAll.queryOptions());
+  } = useQuery({
+    ...trpc.view.getAll.queryOptions(),
+    enabled: !replicacheDashboard.enabled,
+  });
 
   const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
     ? undefined
     : views;
-  const serverEffectiveViews = views ?? boot.localViews;
+  const serverEffectiveViews = replicacheDashboard.enabled
+    ? replicacheDashboard.views
+    : views ?? boot.localViews;
   const confirmedServerViews = useAuthoritativeQuerySnapshot<ViewsCache>({
     queryClient,
     queryKey: trpc.view.getAll.queryKey(),
@@ -361,7 +371,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const outboxRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const outboxSignatureRef = useRef<string>("");
   const { data: bootCurrentView, isLoading: bootListsLoading, isError: bootListsError } = useQuery(
-    trpc.view.getCurrentViewListsWithItems.queryOptions()
+    {
+      ...trpc.view.getCurrentViewListsWithItems.queryOptions(),
+      enabled: !replicacheDashboard.enabled,
+    }
   );
 
   const {
@@ -372,14 +385,20 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: serverAllListsView?.id ?? EMPTY_VIEW_ID },
-      { enabled: Boolean(serverAllListsView?.id) }
+      {
+        enabled:
+          !replicacheDashboard.enabled && Boolean(serverAllListsView?.id),
+      }
     )
   );
 
   const { data: selectedViewSnapshot, isLoading: selectedViewLoading, isError: selectedViewError } = useQuery(
     trpc.view.getViewListsWithItems.queryOptions(
       { viewId: serverSelectedView?.id ?? EMPTY_VIEW_ID },
-      { enabled: Boolean(serverSelectedView?.id) }
+      {
+        enabled:
+          !replicacheDashboard.enabled && Boolean(serverSelectedView?.id),
+      }
     )
   );
 
@@ -613,13 +632,15 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const apiUnavailable = (viewsError || viewsFailureCount > 0) && !views;
   const usingLocalFallback = apiUnavailable && boot.localBootReady;
 
-  const currentView = resolveDashboardCurrentView({
-    selectedViewId,
-    selectedViewSnapshot: effectiveSelectedViewSnapshot,
-    bootCurrentView: effectiveBootCurrentView,
-    localCurrentView: usingLocalFallback ? boot.localCurrentView : undefined,
-    previousCurrentView: undefined,
-  });
+  const currentView = replicacheDashboard.enabled
+    ? replicacheDashboard.currentView
+    : resolveDashboardCurrentView({
+        selectedViewId,
+        selectedViewSnapshot: effectiveSelectedViewSnapshot,
+        bootCurrentView: effectiveBootCurrentView,
+        localCurrentView: usingLocalFallback ? boot.localCurrentView : undefined,
+        previousCurrentView: undefined,
+      });
 
   const lists = currentView?.lists ?? [];
   const visibleLists = dragPreviewLists ?? lists;
@@ -681,6 +702,18 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const scheduleReorderListsSave = useCallback(async (nextLists: Lists) => {
     if (!boot.userId) return;
 
+    if (
+      dashboardMutations.enabled &&
+      dashboardMutations.mutate &&
+      currentView
+    ) {
+      await dashboardMutations.mutate.reorderLists({
+        viewId: currentView.view.id,
+        orderedIds: nextLists.map((list) => list.id),
+      });
+      return;
+    }
+
     await Promise.all([
       queryClient.cancelQueries({ queryKey }),
       queryClient.cancelQueries({ queryKey: currentViewQueryKey }),
@@ -714,6 +747,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     queryKey,
     currentViewQueryKey,
     currentView,
+    dashboardMutations,
     boot.userId,
     optimisticSync,
     queryClient,
@@ -744,6 +778,65 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     nextLists: Lists,
   ) => {
     if (!boot.userId) return;
+
+    if (dashboardMutations.enabled && dashboardMutations.mutate) {
+      const previousPlacement = new Map(
+        previousLists.flatMap((list) =>
+          list.listItems.map((item) => [
+            item.id,
+            { listId: list.id, order: item.order },
+          ] as const)
+        ),
+      );
+      const moved = nextLists
+        .flatMap((list) =>
+          list.listItems.map((item, order) => ({
+            item,
+            listId: list.id,
+            order,
+            previous: previousPlacement.get(item.id),
+          }))
+        )
+        .find((entry) => entry.previous?.listId !== entry.listId);
+
+      if (moved?.previous) {
+        const sourceList = nextLists.find(
+          (list) => list.id === moved.previous?.listId,
+        );
+        const destinationList = nextLists.find(
+          (list) => list.id === moved.listId,
+        );
+        await dashboardMutations.mutate.moveItem({
+          id: moved.item.id,
+          fromListId: moved.previous.listId,
+          toListId: moved.listId,
+          order: moved.order,
+          destinationOrderedIds:
+            destinationList?.listItems.map((item) => item.id) ?? [],
+          sourceOrderedIds:
+            sourceList?.listItems.map((item) => item.id) ?? [],
+          now: new Date().toISOString(),
+        });
+        return;
+      }
+
+      const changedList = nextLists.find((list) => {
+        const previousList = previousLists.find(
+          (candidate) => candidate.id === list.id,
+        );
+        return previousList &&
+          !list.listItems.every(
+            (item, index) => item.id === previousList.listItems[index]?.id,
+          );
+      });
+      if (changedList) {
+        await dashboardMutations.mutate.reorderItems({
+          listId: changedList.id,
+          orderedIds: changedList.listItems.map((item) => item.id),
+        });
+      }
+      return;
+    }
 
     await Promise.all([
       queryClient.cancelQueries({ queryKey: allListsQueryKey }),
@@ -805,6 +898,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     queryKey,
     allListsQueryKey,
     currentViewQueryKey,
+    dashboardMutations,
     boot.userId,
     optimisticSync,
     queryClient,
@@ -835,11 +929,13 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
 
   if (
     (
-      viewsLoading ||
+      (replicacheDashboard.enabled
+        ? !replicacheDashboard.ready
+        : viewsLoading ||
+          bootListsLoading ||
+          allListsLoading ||
+          selectedViewLoading) ||
       !allListsView ||
-      bootListsLoading ||
-      allListsLoading ||
-      selectedViewLoading ||
       (movementCaptureEnabled && !pendingMovementReady)
     ) &&
     !usingLocalFallback
@@ -855,7 +951,11 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   }
 
 
-  if ((viewsError || bootListsError || allListsError || selectedViewError) && !usingLocalFallback) {
+  if (
+    !replicacheDashboard.enabled &&
+    (viewsError || bootListsError || allListsError || selectedViewError) &&
+    !usingLocalFallback
+  ) {
     return <>Something went wrong...</>;
   }
 
