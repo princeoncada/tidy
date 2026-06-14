@@ -213,6 +213,7 @@
       ],
       "imports": [
         "@/lib/supabase/server",
+        "@/lib/realtime/poke-server",
         "@/lib/sync/replicache/push"
       ]
     },
@@ -723,7 +724,8 @@
       ],
       "imports": [
         "react",
-        "@/lib/sync/replicache/client"
+        "@/lib/sync/replicache/client",
+        "@/lib/realtime/poke-client"
       ]
     },
     {
@@ -1879,6 +1881,38 @@
       "imports": [
         "react"
       ]
+    },
+    {
+      "path": "lib/realtime/poke-client.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "subscribeToPokes"
+      ],
+      "imports": [
+        "@/lib/realtime/poke-topic",
+        "@/lib/supabase/client"
+      ]
+    },
+    {
+      "path": "lib/realtime/poke-server.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "pokeUser"
+      ],
+      "imports": [
+        "@/lib/realtime/poke-topic"
+      ]
+    },
+    {
+      "path": "lib/realtime/poke-topic.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "pokeTopicForUser"
+      ],
+      "imports": []
     },
     {
       "path": "lib/supabase/auth-confirm.ts",
@@ -3038,6 +3072,17 @@
       ]
     },
     {
+      "path": "tests/unit/realtime-poke.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/realtime/poke-server",
+        "@/lib/realtime/poke-topic"
+      ]
+    },
+    {
       "path": "tests/unit/replicache-mutators.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3554,6 +3599,12 @@
       "to": "lib/sync/replicache/pull-cvr.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/pull-cvr"
+    },
+    {
+      "from": "app/api/replicache/push/route.ts",
+      "to": "lib/realtime/poke-server.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-server"
     },
     {
       "from": "app/api/replicache/push/route.ts",
@@ -4445,6 +4496,12 @@
     },
     {
       "from": "components/ReplicacheProvider.tsx",
+      "to": "lib/realtime/poke-client.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-client"
+    },
+    {
+      "from": "components/ReplicacheProvider.tsx",
       "to": "lib/sync/replicache/client.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/client"
@@ -5234,6 +5291,24 @@
       "to": "lib/local-first-dashboard.ts",
       "type": "imports",
       "import": "@/lib/local-first-dashboard"
+    },
+    {
+      "from": "lib/realtime/poke-client.ts",
+      "to": "lib/realtime/poke-topic.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-topic"
+    },
+    {
+      "from": "lib/realtime/poke-client.ts",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "lib/realtime/poke-server.ts",
+      "to": "lib/realtime/poke-topic.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-topic"
     },
     {
       "from": "lib/supabase/auth-confirm.ts",
@@ -6104,6 +6179,18 @@
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "tests/unit/realtime-poke.test.ts",
+      "to": "lib/realtime/poke-server.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-server"
+    },
+    {
+      "from": "tests/unit/realtime-poke.test.ts",
+      "to": "lib/realtime/poke-topic.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-topic"
     },
     {
       "from": "tests/unit/replicache-mutators.test.ts",
