@@ -1,9 +1,9 @@
-<!-- Current Version: 1.10.0-alpha -->
+<!-- Current Version: 1.10.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.10.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.10.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.10.0 - Copy and Metadata Hygiene
 **Next**: 1.10.1 - Auth Flow Copy Polish
 
