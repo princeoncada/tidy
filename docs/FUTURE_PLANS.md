@@ -274,6 +274,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.10.1 - Landing Page Branding Polish~~ (stable 2026-06-14)
 
+- ~~2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -283,21 +285,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source) (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.0 - Replicache Read-Path Inversion (Local Store as Render Source)
-- **Status:** In progress | Priority: P1 2.0 local-first render
-- **Type:** product behavior
-- **Files:** lib/sync/*, lib/dashboard-cache.ts, app/api/* (push / pull), components/list/*, prisma/schema.prisma (Replicache client / version tracking)
-- **Implementation goal:** adopt Replicache as the sync spine - one local store, deterministic mutators applied optimistically, batched `/push`, diff `/pull`, client rebase; the dashboard reads the local store via reactive queries and never a raw server payload.
-- **Product impact:** immediate local-first render; the optimistic / overlay / refetch flicker is eliminated.
-- **Runtime integration target:** dashboard renders from the Replicache local store; `/push` reuses `lib/sync/server-apply.ts`; Postgres / Prisma remain the durable source.
-- **Deferral boundary:** order representation -> 2.0.1; realtime poke -> 2.0.2; legacy overlay / outbox-render removal -> 2.0.5.
-- **Validation target:** targeted alpha + manual local-first render proof; full test:ci before stable.
-- **Acceptance:** create / edit / move renders instantly from the local store with no flicker; server rejections surface as background corrections, not UI rollbacks.
 
 ### 2.0.1 - Fractional Indexing for Order
 - **Status:** Open | Priority: P1 2.0 local-first render
