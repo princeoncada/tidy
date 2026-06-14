@@ -287,12 +287,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.2 - Supabase Broadcast Realtime Poke (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.0.2 - Supabase Broadcast Realtime Poke
-- **Status:** Open | Priority: P1 2.0 realtime
+- **Status:** In progress | Priority: P1 2.0 realtime
 - **Type:** product behavior
 - **Files:** lib/sync/*, app/api/sync/route.ts, lib/realtime/* (new), components/*
 - **Implementation goal:** emit one Supabase Broadcast message per `/api/sync` batch ("changed, cursor=N") on a per-workspace / list channel; receivers PULL the delta. Doorbell, not delivery.
