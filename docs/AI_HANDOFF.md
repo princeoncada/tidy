@@ -1,9 +1,9 @@
-<!-- Current Version: 1.9.32-alpha -->
+<!-- Current Version: 1.9.32 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.32-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 1.9.32 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 1.9.32 - Local-First Dashboard Architecture Closeout
 **Next**: 1.10.0 - Copy and Metadata Hygiene
 
