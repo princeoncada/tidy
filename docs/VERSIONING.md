@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 1.10.0-alpha
+- **Current version:** 1.10.0
 - **Current phase:** 1.10.0 - Copy and Metadata Hygiene
 - **Next phase:** 1.10.1 - Auth Flow Copy Polish
 
