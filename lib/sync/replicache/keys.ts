@@ -28,6 +28,7 @@ export type ReplicacheListValue = {
   id: string;
   userId: string;
   name: string;
+  accessRole?: "OWNER" | "EDITOR" | "VIEWER";
   createdAt: string;
   updatedAt: string;
 };
