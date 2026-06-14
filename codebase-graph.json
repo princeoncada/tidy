@@ -3317,6 +3317,17 @@
       ]
     },
     {
+      "path": "tests/unit/share-redeemer.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/sharing/ShareRedeemer"
+      ]
+    },
+    {
       "path": "tests/unit/share-router.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -6669,6 +6680,12 @@
       "to": "lib/sync/sync-batch-contract.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
+      "from": "tests/unit/share-redeemer.test.tsx",
+      "to": "components/sharing/ShareRedeemer.tsx",
+      "type": "imports",
+      "import": "@/components/sharing/ShareRedeemer"
     },
     {
       "from": "tests/unit/share-router.test.ts",
