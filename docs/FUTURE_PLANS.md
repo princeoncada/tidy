@@ -287,15 +287,16 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.2 - Supabase Broadcast Realtime Poke (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.0.2 - Supabase Broadcast Realtime Poke
-- **Status:** Open | Priority: P1 2.0 realtime
+- **Status:** In progress | Priority: P1 2.0 realtime
 - **Type:** product behavior
-- **Files:** lib/sync/*, app/api/sync/route.ts, lib/realtime/* (new), components/*
-- **Implementation goal:** emit one Supabase Broadcast message per `/api/sync` batch ("changed, cursor=N") on a per-workspace / list channel; receivers PULL the delta. Doorbell, not delivery.
+- **Files:** lib/realtime/* (new), app/api/replicache/push/route.ts, lib/sync/replicache/push.ts, components/ReplicacheProvider.tsx
+- **Implementation goal:** emit one Supabase Broadcast message per applied `/api/replicache/push` batch on a per-user channel; receivers PULL the delta. Doorbell, not delivery.
 - **Product impact:** near-real-time multi-client / multi-tab convergence.
 - **Runtime integration target:** a batch flush pokes the channel; receivers pull; missed messages self-heal on the next pull.
 - **Deferral boundary:** multi-user access control -> 2.0.3.

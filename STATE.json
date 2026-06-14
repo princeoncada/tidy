@@ -1,9 +1,9 @@
 {
-    "version":  "2.0.1",
-    "state":  "stable",
-    "phase":  "2.0.1",
-    "phaseTitle":  "Fractional Indexing for Order",
-    "nextPhase":  "2.0.2 - Supabase Broadcast Realtime Poke",
+    "version":  "2.0.2-alpha",
+    "state":  "alpha",
+    "phase":  "2.0.2",
+    "phaseTitle":  "Supabase Broadcast Realtime Poke",
+    "nextPhase":  "2.0.3 - Sharing \u0026 Permissions",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-14"
 }

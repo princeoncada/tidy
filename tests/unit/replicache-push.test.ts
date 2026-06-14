@@ -81,6 +81,37 @@ describe("Replicache push ordering", () => {
     expect(client.lastMutationID).toBe(2);
     expect(result.corrections).toHaveLength(1);
     expect(result.corrections[0]).toMatchObject({ mutationID: 2 });
+    expect(result.applied).toBe(1);
+  });
+
+  it("reports zero applied mutations when every mutation is already applied", async () => {
+    const { database } = createPushDatabase(2);
+
+    const result = await processReplicachePush({
+      userId: "user-1",
+      clientGroupID: "group-1",
+      mutations: [
+        {
+          id: 1,
+          clientID: "client-1",
+          name: "unknown-old",
+          args: {},
+          timestamp: Date.now(),
+        },
+        {
+          id: 2,
+          clientID: "client-1",
+          name: "unknown-current",
+          args: {},
+          timestamp: Date.now(),
+        },
+      ],
+      database,
+      runEffects: vi.fn(async () => undefined),
+    });
+
+    expect(result.applied).toBe(0);
+    expect(result.corrections).toEqual([]);
   });
 
   it("advances lastMutationID atomically for an ownership rejection", async () => {

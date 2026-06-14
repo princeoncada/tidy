@@ -125,8 +125,9 @@ export async function processReplicachePush({
   mutations: ReplicachePushMutation[];
   database?: ReplicachePushDatabase;
   runEffects?: (effects: SyncPostCommitEffects) => Promise<void>;
-}): Promise<{ corrections: ReplicachePushCorrection[] }> {
+}): Promise<{ corrections: ReplicachePushCorrection[]; applied: number }> {
   const corrections: ReplicachePushCorrection[] = [];
+  let applied = 0;
 
   for (const mutation of mutations) {
     const transactionResult = await database.$transaction(
@@ -230,10 +231,11 @@ export async function processReplicachePush({
       break;
     }
     if (transactionResult.action === "applied") {
+      applied += 1;
       corrections.push(...transactionResult.corrections);
       await runEffects(transactionResult.effects);
     }
   }
 
-  return { corrections };
+  return { corrections, applied };
 }

@@ -7,7 +7,8 @@ import {
 function omitOrderKey<T extends { orderKey: unknown }>(
   value: T,
 ): Omit<T, "orderKey"> {
-  const { orderKey: _orderKey, ...legacyValue } = value;
+  const legacyValue = { ...value };
+  Reflect.deleteProperty(legacyValue, "orderKey");
   return legacyValue;
 }
 

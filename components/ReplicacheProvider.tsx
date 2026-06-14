@@ -14,6 +14,7 @@ import {
   isReplicacheRenderEnabled,
   type TidyReplicache,
 } from "@/lib/sync/replicache/client";
+import { subscribeToPokes } from "@/lib/realtime/poke-client";
 
 type ReplicacheContextValue = {
   rep: TidyReplicache | null;
@@ -80,6 +81,21 @@ export function ReplicacheProvider({
       }, 0);
     };
   }, [userId]);
+
+  useEffect(() => {
+    if (!isReplicacheRenderEnabled()) return;
+    const rep =
+      activeInstance?.userId === userId ? activeInstance.rep : null;
+    if (!rep) return;
+
+    const unsubscribe = subscribeToPokes({
+      userId,
+      onPoke: () => {
+        void rep.pull().catch(() => {});
+      },
+    });
+    return unsubscribe;
+  }, [userId, activeInstance]);
 
   const activeRep =
     activeInstance?.userId === userId ? activeInstance.rep : null;
