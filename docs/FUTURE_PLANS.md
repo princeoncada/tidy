@@ -278,6 +278,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.1 - Fractional Indexing for Order~~ (stable 2026-06-14)
 
+- ~~2.0.2 - Supabase Broadcast Realtime Poke~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -287,21 +289,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.2 - Supabase Broadcast Realtime Poke (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.2 - Supabase Broadcast Realtime Poke
-- **Status:** In progress | Priority: P1 2.0 realtime
-- **Type:** product behavior
-- **Files:** lib/realtime/* (new), app/api/replicache/push/route.ts, lib/sync/replicache/push.ts, components/ReplicacheProvider.tsx
-- **Implementation goal:** emit one Supabase Broadcast message per applied `/api/replicache/push` batch on a per-user channel; receivers PULL the delta. Doorbell, not delivery.
-- **Product impact:** near-real-time multi-client / multi-tab convergence.
-- **Runtime integration target:** a batch flush pokes the channel; receivers pull; missed messages self-heal on the next pull.
-- **Deferral boundary:** multi-user access control -> 2.0.3.
-- **Validation target:** targeted alpha + manual two-client convergence proof; full test:ci before stable.
-- **Acceptance:** a change in one client appears in another via poke + pull without per-row CDC.
 
 ### 2.0.3 - Sharing & Permissions
 - **Status:** Open | Priority: P1 2.0 collaboration
