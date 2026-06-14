@@ -26,6 +26,7 @@ interface ListItemComponentProps {
   onRevealComplete?: () => void;
   dashboardKeys: DashboardKeys;
   userId: string | null;
+  canEdit?: boolean;
 }
 
 const ListItemComponent = ({
@@ -34,7 +35,8 @@ const ListItemComponent = ({
   shouldRevealOnMount,
   onRevealComplete,
   dashboardKeys,
-  userId
+  userId,
+  canEdit = true,
 }: ListItemComponentProps) => {
 
   useRenderMeasure(`ListItemComponent:${listItem.id}`);
@@ -130,7 +132,8 @@ const ListItemComponent = ({
     index,
     type: 'list-item',
     accept: 'list-item',
-    group: "list-items"
+    group: "list-items",
+    disabled: !canEdit,
   });
 
   if (itemDeleted) {
@@ -152,8 +155,13 @@ const ListItemComponent = ({
     >
       <div
         data-testid="item-drag-handle"
-        ref={itemHandle}
-        className="cursor-grab active:cursor-grabbing touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-gray-400"
+        ref={canEdit ? itemHandle : undefined}
+        className={cn(
+          "touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-gray-400",
+          canEdit
+            ? "cursor-grab active:cursor-grabbing"
+            : "cursor-default opacity-30",
+        )}
       >
         <GripVertical className="w-3.5 h-3.5" />
       </div>
@@ -162,6 +170,7 @@ const ListItemComponent = ({
         className="w-4 h-4 shrink-0 hover:cursor-pointer my-1"
         checked={listItem.completed}
         onClick={handleToggleCompletion}
+        disabled={!canEdit}
       />
 
       <div className="min-w-0 flex-1">
@@ -175,12 +184,13 @@ const ListItemComponent = ({
           id={listItem.id}
           value={listItem.name}
           onSave={handleRenameItem}
+          disabled={!canEdit}
           displayClassName="whitespace-normal"
           inputClassName="text-sm! p-0! leading-6! break-normal!"
         />
       </div>
 
-      <Button
+      {canEdit && <Button
         className="scale-80 shrink-0 self-start bg-transparent hover:bg-red-500/10 opacity-100 transition-all duration-100"
         variant="destructive"
         size="icon-xs"
@@ -192,7 +202,7 @@ const ListItemComponent = ({
         }}
       >
         <X />
-      </Button>
+      </Button>}
     </div>
   );
 };
