@@ -6,6 +6,7 @@ import type {
   readReplicacheViewsForUser,
   readTagsForUser,
 } from "@/lib/dashboard/server-read";
+import type { ShareRole } from "@/lib/sync/permissions";
 import { initialKeys } from "@/lib/sync/fractional-index";
 import { replicacheKeys } from "@/lib/sync/replicache/keys";
 
@@ -13,6 +14,13 @@ type ServerViews = Awaited<ReturnType<typeof readReplicacheViewsForUser>>;
 type ServerAllLists = NonNullable<
   Awaited<ReturnType<typeof readReplicacheAllListsSnapshotForUser>>
 >;
+type ServerAllListsWithRoles = Omit<ServerAllLists, "lists"> & {
+  lists: Array<
+    ServerAllLists["lists"][number] & {
+      accessRole?: ShareRole;
+    }
+  >;
+};
 type ServerTags = Awaited<ReturnType<typeof readTagsForUser>>;
 
 export type ReplicacheClientViewEntry = {
@@ -52,7 +60,7 @@ export function buildReplicacheClientView({
   tags,
 }: {
   views: ServerViews;
-  allLists: ServerAllLists;
+  allLists: ServerAllListsWithRoles;
   tags: ServerTags;
 }): ReplicacheClientView {
   const entities: ReplicacheClientView = {};
@@ -63,6 +71,7 @@ export function buildReplicacheClientView({
       id: list.id,
       userId: list.userId,
       name: list.name,
+      accessRole: list.accessRole ?? "OWNER",
       createdAt: toIso(list.createdAt),
       updatedAt: toIso(list.updatedAt),
     });
