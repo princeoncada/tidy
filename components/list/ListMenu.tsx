@@ -6,12 +6,16 @@ import { Ellipsis } from 'lucide-react';
 interface ListMenuProps {
   handleViewListItemAdder: () => void;
   handleDeleteList: () => void;
+  canEdit: boolean;
+  canDelete: boolean;
 }
 
 
 const ListMenu = ({
   handleViewListItemAdder,
-  handleDeleteList
+  handleDeleteList,
+  canEdit,
+  canDelete,
 }: ListMenuProps) => {
   return (
     <DropdownMenu>
@@ -23,28 +27,34 @@ const ListMenu = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          variant="default"
-          className='hover:cursor-pointer text-xs!'
-          onSelect={handleViewListItemAdder}
-        >
-          Add Item
-        </DropdownMenuItem>
+        {canEdit && (
+          <DropdownMenuItem
+            variant="default"
+            className='hover:cursor-pointer text-xs!'
+            onSelect={handleViewListItemAdder}
+          >
+            Add Item
+          </DropdownMenuItem>
+        )}
         {/* <DropdownMenuItem
           variant="default"
           className='hover:cursor-pointer'
         >
           Export
         </DropdownMenuItem> */}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          data-testid="delete-list-button"
-          variant='destructive'
-          className='hover:cursor-pointer text-xs!'
-          onSelect={handleDeleteList}
-        >
-          Delete
-        </DropdownMenuItem>
+        {canDelete && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              data-testid="delete-list-button"
+              variant='destructive'
+              className='hover:cursor-pointer text-xs!'
+              onSelect={handleDeleteList}
+            >
+              Delete
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
