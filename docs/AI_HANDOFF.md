@@ -1,9 +1,9 @@
-<!-- Current Version: 2.0.5-alpha -->
+<!-- Current Version: 2.0.5 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.0.5 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.0.5 - Share Redeem Error UX Hardening
 **Next**: 2.0.6 - Yjs Collaborative Item Notes
 
