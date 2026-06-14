@@ -1,6 +1,6 @@
 {
-    "version":  "2.0.1-alpha",
-    "state":  "alpha",
+    "version":  "2.0.1",
+    "state":  "stable",
     "phase":  "2.0.1",
     "phaseTitle":  "Fractional Indexing for Order",
     "nextPhase":  "2.0.2 - Supabase Broadcast Realtime Poke",
