@@ -65,13 +65,16 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `lib/dashboard/server-read.ts` - shared user-scoped server reads used by both tRPC and Replicache pull.
 - `trpc/routers/_app.ts`, `trpc/init.ts`, `trpc/routers/*` - tRPC API and auth context.
 - `prisma/schema.prisma` - database schema.
+- `lib/sync/permissions.ts`, `trpc/routers/shareRouter.ts`, `components/sharing/*`, `app/share/[token]/page.tsx` - sharing role authority, management API, owner controls, and invite redemption.
+- `prisma/sql/2_0_3_realtime_poke_rls.sql` - manually applied private-channel receive policy for per-user poke topics.
 
 ---
 
 ## Architecture Invariants
 
 **Data model:**
-- Models: `List`, `ListItem`, `Tag`, `View`, `ViewList`, `ViewTag`, `ListTag`.
+- Core models: `List`, `ListItem`, `Tag`, `View`, `ViewList`, `ViewTag`, `ListTag`.
+- Sharing models: `Workspace`, `WorkspaceMember`, `ListShare`, and `ShareLink`. Lists may belong to one workspace. Effective list access is the strongest of direct list ownership, a direct list share, workspace ownership, or workspace membership; roles are OWNER, EDITOR, and VIEWER.
 - On the Replicache path, `ViewList.orderKey` owns list order per view, `ListItem.orderKey` owns item order inside a list, and `View.orderKey` owns view order. The integer `order` fields remain the gate-OFF compatibility authority until legacy retirement.
 - Unique constraints: `View.name` per user, `Tag.name` per user, and `ViewList` primary key `[viewId, listId]`.
 - Cascades remove dependent list items, list-tags, view-list memberships, view-tags, and list-tags as defined by Prisma relations.
@@ -83,6 +86,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Replicache push translates each named mutation to the existing `LocalOutboxOperation` decision shape and calls the same `server-apply.ts` ownership/apply matrix. The data write and `lastMutationID` advance share one Prisma transaction; rejected writes advance as no-op background corrections and the next pull rebases the optimistic local state.
 - Replicache pull uses a client-view-record hash snapshot because Tidy retains hard deletes and cascades. Changed/new keys return `put`, absent keys return `del`, cookies advance monotonically per client group, and older CVRs are bounded/pruned.
 - Replicache pull exposes only string order values. Nullable database `orderKey` rows receive deterministic per-group fallback keys derived from the existing integer order and stable id tie-breakers.
+- Replicache pull computes a recipient's shared-list union at read time. Shared lists are appended after owned lists with synthetic All Lists membership/order in the client view only; no recipient `ViewList` rows are stored. Recipient entries include items and effective role but force `listTags: []`, so owner tags and custom views remain private.
 - `view.getViewListsWithItems({ viewId: allListsView.id })` is the canonical full dashboard payload.
 - Selected view payloads are explicit server/query payloads, not filtered copies of All Lists.
 - Dashboard cache key aliases are stable: `views`, `allLists`, `currentView`, and `selectedView`.
@@ -140,6 +144,9 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Use `protectedProcedure` for user data.
 - Server-side ownership checks are mandatory even if UI only exposes owned IDs.
 - `absoluteUrl` resolves from `window.location.origin`, `NEXT_PUBLIC_SITE_URL`, `VERCEL_URL`, then localhost fallback.
+- Sharing management is protected tRPC, not Replicache mutation traffic. Share links grant EDITOR or VIEWER only; redemption rejects missing/revoked/expired/self-owned resources and idempotently preserves the strongest existing grant.
+- `lib/sync/permissions.ts` is the shared server authority. List rename and every ListItem create/update/delete/reorder/move require EDITOR or OWNER; cross-list move requires edit access to both lists. List delete remains restricted to the true `List.userId` owner.
+- Applied Replicache mutations collect affected list ids and poke every user with effective access. The topic stays per-user (`tidy:user:<id>`), while clients authenticate before joining a private channel. Apply `prisma/sql/2_0_3_realtime_poke_rls.sql` manually and disable Realtime "Allow public access" so authenticated users can receive only their own topic.
 
 **Performance and local-first boundary:**
 - Legacy integer reorder endpoints retain batch raw SQL (`UPDATE ... FROM (VALUES ...)`). Fractional Replicache reorder applies one ownership-scoped entity update.
@@ -162,6 +169,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `listItem.reorderListItems` now verifies item ownership and target list ownership before the batched raw SQL update as of 1.6.2, closing the FK-23503 target-list gap.
 - All listItem ownership gaps captured by the 1.6.0 baseline are now closed in `tests/unit/router-ownership-baseline.test.ts`.
 - The 1.6.x P0 ownership series is complete: 1.6.3 adds `tests/unit/router-ownership-sweep.test.ts` to prove list/tag/view transactional procedures reject foreign input, while owned-flow happy paths remain covered by authenticated E2E to avoid brittle deep-transaction unit mocks.
+- Sharing broadens only Replicache list rename and ListItem content operations. Tags, custom views, the gate-OFF tRPC/overlay/Dexie path, and integer-order paths remain per-user and unchanged.
 
 **Optimistic and race behavior:**
 - Optimistic queue mechanics (enqueue FIFO ordering, independent-scope isolation, replacePending cancellation, failure rollback without whole-scope cancel, CancelledError handling) are baselined in `tests/unit/optimistic-sync-baseline.test.ts` as of 1.7.2; replacePending-vs-enqueue scope isolation is test-locked, but broader cross-component optimistic race behavior is still not fully proven.
@@ -193,7 +201,9 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - 1.9.26 closes the replay-reader gap: the batch flush selects pending plus backoff-ready `failed` operations via `lib/sync/retry-backoff.ts`, and `reconcilePendingWritesOnLoad` resets stranded `syncing` rows to `pending` before flushing. Permanent rejections still stay `failed` and visible, and operations beyond `RETRY_MAX_ATTEMPTS` stop auto-retrying until an explicit retry.
 - Concurrent-flush suppression is in-tab single-flight owned by the per-user `useOfflineReplayTrigger` scheduler; cross-tab concurrent flushes (multiple open tabs) are not yet coordinated and remain a follow-up.
 - The Replicache gate now addresses the render race by making the local store the default render source. The legacy overlay/outbox-render/tRPC-render path remains intentionally intact under gate OFF and is retired only in 2.0.5.
-- Fractional keys are nullable in PostgreSQL for rollout compatibility. The migration and one-time backfill must complete before assuming every persisted row has a key; pull fallback prevents null rows from entering the Replicache store. A Supabase Broadcast doorbell now triggers an immediate pull: an applied `/api/replicache/push` batch pokes a per-user channel (`tidy:user:<id>`) and every connected client for that user calls `rep.pull()`. It is a poke, not delivery - the message carries no data and a missed poke self-heals on the next periodic (60s) pull. Sharing/permissions and Yjs notes remain deferred to 2.0.3/2.0.4.
+- Fractional keys are nullable in PostgreSQL for rollout compatibility. The migration and one-time backfill must complete before assuming every persisted row has a key; pull fallback prevents null rows from entering the Replicache store. A Supabase Broadcast doorbell now triggers an immediate pull: an applied `/api/replicache/push` batch fans out per-user private-channel pokes to users with affected-list access, and connected clients call `rep.pull()`. It is a poke, not delivery - missed pokes self-heal on the next periodic (60s) pull.
+- Shared-list revocation and removed workspace membership self-heal on the next pull because the computed union omits inaccessible list/item keys and the CVR emits deletes. Management changes do not materialize recipient view rows.
+- Tag/view sharing and recipient-side ordering of shared lists are intentionally deferred. Shared lists cannot be placed or reordered in a recipient's personal/custom views in 2.0.3.
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
