@@ -182,6 +182,7 @@ async function applyListOperation(
     case "create": {
       const name = getString(operation, "name");
       const tagIds = getStringArray(operation, "tagIds") ?? [];
+      const orderKey = getString(operation, "orderKey");
       if (!name) {
         return rejected(decision, "List create requires payload.name.");
       }
@@ -244,6 +245,7 @@ async function applyListOperation(
           viewId: allListsView.id,
           listId: operation.entityClientId,
           order: topMembership ? topMembership.order - 1 : 0,
+          ...(orderKey ? { orderKey } : {}),
         }],
         skipDuplicates: true,
       });
@@ -397,6 +399,7 @@ async function applyListItemOperation(
     case "create": {
       const name = getString(operation, "name");
       const listId = getString(operation, "listId", "listClientId");
+      const orderKey = getString(operation, "orderKey");
       if (!name || !listId) {
         return rejected(
           decision,
@@ -438,6 +441,7 @@ async function applyListItemOperation(
           name,
           listId,
           order: getInteger(operation, "order") ?? (topItem ? topItem.order - 1 : 0),
+          ...(orderKey ? { orderKey } : {}),
           completed: getBoolean(operation, "completed") ?? false,
           ...(notes !== undefined ? { notes } : {}),
         },
@@ -522,8 +526,52 @@ async function applyListItemOperation(
     }
 
     case "reorder": {
-      const orderedIds = getStringArray(operation, "orderedIds");
       const listId = getString(operation, "listId", "listClientId");
+      const orderKey = getString(operation, "orderKey");
+      if (orderKey) {
+        if (!listId) {
+          return rejected(
+            decision,
+            "Fractional list item reorder requires payload.listId.",
+          );
+        }
+
+        const existing = await tx.listItem.findUnique({
+          where: { id: operation.entityClientId },
+          select: {
+            listId: true,
+            orderKey: true,
+            parentList: { select: { userId: true } },
+          },
+        });
+        if (
+          !existing ||
+          existing.parentList.userId !== userId ||
+          existing.listId !== listId
+        ) {
+          return rejected(
+            decision,
+            "Fractional list item reorder target is not in the owned list.",
+          );
+        }
+        if (existing.orderKey === orderKey) {
+          return result(decision.operationId, "already-applied");
+        }
+
+        const update = await tx.listItem.updateMany({
+          where: {
+            id: operation.entityClientId,
+            listId,
+            parentList: { userId },
+          },
+          data: { orderKey },
+        });
+        return update.count > 0
+          ? result(decision.operationId, "applied")
+          : rejected(decision, "List item reorder ownership check failed.");
+      }
+
+      const orderedIds = getStringArray(operation, "orderedIds");
       if (!orderedIds || !listId || hasDuplicateIds(orderedIds)) {
         return rejected(
           decision,
@@ -587,11 +635,12 @@ async function applyListItemOperation(
         "listId",
         "listClientId",
       );
+      const orderKey = getString(operation, "orderKey");
       const order = getInteger(operation, "order", "position");
-      if (!toListId || order === null) {
+      if (!toListId || (!orderKey && order === null)) {
         return rejected(
           decision,
-          "List item move requires payload.toListClientId and an integer order.",
+          "List item move requires payload.toListClientId and orderKey or an integer order.",
         );
       }
 
@@ -601,6 +650,7 @@ async function applyListItemOperation(
           select: {
             listId: true,
             order: true,
+            orderKey: true,
             parentList: { select: { userId: true } },
           },
         }),
@@ -619,7 +669,10 @@ async function applyListItemOperation(
           "List item move ownership or target-list check failed.",
         );
       }
-      if (existing.listId === toListId && existing.order === order) {
+      const unchanged = orderKey
+        ? existing.listId === toListId && existing.orderKey === orderKey
+        : existing.listId === toListId && existing.order === order;
+      if (unchanged) {
         return result(decision.operationId, "already-applied");
       }
 
@@ -630,7 +683,7 @@ async function applyListItemOperation(
         },
         data: {
           listId: toListId,
-          order,
+          ...(orderKey ? { orderKey } : { order: order! }),
         },
       });
 
@@ -942,6 +995,7 @@ async function applyViewOperation(
     case "create": {
       const name = getString(operation, "name");
       const tagIds = getStringArray(operation, "tagIds");
+      const orderKey = getString(operation, "orderKey");
       if (
         hasPayloadKey(operation, "matchMode") &&
         !getViewMatchMode(operation)
@@ -998,6 +1052,7 @@ async function applyViewOperation(
           name,
           userId,
           order: getInteger(operation, "order") ?? (topView ? topView.order - 1 : 0),
+          ...(orderKey ? { orderKey } : {}),
           type: ViewType.CUSTOM,
           matchMode: getViewMatchMode(operation) ?? "ALL",
           isDefault: true,
@@ -1140,6 +1195,39 @@ async function applyViewOperation(
     }
 
     case "reorder": {
+      const orderKey = getString(operation, "orderKey");
+      if (orderKey) {
+        const existing = await tx.view.findFirst({
+          where: {
+            id: operation.entityClientId,
+            userId,
+            type: ViewType.CUSTOM,
+          },
+          select: { orderKey: true },
+        });
+        if (!existing) {
+          return rejected(
+            decision,
+            "Fractional view reorder target is not an owned custom view.",
+          );
+        }
+        if (existing.orderKey === orderKey) {
+          return result(decision.operationId, "already-applied");
+        }
+
+        const update = await tx.view.updateMany({
+          where: {
+            id: operation.entityClientId,
+            userId,
+            type: ViewType.CUSTOM,
+          },
+          data: { orderKey },
+        });
+        return update.count > 0
+          ? result(decision.operationId, "applied")
+          : rejected(decision, "View reorder ownership check failed.");
+      }
+
       const orderedIds = getStringArray(operation, "orderedIds");
       if (!orderedIds || hasDuplicateIds(orderedIds)) {
         return rejected(
@@ -1215,6 +1303,45 @@ async function applyViewListOperation(
 
   if (operation.operationType === "reorder") {
     const viewId = getString(operation, "viewId", "viewClientId");
+    const listId = getString(operation, "listId", "listClientId");
+    const orderKey = getString(operation, "orderKey");
+    if (orderKey) {
+      if (!viewId || !listId) {
+        return rejected(
+          decision,
+          "Fractional view-list reorder requires payload.viewId and payload.listId.",
+        );
+      }
+
+      const existing = await tx.viewList.findUnique({
+        where: { viewId_listId: { viewId, listId } },
+        select: {
+          orderKey: true,
+          view: { select: { userId: true } },
+          list: { select: { userId: true } },
+        },
+      });
+      if (
+        !existing ||
+        existing.view.userId !== userId ||
+        existing.list.userId !== userId
+      ) {
+        return rejected(
+          decision,
+          "Fractional view-list reorder target is not owned.",
+        );
+      }
+      if (existing.orderKey === orderKey) {
+        return result(decision.operationId, "already-applied");
+      }
+
+      await tx.viewList.update({
+        where: { viewId_listId: { viewId, listId } },
+        data: { orderKey },
+      });
+      return result(decision.operationId, "applied");
+    }
+
     const orderedIds = getStringArray(operation, "orderedIds");
     if (!viewId || !orderedIds || hasDuplicateIds(orderedIds)) {
       return rejected(
@@ -1277,11 +1404,12 @@ async function applyViewListOperation(
 
   if (operation.operationType === "move") {
     const toViewId = getString(operation, "toViewClientId", "targetViewClientId");
+    const orderKey = getString(operation, "orderKey");
     const order = getInteger(operation, "order", "position");
-    if (!listId || !toViewId || order === null) {
+    if (!listId || !toViewId || (!orderKey && order === null)) {
       return rejected(
         decision,
-        "View-list move requires payload.listId, payload.toViewClientId, and an integer order.",
+        "View-list move requires payload.listId, payload.toViewClientId, and orderKey or an integer order.",
       );
     }
 
@@ -1301,7 +1429,7 @@ async function applyViewListOperation(
 
     const existingTarget = await tx.viewList.findUnique({
       where: { viewId_listId: { viewId: toViewId, listId } },
-      select: { order: true },
+      select: { order: true, orderKey: true },
     });
     const sourceViewId = getString(operation, "fromViewId", "fromViewClientId", "viewId");
     let sourceRemoved = false;
@@ -1324,14 +1452,31 @@ async function applyViewListOperation(
       sourceRemoved = deleted.count > 0;
     }
 
-    if (existingTarget?.order === order && !sourceRemoved) {
+    const targetUnchanged = orderKey
+      ? existingTarget?.orderKey === orderKey
+      : existingTarget?.order === order;
+    if (targetUnchanged && !sourceRemoved) {
       return result(decision.operationId, "already-applied");
     }
 
+    const topMembership = !existingTarget
+      ? await tx.viewList.findFirst({
+          where: { viewId: toViewId },
+          orderBy: { order: "asc" },
+          select: { order: true },
+        })
+      : null;
+    const integerOrder =
+      order ?? (topMembership ? topMembership.order - 1 : 0);
     await tx.viewList.upsert({
       where: { viewId_listId: { viewId: toViewId, listId } },
-      update: { order },
-      create: { viewId: toViewId, listId, order },
+      update: orderKey ? { orderKey } : { order: integerOrder },
+      create: {
+        viewId: toViewId,
+        listId,
+        order: integerOrder,
+        ...(orderKey ? { orderKey } : {}),
+      },
     });
     return result(decision.operationId, "applied");
   }
@@ -1359,21 +1504,43 @@ async function applyViewListOperation(
 
   const existing = await tx.viewList.findUnique({
     where: { viewId_listId: { viewId, listId } },
-    select: { order: true },
+    select: { order: true, orderKey: true },
   });
 
   if (operation.operationType === "attach") {
+    const orderKey = getString(operation, "orderKey");
     const order = getInteger(operation, "order", "position");
-    if (order === null) {
-      return rejected(decision, "View-list attach requires an integer order.");
+    if (!orderKey && order === null) {
+      return rejected(
+        decision,
+        "View-list attach requires orderKey or an integer order.",
+      );
     }
-    if (existing?.order === order) {
+    const unchanged = orderKey
+      ? existing?.orderKey === orderKey
+      : existing?.order === order;
+    if (unchanged) {
       return result(decision.operationId, "already-applied");
     }
+
+    const topMembership = !existing
+      ? await tx.viewList.findFirst({
+          where: { viewId },
+          orderBy: { order: "asc" },
+          select: { order: true },
+        })
+      : null;
+    const integerOrder =
+      order ?? (topMembership ? topMembership.order - 1 : 0);
     await tx.viewList.upsert({
       where: { viewId_listId: { viewId, listId } },
-      update: { order },
-      create: { viewId, listId, order },
+      update: orderKey ? { orderKey } : { order: integerOrder },
+      create: {
+        viewId,
+        listId,
+        order: integerOrder,
+        ...(orderKey ? { orderKey } : {}),
+      },
     });
     return result(decision.operationId, "applied");
   }
