@@ -1,5 +1,9 @@
 import { db } from "@/lib/db";
 import {
+  getAccessibleListIdsForUser,
+  getEffectiveListRole,
+} from "@/lib/sync/permissions";
+import {
   ensureAllListsView,
   ensureDefaultView,
 } from "@/trpc/routers/viewHelpers";
@@ -9,6 +13,14 @@ function omitOrderKey<T extends { orderKey: unknown }>(
 ): Omit<T, "orderKey"> {
   const legacyValue = { ...value };
   Reflect.deleteProperty(legacyValue, "orderKey");
+  return legacyValue;
+}
+
+function omitLegacyListFields<T extends { workspaceId: unknown }>(
+  value: T,
+): Omit<T, "workspaceId"> {
+  const legacyValue = { ...value };
+  Reflect.deleteProperty(legacyValue, "workspaceId");
   return legacyValue;
 }
 
@@ -80,11 +92,14 @@ export async function readViewSnapshotForUser(
 
   return {
     view,
-    lists: viewLists.map((viewList) => ({
-      ...viewList.list,
-      order: viewList.order,
-      listItems: viewList.list.listItems.map(omitOrderKey),
-    })),
+    lists: viewLists.map((viewList) => {
+      const list = omitLegacyListFields(viewList.list);
+      return {
+        ...list,
+        order: viewList.order,
+        listItems: viewList.list.listItems.map(omitOrderKey),
+      };
+    }),
   };
 }
 
@@ -174,6 +189,38 @@ async function readReplicacheViewSnapshotForUser(
 export async function readReplicacheAllListsSnapshotForUser(userId: string) {
   const allListsView = await ensureAllListsView(userId);
   return readReplicacheViewSnapshotForUser(userId, allListsView.id);
+}
+
+export async function readReplicacheAccessibleListsForUser(userId: string) {
+  const listIds = await getAccessibleListIdsForUser(db, userId);
+  if (listIds.length === 0) return [];
+
+  const lists = await db.list.findMany({
+    where: { id: { in: listIds } },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    include: {
+      listItems: {
+        orderBy: [{ order: "asc" }, { id: "asc" }],
+      },
+    },
+  });
+
+  const accessibleLists = await Promise.all(
+    lists.map(async (list, index) => {
+      const accessRole = await getEffectiveListRole(db, userId, list.id);
+      return accessRole
+        ? {
+            ...list,
+            order: index,
+            orderKey: null,
+            accessRole,
+            listTags: [],
+          }
+        : null;
+    }),
+  );
+
+  return accessibleLists.filter((list) => list !== null);
 }
 
 export function readTagsForUser(userId: string) {
