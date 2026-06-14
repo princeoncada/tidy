@@ -289,12 +289,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.3 - Sharing & Permissions (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.0.3 - Sharing & Permissions
-- **Status:** Open | Priority: P1 2.0 collaboration
+- **Status:** In progress | Priority: P1 2.0 collaboration
 - **Type:** product behavior
 - **Files:** prisma/schema.prisma, trpc/routers/*, lib/sync/server-apply.ts, app/api/*
 - **Implementation goal:** introduce shared workspaces / lists with per-user permissions enforced server-side in push / pull and the broadcast channel scope.
