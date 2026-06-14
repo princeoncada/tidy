@@ -279,12 +279,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 1.10.0 - Copy and Metadata Hygiene (active) - see Planned
 ---
 
 ## Planned
 
 ### 1.10.0 - Copy and Metadata Hygiene
-- **Status:** Open | Priority: P3 quick polish (pulled forward from 1.11.0)
+- **Status:** In progress | Priority: P3 quick polish (pulled forward from 1.11.0)
 - **Type:** product behavior (polish)
 - **Files:** app/layout.tsx, public/*, README.md if needed
 - **Implementation goal:** fix missing asset references (e.g. the missing `apple-icon.png`) and metadata consistency.

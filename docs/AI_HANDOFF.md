@@ -1,11 +1,11 @@
-<!-- Current Version: 1.9.32 -->
+<!-- Current Version: 1.10.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 1.9.32 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 1.9.32 - Local-First Dashboard Architecture Closeout
-**Next**: 1.10.0 - Copy and Metadata Hygiene
+**Current Version**: 1.10.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 1.10.0 - Copy and Metadata Hygiene
+**Next**: 1.10.1 - Auth Flow Copy Polish
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -194,7 +194,6 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - UI/UX polish is intentionally late, after projection correctness, ownership, optimistic behavior, and test baselines.
 - Register submit button says "Login".
 - Landing page has typo/generic branding.
-- `apple-icon.png` is referenced in metadata but missing from `public/`.
 
 **Workflow:**
 - Assistant responses can drift if they provide commit, merge, promote, or push commands before the user/controller has supplied validation and status evidence. `docs/WORKFLOW.md` owns the stage-gated response rule.
