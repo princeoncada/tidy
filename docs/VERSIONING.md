@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.0.4
-- **Current phase:** 2.0.4 - Replicache Pull Cookie Monotonicity Fix
-- **Next phase:** 2.0.5 - Yjs Collaborative Item Notes
+- **Current version:** 2.0.5-alpha
+- **Current phase:** 2.0.5 - Share Redeem Error UX Hardening
+- **Next phase:** 2.0.6 - Yjs Collaborative Item Notes
 
 ---
 
