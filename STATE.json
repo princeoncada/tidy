@@ -1,6 +1,6 @@
 {
-    "version":  "2.0.0-alpha",
-    "state":  "alpha",
+    "version":  "2.0.0",
+    "state":  "stable",
     "phase":  "2.0.0",
     "phaseTitle":  "Replicache Read-Path Inversion (Local Store as Render Source)",
     "nextPhase":  "2.0.1 - Fractional Indexing for Order",
