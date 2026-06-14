@@ -69,7 +69,11 @@ const Login = () => {
       });
 
       setTimeout(() => {
-        redirect("/dashboard");
+        const next =
+          typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("next")
+            : null;
+        redirect(next?.startsWith("/") ? next : "/dashboard");
       }, 1000);
     }
   };
