@@ -298,7 +298,18 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
-### 2.0.5 - Yjs Collaborative Item Notes
+### 2.0.5 - Share Redeem Error UX Hardening
+- **Status:** In progress | Priority: P1 2.0 sharing UX
+- **Type:** product behavior
+- **Files:** components/sharing/ShareRedeemer.tsx, tests/unit/share-redeemer.test.tsx
+- **Implementation goal:** catch the rejected redeemShareLink promise in ShareRedeemer so revoked/expired/already-owned/missing share links surface the existing in-page "Unable to accept invite" message instead of an unhandled promise rejection (Next.js error overlay / stuck page).
+- **Product impact:** revoked/expired/invalid share links show a clean error message; no runtime overlay or stuck page.
+- **Runtime integration target:** the share redemption page handles failure entirely in-page; a valid link still pulls Replicache and redirects to /dashboard.
+- **Deferral boundary:** does NOT change redeemShareLink server error codes or messages, and does NOT address the ~20s shared-change propagation latency (tracked under Potential Next Directions).
+- **Validation target:** targeted alpha (unit) + manual revoked-link proof; full test:ci before stable.
+- **Acceptance:** redeeming a revoked/expired/invalid link renders the friendly error and produces no unhandled rejection; a valid link still redirects to /dashboard.
+
+### 2.0.6 - Yjs Collaborative Item Notes
 - **Status:** Open | Priority: P2 2.0 collaboration
 - **Type:** product behavior
 - **Files:** components/list/*, lib/collab/* (new Yjs provider), prisma/schema.prisma (binary note doc), app/api/*
@@ -309,7 +320,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Validation target:** targeted alpha + manual concurrent-edit proof; full test:ci before stable.
 - **Acceptance:** two users editing the same item note converge without lost text.
 
-### 2.0.6 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
+### 2.0.7 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 - **Status:** Open | Priority: P1 2.0 cleanup
 - **Type:** cleanup
 - **Files:** lib/local-db/local-overlay.ts, lib/dashboard-cache.ts, hooks/useOptimisticSync.ts, lib/sync/offline-write-prototype.ts, lib/sync/replicache/client.ts, .env.example, components/*
@@ -382,15 +393,17 @@ Assigned a version only when scoped.
 - Migration/backfill playbook (prisma/schema.prisma, prisma/migrations/*)
 - Share tags and custom views with collaborators instead of projecting recipient shared lists with `listTags: []`.
 - Allow recipients to place/reorder shared lists within their own All Lists/custom-view organization without materializing owner view state.
+- Realtime poke delivery latency: shared changes propagate in ~20s while pull/push return 200. Hypothesis: the 2.0.3 realtime RLS added only a SELECT policy on realtime.messages, so the server REST broadcast cannot SEND to the private poke topic and the recipient falls back to the 60s pullInterval. (lib/realtime/poke-server.ts, prisma/sql/2_0_3_realtime_poke_rls.sql, lib/sync/replicache/client.ts)
 
 ---
 
 ## Discarded / Won't Do
 
 - **1.10.1 - Auth Flow Copy Polish - retired 2026-06-14.** Its only deliverable, the Register submit button reading "Login", already shipped in commit 2489cae (the button reads "Register"); the driving Known Risk was stale. The phase is removed and the former "1.10.2 - Landing Page Branding Polish" is renumbered down to 1.10.1 to keep the patch sequence gapless. No work item is dropped.
-- **1.9.x server-authoritative render + pending-outbox overlay as the local-first UX path** - superseded 2026-06-14. Rendering from the tRPC server payload plus `lib/local-db/local-overlay.ts`, with Dexie only as an offline fallback, leaves the optimistic / overlay / refetch three-way race (the perceived flicker). The 2.0 arc replaces it with a Replicache local-store render; the overlay / outbox-render / tRPC-render paths are retired in 2.0.5. The Dexie-first WRITE path and bounded batch sync are NOT discarded - those concepts carry forward into Replicache's push handler. See `docs/DECISIONS.md` (2026-06-14).
+- **1.9.x server-authoritative render + pending-outbox overlay as the local-first UX path** - superseded 2026-06-14. Rendering from the tRPC server payload plus `lib/local-db/local-overlay.ts`, with Dexie only as an offline fallback, leaves the optimistic / overlay / refetch three-way race (the perceived flicker). The 2.0 arc replaces it with a Replicache local-store render; the overlay / outbox-render / tRPC-render paths are retired in 2.0.7. The Dexie-first WRITE path and bounded batch sync are NOT discarded - those concepts carry forward into Replicache's push handler. See `docs/DECISIONS.md` (2026-06-14).
 - **Roadmap renumber (2026-06-14):** old 1.11.0-1.11.2 polish pulled forward to 1.10.0-1.10.2; old 1.10.0-1.10.2 deploy readiness pushed to 2.1.0-2.1.2 and old 1.11.3 visual review to 2.2.0, so deployment docs are written once against the 2.0 architecture. No work item is dropped; only resequenced.
 - **Roadmap renumber (2026-06-14, post-2.0.3 R9):** inserted 2.0.4 - Replicache Pull Cookie Monotonicity Fix ahead of the collaboration work after R9 verification exposed a latent pull-cookie lexicographic-ordering bug. 2.0.4 Yjs Collaborative Item Notes -> 2.0.5; 2.0.5 Retire Legacy paths -> 2.0.6 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
+- **Roadmap renumber (2026-06-14, post-2.0.4 R9):** inserted 2.0.5 - Share Redeem Error UX Hardening ahead of the collaboration work after R9 surfaced a revoked-link redemption UX failure (unhandled rejection on the /share redeem page). Yjs Collaborative Item Notes 2.0.5 -> 2.0.6; Retire Legacy paths 2.0.6 -> 2.0.7 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
 
 ---
 
