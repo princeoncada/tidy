@@ -3,17 +3,22 @@
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import { useTidyReplicache } from "@/components/ReplicacheProvider";
 import { useTRPC } from "@/trpc/client";
+
+function errorMessage(error: unknown) {
+  return error instanceof Error && error.message
+    ? error.message
+    : "This share link could not be accepted.";
+}
 
 export function ShareRedeemer({ token }: { token: string }) {
   const started = useRef(false);
+  const [redeemError, setRedeemError] = useState<string | null>(null);
   const trpc = useTRPC();
   const router = useRouter();
-  const { rep } = useTidyReplicache();
   const redeem = useMutation(
     trpc.share.redeemShareLink.mutationOptions(),
   );
@@ -24,25 +29,25 @@ export function ShareRedeemer({ token }: { token: string }) {
 
     void redeem
       .mutateAsync({ token })
-      .then(async () => {
-        await rep?.pull();
+      .then(() => {
         router.replace("/dashboard");
       })
-      .catch(() => {
-        // Failure is surfaced in-page via redeem.isError below; swallow the
-        // rejection so it does not escape as an unhandled promise rejection
-        // (which surfaces the Next.js error overlay / leaves the page stuck).
+      .catch((error) => {
+        setRedeemError(errorMessage(error));
       });
-  }, [redeem, rep, router, token]);
+  }, [redeem, router, token]);
+
+  const displayedError = redeemError ??
+    (redeem.isError ? redeem.error.message : null);
 
   return (
     <MaxWidthWrapper singleItemPage>
       <div className="flex max-w-sm flex-col items-center gap-3 text-center">
-        {redeem.isError ? (
+        {displayedError ? (
           <>
             <h1 className="text-lg font-semibold">Unable to accept invite</h1>
             <p className="text-sm text-muted-foreground">
-              {redeem.error.message}
+              {displayedError}
             </p>
           </>
         ) : (
