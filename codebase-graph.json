@@ -2551,6 +2551,17 @@
       ]
     },
     {
+      "path": "tests/unit/landing-copy.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "node:fs",
+        "node:path",
+        "vitest"
+      ]
+    },
+    {
       "path": "tests/unit/lists-container-local-fallback.test.ts",
       "kind": "test",
       "extension": ".ts",
