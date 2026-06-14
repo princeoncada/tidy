@@ -268,6 +268,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.31 - E2E Auth-Suite Sync-Timing Assertion Hardening~~ (stable 2026-06-13)
 
+- ~~1.9.32 - Local-First Dashboard Architecture Closeout~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -277,21 +279,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.9.32 - Local-First Dashboard Architecture Closeout (active) - see Planned
 ---
 
 ## Planned
-
-### 1.9.32 - Local-First Dashboard Architecture Closeout
-- **Status:** In progress | Priority: P1 decision
-- **Type:** decision
-- **Files:** docs/DECISIONS.md, docs/AI_HANDOFF.md, docs/FUTURE_PLANS.md
-- **Implementation goal:** evaluate the shipped reconciled read graph, Dexie-first dashboard writes, and bounded server batch sync; record residual limitations and whether the 1.9.x local-first series is complete.
-- **Product impact:** none directly - closes the architecture only after the remaining product outcome is named and sequenced.
-- **Runtime integration target:** none (decision); records the delivered runtime contract and names the follow-up (the 2.0 arc).
-- **Deferral boundary:** production-readiness work moves to 2.1.x; the local-first RENDER product work is the 2.0 arc; no missing dashboard mutation may be silently deferred through this decision.
-- **Validation target:** targeted alpha (validate.ps1 + decision recorded); full validate.ps1 at the gate.
-- **Acceptance:** the decision records that immediate list/item correctness and Dexie-first bounded batch sync are delivered while the local-first RENDER goal is not, keeps `seriesComplete` FALSE, and names the 2.0 arc (Replicache + Yjs + Supabase Broadcast) as the explicitly-versioned remaining product work.
 
 ### 1.10.0 - Copy and Metadata Hygiene
 - **Status:** Open | Priority: P3 quick polish (pulled forward from 1.11.0)
