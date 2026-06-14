@@ -2929,6 +2929,19 @@
       ]
     },
     {
+      "path": "tests/unit/dashboard-hydration.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "react",
+        "react-dom/server",
+        "vitest",
+        "@/components/Dashboard"
+      ]
+    },
+    {
       "path": "tests/unit/flush-scheduler.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -6236,6 +6249,12 @@
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/local-schema"
+    },
+    {
+      "from": "tests/unit/dashboard-hydration.test.tsx",
+      "to": "components/Dashboard.tsx",
+      "type": "imports",
+      "import": "@/components/Dashboard"
     },
     {
       "from": "tests/unit/flush-scheduler.test.ts",
