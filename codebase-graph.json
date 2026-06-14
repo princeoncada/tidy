@@ -366,7 +366,6 @@
       ],
       "imports": [
         "next/navigation",
-        "@/components/ReplicacheProvider",
         "@/components/sharing/ShareRedeemer",
         "@/lib/supabase/server"
       ]
@@ -780,7 +779,6 @@
         "next/navigation",
         "react",
         "@/components/MaxWidthWrapper",
-        "@/components/ReplicacheProvider",
         "@/trpc/client"
       ]
     },
@@ -2046,7 +2044,9 @@
       "extension": ".ts",
       "symbols": [
         "APP_SHELL_CACHE_NAME",
+        "APP_SHELL_CACHE_PREFIX",
         "APP_SHELL_FALLBACK_KEY",
+        "isLocalDevelopmentHost",
         "isNavigationRequest",
         "isPrecachableStaticAsset",
         "shouldBypassRequest"
@@ -2061,7 +2061,9 @@
         "isAppShellServiceWorkerEnabled",
         "registerAppShellServiceWorker"
       ],
-      "imports": []
+      "imports": [
+        "@/lib/sw/app-shell-strategy"
+      ]
     },
     {
       "path": "lib/sync/conflict-resolution.ts",
@@ -2936,9 +2938,20 @@
       "imports": [
         "@testing-library/react",
         "react",
+        "react-dom/client",
         "react-dom/server",
         "vitest",
         "@/components/Dashboard"
+      ]
+    },
+    {
+      "path": "tests/unit/db-client.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/db"
       ]
     },
     {
@@ -3213,6 +3226,17 @@
         "vitest",
         "@/lib/realtime/poke-server",
         "@/lib/realtime/poke-topic"
+      ]
+    },
+    {
+      "path": "tests/unit/register-service-worker.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sw/app-shell-strategy",
+        "@/lib/sw/register-service-worker"
       ]
     },
     {
@@ -3974,12 +3998,6 @@
       "to": "components/auth/ResetPassword.tsx",
       "type": "imports",
       "import": "@/components/auth/ResetPassword"
-    },
-    {
-      "from": "app/share/[token]/page.tsx",
-      "to": "components/ReplicacheProvider.tsx",
-      "type": "imports",
-      "import": "@/components/ReplicacheProvider"
     },
     {
       "from": "app/share/[token]/page.tsx",
@@ -4796,12 +4814,6 @@
       "to": "components/MaxWidthWrapper.tsx",
       "type": "imports",
       "import": "@/components/MaxWidthWrapper"
-    },
-    {
-      "from": "components/sharing/ShareRedeemer.tsx",
-      "to": "components/ReplicacheProvider.tsx",
-      "type": "imports",
-      "import": "@/components/ReplicacheProvider"
     },
     {
       "from": "components/sharing/ShareRedeemer.tsx",
@@ -5668,6 +5680,12 @@
       "import": "@/lib/supabase/server"
     },
     {
+      "from": "lib/sw/register-service-worker.ts",
+      "to": "lib/sw/app-shell-strategy.ts",
+      "type": "imports",
+      "import": "@/lib/sw/app-shell-strategy"
+    },
+    {
       "from": "lib/sync/conflict-resolution.ts",
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
@@ -6268,6 +6286,12 @@
       "import": "@/components/Dashboard"
     },
     {
+      "from": "tests/unit/db-client.test.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
       "from": "tests/unit/flush-scheduler.test.ts",
       "to": "lib/sync/flush-scheduler.ts",
       "type": "imports",
@@ -6578,6 +6602,18 @@
       "to": "lib/realtime/poke-topic.ts",
       "type": "imports",
       "import": "@/lib/realtime/poke-topic"
+    },
+    {
+      "from": "tests/unit/register-service-worker.test.ts",
+      "to": "lib/sw/app-shell-strategy.ts",
+      "type": "imports",
+      "import": "@/lib/sw/app-shell-strategy"
+    },
+    {
+      "from": "tests/unit/register-service-worker.test.ts",
+      "to": "lib/sw/register-service-worker.ts",
+      "type": "imports",
+      "import": "@/lib/sw/register-service-worker"
     },
     {
       "from": "tests/unit/replicache-mutators.test.ts",
