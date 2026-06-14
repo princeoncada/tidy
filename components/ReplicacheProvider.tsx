@@ -15,6 +15,7 @@ import {
   type TidyReplicache,
 } from "@/lib/sync/replicache/client";
 import { subscribeToPokes } from "@/lib/realtime/poke-client";
+import { createClient } from "@/lib/supabase/client";
 
 type ReplicacheContextValue = {
   rep: TidyReplicache | null;
@@ -88,13 +89,37 @@ export function ReplicacheProvider({
       activeInstance?.userId === userId ? activeInstance.rep : null;
     if (!rep) return;
 
-    const unsubscribe = subscribeToPokes({
-      userId,
-      onPoke: () => {
-        void rep.pull().catch(() => {});
-      },
-    });
-    return unsubscribe;
+    let disposed = false;
+    let unsubscribe: (() => void) | undefined;
+
+    void createClient()
+      .auth.getSession()
+      .then(({ data: { session } }) => {
+        const accessToken = session?.access_token;
+        if (!accessToken || disposed) return;
+
+        return subscribeToPokes({
+          userId,
+          accessToken,
+          onPoke: () => {
+            void rep.pull().catch(() => {});
+          },
+        });
+      })
+      .then((cleanup) => {
+        if (!cleanup) return;
+        if (disposed) {
+          cleanup();
+        } else {
+          unsubscribe = cleanup;
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      disposed = true;
+      unsubscribe?.();
+    };
   }, [userId, activeInstance]);
 
   const activeRep =
