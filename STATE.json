@@ -1,9 +1,9 @@
 {
-    "version":  "2.0.3",
-    "state":  "stable",
-    "phase":  "2.0.3",
-    "phaseTitle":  "Sharing \u0026 Permissions",
-    "nextPhase":  "2.0.4 - Yjs Collaborative Item Notes",
+    "version":  "2.0.4-alpha",
+    "state":  "alpha",
+    "phase":  "2.0.4",
+    "phaseTitle":  "Replicache Pull Cookie Monotonicity Fix",
+    "nextPhase":  "2.0.5 - Yjs Collaborative Item Notes",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-14"
 }
