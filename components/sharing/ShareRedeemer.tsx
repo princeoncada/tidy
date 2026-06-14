@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
 
 function errorMessage(error: unknown) {
@@ -49,6 +50,9 @@ export function ShareRedeemer({ token }: { token: string }) {
             <p className="text-sm text-muted-foreground">
               {displayedError}
             </p>
+            <Button onClick={() => router.replace("/dashboard")}>
+              Back to dashboard
+            </Button>
           </>
         ) : (
           <>
