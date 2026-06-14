@@ -61,17 +61,22 @@ model ViewList {
 }
 
 model List {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  userId    String   @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  userId      String   @db.Uuid
+  workspaceId String?  @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  listItems ListItem[]
-  listTags  ListTag[]
-  viewLists ViewList[]
+  listItems  ListItem[]
+  listTags   ListTag[]
+  viewLists  ViewList[]
+  listShares ListShare[]
+  shareLinks ShareLink[]
+  workspace  Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([workspaceId])
 }
 
 model ListItem {
@@ -166,4 +171,73 @@ enum ViewType {
   ALL_LISTS
   UNTAGGED
   CUSTOM
+}
+
+enum ShareRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum ShareResourceType {
+  LIST
+  WORKSPACE
+}
+
+model Workspace {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  ownerId   String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lists      List[]
+  members    WorkspaceMember[]
+  shareLinks ShareLink[]
+
+  @@index([ownerId])
+}
+
+model WorkspaceMember {
+  workspaceId String    @db.Uuid
+  userId      String    @db.Uuid
+  role        ShareRole
+  createdAt   DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@index([userId])
+}
+
+model ListShare {
+  listId    String    @db.Uuid
+  userId    String    @db.Uuid
+  role      ShareRole
+  createdAt DateTime  @default(now())
+
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@id([listId, userId])
+  @@index([userId])
+}
+
+model ShareLink {
+  id           String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token        String            @unique
+  resourceType ShareResourceType
+  role         ShareRole
+  listId       String?           @db.Uuid
+  workspaceId  String?           @db.Uuid
+  createdById  String            @db.Uuid
+  expiresAt    DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime          @default(now())
+
+  list      List?      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([listId])
+  @@index([workspaceId])
+  @@index([createdById])
 }
