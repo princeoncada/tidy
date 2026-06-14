@@ -1,8 +1,9 @@
 // Hand-written app-shell service worker.
 // Decision rules mirror lib/sw/app-shell-strategy.ts (the spec - keep in sync).
 /* global self, caches */
-const APP_SHELL_CACHE_NAME = "tidy-app-shell-v1";
+const APP_SHELL_CACHE_NAME = "tidy-app-shell-v2";
 const APP_SHELL_FALLBACK_KEY = "/app-shell";
+const LOCAL_DEVELOPMENT_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -52,7 +53,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname.startsWith("/_next/static/")) {
+  if (
+    url.pathname.startsWith("/_next/static/") &&
+    !LOCAL_DEVELOPMENT_HOSTS.has(self.location.hostname)
+  ) {
     event.respondWith(
       (async () => {
         const cache = await caches.open(APP_SHELL_CACHE_NAME);
