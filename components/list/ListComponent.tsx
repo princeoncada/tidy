@@ -32,6 +32,7 @@ import {
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
 import { keyBetween } from "@/lib/sync/fractional-index";
+import { ShareDialog } from "@/components/sharing/ShareDialog";
 
 interface ListComponentProps {
   children: ReactNode;
@@ -80,6 +81,11 @@ const ListComponent = ({
   const queryClient = useQueryClient();
   const dashboardMutations = useDashboardMutations();
   const replicacheDashboard = useReplicacheDashboard();
+  const accessRole =
+    list.accessRole ?? (list.userId === userId ? "OWNER" : "VIEWER");
+  const canEdit = accessRole === "OWNER" || accessRole === "EDITOR";
+  const canManage = accessRole === "OWNER";
+  const canDelete = list.userId === userId;
 
   const handleRenameList = (input: { id: string; name: string }) => {
     if (!userId) return;
@@ -184,6 +190,7 @@ const ListComponent = ({
     type: "list",
     accept: "list",
     group: "lists",
+    disabled: !canDelete,
   });
 
   const { ref: dropRef } = useDroppable({
@@ -260,8 +267,13 @@ const ListComponent = ({
               <div className="flex items-start gap-3 px-4">
                 <div
                   data-testid="list-drag-handle"
-                  ref={handleRef}
-                  className="-mt-1 shrink-0 cursor-grab active:cursor-grabbing touch-none select-none p-2 -m-2"
+                  ref={canDelete ? handleRef : undefined}
+                  className={cn(
+                    "-mt-1 shrink-0 touch-none select-none p-2 -m-2",
+                    canDelete
+                      ? "cursor-grab active:cursor-grabbing"
+                      : "cursor-default opacity-30",
+                  )}
                 >
                   <GripVertical />
                 </div>
@@ -276,6 +288,7 @@ const ListComponent = ({
                     id={list.id}
                     value={list.name}
                     onSave={handleRenameList}
+                    disabled={!canEdit}
                   />
 
                   <div className="text-gray-500 flex items-center gap-2">
@@ -284,19 +297,43 @@ const ListComponent = ({
                   </div>
                 </div>
 
-                <ListMenu
-                  handleViewListItemAdder={handleViewListItemAdder}
-                  handleDeleteList={handleDeleteList}
-                />
+                <div className="flex items-center gap-1">
+                  {canManage && (
+                    <ShareDialog
+                      resourceType="LIST"
+                      resourceId={list.id}
+                      title={list.name}
+                      trigger={
+                        <Button size="icon-sm" variant="ghost">
+                          <span className="text-xs">Share</span>
+                        </Button>
+                      }
+                    />
+                  )}
+                  {(canEdit || canDelete) && (
+                    <ListMenu
+                      handleViewListItemAdder={handleViewListItemAdder}
+                      handleDeleteList={handleDeleteList}
+                      canEdit={canEdit}
+                      canDelete={canDelete}
+                    />
+                  )}
+                </div>
               </div>
 
               <div className="my-2 mx-13 mr-14">
-                <ListTagPicker
-                  listId={list.id}
-                  selectedListTags={list.listTags}
-                  dashboardKeys={dashboardKeys}
-                  userId={userId}
-                />
+                {canDelete ? (
+                  <ListTagPicker
+                    listId={list.id}
+                    selectedListTags={list.listTags}
+                    dashboardKeys={dashboardKeys}
+                    userId={userId}
+                  />
+                ) : (
+                  <span className="text-xs text-muted-foreground">
+                    Shared {accessRole.toLowerCase()}
+                  </span>
+                )}
               </div>
 
               <Separator />
@@ -310,7 +347,7 @@ const ListComponent = ({
                   ref={dropRef}
                   className={cn("h-60! min-h-45 w-full touch-pan-y relative")}
                 >
-                  <div
+                  {canEdit && <div
                     className={cn(
                       `flex items-start max-h-12 gap-1.5 pl-px py-px rounded-md pr-2 hover:bg-gray-50 hover:border-gray-100 overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group`, {
                       "max-h-0 opacity-0 py-0": !viewListItemAdder,
@@ -377,7 +414,7 @@ const ListComponent = ({
                     >
                       <Plus />
                     </Button>
-                  </div>
+                  </div>}
                   {children}
                   {totalItems == 0 &&
                     <div className="w-0 h-0 absolute flex items-center justify-center left-1/2 top-1/2">

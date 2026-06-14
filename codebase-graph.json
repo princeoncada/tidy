@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "2.0.2",
+  "version": "2.0.3-alpha",
   "generatedAt": "2026-06-14",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -200,6 +200,7 @@
         "@/app/generated/prisma/client",
         "@/lib/dashboard/server-read",
         "@/lib/db",
+        "@/lib/sync/fractional-index",
         "@/lib/sync/replicache/pull-cvr",
         "@/lib/supabase/server"
       ]
@@ -212,8 +213,10 @@
         "POST"
       ],
       "imports": [
+        "@/lib/db",
         "@/lib/supabase/server",
         "@/lib/realtime/poke-server",
+        "@/lib/sync/permissions",
         "@/lib/sync/replicache/push"
       ]
     },
@@ -355,6 +358,20 @@
       ]
     },
     {
+      "path": "app/share/[token]/page.tsx",
+      "kind": "page_route",
+      "extension": ".tsx",
+      "symbols": [
+        "SharePage"
+      ],
+      "imports": [
+        "next/navigation",
+        "@/components/ReplicacheProvider",
+        "@/components/sharing/ShareRedeemer",
+        "@/lib/supabase/server"
+      ]
+    },
+    {
       "path": "CLAUDE.md",
       "kind": "root_doc",
       "extension": ".md",
@@ -478,7 +495,8 @@
         "./SyncStatusBadge",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/components/ReplicacheProvider",
-        "@/lib/sync/replicache/client"
+        "@/lib/sync/replicache/client",
+        "@/components/sharing/WorkspacesDialog"
       ]
     },
     {
@@ -536,7 +554,8 @@
         "@/lib/local-db/local-write",
         "@/hooks/useDashboardMutations",
         "@/hooks/useReplicacheDashboard",
-        "@/lib/sync/fractional-index"
+        "@/lib/sync/fractional-index",
+        "@/components/sharing/ShareDialog"
       ]
     },
     {
@@ -725,7 +744,64 @@
       "imports": [
         "react",
         "@/lib/sync/replicache/client",
-        "@/lib/realtime/poke-client"
+        "@/lib/realtime/poke-client",
+        "@/lib/supabase/client"
+      ]
+    },
+    {
+      "path": "components/sharing/ShareDialog.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ShareDialog"
+      ],
+      "imports": [
+        "@tanstack/react-query",
+        "lucide-react",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/dialog",
+        "@/components/ui/input",
+        "@/components/ui/label",
+        "@/lib/utils",
+        "@/trpc/client"
+      ]
+    },
+    {
+      "path": "components/sharing/ShareRedeemer.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ShareRedeemer"
+      ],
+      "imports": [
+        "@tanstack/react-query",
+        "lucide-react",
+        "next/navigation",
+        "react",
+        "@/components/MaxWidthWrapper",
+        "@/components/ReplicacheProvider",
+        "@/trpc/client"
+      ]
+    },
+    {
+      "path": "components/sharing/WorkspacesDialog.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "WorkspacesDialog"
+      ],
+      "imports": [
+        "@tanstack/react-query",
+        "lucide-react",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/dialog",
+        "@/components/ui/input",
+        "@/components/ui/label",
+        "@/components/ReplicacheProvider",
+        "@/trpc/client",
+        "./ShareDialog"
       ]
     },
     {
@@ -1499,6 +1575,7 @@
       "extension": ".ts",
       "symbols": [
         "readAllListsSnapshotForUser",
+        "readReplicacheAccessibleListsForUser",
         "readReplicacheAllListsSnapshotForUser",
         "readReplicacheViewsForUser",
         "readTagsForUser",
@@ -1507,6 +1584,7 @@
       ],
       "imports": [
         "@/lib/db",
+        "@/lib/sync/permissions",
         "@/trpc/routers/viewHelpers"
       ]
     },
@@ -2065,6 +2143,26 @@
       "imports": []
     },
     {
+      "path": "lib/sync/permissions.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "PermissionDatabase",
+        "canEditContent",
+        "canManage",
+        "canRead",
+        "getAccessibleListIdsForUser",
+        "getEffectiveListRole",
+        "getEffectiveWorkspaceRole",
+        "getUsersWithListAccess",
+        "rank"
+      ],
+      "imports": [
+        "@/app/generated/prisma/client",
+        "@/lib/db"
+      ]
+    },
+    {
       "path": "lib/sync/replicache/client.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2132,6 +2230,7 @@
         "node:crypto",
         "replicache",
         "@/lib/dashboard/server-read",
+        "@/lib/sync/permissions",
         "@/lib/sync/fractional-index",
         "@/lib/sync/replicache/keys"
       ]
@@ -2188,6 +2287,7 @@
         "@/app/generated/prisma/client",
         "@/lib/db",
         "@/lib/local-db/outbox-schema",
+        "@/lib/sync/permissions",
         "@/lib/sync/sync-batch-contract",
         "@/trpc/routers/viewHelpers"
       ]
@@ -3072,6 +3172,26 @@
       ]
     },
     {
+      "path": "tests/unit/permissions.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/permissions"
+      ]
+    },
+    {
+      "path": "tests/unit/poke-client-private.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/realtime/poke-client"
+      ]
+    },
+    {
       "path": "tests/unit/realtime-poke.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3126,6 +3246,16 @@
       "imports": [
         "vitest",
         "@/app/api/replicache/pull/route"
+      ]
+    },
+    {
+      "path": "tests/unit/replicache-push-route.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/app/api/replicache/push/route"
       ]
     },
     {
@@ -3184,6 +3314,18 @@
         "@/lib/local-db/outbox-schema",
         "@/lib/sync/sync-batch-contract",
         "@/lib/sync/server-apply"
+      ]
+    },
+    {
+      "path": "tests/unit/share-router.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@trpc/server",
+        "vitest",
+        "@/trpc/init",
+        "@/trpc/routers/shareRouter"
       ]
     },
     {
@@ -3412,7 +3554,8 @@
         "./listItemRouter",
         "./testRouter",
         "./tagRouter",
-        "./viewRouter"
+        "./viewRouter",
+        "./shareRouter"
       ]
     },
     {
@@ -3444,6 +3587,23 @@
         "@trpc/server",
         "@/app/generated/prisma/client",
         "./viewHelpers"
+      ]
+    },
+    {
+      "path": "trpc/routers/shareRouter.ts",
+      "kind": "trpc_router",
+      "extension": ".ts",
+      "symbols": [
+        "shareRouter"
+      ],
+      "imports": [
+        "node:crypto",
+        "@/app/generated/prisma/client",
+        "@/lib/db",
+        "@/lib/sync/permissions",
+        "@trpc/server",
+        "zod",
+        "../init"
       ]
     },
     {
@@ -3596,9 +3756,21 @@
     },
     {
       "from": "app/api/replicache/pull/route.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "app/api/replicache/pull/route.ts",
       "to": "lib/sync/replicache/pull-cvr.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/pull-cvr"
+    },
+    {
+      "from": "app/api/replicache/push/route.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
     },
     {
       "from": "app/api/replicache/push/route.ts",
@@ -3611,6 +3783,12 @@
       "to": "lib/supabase/server.ts",
       "type": "imports",
       "import": "@/lib/supabase/server"
+    },
+    {
+      "from": "app/api/replicache/push/route.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
     },
     {
       "from": "app/api/replicache/push/route.ts",
@@ -3763,6 +3941,24 @@
       "import": "@/components/auth/ResetPassword"
     },
     {
+      "from": "app/share/[token]/page.tsx",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
+    },
+    {
+      "from": "app/share/[token]/page.tsx",
+      "to": "components/sharing/ShareRedeemer.tsx",
+      "type": "imports",
+      "import": "@/components/sharing/ShareRedeemer"
+    },
+    {
+      "from": "app/share/[token]/page.tsx",
+      "to": "lib/supabase/server.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/server"
+    },
+    {
       "from": "components/AppShellServiceWorker.tsx",
       "to": "hooks/use-app-shell-service-worker.ts",
       "type": "imports",
@@ -3911,6 +4107,12 @@
       "to": "components/ReplicacheProvider.tsx",
       "type": "imports",
       "import": "@/components/ReplicacheProvider"
+    },
+    {
+      "from": "components/Dashboard.tsx",
+      "to": "components/sharing/WorkspacesDialog.tsx",
+      "type": "imports",
+      "import": "@/components/sharing/WorkspacesDialog"
     },
     {
       "from": "components/Dashboard.tsx",
@@ -4073,6 +4275,12 @@
       "to": "components/list/types.ts",
       "type": "imports",
       "import": "./types"
+    },
+    {
+      "from": "components/list/ListComponent.tsx",
+      "to": "components/sharing/ShareDialog.tsx",
+      "type": "imports",
+      "import": "@/components/sharing/ShareDialog"
     },
     {
       "from": "components/list/ListComponent.tsx",
@@ -4502,9 +4710,111 @@
     },
     {
       "from": "components/ReplicacheProvider.tsx",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "components/ReplicacheProvider.tsx",
       "to": "lib/sync/replicache/client.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/client"
+    },
+    {
+      "from": "components/sharing/ShareDialog.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
+    },
+    {
+      "from": "components/sharing/ShareDialog.tsx",
+      "to": "components/ui/dialog.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dialog"
+    },
+    {
+      "from": "components/sharing/ShareDialog.tsx",
+      "to": "components/ui/input.tsx",
+      "type": "imports",
+      "import": "@/components/ui/input"
+    },
+    {
+      "from": "components/sharing/ShareDialog.tsx",
+      "to": "components/ui/label.tsx",
+      "type": "imports",
+      "import": "@/components/ui/label"
+    },
+    {
+      "from": "components/sharing/ShareDialog.tsx",
+      "to": "lib/utils.ts",
+      "type": "imports",
+      "import": "@/lib/utils"
+    },
+    {
+      "from": "components/sharing/ShareDialog.tsx",
+      "to": "trpc/client.tsx",
+      "type": "imports",
+      "import": "@/trpc/client"
+    },
+    {
+      "from": "components/sharing/ShareRedeemer.tsx",
+      "to": "components/MaxWidthWrapper.tsx",
+      "type": "imports",
+      "import": "@/components/MaxWidthWrapper"
+    },
+    {
+      "from": "components/sharing/ShareRedeemer.tsx",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
+    },
+    {
+      "from": "components/sharing/ShareRedeemer.tsx",
+      "to": "trpc/client.tsx",
+      "type": "imports",
+      "import": "@/trpc/client"
+    },
+    {
+      "from": "components/sharing/WorkspacesDialog.tsx",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
+    },
+    {
+      "from": "components/sharing/WorkspacesDialog.tsx",
+      "to": "components/sharing/ShareDialog.tsx",
+      "type": "imports",
+      "import": "./ShareDialog"
+    },
+    {
+      "from": "components/sharing/WorkspacesDialog.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
+    },
+    {
+      "from": "components/sharing/WorkspacesDialog.tsx",
+      "to": "components/ui/dialog.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dialog"
+    },
+    {
+      "from": "components/sharing/WorkspacesDialog.tsx",
+      "to": "components/ui/input.tsx",
+      "type": "imports",
+      "import": "@/components/ui/input"
+    },
+    {
+      "from": "components/sharing/WorkspacesDialog.tsx",
+      "to": "components/ui/label.tsx",
+      "type": "imports",
+      "import": "@/components/ui/label"
+    },
+    {
+      "from": "components/sharing/WorkspacesDialog.tsx",
+      "to": "trpc/client.tsx",
+      "type": "imports",
+      "import": "@/trpc/client"
     },
     {
       "from": "components/SyncStatusBadge.tsx",
@@ -5012,6 +5322,12 @@
     },
     {
       "from": "lib/dashboard/server-read.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
+    },
+    {
+      "from": "lib/dashboard/server-read.ts",
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
       "import": "@/trpc/routers/viewHelpers"
@@ -5365,6 +5681,12 @@
       "import": "@/lib/sync/sync-status-surface"
     },
     {
+      "from": "lib/sync/permissions.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
       "from": "lib/sync/replicache/client.ts",
       "to": "lib/sync/replicache/mutators.ts",
       "type": "imports",
@@ -5405,6 +5727,12 @@
       "to": "lib/sync/fractional-index.ts",
       "type": "imports",
       "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "lib/sync/replicache/pull-cvr.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
     },
     {
       "from": "lib/sync/replicache/pull-cvr.ts",
@@ -5453,6 +5781,12 @@
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
       "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "lib/sync/server-apply.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
     },
     {
       "from": "lib/sync/server-apply.ts",
@@ -6181,6 +6515,18 @@
       "import": "@/lib/local-db/outbox-schema"
     },
     {
+      "from": "tests/unit/permissions.test.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
+    },
+    {
+      "from": "tests/unit/poke-client-private.test.ts",
+      "to": "lib/realtime/poke-client.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-client"
+    },
+    {
       "from": "tests/unit/realtime-poke.test.ts",
       "to": "lib/realtime/poke-server.ts",
       "type": "imports",
@@ -6253,6 +6599,12 @@
       "import": "@/app/api/replicache/pull/route"
     },
     {
+      "from": "tests/unit/replicache-push-route.test.ts",
+      "to": "app/api/replicache/push/route.ts",
+      "type": "imports",
+      "import": "@/app/api/replicache/push/route"
+    },
+    {
       "from": "tests/unit/replicache-push.test.ts",
       "to": "lib/sync/replicache/push.ts",
       "type": "imports",
@@ -6317,6 +6669,18 @@
       "to": "lib/sync/sync-batch-contract.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-batch-contract"
+    },
+    {
+      "from": "tests/unit/share-router.test.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "@/trpc/init"
+    },
+    {
+      "from": "tests/unit/share-router.test.ts",
+      "to": "trpc/routers/shareRouter.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/shareRouter"
     },
     {
       "from": "tests/unit/sync-batch-client.test.ts",
@@ -6554,6 +6918,12 @@
     },
     {
       "from": "trpc/routers/_app.ts",
+      "to": "trpc/routers/shareRouter.ts",
+      "type": "imports",
+      "import": "./shareRouter"
+    },
+    {
+      "from": "trpc/routers/_app.ts",
       "to": "trpc/routers/tagRouter.ts",
       "type": "imports",
       "import": "./tagRouter"
@@ -6605,6 +6975,24 @@
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
       "import": "./viewHelpers"
+    },
+    {
+      "from": "trpc/routers/shareRouter.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "trpc/routers/shareRouter.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
+    },
+    {
+      "from": "trpc/routers/shareRouter.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "../init"
     },
     {
       "from": "trpc/routers/tagRouter.ts",

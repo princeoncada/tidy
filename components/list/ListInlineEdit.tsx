@@ -47,6 +47,7 @@ export default function ListInlineEdit({
   }, [isEditing, value]);
 
   const startEditing = () => {
+    if (disabled) return;
     setEditValue(value);
     setDisplayValue(value);
     setIsEditing(true);
@@ -118,7 +119,7 @@ export default function ListInlineEdit({
     <span
       data-testid={displayTestId}
       onClick={startEditing}
-      className={`${className} ${displayClassName} break-all! cursor-pointer rounded-sm transition-colors block w-full min-w-0`}
+      className={`${className} ${displayClassName} break-all! ${disabled ? "cursor-default" : "cursor-pointer"} rounded-sm transition-colors block w-full min-w-0`}
     >
       {displayValue}
     </span>

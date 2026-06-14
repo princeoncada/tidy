@@ -5,7 +5,21 @@ import {
   type ReplicachePushDatabase,
 } from "@/lib/sync/replicache/push";
 
+const permissionMocks = vi.hoisted(() => ({
+  getEffectiveListRole: vi.fn(),
+}));
+
+vi.mock("@/lib/sync/permissions", () => ({
+  canEditContent: (role: string | null) =>
+    role === "OWNER" || role === "EDITOR",
+  getEffectiveListRole: permissionMocks.getEffectiveListRole,
+}));
+
 function createPushDatabase(lastMutationID = 0, listOwner = "user-2") {
+  permissionMocks.getEffectiveListRole.mockReset();
+  permissionMocks.getEffectiveListRole.mockResolvedValue(
+    listOwner === "user-1" ? "OWNER" : null,
+  );
   const client = {
     id: "client-1",
     clientGroupId: "group-1",
@@ -34,6 +48,9 @@ function createPushDatabase(lastMutationID = 0, listOwner = "user-2") {
         name: "Foreign",
       })),
       updateMany: vi.fn(async () => ({ count: 1 })),
+    },
+    listItem: {
+      findUnique: vi.fn(async () => null),
     },
   };
   const database = {
@@ -141,7 +158,7 @@ describe("Replicache push ordering", () => {
     );
     expect(client.lastMutationID).toBe(1);
     expect(result.corrections[0]?.messages).toContain(
-      "List update target belongs to another user.",
+      "List update requires edit access.",
     );
     expect(database.$transaction).toHaveBeenCalledTimes(1);
   });
@@ -169,9 +186,10 @@ describe("Replicache push ordering", () => {
 
     expect(result.corrections).toEqual([]);
     expect(tx.list.updateMany).toHaveBeenCalledWith({
-      where: { id: "list-1", userId: "user-1" },
+      where: { id: "list-1" },
       data: { name: "Renamed" },
     });
+    expect(result.affectedListIds).toEqual(["list-1"]);
     expect(client.lastMutationID).toBe(1);
     expect(database.$transaction).toHaveBeenCalledTimes(1);
   });

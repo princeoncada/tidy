@@ -15,6 +15,7 @@ import SyncStatusBadge from "./SyncStatusBadge";
 import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { ReplicacheProvider } from "@/components/ReplicacheProvider";
 import { isReplicacheRenderEnabled } from "@/lib/sync/replicache/client";
+import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
 
 const supabase = createClient();
 
@@ -54,6 +55,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <SyncStatusBadge />
+                  <WorkspacesDialog />
                   <ListAdder boot={localFirstBoot} />
                 </div>
               </div>

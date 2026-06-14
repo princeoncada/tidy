@@ -432,3 +432,17 @@ The 1.9.x local-first series delivered Dexie-first dashboard WRITES, bounded mul
 **Supersession.** This supersedes the 1.9.x server-authoritative-render + pending-outbox-overlay model as the path to local-first UX (retained only until 2.0.5 retires it) and supersedes the 2026-06-10 priority decision's implication that the two write / sync outcomes complete the product series. The 1.9.x write-path, server-apply, UUID, and batch concepts carry FORWARD into Replicache's push handler; they are not discarded.
 
 **Roadmap impact.** `docs/FUTURE_PLANS.md` Planned is renumbered monotonically: old 1.11.0-1.11.2 polish pulled forward to 1.10.0-1.10.2; the 2.0.x arc inserted; old 1.10.0-1.10.2 deploy readiness pushed to 2.1.x and old 1.11.3 visual review to 2.2.0. See the Discarded / Won't Do superseded-architecture entry.
+
+---
+
+## 2026-06-14: Sharing uses computed list/workspace roles and private per-user poke fan-out (2.0.3)
+
+Shareable resources are lists and workspaces, with OWNER, EDITOR, and VIEWER roles. A workspace shares its assigned lists, and a user's effective role for a list is the strongest of direct list ownership, a `ListShare`, workspace ownership, or `WorkspaceMember`. VIEWER is read-only, EDITOR may rename the list and mutate/reorder/move items, and OWNER may manage links and members. List deletion remains restricted to the true `List.userId` owner.
+
+Shared lists are computed into Replicache pull at read time rather than materialized into a recipient's `ViewList` rows. Recipients receive list items and deterministic order after their owned lists, but `listTags` is always empty. Tags and custom views remain strictly per-user, and recipient-side placement/reorder of shared lists is deferred.
+
+Sharing management (workspaces, links, redemption, roles, removal) is protected tRPC. Dashboard content remains on permission-aware Replicache push/pull. The gate-OFF tRPC/overlay/Dexie path and integer order columns are unchanged.
+
+Realtime remains per-user rather than moving to per-resource channels. Each applied push collects affected list ids, resolves every owner/direct-share/workspace recipient, and fans out a poke to each recipient's `tidy:user:<id>` topic. Clients authenticate and subscribe with `private: true`; `prisma/sql/2_0_3_realtime_poke_rls.sql` authorizes receive access only when the topic matches the authenticated user's id.
+
+**Reason:** one permission authority keeps read, write, and notification scope consistent. Computed sharing avoids duplicating personal view state, and per-user fan-out preserves the existing cheap doorbell/pull architecture while closing the public-channel access-control gap.

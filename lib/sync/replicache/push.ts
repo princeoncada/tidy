@@ -44,6 +44,9 @@ type ReplicacheTrackingTransaction = {
     create(args: unknown): Promise<TrackingClient>;
     update(args: unknown): Promise<TrackingClient>;
   };
+  listItem: {
+    findUnique(args: unknown): Promise<{ listId: string } | null>;
+  };
 };
 
 export type ReplicachePushDatabase = {
@@ -59,6 +62,7 @@ type MutationTransactionResult =
       action: "applied";
       corrections: ReplicachePushCorrection[];
       effects: SyncPostCommitEffects;
+      affectedListIds: string[];
     };
 
 const REPLICACHE_MUTATION_SAVEPOINT = "replicache_mutation";
@@ -112,6 +116,52 @@ function rejectedMessages(results: SyncApplyOperationResult[]) {
   );
 }
 
+async function getAffectedListIdsForMutation(
+  tx: ReplicacheTrackingTransaction,
+  mutation: ReplicachePushMutation,
+): Promise<string[]> {
+  if (typeof mutation.args !== "object" || mutation.args === null) return [];
+  const args = mutation.args as Record<string, unknown>;
+  const ids = new Set<string>();
+  const add = (value: unknown) => {
+    if (typeof value === "string" && value.length > 0) ids.add(value);
+  };
+
+  if (
+    mutation.name === "createList" ||
+    mutation.name === "renameList" ||
+    mutation.name === "deleteList"
+  ) {
+    add(args.id);
+  } else if (
+    mutation.name === "reorderLists" ||
+    mutation.name === "reorderViewLists"
+  ) {
+    add(args.listId);
+  } else if (mutation.name === "moveItem") {
+    add(args.fromListId);
+    add(args.toListId);
+  } else if (
+    mutation.name === "createItem" ||
+    mutation.name === "reorderItems"
+  ) {
+    add(args.listId);
+  } else if (
+    mutation.name === "updateItem" ||
+    mutation.name === "deleteItem"
+  ) {
+    const item = typeof args.id === "string"
+      ? await tx.listItem.findUnique({
+          where: { id: args.id },
+          select: { listId: true },
+        })
+      : null;
+    add(item?.listId);
+  }
+
+  return [...ids];
+}
+
 export async function processReplicachePush({
   userId,
   clientGroupID,
@@ -125,8 +175,13 @@ export async function processReplicachePush({
   mutations: ReplicachePushMutation[];
   database?: ReplicachePushDatabase;
   runEffects?: (effects: SyncPostCommitEffects) => Promise<void>;
-}): Promise<{ corrections: ReplicachePushCorrection[]; applied: number }> {
+}): Promise<{
+  corrections: ReplicachePushCorrection[];
+  applied: number;
+  affectedListIds: string[];
+}> {
   const corrections: ReplicachePushCorrection[] = [];
+  const affectedListIds = new Set<string>();
   let applied = 0;
 
   for (const mutation of mutations) {
@@ -149,6 +204,7 @@ export async function processReplicachePush({
 
         let effects = createSyncPostCommitEffects();
         let mutationCorrections: ReplicachePushCorrection[] = [];
+        let mutationAffectedListIds: string[] = [];
 
         if (!isReplicacheMutationName(mutation.name)) {
           mutationCorrections = [{
@@ -181,6 +237,10 @@ export async function processReplicachePush({
           let applyMessages: string[] = [];
 
           if (validationMessages.length === 0 && accepted.length > 0) {
+            mutationAffectedListIds = await getAffectedListIdsForMutation(
+              tx,
+              mutation,
+            );
             await prismaTx.$executeRawUnsafe(
               `SAVEPOINT ${REPLICACHE_MUTATION_SAVEPOINT}`,
             );
@@ -198,6 +258,7 @@ export async function processReplicachePush({
                 `ROLLBACK TO SAVEPOINT ${REPLICACHE_MUTATION_SAVEPOINT}`,
               );
               effects = createSyncPostCommitEffects();
+              mutationAffectedListIds = [];
             }
             await prismaTx.$executeRawUnsafe(
               `RELEASE SAVEPOINT ${REPLICACHE_MUTATION_SAVEPOINT}`,
@@ -223,6 +284,7 @@ export async function processReplicachePush({
           action: "applied",
           corrections: mutationCorrections,
           effects,
+          affectedListIds: mutationAffectedListIds,
         };
       },
     );
@@ -233,9 +295,12 @@ export async function processReplicachePush({
     if (transactionResult.action === "applied") {
       applied += 1;
       corrections.push(...transactionResult.corrections);
+      transactionResult.affectedListIds.forEach((id) =>
+        affectedListIds.add(id)
+      );
       await runEffects(transactionResult.effects);
     }
   }
 
-  return { corrections, applied };
+  return { corrections, applied, affectedListIds: [...affectedListIds] };
 }
