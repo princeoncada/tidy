@@ -9,6 +9,7 @@ import {
   recomputeCustomViewsForIds,
   recomputeCustomViewsForTags,
 } from "./viewHelpers";
+import { readTagsForUser } from "@/lib/dashboard/server-read";
 
 export const tagColorSchema = z.enum([
   "gray",
@@ -38,13 +39,7 @@ function getListTagsForList(userId: string, listId: string) {
 
 export const tagRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx: { userId } }) => {
-    return await db.tag.findMany({
-      where: { userId },
-      orderBy: { name: "asc" },
-      include: {
-        listTags: true,
-      },
-    });
+    return readTagsForUser(userId);
   }),
   create: protectedProcedure.input(z.object({
     id: z.uuid(),
