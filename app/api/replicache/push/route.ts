@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { pokeUser } from "@/lib/realtime/poke-server";
 import {
   processReplicachePush,
   type ReplicachePushMutation,
@@ -75,6 +76,9 @@ export async function POST(request: Request) {
       clientGroupID: parsed.clientGroupID,
       mutations: parsed.mutations,
     });
+    if (result.applied > 0) {
+      await pokeUser(user.id);
+    }
     return Response.json(result, { status: 200 });
   } catch (error) {
     const message =
