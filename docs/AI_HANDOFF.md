@@ -77,8 +77,9 @@ server/client-stable loading render until the browser effect runs. When the
 offline app-shell gate is disabled, registration removes an old service worker
 and all Tidy app-shell caches. The cache is versioned at `v2`, and localhost
 service workers no longer cache Next static chunks, so stale development assets
-cannot survive. `lib/db.ts` reuses one development Prisma client backed by a
-three-connection pg pool.
+cannot survive. List cards expose sharing through an accessible
+`UserRoundPlus` icon button rather than clipped text. `lib/db.ts` reuses one
+development Prisma client backed by a three-connection pg pool.
 
 ---
 
