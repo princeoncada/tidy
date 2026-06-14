@@ -11,8 +11,8 @@ describe("share dialog layout", () => {
     );
 
     expect(source).toContain(
-      'className="max-h-[85vh] w-[min(32rem,calc(100%-2rem))] max-w-none overflow-y-auto sm:max-w-none"',
+      'className="max-h-[85vh] overflow-y-auto sm:max-w-lg"',
     );
-    expect(source).not.toContain("sm:max-w-lg");
+    expect(source).not.toContain("w-[min(32rem,calc(100%-2rem))]");
   });
 });
