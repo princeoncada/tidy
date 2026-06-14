@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.0.3-alpha
+- **Current version:** 2.0.3
 - **Current phase:** 2.0.3 - Sharing & Permissions
 - **Next phase:** 2.0.4 - Yjs Collaborative Item Notes
 
