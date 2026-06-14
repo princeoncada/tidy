@@ -3,8 +3,12 @@
  */
 import { Prisma, PrismaClient } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { config } from "dotenv";
 
 import { initialKeys } from "../lib/sync/fractional-index";
+
+config({ path: ".env.local", quiet: true });
+config({ path: ".env", quiet: true });
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
