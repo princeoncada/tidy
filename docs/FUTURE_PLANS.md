@@ -301,13 +301,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ### 2.0.5 - Share Redeem Error UX Hardening
 - **Status:** In progress | Priority: P1 2.0 sharing UX
 - **Type:** product behavior
-- **Files:** components/sharing/ShareRedeemer.tsx, components/Dashboard.tsx, tests/unit/share-redeemer.test.tsx, tests/unit/dashboard-hydration.test.tsx
-- **Implementation goal:** catch the rejected redeemShareLink promise in ShareRedeemer so revoked/expired/already-owned/missing share links surface the existing in-page "Unable to accept invite" message instead of an unhandled promise rejection, and keep the dashboard's server and initial client render on the same loading tree before client-only Replicache state is available.
-- **Product impact:** revoked/expired/invalid share links show a clean error message; valid redemption reaches the dashboard without a runtime rejection or hydration overlay.
+- **Files:** components/sharing/ShareRedeemer.tsx, components/sharing/ShareDialog.tsx, components/Dashboard.tsx, tests/unit/share-redeemer.test.tsx, tests/unit/share-dialog-layout.test.ts, tests/unit/dashboard-hydration.test.tsx
+- **Implementation goal:** catch the rejected redeemShareLink promise in ShareRedeemer so revoked/expired/already-owned/missing share links surface the existing in-page "Unable to accept invite" message instead of an unhandled promise rejection, keep the dashboard's server and initial client render on the same loading tree before client-only Replicache state is available, and constrain the share-management dialog to a compact responsive width.
+- **Product impact:** revoked/expired/invalid share links show a clean error message; valid redemption reaches the dashboard without a runtime rejection or hydration overlay; share management no longer expands across the desktop viewport.
 - **Runtime integration target:** the share redemption page handles failure entirely in-page; a valid link still pulls Replicache and redirects to /dashboard.
 - **Deferral boundary:** does NOT change redeemShareLink server error codes or messages, and does NOT address the ~20s shared-change propagation latency (tracked under Potential Next Directions).
 - **Validation target:** targeted alpha (unit) + manual revoked-link proof; full test:ci before stable.
-- **Acceptance:** redeeming a revoked/expired/invalid link renders the friendly error and produces no unhandled rejection; a valid link redirects to /dashboard without a hydration mismatch.
+- **Acceptance:** redeeming a revoked/expired/invalid link renders the friendly error and produces no unhandled rejection; a valid link redirects to /dashboard without a hydration mismatch; the share dialog remains compact on desktop and fits within mobile viewport gutters.
 
 ### 2.0.6 - Yjs Collaborative Item Notes
 - **Status:** Open | Priority: P2 2.0 collaboration
