@@ -1,11 +1,11 @@
-<!-- Current Version: 2.0.1 -->
+<!-- Current Version: 2.0.2-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 2.0.1 - Fractional Indexing for Order
-**Next**: 2.0.2 - Supabase Broadcast Realtime Poke
+**Current Version**: 2.0.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.0.2 - Supabase Broadcast Realtime Poke
+**Next**: 2.0.3 - Sharing & Permissions
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
