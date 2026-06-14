@@ -282,6 +282,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.3 - Sharing & Permissions~~ (stable 2026-06-14)
 
+- ~~2.0.4 - Replicache Pull Cookie Monotonicity Fix~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -291,21 +293,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.4 - Replicache Pull Cookie Monotonicity Fix (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.4 - Replicache Pull Cookie Monotonicity Fix
-- **Status:** In progress | Priority: P0 2.0 correctness (blocks the 2.0.5+ collaboration work)
-- **Type:** product behavior (bug fix)
-- **Files:** lib/sync/replicache/pull-cvr.ts, lib/sync/replicache/client.ts, tests/unit/replicache-pull-cvr.test.ts, tests/unit/replicache-pull-route.test.ts
-- **Implementation goal:** make the Replicache pull cookie monotonically comparable under Replicache's lexicographic string ordering by zero-padding the per-client-group sequence to a fixed width; bump the Replicache `schemaVersion` so wedged clients reset.
-- **Product impact:** restores Replicache pull after a client group exceeds 9 CVRs; unblocks shared-list visibility (R9) and any long-lived session.
-- **Runtime integration target:** cookies remain `clientGroupID:<sequence>` strings whose lexicographic order equals numeric order; CVR retention/diff semantics unchanged.
-- **Deferral boundary:** does NOT change the cookie wire type to numeric, the CVR hash/diff model, sharing logic, or server-apply.
-- **Validation target:** targeted alpha (cookie-monotonicity unit tests) + manual R9 re-run; full test:ci before stable.
-- **Acceptance:** consecutive pulls produce strictly increasing cookies across the 9->10 and 99->100 boundaries; the R9 recipient sees the shared list.
 
 ### 2.0.5 - Yjs Collaborative Item Notes
 - **Status:** Open | Priority: P2 2.0 collaboration
