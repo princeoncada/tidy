@@ -410,3 +410,25 @@ The 1.9.27 direct-write retirement attempt was committed on `wip/direct-write-re
 **Supersession**: This supersedes the sequencing of the 2026-06-11 split decision. Retirement now follows the overlay. Decision 4 remains satisfied by the retirement phase, now 1.9.29.
 
 **Impact**: `seriesComplete` stays false; 1.9.30 decides whether the local-first series is complete.
+
+## 2026-06-14: Close the 1.9.x local-first series incomplete; adopt the 2.0 local-first render + collaboration arc (1.9.32)
+
+The 1.9.x local-first series delivered Dexie-first dashboard WRITES, bounded multi-operation batch synchronization to PostgreSQL, server-side authenticated/idempotent apply, a retryable batch lifecycle, a pending-outbox reconcile overlay, and the 1.9.29-1.9.31 online read-correctness and movement-handoff fixes. Those write-path and sync outcomes are delivered and proven.
+
+**Finding - the render is still server-authoritative.** The dashboard still RENDERS from the server: it reads `view.getViewListsWithItems` / `getCurrentViewListsWithItems` through the TanStack Query cache and applies a pending-outbox overlay (`lib/local-db/local-overlay.ts`); Dexie is consulted only as an offline / API-unavailable fallback, not as the primary render source. This creates a three-way race - optimistic cache write vs. debounced outbox overlay vs. server refetch - that surfaces as the flicker / lag / rollback the user observes. The two priority outcomes from the 2026-06-10 decision are met for WRITES and read-correctness, but immediate local-first RENDER is not, so the series goal of a fast local-first UX is not fully achieved.
+
+**Decision - keep `seriesComplete = false`; the remaining product work is a new 2.0 arc.** True local-first render and collaboration is a distinct architecture, not an extension of the 1.9.x overlay / outbox-render model. `STATE.json.seriesComplete` stays false and flips only when the 2.0 arc completes (2.0.5).
+
+**Target architecture (2.0):**
+- **Replicache as the sync spine (chosen over Zero).** Server-authoritative structure sync: one local store, deterministic mutators applied optimistically, batched push to a `/push` endpoint (reuse `lib/sync/server-apply.ts`), `/pull` returns a diff, the client rebases pending mutations. The UI reads the local store via reactive / live queries and NEVER a raw server payload, removing the three-way race and the flicker. Postgres / Prisma stay. Replicache is chosen over Zero for stability and zero cost; Zero is newer and riskier.
+- **Yjs (CRDT) for collaborative TEXT only.** Live concurrent co-editing of item NOTES only (not item names, not the relational structure). Per-field `Y.Doc` keyed by entity id, persisted as binary in Postgres, synced via its own provider. Structure stays server-authoritative with per-entity last-write-wins; only free text uses a CRDT.
+- **Supabase Broadcast as the realtime poke.** One message per `/api/sync` batch ("changed, cursor=N") on a per-workspace / list channel; receivers PULL the delta. Doorbell, not delivery - missed messages self-heal on the next pull. Chosen over Postgres CDC / Changes (per-row cost + RLS retrofit) because it is per-batch and cheap.
+- **Client-authoritative IDs + fractional indexing.** Client `crypto.randomUUID` already exists; fractional indexing replaces coarse `orderedIds` reorder operations so order is a local, conflict-friendly value.
+
+**Reconciliation rules:** structure resolves last-write-wins per entity (consistent with the 1.9.9 server-authoritative-on-ties policy); order resolves via fractional indices; collaborative notes resolve via the Yjs CRDT. Server rejections become background corrections surfaced through the existing `SyncStatusBadge`, not UI rollbacks.
+
+**Phase sequence (2.0.x):** read-path inversion (Replicache) -> fractional indexing -> Broadcast poke -> sharing / permissions -> Yjs collaborative notes -> retire the legacy overlay / outbox-render and tRPC-render paths. Quick copy / metadata / landing polish (renumbered 1.10.0-1.10.2) ships first; deploy / build / smoke readiness (renumbered 2.1.x) and the visual review (2.2.0) are pushed AFTER 2.0 because deployment docs must be written once against the new architecture.
+
+**Supersession.** This supersedes the 1.9.x server-authoritative-render + pending-outbox-overlay model as the path to local-first UX (retained only until 2.0.5 retires it) and supersedes the 2026-06-10 priority decision's implication that the two write / sync outcomes complete the product series. The 1.9.x write-path, server-apply, UUID, and batch concepts carry FORWARD into Replicache's push handler; they are not discarded.
+
+**Roadmap impact.** `docs/FUTURE_PLANS.md` Planned is renumbered monotonically: old 1.11.0-1.11.2 polish pulled forward to 1.10.0-1.10.2; the 2.0.x arc inserted; old 1.10.0-1.10.2 deploy readiness pushed to 2.1.x and old 1.11.3 visual review to 2.2.0. See the Discarded / Won't Do superseded-architecture entry.
