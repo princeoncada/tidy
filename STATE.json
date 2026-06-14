@@ -1,6 +1,6 @@
 {
-    "version":  "1.10.0-alpha",
-    "state":  "alpha",
+    "version":  "1.10.0",
+    "state":  "stable",
     "phase":  "1.10.0",
     "phaseTitle":  "Copy and Metadata Hygiene",
     "nextPhase":  "1.10.1 - Auth Flow Copy Polish",
