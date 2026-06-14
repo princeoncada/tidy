@@ -291,6 +291,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.4 - Replicache Pull Cookie Monotonicity Fix (active) - see Planned
 ---
 
 ## Planned
