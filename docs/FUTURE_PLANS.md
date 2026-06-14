@@ -270,6 +270,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~1.9.32 - Local-First Dashboard Architecture Closeout~~ (stable 2026-06-14)
 
+- ~~1.10.0 - Copy and Metadata Hygiene~~ (stable 2026-06-14)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -279,21 +281,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 1.10.0 - Copy and Metadata Hygiene (active) - see Planned
 ---
 
 ## Planned
-
-### 1.10.0 - Copy and Metadata Hygiene
-- **Status:** In progress | Priority: P3 quick polish (pulled forward from 1.11.0)
-- **Type:** product behavior (polish)
-- **Files:** app/layout.tsx, public/*, README.md if needed
-- **Implementation goal:** fix missing asset references (e.g. the missing `apple-icon.png`) and metadata consistency.
-- **Product impact:** correct metadata / asset references; no behavior change.
-- **Runtime integration target:** metadata references existing assets.
-- **Deferral boundary:** auth copy -> 1.10.1; landing copy -> 1.10.2.
-- **Validation target:** targeted alpha (asset / metadata checks + manual proof); full test:ci before stable.
-- **Acceptance:** metadata references existing assets; no behavior change.
 
 ### 1.10.1 - Auth Flow Copy Polish
 - **Status:** Open | Priority: P3 quick polish (pulled forward from 1.11.1)
