@@ -4,7 +4,7 @@ import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import ListAdder from "./list/ListAdder";
 import ListsContainer from "./list/ListsContainer";
 import { Separator } from "./ui/separator";
@@ -19,22 +19,24 @@ import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
 
 const supabase = createClient();
 
-const subscribeToHydration = () => () => {};
-const getHydratedSnapshot = () => true;
-const getServerHydrationSnapshot = () => false;
-
 const Dashboard = () => {
 
   const [loggingOut, setLoggingOut] = useState(false);
-  const hydrated = useSyncExternalStore(
-    subscribeToHydration,
-    getHydratedSnapshot,
-    getServerHydrationSnapshot,
-  );
+  const [hydrated, setHydrated] = useState(false);
 
   const queryClient = useQueryClient();
   const router = useRouter();
   const localFirstBoot = useLocalFirstDashboardBoot();
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setHydrated(true);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, []);
 
   function handleLogout() {
     setLoggingOut(true);
