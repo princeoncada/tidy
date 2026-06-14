@@ -1,6 +1,6 @@
 {
-    "version":  "2.0.2-alpha",
-    "state":  "alpha",
+    "version":  "2.0.2",
+    "state":  "stable",
     "phase":  "2.0.2",
     "phaseTitle":  "Supabase Broadcast Realtime Poke",
     "nextPhase":  "2.0.3 - Sharing \u0026 Permissions",
