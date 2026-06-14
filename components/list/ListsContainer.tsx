@@ -77,6 +77,30 @@ function isOptimisticCacheRow(value: unknown) {
   );
 }
 
+function canEditListContent(list: List, userId: string | null) {
+  const role =
+    list.accessRole ?? (list.userId === userId ? "OWNER" : "VIEWER");
+  return role === "OWNER" || role === "EDITOR";
+}
+
+function findTargetList(
+  lists: Lists,
+  targetType: string,
+  targetId: string,
+) {
+  if (targetType === "list-drop") {
+    const listId = targetId.replace("list-drop-", "");
+    return lists.find((list) => list.id === listId);
+  }
+  if (targetType === "list-item") {
+    const itemId = targetId.replace("list-item-", "");
+    return lists.find((list) =>
+      list.listItems.some((item) => item.id === itemId)
+    );
+  }
+  return undefined;
+}
+
 function useAuthoritativeQuerySnapshot<T>({
   queryClient,
   queryKey,
@@ -1013,7 +1037,16 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         ) {
           const sourceListId = String(source.id).replace("list-", "");
           const targetListId = String(target.id).replace("list-", "");
-          finalPreview = reorderListsForDrag(lists, sourceListId, targetListId) ?? finalPreview;
+          const sourceList = lists.find((list) => list.id === sourceListId);
+          const targetList = lists.find((list) => list.id === targetListId);
+          if (
+            sourceList?.userId === boot.userId &&
+            targetList?.userId === boot.userId
+          ) {
+            finalPreview =
+              reorderListsForDrag(lists, sourceListId, targetListId) ??
+              finalPreview;
+          }
         }
 
         // Only save the final dropped order. Older drag positions do not matter.
@@ -1063,6 +1096,14 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         if (source.type === "list" && target.type === "list") {
           const sourceListId = String(source.id).replace("list-", "");
           const targetListId = String(target.id).replace("list-", "");
+          const sourceList = lists.find((list) => list.id === sourceListId);
+          const targetList = lists.find((list) => list.id === targetListId);
+          if (
+            sourceList?.userId !== boot.userId ||
+            targetList?.userId !== boot.userId
+          ) {
+            return;
+          }
           const nextLists = reorderListsForDrag(
             dragPreviewListsRef.current ?? lists,
             sourceListId,
@@ -1076,6 +1117,22 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         if (source.type !== "list-item") return;
 
         const draggedItemId = String(source.id).replace("list-item-", "");
+        const sourceList = lists.find((list) =>
+          list.listItems.some((item) => item.id === draggedItemId)
+        );
+        const targetList = findTargetList(
+          lists,
+          String(target.type),
+          String(target.id),
+        );
+        if (
+          !sourceList ||
+          !targetList ||
+          !canEditListContent(sourceList, boot.userId) ||
+          !canEditListContent(targetList, boot.userId)
+        ) {
+          return;
+        }
         const nextLists = reorderItemsForDrag(
           dragPreviewListsRef.current ?? lists,
           draggedItemId,
@@ -1110,6 +1167,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                       listItem={item}
                       index={index}
                       userId={boot.userId}
+                      canEdit={canEditListContent(list, boot.userId)}
                       dashboardKeys={dashboardKeys}
                       shouldRevealOnMount={
                         Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
