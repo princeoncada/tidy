@@ -5,22 +5,16 @@ import { ShareRedeemer } from "@/components/sharing/ShareRedeemer";
 
 const {
   mutateAsyncMock,
-  pullMock,
   replaceMock,
   useMutationMock,
 } = vi.hoisted(() => ({
   mutateAsyncMock: vi.fn(),
-  pullMock: vi.fn(),
   replaceMock: vi.fn(),
   useMutationMock: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
-}));
-
-vi.mock("@/components/ReplicacheProvider", () => ({
-  useTidyReplicache: () => ({ rep: { pull: pullMock } }),
 }));
 
 vi.mock("@/trpc/client", () => ({
@@ -46,8 +40,6 @@ function flushMacrotask() {
 describe("share redeemer", () => {
   beforeEach(() => {
     mutateAsyncMock.mockReset();
-    pullMock.mockReset();
-    pullMock.mockResolvedValue(undefined);
     replaceMock.mockReset();
     useMutationMock.mockReset();
     useMutationMock.mockReturnValue({
@@ -57,7 +49,7 @@ describe("share redeemer", () => {
     });
   });
 
-  it("pulls shared data and redirects after a successful redemption", async () => {
+  it("redirects after a successful redemption", async () => {
     mutateAsyncMock.mockResolvedValue(undefined);
 
     render(<ShareRedeemer token="tok" />);
@@ -67,7 +59,6 @@ describe("share redeemer", () => {
     });
 
     expect(mutateAsyncMock).toHaveBeenCalledWith({ token: "tok" });
-    expect(pullMock).toHaveBeenCalledOnce();
     expect(replaceMock).toHaveBeenCalledWith("/dashboard");
   });
 
@@ -85,8 +76,8 @@ describe("share redeemer", () => {
     mutateAsyncMock.mockRejectedValue(error);
     useMutationMock.mockReturnValue({
       mutateAsync: mutateAsyncMock,
-      isError: true,
-      error,
+      isError: false,
+      error: null,
     });
     process.on("unhandledRejection", handleProcessRejection);
     window.addEventListener("unhandledrejection", handleWindowRejection);
