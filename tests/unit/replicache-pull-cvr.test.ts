@@ -57,9 +57,53 @@ describe("Replicache CVR pull diff", () => {
     ).toEqual({ "list/list-1": "hash-1" });
   });
 
-  it("issues monotonic client-group cookies", () => {
-    expect(nextReplicacheCookie(null, "group-1")).toBe("group-1:1");
-    expect(nextReplicacheCookie("group-1:9", "group-1")).toBe("group-1:10");
+  it("keeps client-group cookies ordered across digit boundaries", () => {
+    const nine = nextReplicacheCookie("group-1:8", "group-1");
+    const ten = nextReplicacheCookie("group-1:9", "group-1");
+    const ninetyNine = nextReplicacheCookie("group-1:98", "group-1");
+    const hundred = nextReplicacheCookie("group-1:99", "group-1");
+    const fortyOne = nextReplicacheCookie("group-1:40", "group-1");
+
+    expect(nine < ten).toBe(true);
+    expect(nine < ninetyNine).toBe(true);
+    expect(ninetyNine < hundred).toBe(true);
+    expect(nine < fortyOne).toBe(true);
+  });
+
+  it("uses one fixed-width sequence suffix for every magnitude", () => {
+    const suffixLengths = [
+      nextReplicacheCookie(null, "group-1"),
+      nextReplicacheCookie("group-1:9", "group-1"),
+      nextReplicacheCookie("group-1:99", "group-1"),
+      nextReplicacheCookie("group-1:999999", "group-1"),
+    ].map((cookie) => cookie.split(":").at(-1)?.length);
+
+    expect(new Set(suffixLengths)).toEqual(new Set([16]));
+  });
+
+  it("starts null and undefined cookies at a zero-padded sequence one", () => {
+    expect(nextReplicacheCookie(null, "group-1")).toBe(
+      "group-1:0000000000000001",
+    );
+    expect(nextReplicacheCookie(undefined, "group-1")).toBe(
+      "group-1:0000000000000001",
+    );
+  });
+
+  it("round-trips a generated cookie and increments by exactly one", () => {
+    const first = nextReplicacheCookie(null, "group-1");
+    const second = nextReplicacheCookie(first, "group-1");
+    const firstSequence = Number(first.split(":").at(-1));
+    const secondSequence = Number(second.split(":").at(-1));
+
+    expect(secondSequence).toBe(firstSequence + 1);
+  });
+
+  it("returns a bare zero-padded sequence without a client group id", () => {
+    expect(nextReplicacheCookie(null)).toBe("0000000000000001");
+    expect(nextReplicacheCookie("0000000000000009")).toBe(
+      "0000000000000010",
+    );
   });
 
   it("supplies deterministic valid fallback keys for nullable server rows", () => {
