@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ShareRedeemer } from "@/components/sharing/ShareRedeemer";
@@ -95,6 +95,12 @@ describe("share redeemer", () => {
       ).toBeInTheDocument();
       expect(replaceMock).not.toHaveBeenCalled();
       expect(unhandledRejections).toEqual([]);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Back to dashboard" }),
+      );
+
+      expect(replaceMock).toHaveBeenCalledWith("/dashboard");
     } finally {
       process.off("unhandledRejection", handleProcessRejection);
       window.removeEventListener(
