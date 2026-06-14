@@ -14,7 +14,7 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 - `docs/VERSIONING.md` - version rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
 - `docs/PHASE_LOG.md` - historical traceability only, not active implementation guidance.
 
-Current alpha status: 1.9.29 has retired direct dashboard tRPC persistence and enabled Dexie-first writes by default; both decisions are sound and remain in place. Phase acceptance is not yet met because the online local-first read path is incomplete for create-then-immediately-mutate flows: the overlay can relinquish a locally-created list before the server snapshot reflects it, rebuilding that list with empty `listTags` can hide the optimistically-attached tag, and rereading Dexie plus setting React state on every outbox capture is a render-hang risk. The reproducible `views.spec.ts` create-tag failures and `dexie-first-tags-views.spec.ts:82` are product behavior bugs, not cross-test pollution, and must be finished within 1.9.29.
+Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. However, `seriesComplete` stays FALSE by decision: the dashboard still RENDERS server-authoritatively (TanStack payload + pending-outbox overlay; Dexie is only an offline fallback), which leaves the optimistic / overlay / refetch three-way race the user perceives as flicker / lag. True local-first RENDER + collaboration is a new 2.0 arc (Replicache + Yjs + Supabase Broadcast); see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.5).
 
 ---
 
@@ -180,6 +180,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Custom-view recompute runs after the atomic write transaction. If recompute fails, the writes remain durable and are reported applied; the projection may remain stale until a later successful recompute.
 - 1.9.26 closes the replay-reader gap: the batch flush selects pending plus backoff-ready `failed` operations via `lib/sync/retry-backoff.ts`, and `reconcilePendingWritesOnLoad` resets stranded `syncing` rows to `pending` before flushing. Permanent rejections still stay `failed` and visible, and operations beyond `RETRY_MAX_ATTEMPTS` stop auto-retrying until an explicit retry.
 - Concurrent-flush suppression is in-tab single-flight owned by the per-user `useOfflineReplayTrigger` scheduler; cross-tab concurrent flushes (multiple open tabs) are not yet coordinated and remain a follow-up.
+- Local-first RENDER is not delivered: the dashboard reads the server payload plus a pending-outbox overlay, with Dexie as an offline fallback only. The resulting optimistic / overlay / refetch race is the perceived flicker / lag. This is deferred to the 2.0 arc (Replicache render inversion + fractional indexing + Supabase Broadcast poke + Yjs notes), which retires the overlay / outbox-render path; see `docs/DECISIONS.md` (2026-06-14).
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
@@ -201,7 +202,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Never run `git restore <file>` on a file whose intended edit is still uncommitted; commit the file first, or strip only the injected negative-proof line.
 - Stable-promotion closeout routes users to the per-file commit commands and final push printed by `promote.ps1`; the assistant should not re-emit those stable promotion commands.
 - `open-phase.ps1` requires an explicit `-NextPhase "<version - title>"` or `-NoNextPhase` on every invocation; there is no silent default from the previous STATE.json nextPhase.
-- The active product phase is 1.9.29; do not advance to the 1.9.30 architecture closeout until the online read-correctness gap is fixed and phase acceptance is met. Authenticated E2E requires real Supabase credentials and per-worker storage state.
+- The 1.9.x product arc is closed at 1.9.32 with `seriesComplete` FALSE by decision; the remaining local-first RENDER work is the 2.0 arc (see `docs/DECISIONS.md`, 2026-06-14). Next is the quick-polish 1.10.0-1.10.2 series, then 2.0.x. Authenticated E2E requires real Supabase credentials and per-worker storage state.
 
 ---
 
