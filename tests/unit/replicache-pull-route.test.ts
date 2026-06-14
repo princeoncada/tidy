@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   readViews: vi.fn(),
   readAllLists: vi.fn(),
+  readAccessibleLists: vi.fn(),
   readTags: vi.fn(),
   transaction: vi.fn(),
 }));
@@ -19,6 +20,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/dashboard/server-read", () => ({
   readReplicacheViewsForUser: mocks.readViews,
   readReplicacheAllListsSnapshotForUser: mocks.readAllLists,
+  readReplicacheAccessibleListsForUser: mocks.readAccessibleLists,
   readTagsForUser: mocks.readTags,
 }));
 
@@ -68,6 +70,19 @@ describe("Replicache pull route", () => {
       }],
     });
     mocks.readTags.mockResolvedValue([]);
+    mocks.readAccessibleLists.mockResolvedValue([{
+      id: "list-shared",
+      userId: "user-2",
+      name: "Shared",
+      order: 0,
+      orderKey: null,
+      accessRole: "EDITOR",
+      createdAt: now,
+      updatedAt: now,
+      listItems: [],
+      listTags: [],
+      workspaceId: null,
+    }]);
 
     const tx = {
       replicacheClientGroup: {
@@ -106,12 +121,22 @@ describe("Replicache pull route", () => {
     expect(response.status).toBe(200);
     expect(mocks.readViews).toHaveBeenCalledWith("user-1");
     expect(mocks.readAllLists).toHaveBeenCalledWith("user-1");
+    expect(mocks.readAccessibleLists).toHaveBeenCalledWith("user-1");
     expect(mocks.readTags).toHaveBeenCalledWith("user-1");
     expect(body.lastMutationIDChanges).toEqual({ "client-1": 7 });
     expect(body.cookie).toBe("group-1:1");
     expect(body.patch).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ op: "put", key: "list/list-1" }),
+        expect.objectContaining({
+          op: "put",
+          key: "list/list-shared",
+          value: expect.objectContaining({ accessRole: "EDITOR" }),
+        }),
+        expect.objectContaining({
+          op: "put",
+          key: "viewList/view-all/list-shared",
+        }),
         expect.objectContaining({
           op: "put",
           key: "metadata/selectedView",
