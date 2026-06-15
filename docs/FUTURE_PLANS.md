@@ -384,6 +384,7 @@ Assigned a version only when scoped.
 - Migration/backfill playbook (prisma/schema.prisma, prisma/migrations/*)
 - Share tags and custom views with collaborators instead of projecting recipient shared lists with `listTags: []`.
 - Allow recipients to place/reorder shared lists within their own All Lists/custom-view organization without materializing owner view state.
+- Add rich-text item notes plus Yjs awareness/presence for remote cursors after the plain-text collaboration path is stable.
 - Realtime poke delivery latency: shared changes propagate in ~20s while pull/push return 200. Hypothesis: the 2.0.3 realtime RLS added only a SELECT policy on realtime.messages, so the server REST broadcast cannot SEND to the private poke topic and the recipient falls back to the 60s pullInterval. (lib/realtime/poke-server.ts, prisma/sql/2_0_3_realtime_poke_rls.sql, lib/sync/replicache/client.ts)
 
 ---
