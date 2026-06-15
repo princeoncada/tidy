@@ -93,7 +93,6 @@ export async function connectNoteProvider({
   let persistQueue: Promise<void> = Promise.resolve();
 
   const endpoint = `/api/collab/notes/${encodeURIComponent(itemId)}`;
-  let channel: RealtimeChannel;
 
   const broadcastState = (state: Uint8Array) => {
     if (!subscribed || destroyed || !canEdit) return;
@@ -152,7 +151,7 @@ export async function connectNoteProvider({
     schedulePersist();
   };
 
-  channel = client
+  const channel: RealtimeChannel = client
     .channel(noteTopicForItem(itemId), {
       config: {
         private: true,
