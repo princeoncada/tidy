@@ -149,7 +149,7 @@ export async function POST(request: Request, context: RouteContext) {
       return { status: 403 as const, error: "Forbidden" };
     }
 
-    await tx.$queryRaw`
+    await tx.$executeRaw`
       SELECT pg_advisory_xact_lock(hashtextextended(${itemId}, 0))
     `;
 
