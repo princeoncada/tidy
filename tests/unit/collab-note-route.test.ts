@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => {
       upsert: vi.fn(),
     },
     $queryRaw: vi.fn(),
+    $executeRaw: vi.fn(),
   };
   return {
     tx,
@@ -91,6 +92,7 @@ describe("collaborative note route permissions", () => {
     mocks.tx.itemNoteDoc.upsert.mockResolvedValue({});
     mocks.tx.itemNoteDoc.findUnique.mockResolvedValue(null);
     mocks.tx.$queryRaw.mockResolvedValue([]);
+    mocks.tx.$executeRaw.mockResolvedValue(1);
   });
 
   it("rejects GET when the user has no effective item access", async () => {
@@ -142,6 +144,8 @@ describe("collaborative note route permissions", () => {
         update: { state: expect.any(Uint8Array) },
         create: { itemId, state: expect.any(Uint8Array) },
       });
+      expect(mocks.tx.$executeRaw).toHaveBeenCalled();
+      expect(mocks.tx.$queryRaw).not.toHaveBeenCalled();
     },
   );
 
