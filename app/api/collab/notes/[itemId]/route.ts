@@ -182,8 +182,8 @@ export async function POST(request: Request, context: RouteContext) {
 
       await tx.itemNoteDoc.upsert({
         where: { itemId },
-        update: { state: Buffer.from(mergedState) },
-        create: { itemId, state: Buffer.from(mergedState) },
+        update: { state: new Uint8Array(mergedState) },
+        create: { itemId, state: new Uint8Array(mergedState) },
       });
 
       return { status: 200 as const, error: null };
