@@ -699,6 +699,47 @@ async function applyListItemOperation(
   }
 }
 
+export async function applyCollaborativeListItemNotesWithinTransaction({
+  userId,
+  itemId,
+  notes,
+  tx,
+}: {
+  userId: string;
+  itemId: string;
+  notes: string;
+  tx: SyncTransaction;
+}): Promise<SyncApplyOperationResult> {
+  const timestamp = new Date().toISOString();
+  const operationId = `collab-note:${itemId}`;
+
+  return applyListItemOperation(
+    userId,
+    {
+      operationId,
+      idempotencyKey: operationId,
+      accepted: true,
+      operation: {
+        operationId,
+        userId,
+        entityType: "listItem",
+        entityClientId: itemId,
+        entityServerId: itemId,
+        operationType: "update",
+        payload: { notes },
+        status: "syncing",
+        retryCount: 0,
+        errorMessage: null,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        lastAttemptedAt: timestamp,
+        idempotencyKey: operationId,
+      },
+    },
+    tx,
+  );
+}
+
 async function applyTagOperation(
   userId: string,
   decision: AcceptedDecision,
