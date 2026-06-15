@@ -295,12 +295,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.6 - Yjs Collaborative Item Notes (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.0.6 - Yjs Collaborative Item Notes
-- **Status:** Open | Priority: P2 2.0 collaboration
+- **Status:** In progress | Priority: P2 2.0 collaboration
 - **Type:** product behavior
 - **Files:** components/list/*, lib/collab/* (new Yjs provider), prisma/schema.prisma (binary note doc), app/api/*
 - **Implementation goal:** add live concurrent co-editing of item NOTES only via per-field `Y.Doc` keyed by item id, persisted as binary in Postgres, synced through its own provider. Structure stays server-authoritative + per-entity LWW.
