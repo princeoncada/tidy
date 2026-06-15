@@ -91,10 +91,19 @@ model ListItem {
   updatedAt DateTime @updatedAt
 
   parentList List @relation(fields: [listId], references: [id], onDelete: Cascade)
+  noteDoc    ItemNoteDoc?
 
   @@index([listId])
   @@index([listId, order])
   @@index([listId, orderKey])
+}
+
+model ItemNoteDoc {
+  itemId    String   @id @db.Uuid
+  state     Bytes
+  updatedAt DateTime @updatedAt
+
+  item ListItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 }
 
 model Tag {
