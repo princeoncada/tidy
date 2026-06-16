@@ -1,6 +1,6 @@
 {
-    "version":  "2.0.8-alpha",
-    "state":  "alpha",
+    "version":  "2.0.8",
+    "state":  "stable",
     "phase":  "2.0.8",
     "phaseTitle":  "Remove Dead Replicache License Config",
     "nextPhase":  "2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths",
