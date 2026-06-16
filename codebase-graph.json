@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
   "version": "2.0.6-alpha",
-  "generatedAt": "2026-06-15",
+  "generatedAt": "2026-06-16",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -3085,6 +3085,17 @@
       "imports": [
         "vitest",
         "@/lib/sync/fractional-index"
+      ]
+    },
+    {
+      "path": "tests/unit/item-notes-editor.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/list/ItemNotesEditor"
       ]
     },
     {
@@ -6569,6 +6580,12 @@
       "to": "lib/sync/fractional-index.ts",
       "type": "imports",
       "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "tests/unit/item-notes-editor.test.tsx",
+      "to": "components/list/ItemNotesEditor.tsx",
+      "type": "imports",
+      "import": "@/components/list/ItemNotesEditor"
     },
     {
       "from": "tests/unit/local-db-diagnostics.test.ts",
