@@ -1,9 +1,9 @@
 {
-    "version":  "2.0.7",
-    "state":  "stable",
-    "phase":  "2.0.7",
-    "phaseTitle":  "Realtime Poke Send Authorization",
-    "nextPhase":  "2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths",
+    "version":  "2.0.8-alpha",
+    "state":  "alpha",
+    "phase":  "2.0.8",
+    "phaseTitle":  "Remove Dead Replicache License Config",
+    "nextPhase":  "2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-16"
 }
