@@ -299,6 +299,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.8 - Remove Dead Replicache License Config (active) - see Planned
 ---
 
 ## Planned
