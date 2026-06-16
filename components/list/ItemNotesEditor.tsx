@@ -21,13 +21,16 @@ import { createClient } from "@/lib/supabase/client";
 function ConnectedItemNotesEditor({
   itemId,
   canEdit,
+  initialNotes,
 }: {
   itemId: string;
   canEdit: boolean;
+  initialNotes: string;
 }) {
   const doc = useMemo(() => createNoteDoc(), [itemId]);
   const providerRef = useRef<NoteProviderTeardown | null>(null);
-  const [value, setValue] = useState(() => flattenNoteText(doc));
+  const [value, setValue] = useState(initialNotes);
+  const [loaded, setLoaded] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
 
   useEffect(() => {
@@ -64,6 +67,7 @@ function ConnectedItemNotesEditor({
           void provider();
         } else {
           providerRef.current = provider;
+          setLoaded(true);
         }
       })
       .catch(() => {
@@ -93,7 +97,7 @@ function ConnectedItemNotesEditor({
       aria-label="Item notes"
       data-testid="item-notes-input"
       value={value}
-      readOnly={!canEdit}
+      readOnly={!canEdit || !loaded}
       placeholder={canEdit ? "Add collaborative notes..." : "No notes"}
       className="mb-1 min-h-16 resize-y text-xs"
       onChange={(event) => replaceNoteText(doc, event.target.value)}
@@ -107,9 +111,11 @@ function ConnectedItemNotesEditor({
 export function ItemNotesEditor({
   itemId,
   canEdit,
+  initialNotes,
 }: {
   itemId: string;
   canEdit: boolean;
+  initialNotes: string;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -129,7 +135,11 @@ export function ItemNotesEditor({
         Notes
       </Button>
       {expanded && (
-        <ConnectedItemNotesEditor itemId={itemId} canEdit={canEdit} />
+        <ConnectedItemNotesEditor
+          itemId={itemId}
+          canEdit={canEdit}
+          initialNotes={initialNotes}
+        />
       )}
     </div>
   );
