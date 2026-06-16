@@ -77,7 +77,6 @@ export function createReplicacheClient({
     pushURL: "/api/replicache/push",
     pullURL: "/api/replicache/pull",
     pullInterval: 60_000,
-    licenseKey: process.env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY,
     mutators: replicacheMutators,
     pusher: createPusher(onCorrections),
   });

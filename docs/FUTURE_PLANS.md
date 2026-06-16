@@ -299,15 +299,27 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.8 - Remove Dead Replicache License Config (active) - see Planned
 ---
 
 ## Planned
 
-### 2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
+### 2.0.8 - Remove Dead Replicache License Config
+- **Status:** In progress | Priority: P1 2.0 cleanup
+- **Type:** cleanup
+- **Files:** lib/sync/replicache/client.ts, .env.example
+- **Implementation goal:** remove the dead `licenseKey: process.env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` option in `createReplicacheClient` (lib/sync/replicache/client.ts) and the orphaned `NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` var + comment block in .env.example. Replicache 15 retired licensing and the field no longer exists in `ReplicacheOptions`; it only typechecks because the passed value is `undefined`. Carved out of the former 2.0.8 retirement so the dead-config removal ships as a small, safe diff ahead of the large gate-OFF retirement (now 2.0.9).
+- **Product impact:** none - dead configuration only; the value was always `undefined` and ignored by Replicache 15.
+- **Runtime integration target:** none - no runtime behavior changes.
+- **Deferral boundary:** the legacy overlay / outbox-render / tRPC-render retirement and the `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate removal stay in 2.0.9.
+- **Validation target:** targeted alpha (typecheck, lint, unit); full validate.ps1 before stable.
+- **Acceptance:** the dead `licenseKey` option and `NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` are gone, `createReplicacheClient` still typechecks and constructs, and the dashboard still renders from Replicache.
+
+### 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 - **Status:** Open | Priority: P1 2.0 cleanup
 - **Type:** cleanup
 - **Files:** lib/local-db/local-overlay.ts, lib/dashboard-cache.ts, hooks/useOptimisticSync.ts, lib/sync/offline-write-prototype.ts, lib/sync/replicache/client.ts, .env.example, components/*
-- **Implementation goal:** remove the 1.9.x pending-outbox overlay, the outbox-as-render-source fallback, and the server-payload tRPC render path now superseded by Replicache; retire the `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate. Also remove the dead `licenseKey: process.env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` option in `createReplicacheClient` (lib/sync/replicache/client.ts:80) and the orphaned `NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` var + its comment in .env.example (lines 17-19) - Replicache 15 retired licensing and the field no longer exists in `ReplicacheOptions`; it only typechecks because the passed value is `undefined`.
+- **Implementation goal:** remove the 1.9.x pending-outbox overlay, the outbox-as-render-source fallback, and the server-payload tRPC render path now superseded by Replicache; retire the `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate.
 - **Product impact:** none beyond removing dead / duplicate render paths; render is wholly local-store driven.
 - **Runtime integration target:** only the Replicache render / sync path remains.
 - **Deferral boundary:** none - final 2.0 architecture cleanup. This is the phase that flips `seriesComplete = true`.
@@ -389,6 +401,7 @@ Assigned a version only when scoped.
 - **Roadmap renumber (2026-06-14, post-2.0.3 R9):** inserted 2.0.4 - Replicache Pull Cookie Monotonicity Fix ahead of the collaboration work after R9 verification exposed a latent pull-cookie lexicographic-ordering bug. 2.0.4 Yjs Collaborative Item Notes -> 2.0.5; 2.0.5 Retire Legacy paths -> 2.0.6 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
 - **Roadmap renumber (2026-06-14, post-2.0.4 R9):** inserted 2.0.5 - Share Redeem Error UX Hardening ahead of the collaboration work after R9 surfaced a revoked-link redemption UX failure (unhandled rejection on the /share redeem page). Yjs Collaborative Item Notes 2.0.5 -> 2.0.6; Retire Legacy paths 2.0.6 -> 2.0.7 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
 - **Roadmap renumber (2026-06-16):** inserted 2.0.7 - Realtime Poke Send Authorization ahead of the cleanup work to fix shared-rename propagation latency (the server poke could not send because realtime.messages RLS, enabled in 2.0.6, blocks the anon key on INSERT). Retire Legacy paths 2.0.7 -> 2.0.8 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
+- **Roadmap renumber (2026-06-16, dead-config carve-out):** carved the dead `licenseKey` / `NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` removal out of the retirement phase into a new small 2.0.8 - Remove Dead Replicache License Config. Retire Legacy paths 2.0.8 -> 2.0.9 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
 
 ---
 
