@@ -288,6 +288,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.6 - Yjs Collaborative Item Notes~~ (stable 2026-06-16)
 
+- ~~2.0.7 - Realtime Poke Send Authorization~~ (stable 2026-06-16)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -297,21 +299,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.7 - Realtime Poke Send Authorization (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.7 - Realtime Poke Send Authorization
-- **Status:** In progress | Priority: P1 collaboration latency
-- **Type:** infrastructure
-- **Files:** lib/realtime/poke-server.ts, .env.example, tests/unit/realtime-poke.test.ts
-- **Implementation goal:** make the server-side realtime poke actually deliver so shared list/item renames (and all shared structure changes) propagate to other clients in ~1-2s via a Replicache pull instead of waiting for the 60s pullInterval. The poke broadcast currently authenticates with the anon publishable key, which RLS on realtime.messages (enabled in 2.0.6) blocks for INSERT; switch the server broadcast to the Supabase service-role key, which bypasses RLS, since the server already authenticated the user and computed the authorized recipients.
-- **Product impact:** shared renames and structure changes appear on other users' screens within ~1-2s instead of up to ~60s. Names stay LWW per the 2026-06-14 ADR; propagation is a Replicache pull round-trip, not Yjs-instant.
-- **Runtime integration target:** the /api/replicache/push fan-out poke reaches all authorized recipients and they pull on poke. Requires SUPABASE_SERVICE_ROLE_KEY in the server env; without it pokes no-op and clients heal via the 60s pull.
-- **Deferral boundary:** no RLS/SQL change (service-role bypasses RLS); the receive-side SELECT policy is unchanged; names are NOT moved onto Yjs; legacy path retirement stays 2.0.8.
-- **Validation target:** targeted alpha (vitest for the poke send unit test) plus a manual two-user proof that a shared rename propagates quickly; full validate.ps1 before stable.
-- **Acceptance:** the poke broadcast sends with the service-role key, the unit test asserts it, and a shared rename visibly propagates to a second client without waiting for the 60s pull.
 
 ### 2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 - **Status:** Open | Priority: P1 2.0 cleanup
