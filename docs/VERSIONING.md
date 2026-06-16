@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.0.5
-- **Current phase:** 2.0.5 - Share Redeem Error UX Hardening
-- **Next phase:** 2.0.6 - Yjs Collaborative Item Notes
+- **Current version:** 2.0.6-alpha
+- **Current phase:** 2.0.6 - Yjs Collaborative Item Notes
+- **Next phase:** 2.0.7 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 
 ---
 

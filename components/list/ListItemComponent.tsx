@@ -17,6 +17,8 @@ import {
   commitLocalListItemRename,
 } from "@/lib/local-db/local-write";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
+import { ItemNotesEditor } from "./ItemNotesEditor";
+import { isYjsNotesEnabled } from "@/lib/collab/yjs-notes-gate";
 
 
 interface ListItemComponentProps {
@@ -188,6 +190,13 @@ const ListItemComponent = ({
           displayClassName="whitespace-normal"
           inputClassName="text-sm! p-0! leading-6! break-normal!"
         />
+        {isYjsNotesEnabled() && (
+          <ItemNotesEditor
+            itemId={listItem.id}
+            canEdit={canEdit}
+            initialNotes={listItem.notes ?? ""}
+          />
+        )}
       </div>
 
       {canEdit && <Button

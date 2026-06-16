@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "2.0.5",
-  "generatedAt": "2026-06-14",
+  "version": "2.0.6-alpha",
+  "generatedAt": "2026-06-16",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -187,6 +187,23 @@
       "imports": [
         "@/lib/supabase/auth-confirm",
         "next/server"
+      ]
+    },
+    {
+      "path": "app/api/collab/notes/[itemId]/route.ts",
+      "kind": "api_route",
+      "extension": ".ts",
+      "symbols": [
+        "GET",
+        "POST"
+      ],
+      "imports": [
+        "@/lib/db",
+        "@/lib/collab/binary-base64",
+        "@/lib/collab/yjs-note-doc",
+        "@/lib/supabase/server",
+        "@/lib/sync/permissions",
+        "@/lib/sync/server-apply"
       ]
     },
     {
@@ -499,6 +516,24 @@
       ]
     },
     {
+      "path": "components/list/ItemNotesEditor.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ItemNotesEditor"
+      ],
+      "imports": [
+        "lucide-react",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/textarea",
+        "@/lib/collab/note-provider",
+        "@/lib/collab/yjs-note-doc",
+        "@/lib/collab/yjs-notes-gate",
+        "@/lib/supabase/client"
+      ]
+    },
+    {
       "path": "components/list/ListAdder.tsx",
       "kind": "component",
       "extension": ".tsx",
@@ -600,7 +635,9 @@
         "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
         "@/lib/local-db/local-write",
-        "@/hooks/useDashboardMutations"
+        "@/hooks/useDashboardMutations",
+        "./ItemNotesEditor",
+        "@/lib/collab/yjs-notes-gate"
       ]
     },
     {
@@ -1523,6 +1560,68 @@
       ]
     },
     {
+      "path": "lib/collab/binary-base64.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "base64ToBytes",
+        "bytesToBase64"
+      ],
+      "imports": []
+    },
+    {
+      "path": "lib/collab/note-provider.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "NoteProviderTeardown",
+        "connectNoteProvider"
+      ],
+      "imports": [
+        "@supabase/supabase-js",
+        "yjs",
+        "@/lib/collab/binary-base64",
+        "@/lib/collab/note-topic",
+        "@/lib/collab/yjs-note-doc",
+        "@/lib/supabase/client"
+      ]
+    },
+    {
+      "path": "lib/collab/note-topic.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "noteTopicForItem"
+      ],
+      "imports": []
+    },
+    {
+      "path": "lib/collab/yjs-note-doc.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "NOTE_TEXT_KEY",
+        "applyNoteUpdate",
+        "createNoteDoc",
+        "encodeNoteState",
+        "flattenNoteText",
+        "getNoteText",
+        "replaceNoteText"
+      ],
+      "imports": [
+        "yjs"
+      ]
+    },
+    {
+      "path": "lib/collab/yjs-notes-gate.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "isYjsNotesEnabled"
+      ],
+      "imports": []
+    },
+    {
       "path": "lib/dashboard-cache.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2282,6 +2381,7 @@
         "SyncPostCommitEffects",
         "SyncTransaction",
         "applyAcceptedSyncOperationsWithinTransaction",
+        "applyCollaborativeListItemNotesWithinTransaction",
         "applySyncOperations",
         "createSyncPostCommitEffects",
         "runSyncPostCommitEffects"
@@ -2910,6 +3010,18 @@
       ]
     },
     {
+      "path": "tests/unit/collab-note-route.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/collab/binary-base64",
+        "@/lib/collab/yjs-note-doc",
+        "@/app/api/collab/notes/[itemId]/route"
+      ]
+    },
+    {
       "path": "tests/unit/conflict-resolution.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2973,6 +3085,17 @@
       "imports": [
         "vitest",
         "@/lib/sync/fractional-index"
+      ]
+    },
+    {
+      "path": "tests/unit/item-notes-editor.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/list/ItemNotesEditor"
       ]
     },
     {
@@ -3561,6 +3684,17 @@
       ]
     },
     {
+      "path": "tests/unit/yjs-note-doc.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/collab/yjs-note-doc",
+        "@/lib/collab/yjs-notes-gate"
+      ]
+    },
+    {
       "path": "trpc/client.tsx",
       "kind": "trpc",
       "extension": ".tsx",
@@ -3806,6 +3940,42 @@
       "to": "lib/supabase/auth-confirm.ts",
       "type": "imports",
       "import": "@/lib/supabase/auth-confirm"
+    },
+    {
+      "from": "app/api/collab/notes/[itemId]/route.ts",
+      "to": "lib/collab/binary-base64.ts",
+      "type": "imports",
+      "import": "@/lib/collab/binary-base64"
+    },
+    {
+      "from": "app/api/collab/notes/[itemId]/route.ts",
+      "to": "lib/collab/yjs-note-doc.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-note-doc"
+    },
+    {
+      "from": "app/api/collab/notes/[itemId]/route.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "app/api/collab/notes/[itemId]/route.ts",
+      "to": "lib/supabase/server.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/server"
+    },
+    {
+      "from": "app/api/collab/notes/[itemId]/route.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
+    },
+    {
+      "from": "app/api/collab/notes/[itemId]/route.ts",
+      "to": "lib/sync/server-apply.ts",
+      "type": "imports",
+      "import": "@/lib/sync/server-apply"
     },
     {
       "from": "app/api/replicache/pull/route.ts",
@@ -4222,6 +4392,42 @@
       "import": "@/lib/sync/replicache/client"
     },
     {
+      "from": "components/list/ItemNotesEditor.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
+    },
+    {
+      "from": "components/list/ItemNotesEditor.tsx",
+      "to": "components/ui/textarea.tsx",
+      "type": "imports",
+      "import": "@/components/ui/textarea"
+    },
+    {
+      "from": "components/list/ItemNotesEditor.tsx",
+      "to": "lib/collab/note-provider.ts",
+      "type": "imports",
+      "import": "@/lib/collab/note-provider"
+    },
+    {
+      "from": "components/list/ItemNotesEditor.tsx",
+      "to": "lib/collab/yjs-note-doc.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-note-doc"
+    },
+    {
+      "from": "components/list/ItemNotesEditor.tsx",
+      "to": "lib/collab/yjs-notes-gate.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-notes-gate"
+    },
+    {
+      "from": "components/list/ItemNotesEditor.tsx",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
       "from": "components/list/ListAdder.tsx",
       "to": "components/list/types.ts",
       "type": "imports",
@@ -4451,6 +4657,12 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
+      "to": "components/list/ItemNotesEditor.tsx",
+      "type": "imports",
+      "import": "./ItemNotesEditor"
+    },
+    {
+      "from": "components/list/ListItemComponent.tsx",
       "to": "components/list/ListInlineEdit.tsx",
       "type": "imports",
       "import": "./ListInlineEdit"
@@ -4478,6 +4690,12 @@
       "to": "hooks/useDashboardMutations.ts",
       "type": "imports",
       "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/list/ListItemComponent.tsx",
+      "to": "lib/collab/yjs-notes-gate.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-notes-gate"
     },
     {
       "from": "components/list/ListItemComponent.tsx",
@@ -5345,6 +5563,30 @@
     },
     {
       "from": "hooks/useUser.ts",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "lib/collab/note-provider.ts",
+      "to": "lib/collab/binary-base64.ts",
+      "type": "imports",
+      "import": "@/lib/collab/binary-base64"
+    },
+    {
+      "from": "lib/collab/note-provider.ts",
+      "to": "lib/collab/note-topic.ts",
+      "type": "imports",
+      "import": "@/lib/collab/note-topic"
+    },
+    {
+      "from": "lib/collab/note-provider.ts",
+      "to": "lib/collab/yjs-note-doc.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-note-doc"
+    },
+    {
+      "from": "lib/collab/note-provider.ts",
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
@@ -6280,6 +6522,24 @@
       "import": "@/lib/sw/app-shell-strategy"
     },
     {
+      "from": "tests/unit/collab-note-route.test.ts",
+      "to": "app/api/collab/notes/[itemId]/route.ts",
+      "type": "imports",
+      "import": "@/app/api/collab/notes/[itemId]/route"
+    },
+    {
+      "from": "tests/unit/collab-note-route.test.ts",
+      "to": "lib/collab/binary-base64.ts",
+      "type": "imports",
+      "import": "@/lib/collab/binary-base64"
+    },
+    {
+      "from": "tests/unit/collab-note-route.test.ts",
+      "to": "lib/collab/yjs-note-doc.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-note-doc"
+    },
+    {
       "from": "tests/unit/conflict-resolution.test.ts",
       "to": "lib/sync/conflict-resolution.ts",
       "type": "imports",
@@ -6320,6 +6580,12 @@
       "to": "lib/sync/fractional-index.ts",
       "type": "imports",
       "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "tests/unit/item-notes-editor.test.tsx",
+      "to": "components/list/ItemNotesEditor.tsx",
+      "type": "imports",
+      "import": "@/components/list/ItemNotesEditor"
     },
     {
       "from": "tests/unit/local-db-diagnostics.test.ts",
@@ -6956,6 +7222,18 @@
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
       "import": "@/trpc/routers/viewHelpers"
+    },
+    {
+      "from": "tests/unit/yjs-note-doc.test.ts",
+      "to": "lib/collab/yjs-note-doc.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-note-doc"
+    },
+    {
+      "from": "tests/unit/yjs-note-doc.test.ts",
+      "to": "lib/collab/yjs-notes-gate.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-notes-gate"
     },
     {
       "from": "trpc/client.tsx",

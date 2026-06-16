@@ -1,11 +1,11 @@
-<!-- Current Version: 2.0.5 -->
+<!-- Current Version: 2.0.6-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.5 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 2.0.5 - Share Redeem Error UX Hardening
-**Next**: 2.0.6 - Yjs Collaborative Item Notes
+**Current Version**: 2.0.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.0.6 - Yjs Collaborative Item Notes
+**Next**: 2.0.7 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -14,11 +14,11 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 - `docs/VERSIONING.md` - version rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
 - `docs/PHASE_LOG.md` - historical traceability only, not active implementation guidance.
 
-Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. At that closeout, `seriesComplete` stayed FALSE because the dashboard still rendered server-authoritatively (TanStack payload + pending-outbox overlay; Dexie only as an offline fallback), leaving the optimistic / overlay / refetch race perceived as flicker / lag. The 2.0 arc addresses local-first render and collaboration; see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.5).
+Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. At that closeout, `seriesComplete` stayed FALSE because the dashboard still rendered server-authoritatively (TanStack payload + pending-outbox overlay; Dexie only as an offline fallback), leaving the optimistic / overlay / refetch race perceived as flicker / lag. The 2.0 arc addresses local-first render and collaboration; see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.7).
 
-2.0.0 adds the Replicache render/write path behind `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED`, default ON. The dashboard now has one per-user Replicache store, named deterministic mutators, reactive local projection, authenticated `/api/replicache/push` and `/api/replicache/pull` handlers, and Prisma client/client-group/CVR tracking. Gate OFF retains the 1.9.x tRPC + overlay + Dexie path for compatibility until 2.0.5.
+2.0.0 adds the Replicache render/write path behind `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED`, default ON. The dashboard now has one per-user Replicache store, named deterministic mutators, reactive local projection, authenticated `/api/replicache/push` and `/api/replicache/pull` handlers, and Prisma client/client-group/CVR tracking. Gate OFF retains the 1.9.x tRPC + overlay + Dexie path for compatibility until 2.0.7.
 
-2.0.1 changes Replicache ordering to `fractional-indexing` string keys. `View.orderKey`, `ViewList.orderKey`, and `ListItem.orderKey` are nullable during rollout; pull supplies deterministic string fallbacks for null rows, while gated create/reorder/move mutations write one entity key rather than shipping a full `orderedIds` array. Dedicated Replicache readers in `lib/dashboard/server-read.ts` expose those fields to pull while the legacy reader return shapes omit them, preventing generated Prisma scalars from widening the gate-OFF tRPC/cache contracts. The legacy gate-OFF path and integer `order` columns remain intact through 2.0.5. Apply the migration, regenerate Prisma, then run `scripts/backfill-order-keys.ts` once before relying on persisted keys for every existing row.
+2.0.1 changes Replicache ordering to `fractional-indexing` string keys. `View.orderKey`, `ViewList.orderKey`, and `ListItem.orderKey` are nullable during rollout; pull supplies deterministic string fallbacks for null rows, while gated create/reorder/move mutations write one entity key rather than shipping a full `orderedIds` array. Dedicated Replicache readers in `lib/dashboard/server-read.ts` expose those fields to pull while the legacy reader return shapes omit them, preventing generated Prisma scalars from widening the gate-OFF tRPC/cache contracts. The legacy gate-OFF path and integer `order` columns remain intact through 2.0.7. Apply the migration, regenerate Prisma, then run `scripts/backfill-order-keys.ts` once before relying on persisted keys for every existing row.
 
 ---
 
@@ -40,6 +40,7 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - Create lists and items.
 - Complete and uncomplete items.
 - Rename and delete lists and items.
+- Edit item notes collaboratively when the Yjs notes gate is enabled.
 - Create tags and attach/detach them from lists.
 - Create custom tag-based views using ALL/ANY match modes.
 - Switch views.
@@ -61,12 +62,14 @@ Tidy is an authenticated personal todo workspace with optimistic-first updates.
 - `lib/dashboard-cache.ts` - centralized TanStack Query cache helpers.
 - `lib/sync/sync-batch-contract.ts`, `lib/sync/server-apply.ts` - bounded sync validation and authenticated PostgreSQL apply matrix.
 - `lib/sync/replicache/*`, `hooks/useReplicacheDashboard.ts`, `hooks/useDashboardMutations.ts`, `components/ReplicacheProvider.tsx` - Replicache keys, mutators/translation, CVR diff, per-user client, reactive render model, and gated mutation seam.
+- `lib/collab/*`, `components/list/ItemNotesEditor.tsx`, `app/api/collab/notes/[itemId]/route.ts` - gated per-item Yjs note documents, private-channel relay, and authenticated binary persistence with plain-text flattening.
 - `app/api/replicache/push/route.ts`, `app/api/replicache/pull/route.ts` - protected Replicache sync endpoints.
 - `lib/dashboard/server-read.ts` - shared user-scoped server reads used by both tRPC and Replicache pull.
 - `trpc/routers/_app.ts`, `trpc/init.ts`, `trpc/routers/*` - tRPC API and auth context.
 - `prisma/schema.prisma` - database schema.
 - `lib/sync/permissions.ts`, `trpc/routers/shareRouter.ts`, `components/sharing/*`, `app/share/[token]/page.tsx` - sharing role authority, management API, owner controls, and invite redemption.
 - `prisma/sql/2_0_3_realtime_poke_rls.sql` - manually applied private-channel receive policy for per-user poke topics.
+- `prisma/sql/2_0_6_note_collab_rls.sql` - manually applied per-item note-topic policies; receive requires access and send requires EDITOR or OWNER.
 
 2.0.5 hardens the sharing transition path: rejected redemption stores and renders
 its caught error locally with a Back to dashboard action, while successful
@@ -81,6 +84,18 @@ cannot survive. List cards expose sharing through an accessible
 `UserRoundPlus` icon button rather than clipped text. `lib/db.ts` reuses one
 development Prisma client backed by a three-connection pg pool.
 
+2.0.6 adds collaborative item notes behind
+`NEXT_PUBLIC_YJS_NOTES_ENABLED=false`. Each opened note owns one `Y.Doc`
+containing a `Y.Text` named `notes`; peers exchange Yjs updates over a private
+`tidy:note:<itemId>` Supabase Broadcast channel. `ItemNoteDoc.state` is the
+binary CRDT authority, while every persisted state is flattened through the
+existing list-item server-apply semantics into `ListItem.notes` so Replicache
+continues to carry the plain-text projection. Per-item PostgreSQL advisory locks
+serialize persistence so incoming state is merged with the stored CRDT before
+the plain-text projection is updated. The Prisma migration/generation and
+`prisma/sql/2_0_6_note_collab_rls.sql` application are manual release steps.
+With the gate off, no editor mounts and no collaboration traffic starts.
+
 ---
 
 ## Architecture Invariants
@@ -88,6 +103,7 @@ development Prisma client backed by a three-connection pg pool.
 **Data model:**
 - Core models: `List`, `ListItem`, `Tag`, `View`, `ViewList`, `ViewTag`, `ListTag`.
 - Sharing models: `Workspace`, `WorkspaceMember`, `ListShare`, and `ShareLink`. Lists may belong to one workspace. Effective list access is the strongest of direct list ownership, a direct list share, workspace ownership, or workspace membership; roles are OWNER, EDITOR, and VIEWER.
+- `ItemNoteDoc` is a one-to-one binary Yjs document keyed by `ListItem.id`. It is not a Replicache entity; `ListItem.notes` remains the plain-text read projection.
 - On the Replicache path, `ViewList.orderKey` owns list order per view, `ListItem.orderKey` owns item order inside a list, and `View.orderKey` owns view order. The integer `order` fields remain the gate-OFF compatibility authority until legacy retirement.
 - Unique constraints: `View.name` per user, `Tag.name` per user, and `ViewList` primary key `[viewId, listId]`.
 - Cascades remove dependent list items, list-tags, view-list memberships, view-tags, and list-tags as defined by Prisma relations.
@@ -160,6 +176,7 @@ development Prisma client backed by a three-connection pg pool.
 - Sharing management is protected tRPC, not Replicache mutation traffic. Share links grant EDITOR or VIEWER only; redemption rejects missing/revoked/expired/self-owned resources and idempotently preserves the strongest existing grant.
 - `lib/sync/permissions.ts` is the shared server authority. List rename and every ListItem create/update/delete/reorder/move require EDITOR or OWNER; cross-list move requires edit access to both lists. List delete remains restricted to the true `List.userId` owner.
 - Applied Replicache mutations collect affected list ids and poke every user with effective access. The topic stays per-user (`tidy:user:<id>`), while clients authenticate before joining a private channel. Apply `prisma/sql/2_0_3_realtime_poke_rls.sql` manually and disable Realtime "Allow public access" so authenticated users can receive only their own topic.
+- Collaborative note GET allows any effective list role. Persistence and Broadcast send require EDITOR or OWNER; private-channel receive allows any effective role. The endpoint resolves `ListItem.listId` server-side and never trusts client role claims.
 
 **Performance and local-first boundary:**
 - Legacy integer reorder endpoints retain batch raw SQL (`UPDATE ... FROM (VALUES ...)`). Fractional Replicache reorder applies one ownership-scoped entity update.
@@ -213,10 +230,11 @@ development Prisma client backed by a three-connection pg pool.
 - Custom-view recompute runs after the atomic write transaction. If recompute fails, the writes remain durable and are reported applied; the projection may remain stale until a later successful recompute.
 - 1.9.26 closes the replay-reader gap: the batch flush selects pending plus backoff-ready `failed` operations via `lib/sync/retry-backoff.ts`, and `reconcilePendingWritesOnLoad` resets stranded `syncing` rows to `pending` before flushing. Permanent rejections still stay `failed` and visible, and operations beyond `RETRY_MAX_ATTEMPTS` stop auto-retrying until an explicit retry.
 - Concurrent-flush suppression is in-tab single-flight owned by the per-user `useOfflineReplayTrigger` scheduler; cross-tab concurrent flushes (multiple open tabs) are not yet coordinated and remain a follow-up.
-- The Replicache gate now addresses the render race by making the local store the default render source. The legacy overlay/outbox-render/tRPC-render path remains intentionally intact under gate OFF and is retired only in 2.0.5.
+- The Replicache gate now addresses the render race by making the local store the default render source. The legacy overlay/outbox-render/tRPC-render path remains intentionally intact under gate OFF and is retired only in 2.0.7.
 - Fractional keys are nullable in PostgreSQL for rollout compatibility. The migration and one-time backfill must complete before assuming every persisted row has a key; pull fallback prevents null rows from entering the Replicache store. A Supabase Broadcast doorbell now triggers an immediate pull: an applied `/api/replicache/push` batch fans out per-user private-channel pokes to users with affected-list access, and connected clients call `rep.pull()`. It is a poke, not delivery - missed pokes self-heal on the next periodic (60s) pull.
 - Shared-list revocation and removed workspace membership self-heal on the next pull because the computed union omits inaccessible list/item keys and the CVR emits deletes. Management changes do not materialize recipient view rows.
 - Tag/view sharing and recipient-side ordering of shared lists are intentionally deferred. Shared lists cannot be placed or reordered in a recipient's personal/custom views in 2.0.3.
+- Collaborative notes require the manually applied per-item Realtime RLS policy; without it, private channel joins/sends fail while GET/POST remain separately protected. Broadcast is relay rather than durable delivery: a missed update self-heals only after the sender persists and the peer reopens or reloads the note. True offline note editing and automatic reconnect state-vector reconciliation are not implemented in 2.0.6.
 
 **Testing and polish:**
 - API-level ownership regression tests now cover the 1.6.x ownership series; owned-flow breadth remains in authenticated E2E.
