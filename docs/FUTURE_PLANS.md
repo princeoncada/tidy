@@ -286,6 +286,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.5 - Share Redeem Error UX Hardening~~ (stable 2026-06-14)
 
+- ~~2.0.6 - Yjs Collaborative Item Notes~~ (stable 2026-06-16)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -295,21 +297,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.6 - Yjs Collaborative Item Notes (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.6 - Yjs Collaborative Item Notes
-- **Status:** In progress | Priority: P2 2.0 collaboration
-- **Type:** product behavior
-- **Files:** components/list/*, lib/collab/* (new Yjs provider), prisma/schema.prisma (binary note doc), app/api/*
-- **Implementation goal:** add live concurrent co-editing of item NOTES only via per-field `Y.Doc` keyed by item id, persisted as binary in Postgres, synced through its own provider. Structure stays server-authoritative + per-entity LWW.
-- **Product impact:** real-time collaborative note editing on items.
-- **Runtime integration target:** item notes are a CRDT field; names and structure remain LWW.
-- **Deferral boundary:** does NOT convert names or relational structure to CRDTs.
-- **Validation target:** targeted alpha + manual concurrent-edit proof; full test:ci before stable.
-- **Acceptance:** two users editing the same item note converge without lost text.
 
 ### 2.0.7 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 - **Status:** Open | Priority: P1 2.0 cleanup
