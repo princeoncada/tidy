@@ -1,6 +1,6 @@
 {
-    "version":  "2.0.7-alpha",
-    "state":  "alpha",
+    "version":  "2.0.7",
+    "state":  "stable",
     "phase":  "2.0.7",
     "phaseTitle":  "Realtime Poke Send Authorization",
     "nextPhase":  "2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths",
