@@ -297,6 +297,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.7 - Realtime Poke Send Authorization (active) - see Planned
 ---
 
 ## Planned
