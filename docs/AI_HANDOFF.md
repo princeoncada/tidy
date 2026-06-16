@@ -1,9 +1,9 @@
-<!-- Current Version: 2.0.8-alpha -->
+<!-- Current Version: 2.0.8 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.8-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.0.8 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.0.8 - Remove Dead Replicache License Config
 **Next**: 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 
