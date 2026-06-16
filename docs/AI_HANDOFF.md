@@ -1,9 +1,9 @@
-<!-- Current Version: 2.0.7-alpha -->
+<!-- Current Version: 2.0.7 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.0.7 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.0.7 - Realtime Poke Send Authorization
 **Next**: 2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 
