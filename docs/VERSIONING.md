@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.0.7-alpha
+- **Current version:** 2.0.7
 - **Current phase:** 2.0.7 - Realtime Poke Send Authorization
 - **Next phase:** 2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 
