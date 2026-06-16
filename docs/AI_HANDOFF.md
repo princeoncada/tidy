@@ -1,11 +1,11 @@
-<!-- Current Version: 2.0.7 -->
+<!-- Current Version: 2.0.8-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.7 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 2.0.7 - Realtime Poke Send Authorization
-**Next**: 2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
+**Current Version**: 2.0.8-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.0.8 - Remove Dead Replicache License Config
+**Next**: 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
