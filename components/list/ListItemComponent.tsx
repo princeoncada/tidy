@@ -191,7 +191,11 @@ const ListItemComponent = ({
           inputClassName="text-sm! p-0! leading-6! break-normal!"
         />
         {isYjsNotesEnabled() && (
-          <ItemNotesEditor itemId={listItem.id} canEdit={canEdit} />
+          <ItemNotesEditor
+            itemId={listItem.id}
+            canEdit={canEdit}
+            initialNotes={listItem.notes ?? ""}
+          />
         )}
       </div>
 
