@@ -290,6 +290,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.7 - Realtime Poke Send Authorization~~ (stable 2026-06-16)
 
+- ~~2.0.8 - Remove Dead Replicache License Config~~ (stable 2026-06-16)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -299,21 +301,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.8 - Remove Dead Replicache License Config (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.8 - Remove Dead Replicache License Config
-- **Status:** In progress | Priority: P1 2.0 cleanup
-- **Type:** cleanup
-- **Files:** lib/sync/replicache/client.ts, .env.example
-- **Implementation goal:** remove the dead `licenseKey: process.env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` option in `createReplicacheClient` (lib/sync/replicache/client.ts) and the orphaned `NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` var + comment block in .env.example. Replicache 15 retired licensing and the field no longer exists in `ReplicacheOptions`; it only typechecks because the passed value is `undefined`. Carved out of the former 2.0.8 retirement so the dead-config removal ships as a small, safe diff ahead of the large gate-OFF retirement (now 2.0.9).
-- **Product impact:** none - dead configuration only; the value was always `undefined` and ignored by Replicache 15.
-- **Runtime integration target:** none - no runtime behavior changes.
-- **Deferral boundary:** the legacy overlay / outbox-render / tRPC-render retirement and the `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate removal stay in 2.0.9.
-- **Validation target:** targeted alpha (typecheck, lint, unit); full validate.ps1 before stable.
-- **Acceptance:** the dead `licenseKey` option and `NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` are gone, `createReplicacheClient` still typechecks and constructs, and the dashboard still renders from Replicache.
 
 ### 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 - **Status:** Open | Priority: P1 2.0 cleanup
