@@ -5,16 +5,20 @@ export async function pokeUser(
   { fetchImpl = fetch }: { fetchImpl?: typeof fetch } = {},
 ): Promise<void> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return;
+  // Server-only service-role key: realtime.messages has RLS enabled (2.0.6) and the
+  // anon key cannot INSERT broadcasts, so the trusted server uses the service-role
+  // key, which bypasses RLS, to deliver the poke. The user is already authenticated
+  // and recipients are authorized upstream in /api/replicache/push.
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey) return;
 
   try {
     await fetchImpl(`${url}/realtime/v1/api/broadcast`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        apikey: key,
-        authorization: `Bearer ${key}`,
+        apikey: serviceRoleKey,
+        authorization: `Bearer ${serviceRoleKey}`,
       },
       body: JSON.stringify({
         messages: [

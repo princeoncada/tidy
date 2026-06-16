@@ -1,11 +1,11 @@
-<!-- Current Version: 2.0.6 -->
+<!-- Current Version: 2.0.7-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.6 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 2.0.6 - Yjs Collaborative Item Notes
-**Next**: 2.0.7 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
+**Current Version**: 2.0.7-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.0.7 - Realtime Poke Send Authorization
+**Next**: 2.0.8 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -14,11 +14,11 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 - `docs/VERSIONING.md` - version rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
 - `docs/PHASE_LOG.md` - historical traceability only, not active implementation guidance.
 
-Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. At that closeout, `seriesComplete` stayed FALSE because the dashboard still rendered server-authoritatively (TanStack payload + pending-outbox overlay; Dexie only as an offline fallback), leaving the optimistic / overlay / refetch race perceived as flicker / lag. The 2.0 arc addresses local-first render and collaboration; see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.7).
+Series status (1.9.32 closeout): 1.9.29 retired direct dashboard tRPC persistence and made Dexie-first writes default-on; 1.9.30 fixed the delete-payload contract; 1.9.31 fixed the synced-movement authoritative-snapshot read-correctness gap and de-brittled the drag / auth E2E. All three are stable. The 1.9.x local-first WRITE path and bounded batch sync are delivered and proven. At that closeout, `seriesComplete` stayed FALSE because the dashboard still rendered server-authoritatively (TanStack payload + pending-outbox overlay; Dexie only as an offline fallback), leaving the optimistic / overlay / refetch race perceived as flicker / lag. The 2.0 arc addresses local-first render and collaboration; see the 2026-06-14 decision in `docs/DECISIONS.md`. The flag flips when the 2.0 arc completes (2.0.8).
 
-2.0.0 adds the Replicache render/write path behind `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED`, default ON. The dashboard now has one per-user Replicache store, named deterministic mutators, reactive local projection, authenticated `/api/replicache/push` and `/api/replicache/pull` handlers, and Prisma client/client-group/CVR tracking. Gate OFF retains the 1.9.x tRPC + overlay + Dexie path for compatibility until 2.0.7.
+2.0.0 adds the Replicache render/write path behind `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED`, default ON. The dashboard now has one per-user Replicache store, named deterministic mutators, reactive local projection, authenticated `/api/replicache/push` and `/api/replicache/pull` handlers, and Prisma client/client-group/CVR tracking. Gate OFF retains the 1.9.x tRPC + overlay + Dexie path for compatibility until 2.0.8.
 
-2.0.1 changes Replicache ordering to `fractional-indexing` string keys. `View.orderKey`, `ViewList.orderKey`, and `ListItem.orderKey` are nullable during rollout; pull supplies deterministic string fallbacks for null rows, while gated create/reorder/move mutations write one entity key rather than shipping a full `orderedIds` array. Dedicated Replicache readers in `lib/dashboard/server-read.ts` expose those fields to pull while the legacy reader return shapes omit them, preventing generated Prisma scalars from widening the gate-OFF tRPC/cache contracts. The legacy gate-OFF path and integer `order` columns remain intact through 2.0.7. Apply the migration, regenerate Prisma, then run `scripts/backfill-order-keys.ts` once before relying on persisted keys for every existing row.
+2.0.1 changes Replicache ordering to `fractional-indexing` string keys. `View.orderKey`, `ViewList.orderKey`, and `ListItem.orderKey` are nullable during rollout; pull supplies deterministic string fallbacks for null rows, while gated create/reorder/move mutations write one entity key rather than shipping a full `orderedIds` array. Dedicated Replicache readers in `lib/dashboard/server-read.ts` expose those fields to pull while the legacy reader return shapes omit them, preventing generated Prisma scalars from widening the gate-OFF tRPC/cache contracts. The legacy gate-OFF path and integer `order` columns remain intact through 2.0.8. Apply the migration, regenerate Prisma, then run `scripts/backfill-order-keys.ts` once before relying on persisted keys for every existing row.
 
 ---
 
@@ -230,7 +230,7 @@ With the gate off, no editor mounts and no collaboration traffic starts.
 - Custom-view recompute runs after the atomic write transaction. If recompute fails, the writes remain durable and are reported applied; the projection may remain stale until a later successful recompute.
 - 1.9.26 closes the replay-reader gap: the batch flush selects pending plus backoff-ready `failed` operations via `lib/sync/retry-backoff.ts`, and `reconcilePendingWritesOnLoad` resets stranded `syncing` rows to `pending` before flushing. Permanent rejections still stay `failed` and visible, and operations beyond `RETRY_MAX_ATTEMPTS` stop auto-retrying until an explicit retry.
 - Concurrent-flush suppression is in-tab single-flight owned by the per-user `useOfflineReplayTrigger` scheduler; cross-tab concurrent flushes (multiple open tabs) are not yet coordinated and remain a follow-up.
-- The Replicache gate now addresses the render race by making the local store the default render source. The legacy overlay/outbox-render/tRPC-render path remains intentionally intact under gate OFF and is retired only in 2.0.7.
+- The Replicache gate now addresses the render race by making the local store the default render source. The legacy overlay/outbox-render/tRPC-render path remains intentionally intact under gate OFF and is retired only in 2.0.8.
 - Fractional keys are nullable in PostgreSQL for rollout compatibility. The migration and one-time backfill must complete before assuming every persisted row has a key; pull fallback prevents null rows from entering the Replicache store. A Supabase Broadcast doorbell now triggers an immediate pull: an applied `/api/replicache/push` batch fans out per-user private-channel pokes to users with affected-list access, and connected clients call `rep.pull()`. It is a poke, not delivery - missed pokes self-heal on the next periodic (60s) pull.
 - Shared-list revocation and removed workspace membership self-heal on the next pull because the computed union omits inaccessible list/item keys and the CVR emits deletes. Management changes do not materialize recipient view rows.
 - Tag/view sharing and recipient-side ordering of shared lists are intentionally deferred. Shared lists cannot be placed or reordered in a recipient's personal/custom views in 2.0.3.
