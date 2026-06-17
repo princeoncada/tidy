@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   processPush: vi.fn(),
   getUsersWithListAccess: vi.fn(),
-  pokeUser: vi.fn(async (_userId: string) => undefined),
+  pokeUser: vi.fn<(userId: string) => Promise<void>>(async () => undefined),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
