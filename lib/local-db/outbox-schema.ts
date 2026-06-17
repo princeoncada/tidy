@@ -1,5 +1,3 @@
-import { isOutboxOperationStatus } from "./sync-status";
-
 export type LocalJsonValue =
   | string
   | number
@@ -69,8 +67,20 @@ export const LOCAL_OUTBOX_OPERATION_TYPES = [
   "upsert",
 ] as const satisfies readonly LocalOutboxOperationType[];
 
+const OUTBOX_OPERATION_STATUSES = [
+  "pending",
+  "syncing",
+  "synced",
+  "failed",
+  "discarded",
+] as const satisfies readonly LocalOutboxOperationStatus[];
+
 function includesOutboxValue<T extends string>(values: readonly T[], value: unknown): value is T {
   return typeof value === "string" && (values as readonly string[]).includes(value);
+}
+
+export function isOutboxOperationStatus(value: unknown): value is LocalOutboxOperationStatus {
+  return includesOutboxValue(OUTBOX_OPERATION_STATUSES, value);
 }
 
 function isPlainJsonObject(value: object): value is { [key: string]: LocalJsonValue } {

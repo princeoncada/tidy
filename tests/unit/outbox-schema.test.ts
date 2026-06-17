@@ -5,6 +5,7 @@ import {
   isLocalOutboxEntityType,
   isLocalOutboxOperation,
   isLocalOutboxOperationType,
+  isOutboxOperationStatus,
   LOCAL_OUTBOX_ENTITY_TYPES,
   LOCAL_OUTBOX_OPERATION_TYPES,
   type LocalOutboxOperation,
@@ -60,6 +61,11 @@ describe("outbox schema model", () => {
     expect(isLocalOutboxOperationType("reorder")).toBe(true);
     expect(isLocalOutboxOperationType("rename")).toBe(false);
     expect(isLocalOutboxOperationType(undefined)).toBe(false);
+
+    expect(isOutboxOperationStatus("pending")).toBe(true);
+    expect(isOutboxOperationStatus("discarded")).toBe(true);
+    expect(isOutboxOperationStatus("local")).toBe(false);
+    expect(isOutboxOperationStatus({ status: "pending" })).toBe(false);
   });
 
   it("accepts JSON-compatible payload values", () => {

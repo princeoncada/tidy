@@ -12,7 +12,7 @@ import {
 export function waitForSyncBatch(page: Page) {
   return page.waitForResponse((response) =>
     response.request().method() === "POST" &&
-    response.url().includes("/api/sync") &&
+    response.url().includes("/api/replicache/push") &&
     response.ok()
   );
 }
