@@ -120,3 +120,5 @@ Keep these because Replicache still uses them:
 ## Validation Boundary
 
 Codex implementation phases do not run validation, graph, build, git, or npm scripts. The user/controller runs the validation commands from `docs/CODEX_RULES.md` and the phase prompt.
+- ChatGPT reviewer sees pushed GitHub state plus pasted evidence only
+- Do not include nested fenced code blocks inside fenced master prompts.
