@@ -27,7 +27,7 @@ function ConnectedItemNotesEditor({
   canEdit: boolean;
   initialNotes: string;
 }) {
-  const doc = useMemo(() => createNoteDoc(), [itemId]);
+  const { doc } = useMemo(() => ({ itemId, doc: createNoteDoc() }), [itemId]);
   const providerRef = useRef<NoteProviderTeardown | null>(null);
   const [value, setValue] = useState(initialNotes);
   const [loaded, setLoaded] = useState(false);
