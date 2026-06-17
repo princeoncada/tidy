@@ -1,9 +1,9 @@
 {
-    "version":  "2.0.9-alpha",
-    "state":  "alpha",
+    "version":  "2.0.9",
+    "state":  "stable",
     "phase":  "2.0.9",
     "phaseTitle":  "Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths",
     "nextPhase":  "2.1.0 - Deploy Env Documentation",
     "seriesComplete":  true,
-    "lastUpdated":  "2026-06-16"
+    "lastUpdated":  "2026-06-17"
 }
