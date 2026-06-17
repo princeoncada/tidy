@@ -1,9 +1,9 @@
-<!-- Current Version: 2.0.9-alpha -->
+<!-- Current Version: 2.0.9 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.0.9-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.0.9 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
 **Next**: 2.1.0 - Deploy Env Documentation
 
