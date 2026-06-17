@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.1.0-alpha
+- **Current version:** 2.1.0
 - **Current phase:** 2.1.0 - Deploy Env Documentation
 - **Next phase:** 2.1.1 - Build/Migration Readiness
 
