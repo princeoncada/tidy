@@ -20,7 +20,7 @@ export async function waitForSyncBatch(page: Page) {
         response.request().method() === "POST" &&
         response.url().includes("/api/replicache/push") &&
         response.ok(),
-      { timeout: 10_000 },
+      { timeout: 1_500 },
     )
     .catch(() => {});
 }
