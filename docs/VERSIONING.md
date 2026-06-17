@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.0.9
-- **Current phase:** 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
-- **Next phase:** 2.1.0 - Deploy Env Documentation
+- **Current version:** 2.1.0-alpha
+- **Current phase:** 2.1.0 - Deploy Env Documentation
+- **Next phase:** 2.1.1 - Build/Migration Readiness
 
 ---
 

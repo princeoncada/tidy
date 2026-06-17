@@ -303,12 +303,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.1.0 - Deploy Env Documentation (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.1.0 - Deploy Env Documentation
-- **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.0; deploy docs written once against the 2.0 architecture)
+- **Status:** In progress | Priority: P2 production readiness (pushed back from 1.10.0; deploy docs written once against the 2.0 architecture)
 - **Type:** docs
 - **Files:** README.md, .env.example
 - **Implementation goal:** document DATABASE_URL, Supabase env vars (incl. Broadcast / Replicache), site URL, and local / prod differences.
