@@ -160,7 +160,7 @@ test("reorder lists inside a custom view persists after reload", async ({ page }
   await dragByMouseAndWaitForMutation(
     page,
     sourceListCard.getByTestId(testIds.listDragHandle),
-    targetListCard.getByTestId(testIds.listDragHandle)
+    targetListCard
   );
 
   await expectListOrder(page, swappedOrder);
