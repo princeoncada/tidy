@@ -1,6 +1,6 @@
 {
-    "version":  "2.1.0-alpha",
-    "state":  "alpha",
+    "version":  "2.1.0",
+    "state":  "stable",
     "phase":  "2.1.0",
     "phaseTitle":  "Deploy Env Documentation",
     "nextPhase":  "2.1.1 - Build/Migration Readiness",
