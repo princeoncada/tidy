@@ -294,6 +294,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths~~ (stable 2026-06-17)
 
+- ~~2.1.0 - Deploy Env Documentation~~ (stable 2026-06-17)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -303,21 +305,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.1.0 - Deploy Env Documentation (active) - see Planned
 ---
 
 ## Planned
-
-### 2.1.0 - Deploy Env Documentation
-- **Status:** In progress | Priority: P2 production readiness (pushed back from 1.10.0; deploy docs written once against the 2.0 architecture)
-- **Type:** docs
-- **Files:** README.md, .env.example
-- **Implementation goal:** document DATABASE_URL, Supabase env vars (incl. Broadcast / Replicache), site URL, and local / prod differences.
-- **Product impact:** none - enables correct deployment.
-- **Runtime integration target:** none.
-- **Deferral boundary:** build / migration path -> 2.1.1.
-- **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
-- **Acceptance:** a new setup can follow the docs without guessing.
 
 ### 2.1.1 - Build/Migration Readiness
 - **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.1)
