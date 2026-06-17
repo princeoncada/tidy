@@ -1,81 +1,24 @@
 "use client";
 
-import {
-  buildDashboardKeys,
-  canApplySelectedViewPayload,
-  DashboardSnapshot,
-  selectedViewFromCache,
-  ViewsCache,
-} from '@/lib/dashboard-cache';
-import {
-  measureCacheWrite,
-  measureOptimisticEvent,
-  OptimisticProfiler,
-  useRenderMeasure,
-} from '@/lib/optimistic-debug';
-import { useOptimisticSync } from '@/hooks/useOptimisticSync';
-import type { LocalFirstDashboardBoot } from '@/hooks/useLocalFirstDashboardBoot';
-import { LOCAL_ALL_LISTS_VIEW_ID, resolveDashboardCurrentView } from '@/lib/local-first-dashboard';
-import { reconcileServerGraphIntoLocalPlan } from '@/lib/local-first-reconcile';
-import {
-  applyLocalGraphReconcilePlan,
-  listLocalListItemsForUser,
-  listLocalListsForUser,
-  listLocalListTagsForUser,
-  listLocalTagsForUser,
-  listLocalViewListsForUser,
-  listLocalViewsForUser,
-  listLocalViewTagsForUser,
-} from '@/lib/local-db/local-repositories';
-import {
-  translateListItemMovement,
-} from '@/lib/local-db/local-movement';
-import {
-  applyPendingOutboxOverlay,
-  applyPendingViewOverlay,
-  outboxOperationsSignature,
-  readActiveOutboxOperationsForUser,
-  readPendingOutboxOperationsForUser,
-  relinquishConfirmedOperations,
-} from '@/lib/local-db/local-overlay';
-import {
-  commitLocalListItemMove,
-  commitLocalListItemReorder,
-  commitLocalListReorder,
-} from '@/lib/local-db/local-write';
-import { subscribeToOutboxCaptures } from '@/lib/sync/outbox-capture-events';
-import { useTRPC } from '@/trpc/client';
 import { DragDropProvider } from '@dnd-kit/react';
-import {
-  type QueryClient,
-  type QueryKey,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import ListComponent from './ListComponent';
-import ListItemComponent from './ListItemComponent';
-import ListSkeleton from './ListSkeleton';
-import { CurrentView, List, Lists, OptimisticList, OptimisticListItem } from './types';
-import ListEmpty from './ListEmpty';
-import { useReplicacheDashboard } from '@/hooks/useReplicacheDashboard';
+import { useCallback, useRef, useState } from 'react';
+
 import { useDashboardMutations } from '@/hooks/useDashboardMutations';
+import type { LocalFirstDashboardBoot } from '@/hooks/useLocalFirstDashboardBoot';
+import { useReplicacheDashboard } from '@/hooks/useReplicacheDashboard';
+import { measureOptimisticEvent, OptimisticProfiler, useRenderMeasure } from '@/lib/optimistic-debug';
 import { keyBetween } from '@/lib/sync/fractional-index';
 import { replicacheKeys } from '@/lib/sync/replicache/keys';
+import ListComponent from './ListComponent';
+import ListEmpty from './ListEmpty';
+import ListItemComponent from './ListItemComponent';
+import ListSkeleton from './ListSkeleton';
+import { List, Lists, OptimisticList, OptimisticListItem } from './types';
 
 type DragPreviewLists = Lists;
 type ListsContainerProps = {
   boot: LocalFirstDashboardBoot;
 };
-
-function isOptimisticCacheRow(value: unknown) {
-  return Boolean(
-    value &&
-    typeof value === "object" &&
-    "isOptimistic" in value &&
-    value.isOptimistic
-  );
-}
 
 function canEditListContent(list: List, userId: string | null) {
   const role =
@@ -99,62 +42,6 @@ function findTargetList(
     );
   }
   return undefined;
-}
-
-function useAuthoritativeQuerySnapshot<T>({
-  queryClient,
-  queryKey,
-  initialData,
-  scopeKey,
-}: {
-  queryClient: QueryClient;
-  queryKey: QueryKey;
-  initialData: T | undefined;
-  scopeKey: string | null;
-}) {
-  const queryKeyHash = JSON.stringify(queryKey);
-  const [snapshot, setSnapshot] = useState<T | undefined>(initialData);
-
-  useEffect(() => {
-    const queryCache = queryClient.getQueryCache();
-    const findCurrentQuery = () =>
-      queryCache
-        .getAll()
-        .find((query) => JSON.stringify(query.queryKey) === queryKeyHash);
-
-    const currentQuery = findCurrentQuery();
-    let cancelled = false;
-
-    queueMicrotask(() => {
-      if (!cancelled) {
-        setSnapshot(
-          currentQuery?.state.status === "success"
-            ? currentQuery.state.data as T
-            : undefined,
-        );
-      }
-    });
-
-    const unsubscribe = queryCache.subscribe((event) => {
-      if (
-        event.type !== "updated" ||
-        event.action.type !== "success" ||
-        event.action.manual ||
-        JSON.stringify(event.query.queryKey) !== queryKeyHash
-      ) {
-        return;
-      }
-
-      setSnapshot(event.action.data as T);
-    });
-
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
-
-  }, [queryClient, queryKeyHash, scopeKey]);
-  return snapshot;
 }
 
 function reorderListsForDrag(
@@ -318,90 +205,9 @@ function movedEntityOrderKey(
   );
 }
 
-const EMPTY_VIEW_ID = "00000000-0000-0000-0000-000000000000";
-
 const ListsContainer = ({ boot }: ListsContainerProps) => {
-
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const replicacheDashboard = useReplicacheDashboard();
   const dashboardMutations = useDashboardMutations();
-  const movementCaptureEnabled =
-    !replicacheDashboard.enabled && Boolean(boot.userId);
-  const [pendingMovementOperations, setPendingMovementOperations] = useState<
-    Parameters<typeof applyPendingOutboxOverlay>[1]
-  >([]);
-  const [movementOperationsUserId, setMovementOperationsUserId] = useState<
-    string | null
-  >(null);
-  const pendingMovementReady =
-    movementCaptureEnabled &&
-    movementOperationsUserId !== null &&
-    movementOperationsUserId === boot.userId;
-
-  const {
-    data: views,
-    isLoading: viewsLoading,
-    isError: viewsError,
-    isSuccess: viewsSucceeded,
-    failureCount: viewsFailureCount,
-  } = useQuery({
-    ...trpc.view.getAll.queryOptions(),
-    enabled: !replicacheDashboard.enabled,
-  });
-
-  const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
-    ? undefined
-    : views;
-  const serverEffectiveViews = replicacheDashboard.enabled
-    ? replicacheDashboard.views
-    : views ?? boot.localViews;
-  const confirmedServerViews = useAuthoritativeQuerySnapshot<ViewsCache>({
-    queryClient,
-    queryKey: trpc.view.getAll.queryKey(),
-    initialData: views,
-    scopeKey: boot.userId,
-  });
-  const effectiveViews = useMemo(
-    () =>
-      movementCaptureEnabled && pendingMovementReady && serverEffectiveViews
-        ? applyPendingViewOverlay(
-          serverEffectiveViews,
-          relinquishConfirmedOperations(pendingMovementOperations, {
-            views: confirmedServerViews ?? null,
-          }),
-        )
-        : serverEffectiveViews,
-    [
-      confirmedServerViews,
-      movementCaptureEnabled,
-      pendingMovementOperations,
-      pendingMovementReady,
-      serverEffectiveViews,
-    ],
-  );
-  const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
-  const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
-  const selectedView = selectedViewFromCache(effectiveViews);
-  const serverSelectedView = selectedViewFromCache(serverViews);
-  const selectedViewId = selectedView?.id;
-
-  const dashboardKeys = buildDashboardKeys(trpc, {
-    allListsViewId: allListsView?.id,
-    selectedViewId,
-  });
-
-  const {
-    views: viewsQueryKey,
-    allLists: allListsQueryKey,
-    currentView: currentViewQueryKey,
-    selectedView: selectedViewQueryKey,
-  } = dashboardKeys;
-
-  const queryKey = selectedViewQueryKey;
-
-
-  const optimisticSync = useOptimisticSync();
 
   useRenderMeasure("ListsContainer");
 
@@ -411,535 +217,82 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   } | null>(null);
   const [dragPreviewLists, setDragPreviewLists] = useState<DragPreviewLists | null>(null);
   const dragPreviewListsRef = useRef<DragPreviewLists | null>(null);
-  const outboxRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const outboxSignatureRef = useRef<string>("");
-  const { data: bootCurrentView, isLoading: bootListsLoading, isError: bootListsError } = useQuery(
-    {
-      ...trpc.view.getCurrentViewListsWithItems.queryOptions(),
-      enabled: !replicacheDashboard.enabled,
-    }
-  );
-
-  const {
-    data: serverAllListsSnapshot,
-    isLoading: allListsLoading,
-    isError: allListsError,
-    isSuccess: allListsSucceeded,
-  } = useQuery(
-    trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: serverAllListsView?.id ?? EMPTY_VIEW_ID },
-      {
-        enabled:
-          !replicacheDashboard.enabled && Boolean(serverAllListsView?.id),
-      }
-    )
-  );
-
-  const { data: selectedViewSnapshot, isLoading: selectedViewLoading, isError: selectedViewError } = useQuery(
-    trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: serverSelectedView?.id ?? EMPTY_VIEW_ID },
-      {
-        enabled:
-          !replicacheDashboard.enabled && Boolean(serverSelectedView?.id),
-      }
-    )
-  );
-
-  const confirmedServerAllListsSnapshot =
-    useAuthoritativeQuerySnapshot<DashboardSnapshot>({
-      queryClient,
-      queryKey: allListsQueryKey,
-      initialData: serverAllListsSnapshot,
-      scopeKey: boot.userId,
-    });
-
-  const relinquishedOperations = useMemo(
-    () =>
-      relinquishConfirmedOperations(pendingMovementOperations, {
-        allLists: confirmedServerAllListsSnapshot ?? null,
-        views: confirmedServerViews ?? null,
-      }),
-    [
-      confirmedServerAllListsSnapshot,
-      confirmedServerViews,
-      pendingMovementOperations,
-    ],
-  );
-
-  useEffect(() => {
-    if (!movementCaptureEnabled || !boot.userId) {
-      return;
-    }
-
-    let cancelled = false;
-
-    void readActiveOutboxOperationsForUser(boot.userId)
-      .then((operations) => {
-        if (!cancelled) {
-          outboxSignatureRef.current = outboxOperationsSignature(operations);
-          setPendingMovementOperations(operations);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setPendingMovementOperations([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setMovementOperationsUserId(boot.userId);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [boot.userId, movementCaptureEnabled]);
-
-  useEffect(() => {
-    const userId = boot.userId;
-    if (!movementCaptureEnabled || !userId) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const refresh = () => {
-      void readActiveOutboxOperationsForUser(userId)
-        .then((operations) => {
-          if (cancelled) return;
-          const signature = outboxOperationsSignature(operations);
-          if (signature === outboxSignatureRef.current) return;
-          outboxSignatureRef.current = signature;
-          setPendingMovementOperations(operations);
-        })
-        .catch(() => {
-          // The existing overlay remains authoritative if the refresh fails.
-        });
-    };
-
-    const unsubscribe = subscribeToOutboxCaptures((event) => {
-      if (event.userId !== userId) return;
-      if (outboxRefreshTimerRef.current !== null) {
-        clearTimeout(outboxRefreshTimerRef.current);
-      }
-      outboxRefreshTimerRef.current = setTimeout(refresh, 120);
-    });
-
-    return () => {
-      cancelled = true;
-      if (outboxRefreshTimerRef.current !== null) {
-        clearTimeout(outboxRefreshTimerRef.current);
-        outboxRefreshTimerRef.current = null;
-      }
-      unsubscribe();
-    };
-  }, [boot.userId, movementCaptureEnabled]);
-
-  const effectiveBootCurrentView = useMemo(
-    () =>
-      movementCaptureEnabled && pendingMovementReady && bootCurrentView
-        ? applyPendingOutboxOverlay(
-          bootCurrentView,
-          relinquishedOperations,
-        )
-        : bootCurrentView,
-    [
-      bootCurrentView,
-      movementCaptureEnabled,
-      pendingMovementReady,
-      relinquishedOperations,
-    ],
-  );
-  const effectiveSelectedViewSnapshot = useMemo(
-    () =>
-      movementCaptureEnabled && pendingMovementReady && selectedViewSnapshot
-        ? applyPendingOutboxOverlay(
-          selectedViewSnapshot,
-          relinquishedOperations,
-        )
-        : selectedViewSnapshot,
-    [
-      movementCaptureEnabled,
-      pendingMovementReady,
-      relinquishedOperations,
-      selectedViewSnapshot,
-    ],
-  );
-
-  useEffect(() => {
-    if (!canApplySelectedViewPayload(selectedViewId, effectiveBootCurrentView)) return;
-    queryClient.setQueryData(currentViewQueryKey, effectiveBootCurrentView);
-  }, [currentViewQueryKey, effectiveBootCurrentView, queryClient, selectedViewId]);
-
-  useEffect(() => {
-    if (!canApplySelectedViewPayload(selectedViewId, effectiveSelectedViewSnapshot)) return;
-    queryClient.setQueryData(currentViewQueryKey, effectiveSelectedViewSnapshot);
-  }, [currentViewQueryKey, effectiveSelectedViewSnapshot, queryClient, selectedViewId]);
-
-  useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      !boot.userId ||
-      !confirmedServerViews ||
-      !confirmedServerAllListsSnapshot ||
-      !viewsSucceeded ||
-      !allListsSucceeded ||
-      viewsError ||
-      allListsError
-    ) {
-      return;
-    }
-
-    let cancelled = false;
-
-    async function seedServerGraphIntoLocalDb() {
-      try {
-        if (!confirmedServerViews || !confirmedServerAllListsSnapshot) return;
-        const confirmedViewsForUser = confirmedServerViews.filter(
-          (view) => view.userId === boot.userId,
-        );
-        const confirmedServerAllLists = {
-          ...confirmedServerAllListsSnapshot,
-          lists: confirmedServerAllListsSnapshot.lists
-            .filter((list) => !isOptimisticCacheRow(list))
-            .map((list) => ({
-              ...list,
-              listItems: list.listItems.filter(
-                (item) => !isOptimisticCacheRow(item),
-              ),
-            })),
-        };
-        const [
-          localViews,
-          localLists,
-          localListItems,
-          localTags,
-          localListTags,
-          localViewLists,
-          localViewTags,
-        ] = await Promise.all([
-          listLocalViewsForUser(boot.userId!),
-          listLocalListsForUser(boot.userId!),
-          listLocalListItemsForUser(boot.userId!),
-          listLocalTagsForUser(boot.userId!),
-          listLocalListTagsForUser(boot.userId!),
-          listLocalViewListsForUser(boot.userId!),
-          listLocalViewTagsForUser(boot.userId!),
-        ]);
-
-        if (cancelled) return;
-
-        const plan = reconcileServerGraphIntoLocalPlan({
-          userId: boot.userId!,
-          server: {
-            views: confirmedViewsForUser,
-            allLists: confirmedServerAllLists,
-          },
-          local: {
-            views: localViews,
-            lists: localLists,
-            listItems: localListItems,
-            tags: localTags,
-            listTags: localListTags,
-            viewLists: localViewLists,
-            viewTags: localViewTags,
-          },
-        });
-
-        await applyLocalGraphReconcilePlan(plan);
-      } catch {
-        // Local seeding must never disrupt the online server-backed dashboard.
-      }
-    }
-
-    void seedServerGraphIntoLocalDb();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    allListsError,
-    allListsSucceeded,
-    boot.userId,
-    confirmedServerAllListsSnapshot,
-    confirmedServerViews,
-    viewsError,
-    viewsSucceeded,
-  ]);
-
-  // Confirmed API-unavailable, NOT ordinary loading: at least one server views fetch has
-  // failed (failureCount increments on the first failed attempt, before retry exhaustion)
-  // and there is no server data. Inert online: a successful fetch keeps failureCount at 0
-  // with `views` defined, and ordinary first-load loading has failureCount 0.
-  const apiUnavailable = (viewsError || viewsFailureCount > 0) && !views;
-  const usingLocalFallback = apiUnavailable && boot.localBootReady;
-
-  const currentView = replicacheDashboard.enabled
-    ? replicacheDashboard.currentView
-    : resolveDashboardCurrentView({
-        selectedViewId,
-        selectedViewSnapshot: effectiveSelectedViewSnapshot,
-        bootCurrentView: effectiveBootCurrentView,
-        localCurrentView: usingLocalFallback ? boot.localCurrentView : undefined,
-        previousCurrentView: undefined,
-      });
-
+  const currentView = replicacheDashboard.currentView;
+  const allListsView = replicacheDashboard.views.find((view) => view.type === "ALL_LISTS");
   const lists = currentView?.lists ?? [];
   const visibleLists = dragPreviewLists ?? lists;
-
-  const reorderListsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reorderListItemsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingItemMovementBaseRef = useRef<Lists | null>(null);
-  const pendingItemMovementNextRef = useRef<Lists | null>(null);
-
-  const refreshPendingMovementOperations = useCallback(async () => {
-    if (!boot.userId) return;
-
-    try {
-      setPendingMovementOperations(
-        await readPendingOutboxOperationsForUser(boot.userId),
-      );
-      setMovementOperationsUserId(boot.userId);
-    } catch {
-      // The committed cache placement remains authoritative for this render.
-    }
-  }, [boot.userId]);
-
-  const writeListOrderToCaches = useCallback((nextLists: Lists) => {
-    if (currentView?.view.type === "ALL_LISTS") {
-      measureCacheWrite("lists.drop.all-lists", nextLists);
-      queryClient.setQueryData<CurrentView>(queryKey, (current) =>
-        current ? { ...current, lists: nextLists } : current
-      );
-      queryClient.setQueryData<CurrentView>(currentViewQueryKey, (current) =>
-        current ? { ...current, lists: nextLists } : current
-      );
-    } else {
-      measureCacheWrite("lists.drop.view-order", nextLists.map((list, index) => ({
-        listId: list.id,
-        order: index,
-      })));
-      queryClient.setQueryData<ViewsCache>(viewsQueryKey, (currentViews) =>
-        currentViews?.map((view) =>
-          view.id === currentView?.view.id
-            ? {
-              ...view,
-              viewLists: nextLists.map((list, index) => ({
-                listId: list.id,
-                order: index,
-              })),
-            }
-            : view
-        )
-      );
-      queryClient.setQueryData<CurrentView>(queryKey, (current) =>
-        current ? { ...current, lists: nextLists } : current
-      );
-      queryClient.setQueryData<CurrentView>(currentViewQueryKey, (current) =>
-        current ? { ...current, lists: nextLists } : current
-      );
-    }
-  }, [currentView?.view.id, currentView?.view.type, currentViewQueryKey, queryClient, queryKey, viewsQueryKey]);
 
   const scheduleReorderListsSave = useCallback(async (
     nextLists: Lists,
     movedListId: string,
   ) => {
-    if (!boot.userId) return;
+    if (!boot.userId || !currentView || !dashboardMutations.mutate) return;
 
-    if (
-      dashboardMutations.enabled &&
-      dashboardMutations.mutate &&
-      currentView
-    ) {
-      const currentKeys = new Map<string, string>();
-      for (const list of nextLists) {
-        const key = replicacheDashboard.orderKeys.viewLists.get(
-          replicacheKeys.viewList(currentView.view.id, list.id),
-        );
-        if (key) currentKeys.set(list.id, key);
-      }
-      await dashboardMutations.mutate.reorderLists({
-        viewId: currentView.view.id,
-        listId: movedListId,
-        orderKey: movedEntityOrderKey(
-          nextLists.map((list) => list.id),
-          movedListId,
-          currentKeys,
-        ),
-      });
-      return;
+    const currentKeys = new Map<string, string>();
+    for (const list of nextLists) {
+      const key = replicacheDashboard.orderKeys.viewLists.get(
+        replicacheKeys.viewList(currentView.view.id, list.id),
+      );
+      if (key) currentKeys.set(list.id, key);
     }
 
-    await Promise.all([
-      queryClient.cancelQueries({ queryKey }),
-      queryClient.cancelQueries({ queryKey: currentViewQueryKey }),
-      queryClient.cancelQueries({ queryKey: viewsQueryKey }),
-    ]);
-
-    writeListOrderToCaches(nextLists);
-
-    if (reorderListsTimeoutRef.current) {
-      clearTimeout(reorderListsTimeoutRef.current);
-    }
-
-    reorderListsTimeoutRef.current = setTimeout(() => {
-      optimisticSync.replacePending("list-order", async () => {
-        if (!currentView || !boot.userId) return;
-
-        try {
-          await commitLocalListReorder({
-            userId: boot.userId,
-            viewId: currentView.view.id,
-            orderedListIds: nextLists.map((list) => list.id),
-          });
-          await refreshPendingMovementOperations();
-        } catch {
-          // Local persistence must not replace the committed cache placement.
-        }
-        writeListOrderToCaches(nextLists);
-      }, { label: "view.reorderViewLists" });
-    }, 300);
+    await dashboardMutations.mutate.reorderLists({
+      viewId: currentView.view.id,
+      listId: movedListId,
+      orderKey: movedEntityOrderKey(
+        nextLists.map((list) => list.id),
+        movedListId,
+        currentKeys,
+      ),
+    });
   }, [
-    queryKey,
-    currentViewQueryKey,
-    currentView,
-    dashboardMutations,
-    replicacheDashboard.orderKeys.viewLists,
     boot.userId,
-    optimisticSync,
-    queryClient,
-    refreshPendingMovementOperations,
-    writeListOrderToCaches,
-    viewsQueryKey,
+    currentView,
+    dashboardMutations.mutate,
+    replicacheDashboard.orderKeys.viewLists,
   ]);
-
-  const writeListItemOrderToCaches = useCallback((nextLists: Lists) => {
-    measureCacheWrite("items.drop.all-lists", nextLists);
-    const mergeChangedLists = (current: DashboardSnapshot | undefined) =>
-      current
-        ? {
-          ...current,
-          lists: current.lists.map((list) =>
-            nextLists.find((nextList) => nextList.id === list.id) ?? list
-          ),
-        }
-        : current;
-
-    queryClient.setQueryData<CurrentView>(allListsQueryKey, mergeChangedLists);
-    queryClient.setQueryData<CurrentView>(queryKey, mergeChangedLists);
-    queryClient.setQueryData<CurrentView>(currentViewQueryKey, mergeChangedLists);
-  }, [allListsQueryKey, currentViewQueryKey, queryClient, queryKey]);
 
   const scheduleReorderListItemsSave = useCallback(async (
     previousLists: Lists,
     nextLists: Lists,
     movedItemId: string,
   ) => {
-    if (!boot.userId) return;
+    if (!boot.userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      const previousList = previousLists.find((list) =>
-        list.listItems.some((item) => item.id === movedItemId)
-      );
-      const destinationList = nextLists.find((list) =>
-        list.listItems.some((item) => item.id === movedItemId)
-      );
-      if (!previousList || !destinationList) return;
+    const previousList = previousLists.find((list) =>
+      list.listItems.some((item) => item.id === movedItemId)
+    );
+    const destinationList = nextLists.find((list) =>
+      list.listItems.some((item) => item.id === movedItemId)
+    );
+    if (!previousList || !destinationList) return;
 
-      const orderKey = movedEntityOrderKey(
-        destinationList.listItems.map((item) => item.id),
-        movedItemId,
-        replicacheDashboard.orderKeys.listItems,
-      );
+    const orderKey = movedEntityOrderKey(
+      destinationList.listItems.map((item) => item.id),
+      movedItemId,
+      replicacheDashboard.orderKeys.listItems,
+    );
 
-      if (previousList.id !== destinationList.id) {
-        await dashboardMutations.mutate.moveItem({
-          id: movedItemId,
-          fromListId: previousList.id,
-          toListId: destinationList.id,
-          order: orderKey,
-          now: new Date().toISOString(),
-        });
-        return;
-      }
-
-      await dashboardMutations.mutate.reorderItems({
-        listId: destinationList.id,
+    if (previousList.id !== destinationList.id) {
+      await dashboardMutations.mutate.moveItem({
         id: movedItemId,
-        orderKey,
+        fromListId: previousList.id,
+        toListId: destinationList.id,
+        order: orderKey,
+        now: new Date().toISOString(),
       });
       return;
     }
 
-    await Promise.all([
-      queryClient.cancelQueries({ queryKey: allListsQueryKey }),
-      queryClient.cancelQueries({ queryKey }),
-      queryClient.cancelQueries({ queryKey: currentViewQueryKey }),
-    ]);
-
-    writeListItemOrderToCaches(nextLists);
-    pendingItemMovementBaseRef.current ??= previousLists;
-    pendingItemMovementNextRef.current = nextLists;
-
-    if (reorderListItemsTimeoutRef.current) {
-      clearTimeout(reorderListItemsTimeoutRef.current);
-    }
-
-    reorderListItemsTimeoutRef.current = setTimeout(() => {
-      const movementBase =
-        pendingItemMovementBaseRef.current ?? previousLists;
-      const movementNext =
-        pendingItemMovementNextRef.current ?? nextLists;
-
-      pendingItemMovementBaseRef.current = null;
-      pendingItemMovementNextRef.current = null;
-
-      optimisticSync.replacePending("item-order", async () => {
-        if (!boot.userId) return;
-
-        const intents = translateListItemMovement(
-          movementBase,
-          movementNext,
-        );
-
-        try {
-          for (const intent of intents) {
-            if (intent.type === "move") {
-              await commitLocalListItemMove({
-                userId: boot.userId,
-                itemId: intent.itemId,
-                toListId: intent.toListId,
-                order: intent.order,
-              });
-              continue;
-            }
-
-            await commitLocalListItemReorder({
-              userId: boot.userId,
-              listId: intent.listId,
-              orderedItemIds: intent.orderedItemIds,
-            });
-          }
-          await refreshPendingMovementOperations();
-        } catch {
-          // Local persistence must not replace the committed cache placement.
-        }
-        writeListItemOrderToCaches(movementNext);
-      }, { label: "listItem.reorderListItems" });
-    }, 300);
+    await dashboardMutations.mutate.reorderItems({
+      listId: destinationList.id,
+      id: movedItemId,
+      orderKey,
+    });
   }, [
-    queryKey,
-    allListsQueryKey,
-    currentViewQueryKey,
-    dashboardMutations,
-    replicacheDashboard.orderKeys.listItems,
     boot.userId,
-    optimisticSync,
-    queryClient,
-    refreshPendingMovementOperations,
-    writeListItemOrderToCaches,
+    dashboardMutations.mutate,
+    replicacheDashboard.orderKeys.listItems,
   ]);
 
   const setLocalDragPreview = useCallback((nextLists: DragPreviewLists | null) => {
@@ -963,19 +316,7 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
     setRevealedItemIds((currentIds) => new Set(currentIds).add(itemId));
   }, []);
 
-  if (
-    (
-      (replicacheDashboard.enabled
-        ? !replicacheDashboard.ready
-        : viewsLoading ||
-          bootListsLoading ||
-          allListsLoading ||
-          selectedViewLoading) ||
-      !allListsView ||
-      (movementCaptureEnabled && !pendingMovementReady)
-    ) &&
-    !usingLocalFallback
-  ) {
+  if (!replicacheDashboard.ready || !allListsView) {
     return <div className="grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
       <ListSkeleton />
       <ListSkeleton />
@@ -984,15 +325,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
       <ListSkeleton />
       <ListSkeleton />
     </div>;
-  }
-
-
-  if (
-    !replicacheDashboard.enabled &&
-    (viewsError || bootListsError || allListsError || selectedViewError) &&
-    !usingLocalFallback
-  ) {
-    return <>Something went wrong...</>;
   }
 
   if (visibleLists.length === 0) {
@@ -1004,7 +336,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   return (
     <DragDropProvider
       onDragStart={() => {
-        // Keep drag order local so hovering does not rewrite the whole cache.
         measureOptimisticEvent("drag.start", { lists: lists.length });
         setLocalDragPreview(lists);
       }}
@@ -1018,7 +349,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
         setLocalDragPreview(null);
 
         if (e.canceled) {
-          // Cancelled drags should leave cache and server data untouched.
           measureOptimisticEvent("drag.cancel");
           return;
         }
@@ -1049,7 +379,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
           }
         }
 
-        // Only save the final dropped order. Older drag positions do not matter.
         switch (source.type) {
           case "list":
             if (!listOrderMatches(finalPreview, lists)) {
@@ -1154,7 +483,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                 index={index}
                 userId={boot.userId}
                 activeDropTarget={activeDropTarget}
-                dashboardKeys={dashboardKeys}
                 shouldRevealOnMount={
                   Boolean(list.isOptimistic) && !revealedListIds.has(list.id)
                 }
@@ -1168,7 +496,6 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
                       index={index}
                       userId={boot.userId}
                       canEdit={canEditListContent(list, boot.userId)}
-                      dashboardKeys={dashboardKeys}
                       shouldRevealOnMount={
                         Boolean(item.isOptimistic) && !revealedItemIds.has(item.id)
                       }

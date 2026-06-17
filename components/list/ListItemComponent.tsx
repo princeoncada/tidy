@@ -1,7 +1,6 @@
 "use client";
 
 import { useSortable } from "@dnd-kit/react/sortable";
-import { useQueryClient } from "@tanstack/react-query";
 import { GripVertical, X } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import ListInlineEdit from "./ListInlineEdit";
@@ -9,13 +8,7 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { ListItem } from "./types";
 import { cn } from "@/lib/utils";
-import { DashboardKeys, updateListInDashboardCaches } from "@/lib/dashboard-cache";
 import { useRenderMeasure } from "@/lib/optimistic-debug";
-import {
-  commitLocalListItemCompletion,
-  commitLocalListItemDelete,
-  commitLocalListItemRename,
-} from "@/lib/local-db/local-write";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import { ItemNotesEditor } from "./ItemNotesEditor";
 import { isYjsNotesEnabled } from "@/lib/collab/yjs-notes-gate";
@@ -26,7 +19,6 @@ interface ListItemComponentProps {
   index: number;
   shouldRevealOnMount?: boolean;
   onRevealComplete?: () => void;
-  dashboardKeys: DashboardKeys;
   userId: string | null;
   canEdit?: boolean;
 }
@@ -36,7 +28,6 @@ const ListItemComponent = ({
   index,
   shouldRevealOnMount,
   onRevealComplete,
-  dashboardKeys,
   userId,
   canEdit = true,
 }: ListItemComponentProps) => {
@@ -57,76 +48,34 @@ const ListItemComponent = ({
     return () => clearTimeout(timeout);
   }, [shouldRevealOnMount, onRevealComplete, listItem.id]);
 
-  const queryClient = useQueryClient();
   const dashboardMutations = useDashboardMutations();
 
   const handleRenameItem = (input: { id: string; name: string }) => {
-    if (!userId) return;
+    if (!userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      void dashboardMutations.mutate.updateItem({
-        id: input.id,
-        name: input.name,
-        now: new Date().toISOString(),
-      });
-      return;
-    }
-
-    updateListInDashboardCaches(queryClient, dashboardKeys, listItem.listId, (list) => ({
-      ...list,
-      listItems: list.listItems.map((item: ListItem) =>
-        item.id === input.id ? { ...item, name: input.name } : item
-      ),
-    }));
-    void commitLocalListItemRename({
-      userId,
-      itemId: input.id,
+    void dashboardMutations.mutate.updateItem({
+      id: input.id,
       name: input.name,
-    }).catch(() => {});
+      now: new Date().toISOString(),
+    });
   };
 
   const deleteItem = (itemId: string) => {
-    if (!userId) return;
+    if (!userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      void dashboardMutations.mutate.deleteItem({ id: itemId });
-      return;
-    }
-
-    updateListInDashboardCaches(queryClient, dashboardKeys, listItem.listId, (list) => ({
-      ...list,
-      listItems: list.listItems.filter((item: ListItem) => item.id !== itemId),
-    }));
-    void commitLocalListItemDelete({ userId, itemId }).catch(() => {});
+    void dashboardMutations.mutate.deleteItem({ id: itemId });
   };
 
   const handleToggleCompletion = () => {
     const nextCompleted = !listItem.completed;
 
-    if (!userId) return;
+    if (!userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      void dashboardMutations.mutate.updateItem({
-        id: listItem.id,
-        completed: nextCompleted,
-        now: new Date().toISOString(),
-      });
-      return;
-    }
-
-    updateListInDashboardCaches(queryClient, dashboardKeys, listItem.listId, (list) => ({
-      ...list,
-      listItems: list.listItems.map((item: ListItem) =>
-        item.id === listItem.id
-          ? { ...item, completed: nextCompleted }
-          : item
-      ),
-    }));
-    void commitLocalListItemCompletion({
-      userId,
-      itemId: listItem.id,
+    void dashboardMutations.mutate.updateItem({
+      id: listItem.id,
       completed: nextCompleted,
-    }).catch(() => {});
+      now: new Date().toISOString(),
+    });
   };
 
   const { ref, handleRef: itemHandle, isDragging } = useSortable({

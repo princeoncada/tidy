@@ -11,7 +11,6 @@ import {
 
 import {
   createReplicacheClient,
-  isReplicacheRenderEnabled,
   type TidyReplicache,
 } from "@/lib/sync/replicache/client";
 import { subscribeToPokes } from "@/lib/realtime/poke-client";
@@ -46,8 +45,6 @@ export function ReplicacheProvider({
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!isReplicacheRenderEnabled()) return;
-
     if (closeTimerRef.current !== null) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
@@ -84,7 +81,6 @@ export function ReplicacheProvider({
   }, [userId]);
 
   useEffect(() => {
-    if (!isReplicacheRenderEnabled()) return;
     const rep =
       activeInstance?.userId === userId ? activeInstance.rep : null;
     if (!rep) return;
@@ -125,7 +121,7 @@ export function ReplicacheProvider({
   const activeRep =
     activeInstance?.userId === userId ? activeInstance.rep : null;
 
-  if (isReplicacheRenderEnabled() && !activeRep) {
+  if (!activeRep) {
     return null;
   }
 

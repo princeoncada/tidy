@@ -251,8 +251,8 @@ export function useReplicacheDashboard() {
   const dashboard = assembleReplicacheDashboard(graph);
 
   return {
-    enabled: Boolean(rep),
-    ready: !rep || Boolean(dashboard.currentView),
+    enabled: true,
+    ready: Boolean(rep && dashboard.currentView),
     ...dashboard,
   };
 }

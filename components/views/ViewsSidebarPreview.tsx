@@ -2,7 +2,6 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check,
   GripVertical,
@@ -39,40 +38,12 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOptimisticSync } from "@/hooks/useOptimisticSync";
-import {
-  applyViewFilterUpdateToCaches,
-  applyViewRenameToViewsCache,
-  applyViewSelection,
-  buildDashboardKeys,
-  captureViewMutationSnapshots,
-  commitViewOrderToViewsCache,
-  DashboardSnapshot,
-  insertOptimisticViewIntoDashboardCaches,
-  listMatchesView,
-  reconcileCreatedViewInViewsCache,
-  removeViewFromDashboardCaches,
-  ViewsCache,
-} from "@/lib/dashboard-cache";
-import {
-  measureCacheWrite,
-  measureOptimisticEvent,
-  OptimisticProfiler,
-  useRenderMeasure,
-} from "@/lib/optimistic-debug";
-import {
-  commitLocalSelectedView,
-  commitLocalViewCreate,
-  commitLocalViewDelete,
-  commitLocalViewReorder,
-  commitLocalViewUpdate,
-} from "@/lib/local-db/local-write";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
+import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
+import { measureOptimisticEvent, OptimisticProfiler, useRenderMeasure } from "@/lib/optimistic-debug";
+import { keyBetween } from "@/lib/sync/fractional-index";
 import type { RouterOutputs } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { useTRPC } from "@/trpc/client";
-import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
-import { useDashboardMutations } from "@/hooks/useDashboardMutations";
-import { keyBetween } from "@/lib/sync/fractional-index";
 
 type ViewItem = RouterOutputs["view"]["getAll"][number];
 type TagItem = RouterOutputs["tag"]["getAll"][number];
@@ -83,47 +54,6 @@ type ViewDialogState = {
   mode: ViewDialogMode;
   view?: ViewItem;
 };
-
-function buildOptimisticView({
-  id,
-  name,
-  tagIds,
-  views,
-  tags,
-  allListsSnapshot,
-}: {
-  id: string;
-  name: string;
-  tagIds: string[];
-  views: ViewsCache | undefined;
-  tags: TagItem[];
-  allListsSnapshot: DashboardSnapshot | undefined;
-}): ViewItem {
-  const selectedTags = tags.filter((tag) => tagIds.includes(tag.id));
-  const optimisticView: ViewItem = {
-    id,
-    name,
-    userId: "optimistic",
-    order: views?.length ? Math.min(...views.map((view) => view.order)) - 1 : 0,
-    type: "CUSTOM",
-    isDefault: true,
-    matchMode: "ALL",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    viewTags: selectedTags.map((tag) => ({
-      viewId: id,
-      tagId: tag.id,
-      tag,
-    })),
-    viewLists: [],
-  };
-
-  optimisticView.viewLists = (allListsSnapshot?.lists ?? [])
-    .filter((list) => listMatchesView(list, optimisticView))
-    .map((list) => ({ listId: list.id, order: list.order }));
-
-  return optimisticView;
-}
 
 function moveCustomView(
   views: ViewItem[],
@@ -415,9 +345,6 @@ export default function ViewsSidebarPreview({
 }: {
   userId: string | null;
 }) {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const optimisticSync = useOptimisticSync();
   const replicacheDashboard = useReplicacheDashboard();
   const dashboardMutations = useDashboardMutations();
   const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -428,48 +355,18 @@ export default function ViewsSidebarPreview({
 
   useRenderMeasure("ViewsSidebarPreview");
 
-  const { data: serverViews = [], isLoading: viewsLoading } = useQuery({
-    ...trpc.view.getAll.queryOptions(),
-    enabled: !replicacheDashboard.enabled,
-  });
-  const { data: serverTags = [], isLoading: tagsLoading } = useQuery({
-    ...trpc.tag.getAll.queryOptions(),
-    enabled: !replicacheDashboard.enabled,
-  });
-  const views = replicacheDashboard.enabled
-    ? replicacheDashboard.views
-    : serverViews;
-  const tags = replicacheDashboard.enabled
-    ? replicacheDashboard.tags
-    : serverTags;
-
+  const views = replicacheDashboard.views;
+  const tags = replicacheDashboard.tags;
   const allListsView = useMemo(
     () => views.find((view) => view.type === "ALL_LISTS"),
     [views]
-  );
-  const { isLoading: allListsLoading } = useQuery(
-    trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: allListsView?.id ?? "00000000-0000-0000-0000-000000000000" },
-      {
-        enabled:
-          !replicacheDashboard.enabled && Boolean(allListsView?.id),
-      }
-    )
   );
   const savedCustomViews = useMemo(
     () => views.filter((view) => view.type === "CUSTOM"),
     [views]
   );
   const customViews = dragPreviewViews ?? savedCustomViews;
-  const selectedViewId = useMemo(
-    () => views.find((view) => view.isDefault)?.id ?? allListsView?.id,
-    [allListsView?.id, views]
-  );
-  const dashboardKeys = buildDashboardKeys(trpc, {
-    allListsViewId: allListsView?.id,
-    selectedViewId,
-  });
-  const queryKey = dashboardKeys.allLists;
+  const selectedViewId = replicacheDashboard.selectedView?.id ?? allListsView?.id;
 
   const setLocalViewPreview = useCallback((nextViews: ViewItem[] | null) => {
     dragPreviewViewsRef.current = nextViews;
@@ -485,47 +382,32 @@ export default function ViewsSidebarPreview({
     }
 
     reorderTimeoutRef.current = setTimeout(() => {
-      if (!userId || nextViews.length === 0) return;
+      if (!userId || nextViews.length === 0 || !dashboardMutations.mutate) return;
 
-      if (dashboardMutations.enabled && dashboardMutations.mutate) {
-        const movedIndex = nextViews.findIndex(
-          (view) => view.id === movedViewId,
-        );
-        const beforeId = movedIndex > 0
-          ? nextViews[movedIndex - 1]?.id
-          : allListsView?.id;
-        const afterId = movedIndex >= 0 && movedIndex < nextViews.length - 1
-          ? nextViews[movedIndex + 1]?.id
-          : undefined;
-        void dashboardMutations.mutate.reorderViews({
-          id: movedViewId,
-          orderKey: keyBetween(
-            beforeId
-              ? replicacheDashboard.orderKeys.views.get(beforeId) ?? null
-              : null,
-            afterId
-              ? replicacheDashboard.orderKeys.views.get(afterId) ?? null
-              : null,
-          ),
-        });
-        return;
-      }
-
-      optimisticSync.replacePending("views", async () => {
-        try {
-          await commitLocalViewReorder({
-            userId,
-            orderedViewIds: nextViews.map((view) => view.id),
-          });
-        } catch {
-          // Local persistence must not replace the committed cache order.
-        }
-      }, { label: "view.reorderViews" });
+      const movedIndex = nextViews.findIndex(
+        (view) => view.id === movedViewId,
+      );
+      const beforeId = movedIndex > 0
+        ? nextViews[movedIndex - 1]?.id
+        : allListsView?.id;
+      const afterId = movedIndex >= 0 && movedIndex < nextViews.length - 1
+        ? nextViews[movedIndex + 1]?.id
+        : undefined;
+      void dashboardMutations.mutate.reorderViews({
+        id: movedViewId,
+        orderKey: keyBetween(
+          beforeId
+            ? replicacheDashboard.orderKeys.views.get(beforeId) ?? null
+            : null,
+          afterId
+            ? replicacheDashboard.orderKeys.views.get(afterId) ?? null
+            : null,
+        ),
+      });
     }, 300);
   }, [
     allListsView?.id,
-    dashboardMutations,
-    optimisticSync,
+    dashboardMutations.mutate,
     replicacheDashboard.orderKeys.views,
     userId,
   ]);
@@ -535,23 +417,8 @@ export default function ViewsSidebarPreview({
     movedViewId: string,
   ) => {
     if (!userId) return;
-
-    if (dashboardMutations.enabled) {
-      scheduleReorderSave(nextViews, movedViewId);
-      return;
-    }
-
-    // Only save the final dropped order. Older drag positions do not matter.
-    measureCacheWrite("views.drop.order", nextViews);
-    commitViewOrderToViewsCache(queryClient, dashboardKeys, nextViews);
     scheduleReorderSave(nextViews, movedViewId);
-  }, [
-    dashboardMutations.enabled,
-    queryClient,
-    scheduleReorderSave,
-    dashboardKeys,
-    userId,
-  ]);
+  }, [scheduleReorderSave, userId]);
 
   const moveViewPreview = useCallback((sourceId: string, targetId: string) => {
     const baseViews = dragPreviewViewsRef.current ?? customViews;
@@ -561,160 +428,64 @@ export default function ViewsSidebarPreview({
   }, [customViews, setLocalViewPreview]);
 
   function selectView(id: string | undefined) {
-    if (!id || selectedViewId === id || !userId) return;
+    if (!id || selectedViewId === id || !userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      void dashboardMutations.mutate.setSelectedView({ viewId: id });
-      return;
-    }
-
-    applyViewSelection(queryClient, dashboardKeys, id);
-    optimisticSync.replacePending(
-      "view-selection",
-      async () => {
-        try {
-          await commitLocalSelectedView({ userId, viewId: id });
-        } catch {
-          // Local persistence must not replace the committed cache selection.
-        }
-      },
-      { label: "view.saveSelectedView" }
-    );
+    void dashboardMutations.mutate.setSelectedView({ viewId: id });
   }
 
   function createView(name: string, tagIds: string[]) {
-    if (tagIds.length === 0 || !userId) return;
+    if (tagIds.length === 0 || !userId || !dashboardMutations.mutate) return;
 
     const viewId = crypto.randomUUID();
-    const snapshots = captureViewMutationSnapshots(queryClient, dashboardKeys);
-    const allListsSnapshot = replicacheDashboard.enabled
-      ? replicacheDashboard.allLists
-      : queryClient.getQueryData<DashboardSnapshot>(queryKey);
-    const optimisticView = buildOptimisticView({
+    const firstCustomViewId = savedCustomViews[0]?.id;
+    const allListsOrderKey = allListsView
+      ? replicacheDashboard.orderKeys.views.get(allListsView.id) ?? null
+      : null;
+    const firstCustomOrderKey = firstCustomViewId
+      ? replicacheDashboard.orderKeys.views.get(firstCustomViewId) ?? null
+      : null;
+
+    void dashboardMutations.mutate.createView({
       id: viewId,
-      name,
-      tagIds,
-      views: snapshots.previousViews,
-      tags,
-      allListsSnapshot,
-    });
-
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      const firstCustomViewId = savedCustomViews[0]?.id;
-      const allListsOrderKey = allListsView
-        ? replicacheDashboard.orderKeys.views.get(allListsView.id) ?? null
-        : null;
-      const firstCustomOrderKey = firstCustomViewId
-        ? replicacheDashboard.orderKeys.views.get(firstCustomViewId) ?? null
-        : null;
-      void dashboardMutations.mutate.createView({
-        id: viewId,
-        userId,
-        name,
-        order: firstCustomOrderKey
-          ? keyBetween(allListsOrderKey, firstCustomOrderKey)
-          : keyBetween(allListsOrderKey, null),
-        tagIds,
-        matchMode: "ALL",
-        now: new Date().toISOString(),
-      });
-      setDialogState(null);
-      return;
-    }
-
-    insertOptimisticViewIntoDashboardCaches(
-      queryClient,
-      dashboardKeys,
-      optimisticView,
-      allListsSnapshot
-    );
-    void commitLocalViewCreate({
       userId,
-      viewId,
       name,
+      order: firstCustomOrderKey
+        ? keyBetween(allListsOrderKey, firstCustomOrderKey)
+        : keyBetween(allListsOrderKey, null),
       tagIds,
-    })
-      .then(() => {
-        reconcileCreatedViewInViewsCache(queryClient, dashboardKeys, {
-          id: viewId,
-          userId,
-        });
-      })
-      .catch(() => {});
+      matchMode: "ALL",
+      now: new Date().toISOString(),
+    });
     setDialogState(null);
   }
 
   function updateView(view: ViewItem, name: string, tagIds: string[]) {
-    if (tagIds.length === 0 || !userId) return;
+    if (tagIds.length === 0 || !userId || !dashboardMutations.mutate) return;
 
     const currentTagIds = view.viewTags.map((viewTag) => viewTag.tagId).sort();
     const nextTagIds = [...tagIds].sort();
     const nameChanged = view.name !== name;
     const tagsChanged = currentTagIds.join("|") !== nextTagIds.join("|");
 
-    if (
-      dashboardMutations.enabled &&
-      dashboardMutations.mutate &&
-      (nameChanged || tagsChanged)
-    ) {
+    if (nameChanged || tagsChanged) {
       void dashboardMutations.mutate.updateView({
         id: view.id,
         ...(nameChanged ? { name } : {}),
         ...(tagsChanged ? { tagIds } : {}),
         now: new Date().toISOString(),
       });
-      setDialogState(null);
-      return;
-    }
-
-    if (nameChanged) {
-      applyViewRenameToViewsCache(queryClient, dashboardKeys, view.id, name);
-    }
-
-    if (tagsChanged) {
-      const allListsSnapshot =
-        queryClient.getQueryData<DashboardSnapshot>(queryKey);
-      const selectedTags = tags.filter((tag) => tagIds.includes(tag.id));
-
-      applyViewFilterUpdateToCaches(queryClient, dashboardKeys, {
-        viewId: view.id,
-        selectedTags,
-        allListsSnapshot,
-      });
-    }
-
-    if (nameChanged || tagsChanged) {
-      void commitLocalViewUpdate({
-        userId,
-        viewId: view.id,
-        ...(nameChanged ? { name } : {}),
-        ...(tagsChanged ? { tagIds } : {}),
-      }).catch(() => {});
     }
 
     setDialogState(null);
   }
 
   function deleteView(id: string) {
-    if (!userId) return;
+    if (!userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      void dashboardMutations.mutate.deleteView({
-        id,
-        fallbackViewId: allListsView?.id,
-      });
-      return;
-    }
-
-    const allListsSnapshot = queryClient.getQueryData<DashboardSnapshot>(queryKey);
-
-    removeViewFromDashboardCaches(
-      queryClient,
-      dashboardKeys,
+    void dashboardMutations.mutate.deleteView({
       id,
-      allListsSnapshot
-    );
-    void commitLocalViewDelete({ userId, viewId: id }).catch(() => {});
+      fallbackViewId: allListsView?.id,
+    });
   }
 
   function openCreateView() {
@@ -729,12 +500,7 @@ export default function ViewsSidebarPreview({
     if (!open) setDialogState(null);
   }
 
-  if (
-    (replicacheDashboard.enabled
-      ? !replicacheDashboard.ready
-      : viewsLoading || tagsLoading || allListsLoading) ||
-    !allListsView
-  ) {
+  if (!replicacheDashboard.ready || !allListsView) {
     return <ViewsSidebarSkeleton />;
   }
 
@@ -790,7 +556,6 @@ export default function ViewsSidebarPreview({
 
           <DragDropProvider
             onDragStart={() => {
-              // Keep view drag order local so hovering does not rewrite the views cache.
               measureOptimisticEvent("views.drag.start", { count: customViews.length });
               setLocalViewPreview(customViews);
             }}
@@ -799,7 +564,6 @@ export default function ViewsSidebarPreview({
               setLocalViewPreview(null);
 
               if (event.canceled) {
-                // Cancelled drags should leave cache and server data untouched.
                 measureOptimisticEvent("views.drag.cancel");
                 return;
               }
