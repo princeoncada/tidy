@@ -38,20 +38,12 @@ vi.mock("@/hooks/useLocalFirstDashboardBoot", () => ({
   useLocalFirstDashboardBoot: useLocalFirstDashboardBootMock,
 }));
 
-vi.mock("@/lib/sync/replicache/client", () => ({
-  isReplicacheRenderEnabled: () => false,
-}));
-
 vi.mock("@/components/ReplicacheProvider", () => ({
   ReplicacheProvider: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock("@/components/UserAccountNav", () => ({
   default: () => <div>User</div>,
-}));
-
-vi.mock("@/components/SyncStatusBadge", () => ({
-  default: () => <div>Sync</div>,
 }));
 
 vi.mock("@/components/sharing/WorkspacesDialog", () => ({

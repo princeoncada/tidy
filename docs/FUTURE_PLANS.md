@@ -301,12 +301,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
-- **Status:** Open | Priority: P1 2.0 cleanup
+- **Status:** In progress | Priority: P1 2.0 cleanup
 - **Type:** cleanup
 - **Files:** lib/local-db/local-overlay.ts, lib/dashboard-cache.ts, hooks/useOptimisticSync.ts, lib/sync/offline-write-prototype.ts, lib/sync/replicache/client.ts, .env.example, components/*
 - **Implementation goal:** remove the 1.9.x pending-outbox overlay, the outbox-as-render-source fallback, and the server-payload tRPC render path now superseded by Replicache; retire the `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate.

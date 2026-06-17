@@ -2,13 +2,6 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.PORT ?? 3000);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
-const replicacheProjectRequested = process.argv.some((argument, index) =>
-  argument === "--project=replicache-render" ||
-  (
-    argument === "--project" &&
-    process.argv[index + 1] === "replicache-render"
-  )
-);
 const webServerCommand =
   `npm run dev -- --hostname 127.0.0.1 --port ${port}`;
 
@@ -29,14 +22,11 @@ export default defineConfig({
   webServer: {
     command: webServerCommand,
     url: baseURL,
-    reuseExistingServer: !process.env.CI && !replicacheProjectRequested,
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
       ...(process.env as Record<string, string>),
       NEXT_PUBLIC_OFFLINE_APP_SHELL_ENABLED: "true",
-      NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED:
-        process.env.NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED ??
-        (replicacheProjectRequested ? "true" : "false"),
     },
   },
   projects: [

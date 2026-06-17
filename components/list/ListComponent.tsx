@@ -1,16 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import {
-  DashboardKeys,
-  reconcileLocallyCommittedListItemInDashboardCaches,
-  removeListFromDashboardCaches,
-  updateListInDashboardCaches,
-} from "@/lib/dashboard-cache";
 import { useRenderMeasure } from "@/lib/optimistic-debug";
 import { useDroppable } from "@dnd-kit/react";
 import { useSortable } from '@dnd-kit/react/sortable';
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Calendar1,
   GripVertical,
@@ -29,12 +22,7 @@ import { Textarea } from "../ui/textarea";
 import ListInlineEdit from "./ListInlineEdit";
 import ListMenu from "./ListMenu";
 import ListTagPicker from "./ListTagPicker";
-import { List, ListItem, OptimisticListItem } from "./types";
-import {
-  commitLocalListDelete,
-  commitLocalListItemCreate,
-  commitLocalListRename,
-} from "@/lib/local-db/local-write";
+import { List, ListItem } from "./types";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
 import { keyBetween } from "@/lib/sync/fractional-index";
@@ -50,7 +38,6 @@ interface ListComponentProps {
   } | null;
   shouldRevealOnMount?: boolean,
   onRevealComplete: () => void;
-  dashboardKeys: DashboardKeys;
   userId: string | null;
 }
 
@@ -61,7 +48,6 @@ const ListComponent = ({
   activeDropTarget,
   shouldRevealOnMount,
   onRevealComplete,
-  dashboardKeys,
   userId
 }: ListComponentProps) => {
 
@@ -84,7 +70,6 @@ const ListComponent = ({
   const [createListItemName, setCreateListItemName] = useState<string>('');
   const [viewListItemAdder, setViewListItemAdder] = useState<boolean>(false);
   const [newItemId, setNewItemId] = useState(() => crypto.randomUUID());
-  const queryClient = useQueryClient();
   const dashboardMutations = useDashboardMutations();
   const replicacheDashboard = useReplicacheDashboard();
   const accessRole =
@@ -94,38 +79,19 @@ const ListComponent = ({
   const canDelete = list.userId === userId;
 
   const handleRenameList = (input: { id: string; name: string }) => {
-    if (!userId) return;
+    if (!userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      void dashboardMutations.mutate.renameList({
-        id: input.id,
-        name: input.name,
-        now: new Date().toISOString(),
-      });
-      return;
-    }
-
-    updateListInDashboardCaches(queryClient, dashboardKeys, input.id, (currentList) => ({
-      ...currentList,
+    void dashboardMutations.mutate.renameList({
+      id: input.id,
       name: input.name,
-    }));
-    void commitLocalListRename({
-      userId,
-      listId: input.id,
-      name: input.name,
-    }).catch(() => {});
+      now: new Date().toISOString(),
+    });
   };
 
   const deleteList = (listId: string) => {
-    if (!userId) return;
+    if (!userId || !dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      void dashboardMutations.mutate.deleteList({ id: listId });
-      return;
-    }
-
-    removeListFromDashboardCaches(queryClient, dashboardKeys, listId);
-    void commitLocalListDelete({ userId, listId }).catch(() => {});
+    void dashboardMutations.mutate.deleteList({ id: listId });
   };
 
   const handleCreateItem = () => {
@@ -136,58 +102,20 @@ const ListComponent = ({
 
     setNewItemId(crypto.randomUUID());
 
-    const order = list.listItems && list.listItems.length > 0
-      ? Math.max(...list.listItems.map((item: ListItem) => item.order)) + 1
-      : 0;
-    const optimisticListItem: OptimisticListItem = {
-      id: itemId,
-      name: itemName,
-      listId: list.id,
-      order,
-      completed: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      isOptimistic: true,
-      notes: "",
-    };
+    if (!dashboardMutations.mutate) return;
 
-    if (dashboardMutations.enabled && dashboardMutations.mutate) {
-      const firstItemId = list.listItems[0]?.id;
-      const firstOrderKey = firstItemId
-        ? replicacheDashboard.orderKeys.listItems.get(firstItemId) ?? null
-        : null;
-      setCreateListItemName("");
-      void dashboardMutations.mutate.createItem({
-        id: itemId,
-        listId: list.id,
-        name: itemName,
-        order: keyBetween(null, firstOrderKey),
-        now: new Date().toISOString(),
-      });
-      return;
-    }
-
-    updateListInDashboardCaches(queryClient, dashboardKeys, list.id, (currentList) => ({
-      ...currentList,
-      listItems: [optimisticListItem, ...currentList.listItems],
-    }));
+    const firstItemId = list.listItems[0]?.id;
+    const firstOrderKey = firstItemId
+      ? replicacheDashboard.orderKeys.listItems.get(firstItemId) ?? null
+      : null;
     setCreateListItemName("");
-    void commitLocalListItemCreate({
-      userId,
-      itemId,
+    void dashboardMutations.mutate.createItem({
+      id: itemId,
       listId: list.id,
       name: itemName,
-      order,
-    })
-      .then(() => {
-        reconcileLocallyCommittedListItemInDashboardCaches(
-          queryClient,
-          dashboardKeys,
-          list.id,
-          itemId,
-        );
-      })
-      .catch(() => {});
+      order: keyBetween(null, firstOrderKey),
+      now: new Date().toISOString(),
+    });
   };
 
   const { ref: listRef, handleRef, isDragging } = useSortable({
@@ -337,7 +265,6 @@ const ListComponent = ({
                   <ListTagPicker
                     listId={list.id}
                     selectedListTags={list.listTags}
-                    dashboardKeys={dashboardKeys}
                     userId={userId}
                   />
                 ) : (

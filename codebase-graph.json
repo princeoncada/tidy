@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "2.0.8",
-  "generatedAt": "2026-06-16",
+  "version": "2.0.9-alpha",
+  "generatedAt": "2026-06-17",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -235,19 +235,6 @@
         "@/lib/realtime/poke-server",
         "@/lib/sync/permissions",
         "@/lib/sync/replicache/push"
-      ]
-    },
-    {
-      "path": "app/api/sync/route.ts",
-      "kind": "api_route",
-      "extension": ".ts",
-      "symbols": [
-        "POST"
-      ],
-      "imports": [
-        "@/lib/supabase/server",
-        "@/lib/sync/server-apply",
-        "@/lib/sync/sync-batch-contract"
       ]
     },
     {
@@ -508,10 +495,8 @@
         "./UserAccountNav",
         "@tanstack/react-query",
         "./views/ViewsSidebarPreview",
-        "./SyncStatusBadge",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/components/ReplicacheProvider",
-        "@/lib/sync/replicache/client",
         "@/components/sharing/WorkspacesDialog"
       ]
     },
@@ -539,25 +524,19 @@
       "extension": ".tsx",
       "symbols": [],
       "imports": [
-        "@/trpc/client",
         "@/hooks/useLocalFirstDashboardBoot",
+        "@/hooks/useDashboardMutations",
+        "@/hooks/useReplicacheDashboard",
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys",
+        "lucide-react",
+        "react",
         "../ui/button",
         "../ui/dialog",
         "../ui/input",
         "../ui/label",
         "../ui/separator",
-        "react",
-        "@tanstack/react-query",
-        "./types",
-        "lucide-react",
-        "@/lib/dashboard-cache",
-        "@/lib/local-first-dashboard",
-        "@/lib/local-db/local-write",
-        "../ui/skeleton",
-        "@/hooks/useReplicacheDashboard",
-        "@/hooks/useDashboardMutations",
-        "@/lib/sync/fractional-index",
-        "@/lib/sync/replicache/keys"
+        "../ui/skeleton"
       ]
     },
     {
@@ -567,11 +546,9 @@
       "symbols": [],
       "imports": [
         "@/lib/utils",
-        "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
         "@dnd-kit/react",
         "@dnd-kit/react/sortable",
-        "@tanstack/react-query",
         "lucide-react",
         "motion/react",
         "react",
@@ -585,7 +562,6 @@
         "./ListMenu",
         "./ListTagPicker",
         "./types",
-        "@/lib/local-db/local-write",
         "@/hooks/useDashboardMutations",
         "@/hooks/useReplicacheDashboard",
         "@/lib/sync/fractional-index",
@@ -624,7 +600,6 @@
       "symbols": [],
       "imports": [
         "@dnd-kit/react/sortable",
-        "@tanstack/react-query",
         "lucide-react",
         "react",
         "./ListInlineEdit",
@@ -632,9 +607,7 @@
         "../ui/checkbox",
         "./types",
         "@/lib/utils",
-        "@/lib/dashboard-cache",
         "@/lib/optimistic-debug",
-        "@/lib/local-db/local-write",
         "@/hooks/useDashboardMutations",
         "./ItemNotesEditor",
         "@/lib/collab/yjs-notes-gate"
@@ -657,30 +630,19 @@
       "extension": ".tsx",
       "symbols": [],
       "imports": [
-        "@/lib/dashboard-cache",
-        "@/lib/optimistic-debug",
-        "@/hooks/useOptimisticSync",
-        "@/hooks/useLocalFirstDashboardBoot",
-        "@/lib/local-first-dashboard",
-        "@/lib/local-first-reconcile",
-        "@/lib/local-db/local-repositories",
-        "@/lib/local-db/local-movement",
-        "@/lib/local-db/local-overlay",
-        "@/lib/local-db/local-write",
-        "@/lib/sync/outbox-capture-events",
-        "@/trpc/client",
         "@dnd-kit/react",
-        "@tanstack/react-query",
         "react",
+        "@/hooks/useDashboardMutations",
+        "@/hooks/useLocalFirstDashboardBoot",
+        "@/hooks/useReplicacheDashboard",
+        "@/lib/optimistic-debug",
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys",
         "./ListComponent",
+        "./ListEmpty",
         "./ListItemComponent",
         "./ListSkeleton",
-        "./types",
-        "./ListEmpty",
-        "@/hooks/useReplicacheDashboard",
-        "@/hooks/useDashboardMutations",
-        "@/lib/sync/fractional-index",
-        "@/lib/sync/replicache/keys"
+        "./types"
       ]
     },
     {
@@ -712,22 +674,18 @@
       ],
       "imports": [
         "react",
-        "@tanstack/react-query",
         "lucide-react",
         "@/components/ui/badge",
         "@/components/ui/button",
         "@/components/ui/command",
         "@/components/ui/dropdown-menu",
         "@/components/ui/scroll-area",
-        "@/lib/utils",
-        "@/trpc/client",
-        "@/lib/trpc",
-        "./types",
-        "@/lib/dashboard-cache",
-        "@/lib/local-db/local-write",
-        "@/lib/optimistic-debug",
+        "@/hooks/useDashboardMutations",
         "@/hooks/useReplicacheDashboard",
-        "@/hooks/useDashboardMutations"
+        "@/lib/dashboard-cache",
+        "@/lib/optimistic-debug",
+        "@/lib/utils",
+        "./types"
       ]
     },
     {
@@ -756,17 +714,6 @@
       "imports": [
         "react",
         "@/lib/utils"
-      ]
-    },
-    {
-      "path": "components/OfflineReplayTrigger.tsx",
-      "kind": "component",
-      "extension": ".tsx",
-      "symbols": [
-        "OfflineReplayTrigger"
-      ],
-      "imports": [
-        "@/hooks/use-offline-replay-trigger"
       ]
     },
     {
@@ -838,16 +785,6 @@
         "@/components/ReplicacheProvider",
         "@/trpc/client",
         "./ShareDialog"
-      ]
-    },
-    {
-      "path": "components/SyncStatusBadge.tsx",
-      "kind": "component",
-      "extension": ".tsx",
-      "symbols": [],
-      "imports": [
-        "@/hooks/use-sync-status-surface",
-        "@/components/ReplicacheProvider"
       ]
     },
     {
@@ -1109,7 +1046,6 @@
       "imports": [
         "@dnd-kit/react",
         "@dnd-kit/react/sortable",
-        "@tanstack/react-query",
         "lucide-react",
         "react",
         "@/components/ui/badge",
@@ -1123,16 +1059,12 @@
         "@/components/ui/scroll-area",
         "@/components/ui/separator",
         "@/components/ui/skeleton",
-        "@/hooks/useOptimisticSync",
-        "@/lib/dashboard-cache",
-        "@/lib/optimistic-debug",
-        "@/lib/local-db/local-write",
-        "@/lib/trpc",
-        "@/lib/utils",
-        "@/trpc/client",
-        "@/hooks/useReplicacheDashboard",
         "@/hooks/useDashboardMutations",
-        "@/lib/sync/fractional-index"
+        "@/hooks/useReplicacheDashboard",
+        "@/lib/optimistic-debug",
+        "@/lib/sync/fractional-index",
+        "@/lib/trpc",
+        "@/lib/utils"
       ]
     },
     {
@@ -1458,35 +1390,6 @@
       ]
     },
     {
-      "path": "hooks/use-offline-replay-trigger.ts",
-      "kind": "hook",
-      "extension": ".ts",
-      "symbols": [
-        "useOfflineReplayTrigger"
-      ],
-      "imports": [
-        "react",
-        "@/lib/supabase/client",
-        "@/lib/sync/flush-scheduler",
-        "@/lib/sync/offline-write-prototype",
-        "@/lib/sync/outbox-capture-events"
-      ]
-    },
-    {
-      "path": "hooks/use-sync-status-surface.ts",
-      "kind": "hook",
-      "extension": ".ts",
-      "symbols": [
-        "useSyncStatusSurface"
-      ],
-      "imports": [
-        "react",
-        "@/lib/supabase/client",
-        "@/lib/sync/offline-write-prototype",
-        "@/lib/sync/sync-status-surface"
-      ]
-    },
-    {
       "path": "hooks/useDashboardMutations.ts",
       "kind": "hook",
       "extension": ".ts",
@@ -1512,22 +1415,6 @@
         "@/lib/local-first-dashboard",
         "@/lib/local-db/local-repositories",
         "@/lib/supabase/client"
-      ]
-    },
-    {
-      "path": "hooks/useOptimisticSync.ts",
-      "kind": "hook",
-      "extension": ".ts",
-      "symbols": [
-        "DurablePendingWrite",
-        "EnqueueOptions",
-        "OptimisticScope",
-        "useOptimisticSync"
-      ],
-      "imports": [
-        "react",
-        "@/lib/sync/offline-write-prototype",
-        "@/lib/local-db/outbox-repository"
       ]
     },
     {
@@ -1756,29 +1643,6 @@
       ]
     },
     {
-      "path": "lib/local-db/local-overlay.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "OutboxConfirmContext",
-        "applyPendingOutboxOverlay",
-        "applyPendingViewOverlay",
-        "isOutboxOperationServerConfirmed",
-        "outboxOperationsSignature",
-        "readActiveOutboxOperationsForUser",
-        "readPendingOutboxOperationsForUser",
-        "relinquishConfirmedOperations"
-      ],
-      "imports": [
-        "@/lib/dashboard-cache",
-        "./local-movement",
-        "./local-repositories",
-        "./local-schema",
-        "./outbox-schema",
-        "./tidy-db"
-      ]
-    },
-    {
       "path": "lib/local-db/local-repositories.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1833,41 +1697,6 @@
       "imports": []
     },
     {
-      "path": "lib/local-db/local-write.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "CommitLocalListCreateArgs",
-        "CommitLocalListDeleteArgs",
-        "CommitLocalListItemCompletionArgs",
-        "CommitLocalListItemCreateArgs",
-        "CommitLocalListItemDeleteArgs",
-        "CommitLocalListItemMoveArgs",
-        "CommitLocalListItemRenameArgs",
-        "CommitLocalListItemReorderArgs",
-        "CommitLocalListRenameArgs",
-        "CommitLocalListReorderArgs",
-        "CommitLocalListTagChangesArgs",
-        "CommitLocalSelectedViewArgs",
-        "CommitLocalTagCreateArgs",
-        "CommitLocalTagDeleteArgs",
-        "CommitLocalTagUpdateArgs",
-        "CommitLocalViewCreateArgs",
-        "CommitLocalViewDeleteArgs",
-        "CommitLocalViewReorderArgs",
-        "CommitLocalViewUpdateArgs",
-        "commitLocalListCreate"
-      ],
-      "imports": [
-        "./outbox-coalescing",
-        "./local-repositories",
-        "./outbox-schema",
-        "./local-schema",
-        "./tidy-db",
-        "@/lib/sync/outbox-capture-events"
-      ]
-    },
-    {
       "path": "lib/local-db/metadata-repository.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1887,44 +1716,6 @@
       ]
     },
     {
-      "path": "lib/local-db/outbox-coalescing.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "CoalescedOutboxOperations",
-        "coalesceOutboxOperations"
-      ],
-      "imports": [
-        "./outbox-schema"
-      ]
-    },
-    {
-      "path": "lib/local-db/outbox-repository.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "LocalOutboxRepositoryDatabase",
-        "enqueueOutboxOperation",
-        "getOutboxOperationById",
-        "getOutboxOperationsForUser",
-        "getPendingOutboxOperations",
-        "getRetryableOutboxOperations",
-        "incrementRetryCount",
-        "markOutboxOperationDiscarded",
-        "markOutboxOperationFailed",
-        "markOutboxOperationPending",
-        "markOutboxOperationSynced",
-        "markOutboxOperationSyncing",
-        "recoverStrandedSyncingOperations"
-      ],
-      "imports": [
-        "./local-repositories",
-        "./outbox-schema",
-        "./tidy-db",
-        "@/lib/sync/retry-backoff"
-      ]
-    },
-    {
       "path": "lib/local-db/outbox-schema.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1939,55 +1730,10 @@
         "isLocalJsonValue",
         "isLocalOutboxEntityType",
         "isLocalOutboxOperation",
-        "isLocalOutboxOperationType"
+        "isLocalOutboxOperationType",
+        "isOutboxOperationStatus"
       ],
-      "imports": [
-        "./sync-status"
-      ]
-    },
-    {
-      "path": "lib/local-db/sync-replay-client.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "FlushOutboxOperationsBatchArgs",
-        "ReplayOutboxOperationsArgs",
-        "SyncBatchOperationResult",
-        "SyncBatchTransport",
-        "SyncReplayOperationResult",
-        "SyncReplayRepository",
-        "SyncReplayResult",
-        "SyncReplayTransport",
-        "SyncReplayTransportRequest",
-        "SyncServerSnapshotProvider",
-        "flushOutboxOperationsBatch",
-        "replayOutboxOperations"
-      ],
-      "imports": [
-        "./outbox-coalescing",
-        "./outbox-repository",
-        "./outbox-schema",
-        "@/lib/sync/conflict-resolution",
-        "@/lib/sync/sync-batch-contract"
-      ]
-    },
-    {
-      "path": "lib/local-db/sync-status.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "LOCAL_SYNC_STATUSES",
-        "OUTBOX_OPERATION_STATUSES",
-        "isLocalSyncStatus",
-        "isOutboxOperationStatus",
-        "isRetryableOutboxOperationStatus",
-        "isTerminalLocalSyncStatus",
-        "isTerminalOutboxOperationStatus"
-      ],
-      "imports": [
-        "./local-schema",
-        "./outbox-schema"
-      ]
+      "imports": []
     },
     {
       "path": "lib/local-db/tidy-db.ts",
@@ -2166,32 +1912,6 @@
       ]
     },
     {
-      "path": "lib/sync/conflict-resolution.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "SyncConflictResolution",
-        "SyncServerEntitySnapshot",
-        "resolveOutboxOperationConflict"
-      ],
-      "imports": [
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "lib/sync/flush-scheduler.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "CreateFlushSchedulerArgs",
-        "FLUSH_BATCH_SIZE_THRESHOLD",
-        "FLUSH_QUIET_WINDOW_MS",
-        "FlushScheduler",
-        "createFlushScheduler"
-      ],
-      "imports": []
-    },
-    {
       "path": "lib/sync/fractional-index.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2203,46 +1923,6 @@
       "imports": [
         "fractional-indexing"
       ]
-    },
-    {
-      "path": "lib/sync/offline-write-prototype.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "CreateHttpSyncReplayTransportArgs",
-        "FlushOfflineWritesArgs",
-        "OfflineWriteIntent",
-        "ReadSyncStatusSurfaceArgs",
-        "ReconcilePendingWritesArgs",
-        "captureDashboardMutationOutbox",
-        "captureOfflineWrite",
-        "createHttpSyncBatchTransport",
-        "createHttpSyncReplayTransport",
-        "flushOfflineWrites",
-        "isOfflineWriteCaptureEnabled",
-        "readSyncStatusSurfaceForUser",
-        "reconcilePendingWritesOnLoad"
-      ],
-      "imports": [
-        "@/lib/local-db/outbox-repository",
-        "@/lib/local-db/sync-replay-client",
-        "@/lib/local-db/local-repositories",
-        "@/lib/sync/sync-status-surface",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/sync/sync-batch-contract",
-        "@/lib/sync/outbox-capture-events"
-      ]
-    },
-    {
-      "path": "lib/sync/outbox-capture-events.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "OutboxCaptureEvent",
-        "notifyOutboxCaptured",
-        "subscribeToOutboxCaptures"
-      ],
-      "imports": []
     },
     {
       "path": "lib/sync/permissions.ts",
@@ -2270,8 +1950,7 @@
       "extension": ".ts",
       "symbols": [
         "TidyReplicache",
-        "createReplicacheClient",
-        "isReplicacheRenderEnabled"
+        "createReplicacheClient"
       ],
       "imports": [
         "replicache",
@@ -2356,22 +2035,6 @@
       ]
     },
     {
-      "path": "lib/sync/retry-backoff.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "RETRY_BASE_DELAY_MS",
-        "RETRY_MAX_ATTEMPTS",
-        "RETRY_MAX_DELAY_MS",
-        "computeRetryDelayMs",
-        "isOutboxOperationRetryExhausted",
-        "isOutboxOperationRetryReady"
-      ],
-      "imports": [
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
       "path": "lib/sync/server-apply.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2423,20 +2086,6 @@
         "SyncEndpointValidationContext",
         "SyncEndpointValidationResult",
         "validateSyncEndpointRequest"
-      ],
-      "imports": [
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "lib/sync/sync-status-surface.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [
-        "SyncStatusSurface",
-        "SyncStatusSurfaceCounts",
-        "SyncStatusSurfaceState",
-        "createSyncStatusSurface"
       ],
       "imports": [
         "@/lib/local-db/outbox-schema"
@@ -2720,54 +2369,6 @@
       ]
     },
     {
-      "path": "tests/e2e/dexie-first-overlay-survival.spec.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "dotenv",
-        "@playwright/test",
-        "./utils/fixtures",
-        "./utils/app",
-        "./utils/assertions",
-        "./utils/seed",
-        "./utils/test-ids",
-        "@/lib/db"
-      ]
-    },
-    {
-      "path": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "dotenv",
-        "@playwright/test",
-        "./utils/fixtures",
-        "./utils/app",
-        "./utils/assertions",
-        "./utils/seed",
-        "./utils/test-ids",
-        "@/lib/db"
-      ]
-    },
-    {
-      "path": "tests/e2e/dexie-first-tags-views.spec.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "dotenv",
-        "@playwright/test",
-        "./utils/fixtures",
-        "./utils/app",
-        "./utils/assertions",
-        "./utils/seed",
-        "./utils/test-ids",
-        "@/lib/db"
-      ]
-    },
-    {
       "path": "tests/e2e/drag-drop.spec.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2780,8 +2381,7 @@
         "./utils/assertions",
         "./utils/drag",
         "./utils/seed",
-        "./utils/test-ids",
-        "@/lib/db"
+        "./utils/test-ids"
       ]
     },
     {
@@ -3022,16 +2622,6 @@
       ]
     },
     {
-      "path": "tests/unit/conflict-resolution.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/sync/conflict-resolution"
-      ]
-    },
-    {
       "path": "tests/unit/dashboard-cache.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3065,16 +2655,6 @@
       "imports": [
         "vitest",
         "@/lib/db"
-      ]
-    },
-    {
-      "path": "tests/unit/flush-scheduler.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/sync/flush-scheduler"
       ]
     },
     {
@@ -3121,17 +2701,6 @@
       ]
     },
     {
-      "path": "tests/unit/lists-container-local-fallback.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "node:fs",
-        "node:path",
-        "vitest"
-      ]
-    },
-    {
       "path": "tests/unit/local-db-diagnostics.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3151,20 +2720,6 @@
         "vitest",
         "@/lib/local-db/metadata-repository",
         "@/lib/local-db/local-schema"
-      ]
-    },
-    {
-      "path": "tests/unit/local-db-role-audit.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "node:fs",
-        "node:path",
-        "vitest",
-        "@/lib/local-db/metadata-repository",
-        "@/lib/local-db/local-schema",
-        "@/lib/sync/offline-write-prototype"
       ]
     },
     {
@@ -3205,21 +2760,6 @@
       ]
     },
     {
-      "path": "tests/unit/local-overlay.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/dashboard-cache",
-        "@/lib/local-db/local-movement",
-        "@/lib/local-db/local-overlay",
-        "@/lib/local-db/local-repositories",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/local-db/tidy-db"
-      ]
-    },
-    {
       "path": "tests/unit/local-repositories.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3233,19 +2773,6 @@
       ]
     },
     {
-      "path": "tests/unit/local-write.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/local-schema",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/local-db/tidy-db",
-        "@/lib/local-db/local-write"
-      ]
-    },
-    {
       "path": "tests/unit/metadata-assets.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3254,72 +2781,6 @@
         "node:fs",
         "node:path",
         "vitest"
-      ]
-    },
-    {
-      "path": "tests/unit/offline-write-prototype.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "node:fs",
-        "node:path",
-        "vitest",
-        "@/lib/sync/offline-write-prototype",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/local-db/outbox-repository",
-        "@/lib/sync/sync-batch-contract"
-      ]
-    },
-    {
-      "path": "tests/unit/optimistic-sync-baseline.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "@testing-library/react",
-        "@tanstack/react-query",
-        "react",
-        "vitest",
-        "@/lib/dashboard-cache",
-        "@/hooks/useOptimisticSync"
-      ]
-    },
-    {
-      "path": "tests/unit/optimistic-sync-durable.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "@testing-library/react",
-        "react",
-        "vitest",
-        "@/lib/local-db/outbox-repository",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/sync/offline-write-prototype",
-        "@/hooks/useOptimisticSync"
-      ]
-    },
-    {
-      "path": "tests/unit/outbox-coalescing.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/outbox-coalescing",
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "tests/unit/outbox-repository.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/outbox-repository",
-        "@/lib/local-db/outbox-schema"
       ]
     },
     {
@@ -3441,17 +2902,6 @@
       ]
     },
     {
-      "path": "tests/unit/retry-backoff.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/sync/retry-backoff",
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
       "path": "tests/unit/router-ownership-baseline.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3523,18 +2973,6 @@
       ]
     },
     {
-      "path": "tests/unit/sync-batch-client.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/local-db/sync-replay-client",
-        "@/lib/sync/sync-batch-contract"
-      ]
-    },
-    {
       "path": "tests/unit/sync-batch-contract.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3554,122 +2992,6 @@
         "vitest",
         "@/lib/sync/sync-endpoint-contract",
         "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-endpoint-route.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/outbox-schema",
-        "@/app/api/sync/route"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-replay-client.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/sync-replay-client",
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-replay-conflict.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/sync-replay-client",
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-replay-endpoint-integration.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/local-db/sync-replay-client",
-        "@/lib/sync/sync-batch-contract",
-        "@/lib/sync/sync-endpoint-contract"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-status-badge.test.tsx",
-      "kind": "test",
-      "extension": ".tsx",
-      "symbols": [],
-      "imports": [
-        "@testing-library/react",
-        "vitest",
-        "@/components/SyncStatusBadge",
-        "@/lib/sync/sync-status-surface"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-status-reader.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/sync/offline-write-prototype",
-        "@/lib/local-db/outbox-schema",
-        "@/lib/local-db/outbox-repository"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-status-surface.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/sync/sync-status-surface",
-        "@/lib/local-db/outbox-schema"
-      ]
-    },
-    {
-      "path": "tests/unit/sync-status.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/local-db/sync-status"
-      ]
-    },
-    {
-      "path": "tests/unit/use-offline-replay-trigger.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "@testing-library/react",
-        "react",
-        "vitest",
-        "@/hooks/use-offline-replay-trigger"
-      ]
-    },
-    {
-      "path": "tests/unit/use-sync-status-surface.test.ts",
-      "kind": "test",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "@testing-library/react",
-        "react",
-        "vitest",
-        "@/lib/sync/sync-status-surface",
-        "@/hooks/use-sync-status-surface"
       ]
     },
     {
@@ -3711,8 +3033,7 @@
         "superjson",
         "@/lib/utils",
         "@/components/AuthSync",
-        "@/hooks/use-local-db-health-check",
-        "@/components/OfflineReplayTrigger"
+        "@/hooks/use-local-db-health-check"
       ]
     },
     {
@@ -4038,24 +3359,6 @@
       "import": "@/lib/sync/replicache/push"
     },
     {
-      "from": "app/api/sync/route.ts",
-      "to": "lib/supabase/server.ts",
-      "type": "imports",
-      "import": "@/lib/supabase/server"
-    },
-    {
-      "from": "app/api/sync/route.ts",
-      "to": "lib/sync/server-apply.ts",
-      "type": "imports",
-      "import": "@/lib/sync/server-apply"
-    },
-    {
-      "from": "app/api/sync/route.ts",
-      "to": "lib/sync/sync-batch-contract.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-batch-contract"
-    },
-    {
       "from": "app/api/trpc/[trpc]/route.ts",
       "to": "trpc/init.ts",
       "type": "imports",
@@ -4351,12 +3654,6 @@
     },
     {
       "from": "components/Dashboard.tsx",
-      "to": "components/SyncStatusBadge.tsx",
-      "type": "imports",
-      "import": "./SyncStatusBadge"
-    },
-    {
-      "from": "components/Dashboard.tsx",
       "to": "components/ui/separator.tsx",
       "type": "imports",
       "import": "./ui/separator"
@@ -4384,12 +3681,6 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
-    },
-    {
-      "from": "components/Dashboard.tsx",
-      "to": "lib/sync/replicache/client.ts",
-      "type": "imports",
-      "import": "@/lib/sync/replicache/client"
     },
     {
       "from": "components/list/ItemNotesEditor.tsx",
@@ -4426,12 +3717,6 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
-      "to": "components/list/types.ts",
-      "type": "imports",
-      "import": "./types"
     },
     {
       "from": "components/list/ListAdder.tsx",
@@ -4489,24 +3774,6 @@
     },
     {
       "from": "components/list/ListAdder.tsx",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
-      "to": "lib/local-db/local-write.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-write"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
-      "to": "lib/local-first-dashboard.ts",
-      "type": "imports",
-      "import": "@/lib/local-first-dashboard"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
       "to": "lib/sync/fractional-index.ts",
       "type": "imports",
       "import": "@/lib/sync/fractional-index"
@@ -4516,12 +3783,6 @@
       "to": "lib/sync/replicache/keys.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/keys"
-    },
-    {
-      "from": "components/list/ListAdder.tsx",
-      "to": "trpc/client.tsx",
-      "type": "imports",
-      "import": "@/trpc/client"
     },
     {
       "from": "components/list/ListComponent.tsx",
@@ -4600,18 +3861,6 @@
       "to": "hooks/useReplicacheDashboard.ts",
       "type": "imports",
       "import": "@/hooks/useReplicacheDashboard"
-    },
-    {
-      "from": "components/list/ListComponent.tsx",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "components/list/ListComponent.tsx",
-      "to": "lib/local-db/local-write.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-write"
     },
     {
       "from": "components/list/ListComponent.tsx",
@@ -4699,18 +3948,6 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "components/list/ListItemComponent.tsx",
-      "to": "lib/local-db/local-write.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-write"
-    },
-    {
-      "from": "components/list/ListItemComponent.tsx",
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
@@ -4777,57 +4014,9 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
-      "to": "hooks/useOptimisticSync.ts",
-      "type": "imports",
-      "import": "@/hooks/useOptimisticSync"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
       "to": "hooks/useReplicacheDashboard.ts",
       "type": "imports",
       "import": "@/hooks/useReplicacheDashboard"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "lib/local-db/local-movement.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-movement"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "lib/local-db/local-overlay.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-overlay"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-repositories"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "lib/local-db/local-write.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-write"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "lib/local-first-dashboard.ts",
-      "type": "imports",
-      "import": "@/lib/local-first-dashboard"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "lib/local-first-reconcile.ts",
-      "type": "imports",
-      "import": "@/lib/local-first-reconcile"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -4843,21 +4032,9 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
-      "to": "lib/sync/outbox-capture-events.ts",
-      "type": "imports",
-      "import": "@/lib/sync/outbox-capture-events"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
       "to": "lib/sync/replicache/keys.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/keys"
-    },
-    {
-      "from": "components/list/ListsContainer.tsx",
-      "to": "trpc/client.tsx",
-      "type": "imports",
-      "import": "@/trpc/client"
     },
     {
       "from": "components/list/ListSkeleton.tsx",
@@ -4939,33 +4116,15 @@
     },
     {
       "from": "components/list/ListTagPicker.tsx",
-      "to": "lib/local-db/local-write.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-write"
-    },
-    {
-      "from": "components/list/ListTagPicker.tsx",
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
     },
     {
       "from": "components/list/ListTagPicker.tsx",
-      "to": "lib/trpc.ts",
-      "type": "imports",
-      "import": "@/lib/trpc"
-    },
-    {
-      "from": "components/list/ListTagPicker.tsx",
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
-    },
-    {
-      "from": "components/list/ListTagPicker.tsx",
-      "to": "trpc/client.tsx",
-      "type": "imports",
-      "import": "@/trpc/client"
     },
     {
       "from": "components/list/types.ts",
@@ -4978,12 +4137,6 @@
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
-    },
-    {
-      "from": "components/OfflineReplayTrigger.tsx",
-      "to": "hooks/use-offline-replay-trigger.ts",
-      "type": "imports",
-      "import": "@/hooks/use-offline-replay-trigger"
     },
     {
       "from": "components/ReplicacheProvider.tsx",
@@ -5098,18 +4251,6 @@
       "to": "trpc/client.tsx",
       "type": "imports",
       "import": "@/trpc/client"
-    },
-    {
-      "from": "components/SyncStatusBadge.tsx",
-      "to": "components/ReplicacheProvider.tsx",
-      "type": "imports",
-      "import": "@/components/ReplicacheProvider"
-    },
-    {
-      "from": "components/SyncStatusBadge.tsx",
-      "to": "hooks/use-sync-status-surface.ts",
-      "type": "imports",
-      "import": "@/hooks/use-sync-status-surface"
     },
     {
       "from": "components/ui/avatar.tsx",
@@ -5395,27 +4536,9 @@
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
-      "to": "hooks/useOptimisticSync.ts",
-      "type": "imports",
-      "import": "@/hooks/useOptimisticSync"
-    },
-    {
-      "from": "components/views/ViewsSidebarPreview.tsx",
       "to": "hooks/useReplicacheDashboard.ts",
       "type": "imports",
       "import": "@/hooks/useReplicacheDashboard"
-    },
-    {
-      "from": "components/views/ViewsSidebarPreview.tsx",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "components/views/ViewsSidebarPreview.tsx",
-      "to": "lib/local-db/local-write.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-write"
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
@@ -5442,12 +4565,6 @@
       "import": "@/lib/utils"
     },
     {
-      "from": "components/views/ViewsSidebarPreview.tsx",
-      "to": "trpc/client.tsx",
-      "type": "imports",
-      "import": "@/trpc/client"
-    },
-    {
       "from": "hooks/use-app-shell-service-worker.ts",
       "to": "lib/sw/register-service-worker.ts",
       "type": "imports",
@@ -5458,48 +4575,6 @@
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
       "import": "@/lib/local-db/metadata-repository"
-    },
-    {
-      "from": "hooks/use-offline-replay-trigger.ts",
-      "to": "lib/supabase/client.ts",
-      "type": "imports",
-      "import": "@/lib/supabase/client"
-    },
-    {
-      "from": "hooks/use-offline-replay-trigger.ts",
-      "to": "lib/sync/flush-scheduler.ts",
-      "type": "imports",
-      "import": "@/lib/sync/flush-scheduler"
-    },
-    {
-      "from": "hooks/use-offline-replay-trigger.ts",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "hooks/use-offline-replay-trigger.ts",
-      "to": "lib/sync/outbox-capture-events.ts",
-      "type": "imports",
-      "import": "@/lib/sync/outbox-capture-events"
-    },
-    {
-      "from": "hooks/use-sync-status-surface.ts",
-      "to": "lib/supabase/client.ts",
-      "type": "imports",
-      "import": "@/lib/supabase/client"
-    },
-    {
-      "from": "hooks/use-sync-status-surface.ts",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "hooks/use-sync-status-surface.ts",
-      "to": "lib/sync/sync-status-surface.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-status-surface"
     },
     {
       "from": "hooks/useDashboardMutations.ts",
@@ -5530,18 +4605,6 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
-    },
-    {
-      "from": "hooks/useOptimisticSync.ts",
-      "to": "lib/local-db/outbox-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-repository"
-    },
-    {
-      "from": "hooks/useOptimisticSync.ts",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "hooks/useReplicacheDashboard.ts",
@@ -5682,42 +4745,6 @@
       "import": "./outbox-schema"
     },
     {
-      "from": "lib/local-db/local-overlay.ts",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "lib/local-db/local-overlay.ts",
-      "to": "lib/local-db/local-movement.ts",
-      "type": "imports",
-      "import": "./local-movement"
-    },
-    {
-      "from": "lib/local-db/local-overlay.ts",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "./local-repositories"
-    },
-    {
-      "from": "lib/local-db/local-overlay.ts",
-      "to": "lib/local-db/local-schema.ts",
-      "type": "imports",
-      "import": "./local-schema"
-    },
-    {
-      "from": "lib/local-db/local-overlay.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "./outbox-schema"
-    },
-    {
-      "from": "lib/local-db/local-overlay.ts",
-      "to": "lib/local-db/tidy-db.ts",
-      "type": "imports",
-      "import": "./tidy-db"
-    },
-    {
       "from": "lib/local-db/local-repositories.ts",
       "to": "lib/local-db/local-schema.ts",
       "type": "imports",
@@ -5742,42 +4769,6 @@
       "import": "../local-first-reconcile"
     },
     {
-      "from": "lib/local-db/local-write.ts",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "./local-repositories"
-    },
-    {
-      "from": "lib/local-db/local-write.ts",
-      "to": "lib/local-db/local-schema.ts",
-      "type": "imports",
-      "import": "./local-schema"
-    },
-    {
-      "from": "lib/local-db/local-write.ts",
-      "to": "lib/local-db/outbox-coalescing.ts",
-      "type": "imports",
-      "import": "./outbox-coalescing"
-    },
-    {
-      "from": "lib/local-db/local-write.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "./outbox-schema"
-    },
-    {
-      "from": "lib/local-db/local-write.ts",
-      "to": "lib/local-db/tidy-db.ts",
-      "type": "imports",
-      "import": "./tidy-db"
-    },
-    {
-      "from": "lib/local-db/local-write.ts",
-      "to": "lib/sync/outbox-capture-events.ts",
-      "type": "imports",
-      "import": "@/lib/sync/outbox-capture-events"
-    },
-    {
       "from": "lib/local-db/metadata-repository.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -5794,84 +4785,6 @@
       "to": "lib/local-db/tidy-db.ts",
       "type": "imports",
       "import": "./tidy-db"
-    },
-    {
-      "from": "lib/local-db/outbox-coalescing.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "./outbox-schema"
-    },
-    {
-      "from": "lib/local-db/outbox-repository.ts",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "./local-repositories"
-    },
-    {
-      "from": "lib/local-db/outbox-repository.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "./outbox-schema"
-    },
-    {
-      "from": "lib/local-db/outbox-repository.ts",
-      "to": "lib/local-db/tidy-db.ts",
-      "type": "imports",
-      "import": "./tidy-db"
-    },
-    {
-      "from": "lib/local-db/outbox-repository.ts",
-      "to": "lib/sync/retry-backoff.ts",
-      "type": "imports",
-      "import": "@/lib/sync/retry-backoff"
-    },
-    {
-      "from": "lib/local-db/outbox-schema.ts",
-      "to": "lib/local-db/sync-status.ts",
-      "type": "imports",
-      "import": "./sync-status"
-    },
-    {
-      "from": "lib/local-db/sync-replay-client.ts",
-      "to": "lib/local-db/outbox-coalescing.ts",
-      "type": "imports",
-      "import": "./outbox-coalescing"
-    },
-    {
-      "from": "lib/local-db/sync-replay-client.ts",
-      "to": "lib/local-db/outbox-repository.ts",
-      "type": "imports",
-      "import": "./outbox-repository"
-    },
-    {
-      "from": "lib/local-db/sync-replay-client.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "./outbox-schema"
-    },
-    {
-      "from": "lib/local-db/sync-replay-client.ts",
-      "to": "lib/sync/conflict-resolution.ts",
-      "type": "imports",
-      "import": "@/lib/sync/conflict-resolution"
-    },
-    {
-      "from": "lib/local-db/sync-replay-client.ts",
-      "to": "lib/sync/sync-batch-contract.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-batch-contract"
-    },
-    {
-      "from": "lib/local-db/sync-status.ts",
-      "to": "lib/local-db/local-schema.ts",
-      "type": "imports",
-      "import": "./local-schema"
-    },
-    {
-      "from": "lib/local-db/sync-status.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "./outbox-schema"
     },
     {
       "from": "lib/local-db/tidy-db.ts",
@@ -5944,54 +4857,6 @@
       "to": "lib/sw/app-shell-strategy.ts",
       "type": "imports",
       "import": "@/lib/sw/app-shell-strategy"
-    },
-    {
-      "from": "lib/sync/conflict-resolution.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "lib/sync/offline-write-prototype.ts",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-repositories"
-    },
-    {
-      "from": "lib/sync/offline-write-prototype.ts",
-      "to": "lib/local-db/outbox-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-repository"
-    },
-    {
-      "from": "lib/sync/offline-write-prototype.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "lib/sync/offline-write-prototype.ts",
-      "to": "lib/local-db/sync-replay-client.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/sync-replay-client"
-    },
-    {
-      "from": "lib/sync/offline-write-prototype.ts",
-      "to": "lib/sync/outbox-capture-events.ts",
-      "type": "imports",
-      "import": "@/lib/sync/outbox-capture-events"
-    },
-    {
-      "from": "lib/sync/offline-write-prototype.ts",
-      "to": "lib/sync/sync-batch-contract.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-batch-contract"
-    },
-    {
-      "from": "lib/sync/offline-write-prototype.ts",
-      "to": "lib/sync/sync-status-surface.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-status-surface"
     },
     {
       "from": "lib/sync/permissions.ts",
@@ -6078,12 +4943,6 @@
       "import": "@/lib/sync/sync-batch-contract"
     },
     {
-      "from": "lib/sync/retry-backoff.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
       "from": "lib/sync/server-apply.ts",
       "to": "lib/db.ts",
       "type": "imports",
@@ -6132,12 +4991,6 @@
       "import": "@/lib/local-db/outbox-schema"
     },
     {
-      "from": "lib/sync/sync-status-surface.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
       "from": "lib/trpc.ts",
       "to": "trpc/routers/_app.ts",
       "type": "imports",
@@ -6163,120 +5016,6 @@
     },
     {
       "from": "tests/e2e/data-reset.setup.ts",
-      "to": "lib/db.ts",
-      "type": "imports",
-      "import": "@/lib/db"
-    },
-    {
-      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
-      "to": "lib/db.ts",
-      "type": "imports",
-      "import": "@/lib/db"
-    },
-    {
-      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
-      "to": "tests/e2e/utils/app.ts",
-      "type": "imports",
-      "import": "./utils/app"
-    },
-    {
-      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
-      "to": "tests/e2e/utils/assertions.ts",
-      "type": "imports",
-      "import": "./utils/assertions"
-    },
-    {
-      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
-      "to": "tests/e2e/utils/fixtures.ts",
-      "type": "imports",
-      "import": "./utils/fixtures"
-    },
-    {
-      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
-      "to": "tests/e2e/utils/seed.ts",
-      "type": "imports",
-      "import": "./utils/seed"
-    },
-    {
-      "from": "tests/e2e/dexie-first-overlay-survival.spec.ts",
-      "to": "tests/e2e/utils/test-ids.ts",
-      "type": "imports",
-      "import": "./utils/test-ids"
-    },
-    {
-      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
-      "to": "lib/db.ts",
-      "type": "imports",
-      "import": "@/lib/db"
-    },
-    {
-      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
-      "to": "tests/e2e/utils/app.ts",
-      "type": "imports",
-      "import": "./utils/app"
-    },
-    {
-      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
-      "to": "tests/e2e/utils/assertions.ts",
-      "type": "imports",
-      "import": "./utils/assertions"
-    },
-    {
-      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
-      "to": "tests/e2e/utils/fixtures.ts",
-      "type": "imports",
-      "import": "./utils/fixtures"
-    },
-    {
-      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
-      "to": "tests/e2e/utils/seed.ts",
-      "type": "imports",
-      "import": "./utils/seed"
-    },
-    {
-      "from": "tests/e2e/dexie-first-sync-lifecycle.spec.ts",
-      "to": "tests/e2e/utils/test-ids.ts",
-      "type": "imports",
-      "import": "./utils/test-ids"
-    },
-    {
-      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
-      "to": "lib/db.ts",
-      "type": "imports",
-      "import": "@/lib/db"
-    },
-    {
-      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
-      "to": "tests/e2e/utils/app.ts",
-      "type": "imports",
-      "import": "./utils/app"
-    },
-    {
-      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
-      "to": "tests/e2e/utils/assertions.ts",
-      "type": "imports",
-      "import": "./utils/assertions"
-    },
-    {
-      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
-      "to": "tests/e2e/utils/fixtures.ts",
-      "type": "imports",
-      "import": "./utils/fixtures"
-    },
-    {
-      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
-      "to": "tests/e2e/utils/seed.ts",
-      "type": "imports",
-      "import": "./utils/seed"
-    },
-    {
-      "from": "tests/e2e/dexie-first-tags-views.spec.ts",
-      "to": "tests/e2e/utils/test-ids.ts",
-      "type": "imports",
-      "import": "./utils/test-ids"
-    },
-    {
-      "from": "tests/e2e/drag-drop.spec.ts",
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
@@ -6540,12 +5279,6 @@
       "import": "@/lib/collab/yjs-note-doc"
     },
     {
-      "from": "tests/unit/conflict-resolution.test.ts",
-      "to": "lib/sync/conflict-resolution.ts",
-      "type": "imports",
-      "import": "@/lib/sync/conflict-resolution"
-    },
-    {
       "from": "tests/unit/dashboard-cache.test.ts",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
@@ -6568,12 +5301,6 @@
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
-    },
-    {
-      "from": "tests/unit/flush-scheduler.test.ts",
-      "to": "lib/sync/flush-scheduler.ts",
-      "type": "imports",
-      "import": "@/lib/sync/flush-scheduler"
     },
     {
       "from": "tests/unit/fractional-index.test.ts",
@@ -6610,24 +5337,6 @@
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
       "import": "@/lib/local-db/metadata-repository"
-    },
-    {
-      "from": "tests/unit/local-db-role-audit.test.ts",
-      "to": "lib/local-db/local-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-schema"
-    },
-    {
-      "from": "tests/unit/local-db-role-audit.test.ts",
-      "to": "lib/local-db/metadata-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/metadata-repository"
-    },
-    {
-      "from": "tests/unit/local-db-role-audit.test.ts",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
     },
     {
       "from": "tests/unit/local-first-dashboard.test.ts",
@@ -6690,42 +5399,6 @@
       "import": "@/lib/local-db/local-repositories"
     },
     {
-      "from": "tests/unit/local-overlay.test.ts",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "tests/unit/local-overlay.test.ts",
-      "to": "lib/local-db/local-movement.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-movement"
-    },
-    {
-      "from": "tests/unit/local-overlay.test.ts",
-      "to": "lib/local-db/local-overlay.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-overlay"
-    },
-    {
-      "from": "tests/unit/local-overlay.test.ts",
-      "to": "lib/local-db/local-repositories.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-repositories"
-    },
-    {
-      "from": "tests/unit/local-overlay.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/local-overlay.test.ts",
-      "to": "lib/local-db/tidy-db.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/tidy-db"
-    },
-    {
       "from": "tests/unit/local-repositories.test.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -6748,114 +5421,6 @@
       "to": "lib/local-first-reconcile.ts",
       "type": "imports",
       "import": "@/lib/local-first-reconcile"
-    },
-    {
-      "from": "tests/unit/local-write.test.ts",
-      "to": "lib/local-db/local-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-schema"
-    },
-    {
-      "from": "tests/unit/local-write.test.ts",
-      "to": "lib/local-db/local-write.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/local-write"
-    },
-    {
-      "from": "tests/unit/local-write.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/local-write.test.ts",
-      "to": "lib/local-db/tidy-db.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/tidy-db"
-    },
-    {
-      "from": "tests/unit/offline-write-prototype.test.ts",
-      "to": "lib/local-db/outbox-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-repository"
-    },
-    {
-      "from": "tests/unit/offline-write-prototype.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/offline-write-prototype.test.ts",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "tests/unit/offline-write-prototype.test.ts",
-      "to": "lib/sync/sync-batch-contract.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-batch-contract"
-    },
-    {
-      "from": "tests/unit/optimistic-sync-baseline.test.ts",
-      "to": "hooks/useOptimisticSync.ts",
-      "type": "imports",
-      "import": "@/hooks/useOptimisticSync"
-    },
-    {
-      "from": "tests/unit/optimistic-sync-baseline.test.ts",
-      "to": "lib/dashboard-cache.ts",
-      "type": "imports",
-      "import": "@/lib/dashboard-cache"
-    },
-    {
-      "from": "tests/unit/optimistic-sync-durable.test.ts",
-      "to": "hooks/useOptimisticSync.ts",
-      "type": "imports",
-      "import": "@/hooks/useOptimisticSync"
-    },
-    {
-      "from": "tests/unit/optimistic-sync-durable.test.ts",
-      "to": "lib/local-db/outbox-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-repository"
-    },
-    {
-      "from": "tests/unit/optimistic-sync-durable.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/optimistic-sync-durable.test.ts",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "tests/unit/outbox-coalescing.test.ts",
-      "to": "lib/local-db/outbox-coalescing.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-coalescing"
-    },
-    {
-      "from": "tests/unit/outbox-coalescing.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/outbox-repository.test.ts",
-      "to": "lib/local-db/outbox-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-repository"
-    },
-    {
-      "from": "tests/unit/outbox-repository.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
     },
     {
       "from": "tests/unit/outbox-schema.test.ts",
@@ -6972,18 +5537,6 @@
       "import": "@/lib/sync/replicache/push"
     },
     {
-      "from": "tests/unit/retry-backoff.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/retry-backoff.test.ts",
-      "to": "lib/sync/retry-backoff.ts",
-      "type": "imports",
-      "import": "@/lib/sync/retry-backoff"
-    },
-    {
       "from": "tests/unit/router-ownership-baseline.test.ts",
       "to": "trpc/init.ts",
       "type": "imports",
@@ -7050,24 +5603,6 @@
       "import": "@/trpc/routers/shareRouter"
     },
     {
-      "from": "tests/unit/sync-batch-client.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/sync-batch-client.test.ts",
-      "to": "lib/local-db/sync-replay-client.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/sync-replay-client"
-    },
-    {
-      "from": "tests/unit/sync-batch-client.test.ts",
-      "to": "lib/sync/sync-batch-contract.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-batch-contract"
-    },
-    {
       "from": "tests/unit/sync-batch-contract.test.ts",
       "to": "lib/local-db/outbox-schema.ts",
       "type": "imports",
@@ -7090,132 +5625,6 @@
       "to": "lib/sync/sync-endpoint-contract.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-endpoint-contract"
-    },
-    {
-      "from": "tests/unit/sync-endpoint-route.test.ts",
-      "to": "app/api/sync/route.ts",
-      "type": "imports",
-      "import": "@/app/api/sync/route"
-    },
-    {
-      "from": "tests/unit/sync-endpoint-route.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/sync-replay-client.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/sync-replay-client.test.ts",
-      "to": "lib/local-db/sync-replay-client.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/sync-replay-client"
-    },
-    {
-      "from": "tests/unit/sync-replay-conflict.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/sync-replay-conflict.test.ts",
-      "to": "lib/local-db/sync-replay-client.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/sync-replay-client"
-    },
-    {
-      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
-      "to": "lib/local-db/sync-replay-client.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/sync-replay-client"
-    },
-    {
-      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
-      "to": "lib/sync/sync-batch-contract.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-batch-contract"
-    },
-    {
-      "from": "tests/unit/sync-replay-endpoint-integration.test.ts",
-      "to": "lib/sync/sync-endpoint-contract.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-endpoint-contract"
-    },
-    {
-      "from": "tests/unit/sync-status-badge.test.tsx",
-      "to": "components/SyncStatusBadge.tsx",
-      "type": "imports",
-      "import": "@/components/SyncStatusBadge"
-    },
-    {
-      "from": "tests/unit/sync-status-badge.test.tsx",
-      "to": "lib/sync/sync-status-surface.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-status-surface"
-    },
-    {
-      "from": "tests/unit/sync-status-reader.test.ts",
-      "to": "lib/local-db/outbox-repository.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-repository"
-    },
-    {
-      "from": "tests/unit/sync-status-reader.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/sync-status-reader.test.ts",
-      "to": "lib/sync/offline-write-prototype.ts",
-      "type": "imports",
-      "import": "@/lib/sync/offline-write-prototype"
-    },
-    {
-      "from": "tests/unit/sync-status-surface.test.ts",
-      "to": "lib/local-db/outbox-schema.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/outbox-schema"
-    },
-    {
-      "from": "tests/unit/sync-status-surface.test.ts",
-      "to": "lib/sync/sync-status-surface.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-status-surface"
-    },
-    {
-      "from": "tests/unit/sync-status.test.ts",
-      "to": "lib/local-db/sync-status.ts",
-      "type": "imports",
-      "import": "@/lib/local-db/sync-status"
-    },
-    {
-      "from": "tests/unit/use-offline-replay-trigger.test.ts",
-      "to": "hooks/use-offline-replay-trigger.ts",
-      "type": "imports",
-      "import": "@/hooks/use-offline-replay-trigger"
-    },
-    {
-      "from": "tests/unit/use-sync-status-surface.test.ts",
-      "to": "hooks/use-sync-status-surface.ts",
-      "type": "imports",
-      "import": "@/hooks/use-sync-status-surface"
-    },
-    {
-      "from": "tests/unit/use-sync-status-surface.test.ts",
-      "to": "lib/sync/sync-status-surface.ts",
-      "type": "imports",
-      "import": "@/lib/sync/sync-status-surface"
     },
     {
       "from": "tests/unit/view-helpers.test.ts",
@@ -7240,12 +5649,6 @@
       "to": "components/AuthSync.tsx",
       "type": "imports",
       "import": "@/components/AuthSync"
-    },
-    {
-      "from": "trpc/client.tsx",
-      "to": "components/OfflineReplayTrigger.tsx",
-      "type": "imports",
-      "import": "@/components/OfflineReplayTrigger"
     },
     {
       "from": "trpc/client.tsx",

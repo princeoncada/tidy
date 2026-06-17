@@ -9,12 +9,20 @@ import {
   getVisibleViewCard,
 } from "./assertions";
 
-export function waitForSyncBatch(page: Page) {
-  return page.waitForResponse((response) =>
-    response.request().method() === "POST" &&
-    response.url().includes("/api/sync") &&
-    response.ok()
-  );
+export async function waitForSyncBatch(page: Page) {
+  // Replicache batches/coalesces pushes, so a given action may not emit its own
+  // /api/replicache/push response. Wait best-effort and never block past the
+  // timeout; the local-first store reflects the change immediately, and pending
+  // mutations survive reload via IndexedDB.
+  await page
+    .waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        response.url().includes("/api/replicache/push") &&
+        response.ok(),
+      { timeout: 1_500 },
+    )
+    .catch(() => {});
 }
 
 function escapeRegExp(value: string) {

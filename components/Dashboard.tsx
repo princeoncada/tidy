@@ -11,10 +11,8 @@ import { Separator } from "./ui/separator";
 import UserAccountNav from "./UserAccountNav";
 import { useQueryClient } from "@tanstack/react-query";
 import ViewsSidebarPreview from "./views/ViewsSidebarPreview";
-import SyncStatusBadge from "./SyncStatusBadge";
 import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { ReplicacheProvider } from "@/components/ReplicacheProvider";
-import { isReplicacheRenderEnabled } from "@/lib/sync/replicache/client";
 import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
 
 const supabase = createClient();
@@ -65,7 +63,6 @@ const Dashboard = () => {
                   </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                  <SyncStatusBadge />
                   <WorkspacesDialog />
                   <ListAdder boot={localFirstBoot} />
                 </div>
@@ -91,24 +88,21 @@ const Dashboard = () => {
     </MaxWidthWrapper>
   );
 
-  if (isReplicacheRenderEnabled()) {
-    if (!localFirstBoot.localBootReady) {
-      return (
-        <MaxWidthWrapper singleItemPage={true}>
-          <Loader2 className="w-5 h-5 animate-spin" />
-        </MaxWidthWrapper>
-      );
-    }
-    if (localFirstBoot.userId) {
-      return (
-        <ReplicacheProvider userId={localFirstBoot.userId}>
-          {dashboard}
-        </ReplicacheProvider>
-      );
-    }
+  if (!localFirstBoot.localBootReady) {
+    return (
+      <MaxWidthWrapper singleItemPage={true}>
+        <Loader2 className="w-5 h-5 animate-spin" />
+      </MaxWidthWrapper>
+    );
   }
 
-  return dashboard;
+  if (!localFirstBoot.userId) return dashboard;
+
+  return (
+    <ReplicacheProvider userId={localFirstBoot.userId}>
+      {dashboard}
+    </ReplicacheProvider>
+  );
 };
 
 export default Dashboard;

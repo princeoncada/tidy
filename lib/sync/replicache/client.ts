@@ -8,10 +8,6 @@ import { replicacheMutators } from "@/lib/sync/replicache/mutators";
 
 export type TidyReplicache = Replicache<typeof replicacheMutators>;
 
-export function isReplicacheRenderEnabled() {
-  return process.env.NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED !== "false";
-}
-
 function createPusher(onCorrections: (count: number) => void): Pusher {
   return async (requestBody) => {
     const response = await fetch("/api/replicache/push", {

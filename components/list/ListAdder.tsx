@@ -1,111 +1,40 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import type { LocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
+import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
+import { keyBetween } from "@/lib/sync/fractional-index";
+import { replicacheKeys } from "@/lib/sync/replicache/keys";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CurrentView, OptimisticList } from "./types";
-import { Plus } from "lucide-react";
-import {
-  buildDashboardKeys,
-  insertOptimisticListIntoDashboardCaches,
-  reconcileLocallyCommittedListInDashboardCaches,
-  selectedViewFromCache,
-} from "@/lib/dashboard-cache";
-import { LOCAL_ALL_LISTS_VIEW_ID } from "@/lib/local-first-dashboard";
-import { commitLocalListCreate } from "@/lib/local-db/local-write";
 import { Skeleton } from "../ui/skeleton";
-import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
-import { useDashboardMutations } from "@/hooks/useDashboardMutations";
-import { keyBetween } from "@/lib/sync/fractional-index";
-import { replicacheKeys } from "@/lib/sync/replicache/keys";
-
 
 type ListAdderProps = {
   boot: LocalFirstDashboardBoot;
 };
-
-const EMPTY_VIEW_ID = "00000000-0000-0000-0000-000000000000";
 
 const ListAdder = ({ boot }: ListAdderProps) => {
 
   const [createListName, setCreateListName] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const replicacheDashboard = useReplicacheDashboard();
   const dashboardMutations = useDashboardMutations();
-  const { data: views, isLoading: viewsLoading } = useQuery({
-    ...trpc.view.getAll.queryOptions(),
-    enabled: !replicacheDashboard.enabled,
-  });
-  const serverViews = views?.some((view) => view.id === LOCAL_ALL_LISTS_VIEW_ID)
-    ? undefined
-    : views;
-  const effectiveViews = replicacheDashboard.enabled
-    ? replicacheDashboard.views
-    : views ?? boot.localViews;
-  const allListsView = effectiveViews?.find((view) => view.type === "ALL_LISTS");
-  const serverAllListsView = serverViews?.find((view) => view.type === "ALL_LISTS");
-  const selectedView = selectedViewFromCache(effectiveViews);
-  const serverSelectedView = selectedViewFromCache(serverViews);
-  const selectedViewId = selectedView?.id;
-  const dashboardKeys = buildDashboardKeys(trpc, {
-    allListsViewId: allListsView?.id,
-    selectedViewId,
-  });
-  const { views: viewsQueryKey } = dashboardKeys;
-
-  const { isLoading: bootListsLoading } = useQuery(
-    {
-      ...trpc.view.getCurrentViewListsWithItems.queryOptions(),
-      enabled: !replicacheDashboard.enabled,
-    }
-  );
-
-  const { isLoading: allListsLoading } = useQuery(
-    trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: serverAllListsView?.id ?? EMPTY_VIEW_ID },
-      {
-        enabled:
-          !replicacheDashboard.enabled && Boolean(serverAllListsView?.id),
-      }
-    )
-  );
-
-  const { isLoading: selectedViewLoading } = useQuery(
-    trpc.view.getViewListsWithItems.queryOptions(
-      { viewId: serverSelectedView?.id ?? EMPTY_VIEW_ID },
-      {
-        enabled:
-          !replicacheDashboard.enabled && Boolean(serverSelectedView?.id),
-      }
-    )
-  );
+  const allListsView = replicacheDashboard.views.find((view) => view.type === "ALL_LISTS");
 
   const handleCreateList = () => {
     const name = createListName.trim();
     const userId = boot.userId;
 
-    if (!name || !userId) return;
+    if (!name || !userId || !dashboardMutations.mutate || !allListsView) return;
 
     const newListId = crypto.randomUUID();
-    const activeView = replicacheDashboard.enabled
-      ? replicacheDashboard.selectedView
-      : selectedViewFromCache(queryClient.getQueryData(viewsQueryKey));
-    const previousAllLists = replicacheDashboard.enabled
-      ? replicacheDashboard.allLists
-      : queryClient.getQueryData<CurrentView>(dashboardKeys.allLists);
-    const previousCurrentView = replicacheDashboard.enabled
-      ? replicacheDashboard.currentView
-      : queryClient.getQueryData<CurrentView>(dashboardKeys.currentView);
-    const baseLists = previousCurrentView?.lists ?? previousAllLists?.lists ?? [];
+    const activeView = replicacheDashboard.selectedView;
     const inheritedListTags = activeView?.type === "CUSTOM"
       ? activeView.viewTags.map((viewTag) => ({
           listId: newListId,
@@ -113,64 +42,23 @@ const ListAdder = ({ boot }: ListAdderProps) => {
           tag: viewTag.tag,
         }))
       : [];
-    const optimisticList: OptimisticList = {
+    const firstListId = replicacheDashboard.allLists?.lists[0]?.id;
+    const firstOrderKey = firstListId
+      ? replicacheDashboard.orderKeys.viewLists.get(
+          replicacheKeys.viewList(allListsView.id, firstListId),
+        ) ?? null
+      : null;
+
+    void dashboardMutations.mutate.createList({
       id: newListId,
-      userId: "optimistic",
-      name,
-      order: baseLists.length > 0
-        ? Math.min(...baseLists.map((list) => list.order)) - 1
-        : 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      listTags: inheritedListTags,
-      listItems: [],
-      isOptimistic: true,
-    };
-
-    if (dashboardMutations.enabled && dashboardMutations.mutate && allListsView) {
-      const firstListId = previousAllLists?.lists[0]?.id;
-      const firstOrderKey = firstListId
-        ? replicacheDashboard.orderKeys.viewLists.get(
-            replicacheKeys.viewList(allListsView.id, firstListId),
-          ) ?? null
-        : null;
-      void dashboardMutations.mutate.createList({
-        id: newListId,
-        userId,
-        name,
-        allListsViewId: allListsView.id,
-        order: keyBetween(null, firstOrderKey),
-        inheritedTagIds: inheritedListTags.map((listTag) => listTag.tagId),
-        now: new Date().toISOString(),
-      });
-      setCreateListName("");
-      return;
-    }
-
-    insertOptimisticListIntoDashboardCaches(
-      queryClient,
-      dashboardKeys,
-      optimisticList,
-      activeView,
-    );
-    void commitLocalListCreate({
       userId,
-      listId: newListId,
       name,
+      allListsViewId: allListsView.id,
+      order: keyBetween(null, firstOrderKey),
       inheritedTagIds: inheritedListTags.map((listTag) => listTag.tagId),
-    })
-      .then(() => {
-        reconcileLocallyCommittedListInDashboardCaches(
-          queryClient,
-          dashboardKeys,
-          newListId,
-          userId,
-        );
-      })
-      .catch(() => {
-        // Local-first commit is best-effort and must not block the UI.
-      });
-    setCreateListName('');
+      now: new Date().toISOString(),
+    });
+    setCreateListName("");
   };
 
   const handleExit = () => {
@@ -179,10 +67,7 @@ const ListAdder = ({ boot }: ListAdderProps) => {
     }, 200);
   };
 
-  const serverStillLoading = replicacheDashboard.enabled
-    ? !replicacheDashboard.ready
-    : viewsLoading || bootListsLoading || allListsLoading || selectedViewLoading;
-  if (!effectiveViews || !allListsView || (!boot.localBootReady && serverStillLoading)) {
+  if (!replicacheDashboard.ready || !allListsView) {
     return (
       <div className="h-full flex items-end">
         <Skeleton className="hidden h-8 w-24 md:block" />
