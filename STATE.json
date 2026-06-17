@@ -4,6 +4,6 @@
     "phase":  "2.0.9",
     "phaseTitle":  "Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths",
     "nextPhase":  "2.1.0 - Deploy Env Documentation",
-    "seriesComplete":  false,
+    "seriesComplete":  true,
     "lastUpdated":  "2026-06-16"
 }
