@@ -292,6 +292,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.0.8 - Remove Dead Replicache License Config~~ (stable 2026-06-16)
 
+- ~~2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths~~ (stable 2026-06-17)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -301,21 +303,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths (active) - see Planned
 ---
 
 ## Planned
-
-### 2.0.9 - Retire Legacy Overlay / Outbox-Render / tRPC-Render Paths
-- **Status:** In progress | Priority: P1 2.0 cleanup
-- **Type:** cleanup
-- **Files:** lib/local-db/local-overlay.ts, lib/dashboard-cache.ts, hooks/useOptimisticSync.ts, lib/sync/offline-write-prototype.ts, lib/sync/replicache/client.ts, .env.example, components/*
-- **Implementation goal:** remove the 1.9.x pending-outbox overlay, the outbox-as-render-source fallback, and the server-payload tRPC render path now superseded by Replicache; retire the `NEXT_PUBLIC_OFFLINE_WRITE_PROTOTYPE_ENABLED` gate.
-- **Product impact:** none beyond removing dead / duplicate render paths; render is wholly local-store driven.
-- **Runtime integration target:** only the Replicache render / sync path remains.
-- **Deferral boundary:** none - final 2.0 architecture cleanup. This is the phase that flips `seriesComplete = true`.
-- **Validation target:** full test:ci + manual regression of the dashboard; full validate.ps1 before stable.
-- **Acceptance:** the legacy overlay / outbox-render / tRPC-render paths are gone and the dashboard still passes the full suite; `seriesComplete` flips true.
 
 ### 2.1.0 - Deploy Env Documentation
 - **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.0; deploy docs written once against the 2.0 architecture)
