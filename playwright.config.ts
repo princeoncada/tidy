@@ -46,6 +46,11 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      name: "offline-shell",
+      testMatch: /offline-shell\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       name: "e2e-reset",
       testMatch: /data-reset\.setup\.ts/,
       use: { ...devices["Desktop Chrome"] },
@@ -55,6 +60,7 @@ export default defineConfig({
       testIgnore: [
         /smoke\.spec\.ts/,
         /dashboard-public\.spec\.ts/,
+        /offline-shell\.spec\.ts/,
         /auth\.setup\.ts/,
         /data-reset\.setup\.ts/,
         /replicache-render\.spec\.ts/,
