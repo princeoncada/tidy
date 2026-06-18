@@ -314,6 +314,17 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
+### 2.2.0 - Visual Review Pass
+- **Status:** In progress | Priority: P3 late UI/UX (pushed back from 1.11.3)
+- **Type:** product behavior (polish)
+- **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, app/page.tsx
+- **Implementation goal:** small visual review pass after the 2.0 local-first render and collaboration are stable.
+- **Product impact:** small visual improvements; no data behavior change.
+- **Runtime integration target:** none beyond presentation.
+- **Deferral boundary:** none - last polish phase.
+- **Validation target:** targeted alpha (visual review + manual proof); full test:ci before stable.
+- **Acceptance:** visual changes are small, reviewable, and do not alter data behavior.
+
 ### 2.2.1 - Retire test:e2e:replicache Render Gate
 - **Status:** Open | Priority: P4 cleanup (2.0.9 leftover)
 - **Type:** cleanup
