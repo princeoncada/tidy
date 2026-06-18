@@ -1,6 +1,6 @@
 {
-    "version":  "2.2.1-alpha",
-    "state":  "alpha",
+    "version":  "2.2.1",
+    "state":  "stable",
     "phase":  "2.2.1",
     "phaseTitle":  "Retire test:e2e:replicache Render Gate",
     "nextPhase":  "2.2.2 - View Create Idempotency Hardening",
