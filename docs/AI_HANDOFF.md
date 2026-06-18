@@ -1,9 +1,9 @@
-<!-- Current Version: 2.2.2-alpha -->
+<!-- Current Version: 2.2.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.2.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.2.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.2.2 - View Create Idempotency Hardening
 **Next**: 2.2.3 - seriesComplete Flag Reconciliation
 
