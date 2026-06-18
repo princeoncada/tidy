@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.1.1-alpha
+- **Current version:** 2.1.1
 - **Current phase:** 2.1.1 - Build/Migration Readiness
 - **Next phase:** 2.1.2 - Production Smoke Checklist
 
