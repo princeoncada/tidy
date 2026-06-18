@@ -305,12 +305,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.1.1 - Build/Migration Readiness (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.1.1 - Build/Migration Readiness
-- **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.1)
+- **Status:** In progress | Priority: P2 production readiness (pushed back from 1.10.1)
 - **Type:** docs
 - **Files:** README.md, prisma/*, package.json only if needed
 - **Implementation goal:** document Prisma generate, migration, and build steps (including any Replicache / Yjs persistence migrations) for a repeatable release path.
