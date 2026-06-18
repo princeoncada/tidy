@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.2.0-alpha
+- **Current version:** 2.2.0
 - **Current phase:** 2.2.0 - Visual Review Pass
 - **Next phase:** 2.2.1 - Retire test:e2e:replicache Render Gate
 
