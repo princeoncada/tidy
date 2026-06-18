@@ -314,16 +314,16 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 
 ## Planned
 
-### 2.2.0 - Visual Review Pass
-- **Status:** In progress | Priority: P3 late UI/UX (pushed back from 1.11.3)
-- **Type:** product behavior (polish)
-- **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, app/page.tsx
-- **Implementation goal:** small visual review pass after the 2.0 local-first render and collaboration are stable.
-- **Product impact:** small visual improvements; no data behavior change.
-- **Runtime integration target:** none beyond presentation.
-- **Deferral boundary:** none - last polish phase.
-- **Validation target:** targeted alpha (visual review + manual proof); full test:ci before stable.
-- **Acceptance:** visual changes are small, reviewable, and do not alter data behavior.
+### 2.2.1 - Retire test:e2e:replicache Render Gate
+- **Status:** Open | Priority: P4 cleanup (2.0.9 leftover)
+- **Type:** cleanup
+- **Files:** package.json (the `test:e2e:replicache` script); confirm at phase open whether the `replicache-render` Playwright project is also orphaned (playwright config).
+- **Implementation goal:** remove the retired `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED` env gate the `test:e2e:replicache` script still sets; the gate was deleted in 2.0.9 when Replicache became the sole render path, leaving the script setting a dead variable.
+- **Product impact:** none - developer test tooling only.
+- **Runtime integration target:** none - test script.
+- **Deferral boundary:** decide at phase open whether the entire `test:e2e:replicache` script / `replicache-render` project is dead and should be removed wholesale vs. just dropping the env gate; do not delete the project blindly in that phase.
+- **Validation target:** targeted alpha (typecheck/lint unaffected; confirm scripts still parse); full test:ci before stable.
+- **Acceptance:** no retired Replicache env gate remains in package.json scripts and the e2e suite still runs.
 
 ---
 
