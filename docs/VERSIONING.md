@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.2.1
-- **Current phase:** 2.2.1 - Retire test:e2e:replicache Render Gate
-- **Next phase:** 2.2.2 - View Create Idempotency Hardening
+- **Current version:** 2.2.2-alpha
+- **Current phase:** 2.2.2 - View Create Idempotency Hardening
+- **Next phase:** 2.2.3 - seriesComplete Flag Reconciliation
 
 ---
 

@@ -131,6 +131,36 @@ describe("Replicache push ordering", () => {
     expect(result.corrections).toEqual([]);
   });
 
+  it("skips a duplicate createView push via lastMutationID", async () => {
+    const { client, database } = createPushDatabase(1);
+
+    const result = await processReplicachePush({
+      userId: "user-1",
+      clientGroupID: "group-1",
+      mutations: [{
+        id: 1,
+        clientID: "client-1",
+        name: "createView",
+        args: {
+          id: "view-1",
+          userId: "user-1",
+          name: "Priorities",
+          order: "a0",
+          tagIds: ["tag-1"],
+          matchMode: "ALL",
+          now: "2026-06-18T12:00:00.000Z",
+        },
+        timestamp: Date.parse("2026-06-18T12:00:00.000Z"),
+      }],
+      database,
+      runEffects: vi.fn(async () => undefined),
+    });
+
+    expect(result.applied).toBe(0);
+    expect(result.corrections).toEqual([]);
+    expect(client.lastMutationID).toBe(1);
+  });
+
   it("advances lastMutationID atomically for an ownership rejection", async () => {
     const { client, database, tx } = createPushDatabase();
 
