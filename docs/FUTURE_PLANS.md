@@ -309,12 +309,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.2.0 - Visual Review Pass (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.2.0 - Visual Review Pass
-- **Status:** Open | Priority: P3 late UI/UX (pushed back from 1.11.3)
+- **Status:** In progress | Priority: P3 late UI/UX (pushed back from 1.11.3)
 - **Type:** product behavior (polish)
 - **Files:** components/list/*, components/views/ViewsSidebarPreview.tsx, app/page.tsx
 - **Implementation goal:** small visual review pass after the 2.0 local-first render and collaboration are stable.
