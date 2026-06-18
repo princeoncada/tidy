@@ -1,9 +1,9 @@
 {
-    "version":  "2.1.1",
-    "state":  "stable",
-    "phase":  "2.1.1",
-    "phaseTitle":  "Build/Migration Readiness",
-    "nextPhase":  "2.1.2 - Production Smoke Checklist",
+    "version":  "2.1.2-alpha",
+    "state":  "alpha",
+    "phase":  "2.1.2",
+    "phaseTitle":  "Production Smoke Checklist",
+    "nextPhase":  "2.2.0 - Visual Review Pass",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-18"
 }
