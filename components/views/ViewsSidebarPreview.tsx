@@ -179,7 +179,7 @@ function ViewsSidebarSkeleton() {
   return (
     <Card className="w-full border-zinc-200/80 bg-white/90 shadow-none py-0 mt-3">
       <CardHeader className="px-3 py-3">
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-sm">
           <span className="inline-flex items-center gap-1.5">
             <Skeleton className="size-3.5" />
             <Skeleton className="h-4 w-12" />
@@ -532,10 +532,10 @@ export default function ViewsSidebarPreview({
             type="button"
             onClick={() => selectView(allListsView?.id)}
             className={cn(
-              "flex w-full items-center justify-between rounded-md border hover:bg-zinc-50 px-2 py-1.5 text-left text-xs transition",
+              "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-zinc-200 hover:bg-zinc-50",
               selectedViewId === allListsView?.id
-                ? "border-zinc-300 text-zinc-900"
-                : "border-zinc-200 text-zinc-700"
+                ? "border-zinc-300 bg-zinc-50 text-zinc-900"
+                : "text-zinc-700 hover:text-zinc-900"
             )}
           >
             <span className="inline-flex items-center gap-1.5">

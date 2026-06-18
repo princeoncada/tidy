@@ -195,15 +195,15 @@ const ListComponent = ({
           )
         )}
       >
-          <Card data-testid="list-card" data-list-id={list.id} className={`transition-all duration-300 h-full min-h-92.5 flex flex-col ${isDragging ? "scale-[1.03] backdrop-blur-[5px] shadow-xl" : ""}`}>
+          <Card data-testid="list-card" data-list-id={list.id} className={`transition-all duration-300 h-full min-h-96 flex flex-col ${isDragging ? "scale-[1.03] backdrop-blur-[5px] shadow-xl" : ""}`}>
           <CardContent className="px-0 flex flex-col flex-1">
             <div className="flex flex-col flex-1">
-              <div className="flex items-start gap-3 px-4">
+              <div className="flex items-start gap-2 px-4">
                 <div
                   data-testid="list-drag-handle"
                   ref={canDelete ? handleRef : undefined}
                   className={cn(
-                    "-mt-1 shrink-0 touch-none select-none p-2 -m-2",
+                    "mt-0.5 -ml-1.5 shrink-0 touch-none select-none p-1.5",
                     canDelete
                       ? "cursor-grab active:cursor-grabbing"
                       : "cursor-default opacity-30",
@@ -225,8 +225,8 @@ const ListComponent = ({
                     disabled={!canEdit}
                   />
 
-                  <div className="text-gray-500 flex items-center gap-2">
-                    <Calendar1 className="w-4 h-4 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar1 className="size-3.5 shrink-0" />
                     <span>{list.createdAt.toISOString().split("T")[0].replaceAll("-", "/")}</span>
                   </div>
                 </div>
@@ -260,7 +260,7 @@ const ListComponent = ({
                 </div>
               </div>
 
-              <div className="my-2 mx-13 mr-14">
+              <div className="mx-4 my-2">
                 {canDelete ? (
                   <ListTagPicker
                     listId={list.id}
@@ -363,10 +363,10 @@ const ListComponent = ({
 
             </div>
 
-            <div className="h-4 relative top-0 mt-2 flex items-center w-full">
+            <div className="mt-2 flex h-6 w-full items-center justify-center px-4 text-sm text-muted-foreground">
               {
                 totalItems !== 0 &&
-                <div className={cn("text-center text-sm absolute w-full flex items-center justify-center")}>
+                <div className="text-center">
                   {completedItems} of {totalItems} completed
                 </div>
               }

@@ -1,9 +1,9 @@
 {
-    "version":  "2.1.2",
-    "state":  "stable",
-    "phase":  "2.1.2",
-    "phaseTitle":  "Production Smoke Checklist",
-    "nextPhase":  "2.2.0 - Visual Review Pass",
+    "version":  "2.2.0-alpha",
+    "state":  "alpha",
+    "phase":  "2.2.0",
+    "phaseTitle":  "Visual Review Pass",
+    "nextPhase":  "2.2.1 - Retire test:e2e:replicache Render Gate",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-18"
 }
