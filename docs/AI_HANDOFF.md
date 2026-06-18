@@ -1,9 +1,9 @@
-<!-- Current Version: 2.1.1-alpha -->
+<!-- Current Version: 2.1.1 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.1.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.1.1 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.1.1 - Build/Migration Readiness
 **Next**: 2.1.2 - Production Smoke Checklist
 
