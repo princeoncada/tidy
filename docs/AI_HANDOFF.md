@@ -1,9 +1,9 @@
-<!-- Current Version: 2.2.0-alpha -->
+<!-- Current Version: 2.2.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.2.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 2.2.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 2.2.0 - Visual Review Pass
 **Next**: 2.2.1 - Retire test:e2e:replicache Render Gate
 
