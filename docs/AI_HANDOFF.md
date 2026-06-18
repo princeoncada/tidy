@@ -67,6 +67,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 **Sync and projection:**
 - Replicache pull converts the server graph into key/value patches and uses CVR hashes to emit `put`/`del` changes.
 - Replicache push translates named mutators into the existing operation decision shape and applies them through `server-apply.ts` inside a Prisma transaction with `lastMutationID` advancement.
+- View-create is idempotent for sequential/duplicate pushes via two layers: the push handler's `lastMutationID` dedup and server-apply's `findUnique(id)` guard (`already-applied` for the same user, rejected for another user's id) before `tx.view.create`. A concurrent same-id push could in principle race to a P2002 -> 500, but this is unreproducible in the mock-only server test layer and is prevented by the Replicache client's per-client push serialization; addressing it would require a transaction-abort/savepoint-aware change. This residual is accepted and deferred in `docs/FUTURE_PLANS.md` Potential Next Directions.
 - Rejected Replicache mutations advance as no-op background corrections; the next pull rebases local optimistic state.
 - Supabase Broadcast pokes are doorbells only. Missed pokes self-heal on the periodic Replicache pull.
 - `lib/dashboard/projection.ts` preserves ALL_LISTS, CUSTOM ALL/ANY, UNTAGGED, per-view order fallback, and deterministic tie-breaking.
