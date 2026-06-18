@@ -97,9 +97,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.2.0
-- **Current phase:** 2.2.0 - Visual Review Pass
-- **Next phase:** 2.2.1 - Retire test:e2e:replicache Render Gate
+- **Current version:** 2.2.1-alpha
+- **Current phase:** 2.2.1 - Retire test:e2e:replicache Render Gate
+- **Next phase:** 2.2.2 - View Create Idempotency Hardening
 
 ---
 
