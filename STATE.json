@@ -1,6 +1,6 @@
 {
-    "version":  "2.1.2-alpha",
-    "state":  "alpha",
+    "version":  "2.1.2",
+    "state":  "stable",
     "phase":  "2.1.2",
     "phaseTitle":  "Production Smoke Checklist",
     "nextPhase":  "2.2.0 - Visual Review Pass",
