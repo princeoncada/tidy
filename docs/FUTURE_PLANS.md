@@ -307,12 +307,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.1.2 - Production Smoke Checklist (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.1.2 - Production Smoke Checklist
-- **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.2)
+- **Status:** In progress | Priority: P2 production readiness (pushed back from 1.10.2)
 - **Type:** docs
 - **Files:** README.md, docs/FUTURE_PLANS.md
 - **Implementation goal:** document a small post-deploy smoke checklist (login, dashboard load, create list / item, tag view, reorder, refresh, two-client sync).
