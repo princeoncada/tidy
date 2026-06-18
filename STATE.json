@@ -1,6 +1,6 @@
 {
-    "version":  "2.1.1-alpha",
-    "state":  "alpha",
+    "version":  "2.1.1",
+    "state":  "stable",
     "phase":  "2.1.1",
     "phaseTitle":  "Build/Migration Readiness",
     "nextPhase":  "2.1.2 - Production Smoke Checklist",
