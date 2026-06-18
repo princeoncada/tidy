@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.2.2-alpha
+- **Current version:** 2.2.2
 - **Current phase:** 2.2.2 - View Create Idempotency Hardening
 - **Next phase:** 2.2.3 - seriesComplete Flag Reconciliation
 
