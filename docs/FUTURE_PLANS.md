@@ -304,6 +304,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.2.1 - Retire test:e2e:replicache Render Gate~~ (stable 2026-06-18)
 
+- ~~2.2.2 - View Create Idempotency Hardening~~ (stable 2026-06-18)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -313,22 +315,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.2.2 - View Create Idempotency Hardening (active) - see Planned
 ---
 
 ## Planned
-
-### 2.2.2 - View Create Idempotency Hardening
-- **Status:** In progress | Priority: P3 (repro-gated concurrency hardening)
-- **Type:** product behavior
-- **Files:** lib/sync/server-apply.ts (view `create` handler `tx.view.create`, ~line 1086); a regression test under tests/ reproducing a duplicate/concurrent view-create push.
-- **Implementation goal:** FIRST confirm on a clean database whether a duplicate/concurrent view-create push can 500 on the unique `id` constraint. The sequential-replay path is ALREADY idempotent (the handler runs `tx.view.findUnique({ where: { id: entityClientId } })` and returns `already-applied` before inserting, lib/sync/server-apply.ts:1049-1057), so this phase targets only the residual concurrent same-id race between that check and `tx.view.create`. If reproduced, make the insert idempotent under concurrency (create->upsert on the primary key, or treat a unique-violation as `already-applied`).
-- **Product impact:** none in the happy path; hardens the sync push handler against a duplicate/concurrent view-create 500.
-- **Runtime integration target:** the /api/replicache/push server-apply view `create` case.
-- **Deferral boundary:** if the 500 does NOT reproduce on a clean DB under concurrency, do not change server-apply - downgrade or close the phase and record the negative result. Scope only the view-create path; do not audit other server-apply creates.
-- **Validation target:** targeted alpha (a regression test driving a duplicate/concurrent view-create asserting idempotent success, not 500); full test:ci before stable.
-- **Acceptance:** either a reproduced concurrent view-create 500 is fixed with a regression test, or the phase records it does not reproduce and closes without a server-apply change.
-- **Result (2026-06-18):** Confirmed by source review that sequential/duplicate view-create is doubly idempotent - the push handler dedups by `lastMutationID` (`lib/sync/replicache/push.ts`) and server-apply re-guards by id (`lib/sync/server-apply.ts` `findUnique` -> `already-applied` for the same user, rejected for another user's id) before `tx.view.create`. The residual concurrent same-id TOCTOU (P2002 -> 500 under READ COMMITTED) is NOT reproducible in the mock-only server test layer and is prevented in practice by the Replicache client's per-client push serialization; a correct fix would require transaction-abort/savepoint-aware handling in the push path. Per the deferral boundary, no server-apply change was made. Deterministic guard tests were added (server-apply `findUnique` guard + push `lastMutationID` dedup). The residual race is deferred to Potential Next Directions.
 
 ### 2.2.3 - seriesComplete Flag Reconciliation
 - **Status:** Open | Priority: P4 (workflow hygiene)
