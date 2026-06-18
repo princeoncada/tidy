@@ -311,12 +311,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.2.1 - Retire test:e2e:replicache Render Gate (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.2.1 - Retire test:e2e:replicache Render Gate
-- **Status:** Open | Priority: P4 cleanup (2.0.9 leftover)
+- **Status:** In progress | Priority: P4 cleanup (2.0.9 leftover)
 - **Type:** cleanup
 - **Files:** package.json (the `test:e2e:replicache` script); confirm at phase open whether the `replicache-render` Playwright project is also orphaned (playwright config).
 - **Implementation goal:** remove the retired `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED` env gate the `test:e2e:replicache` script still sets; the gate was deleted in 2.0.9 when Replicache became the sole render path, leaving the script setting a dead variable.
