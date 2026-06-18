@@ -328,6 +328,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Deferral boundary:** if the 500 does NOT reproduce on a clean DB under concurrency, do not change server-apply - downgrade or close the phase and record the negative result. Scope only the view-create path; do not audit other server-apply creates.
 - **Validation target:** targeted alpha (a regression test driving a duplicate/concurrent view-create asserting idempotent success, not 500); full test:ci before stable.
 - **Acceptance:** either a reproduced concurrent view-create 500 is fixed with a regression test, or the phase records it does not reproduce and closes without a server-apply change.
+- **Result (2026-06-18):** Confirmed by source review that sequential/duplicate view-create is doubly idempotent - the push handler dedups by `lastMutationID` (`lib/sync/replicache/push.ts`) and server-apply re-guards by id (`lib/sync/server-apply.ts` `findUnique` -> `already-applied` for the same user, rejected for another user's id) before `tx.view.create`. The residual concurrent same-id TOCTOU (P2002 -> 500 under READ COMMITTED) is NOT reproducible in the mock-only server test layer and is prevented in practice by the Replicache client's per-client push serialization; a correct fix would require transaction-abort/savepoint-aware handling in the push path. Per the deferral boundary, no server-apply change was made. Deterministic guard tests were added (server-apply `findUnique` guard + push `lastMutationID` dedup). The residual race is deferred to Potential Next Directions.
 
 ### 2.2.3 - seriesComplete Flag Reconciliation
 - **Status:** Open | Priority: P4 (workflow hygiene)
@@ -345,6 +346,7 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## Potential Next Directions (unversioned)
 
 Assigned a version only when scoped.
+- View-create concurrent same-id idempotency: stand up a real-Postgres integration harness and add a transaction-abort-aware fix (`ROLLBACK TO SAVEPOINT` recovery, or an atomic `INSERT ... ON CONFLICT`) for the `findUnique` -> `create` TOCTOU in `lib/sync/server-apply.ts` view-create. Deferred from 2.2.2 (unreproducible in the mock-only test layer; prevented client-side).
 - Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
 - Rate limiting and abuse controls
 - Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency
