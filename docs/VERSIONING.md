@@ -97,7 +97,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.1.2-alpha
+- **Current version:** 2.1.2
 - **Current phase:** 2.1.2 - Production Smoke Checklist
 - **Next phase:** 2.2.0 - Visual Review Pass
 
