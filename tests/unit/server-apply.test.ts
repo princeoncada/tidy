@@ -126,6 +126,65 @@ describe("server sync apply", () => {
     permissionMocks.getEffectiveListRole.mockResolvedValue("OWNER");
   });
 
+  describe("view create idempotency", () => {
+    it("treats a duplicate view create as already applied without inserting", async () => {
+      const tx = createTx();
+      tx.view.findUnique.mockResolvedValue({ userId: "user-1" });
+
+      const results = await applySyncOperations({
+        userId: "user-1",
+        decisions: [accepted({
+          entityType: "view",
+          entityClientId: "view-1",
+          entityServerId: null,
+          operationType: "create",
+          payload: {
+            name: "Priorities",
+            tagIds: ["tag-1"],
+            matchMode: "ALL",
+            orderKey: "a0",
+          },
+        })],
+        db: createDb(tx),
+      });
+
+      expect(results[0]).toMatchObject({ status: "already-applied" });
+      expect(tx.view.create).not.toHaveBeenCalled();
+      expect(tx.view.findUnique).toHaveBeenCalledWith({
+        where: { id: "view-1" },
+        select: { userId: true },
+      });
+    });
+
+    it("rejects a view create whose id belongs to another user", async () => {
+      const tx = createTx();
+      tx.view.findUnique.mockResolvedValue({ userId: "user-2" });
+
+      const results = await applySyncOperations({
+        userId: "user-1",
+        decisions: [accepted({
+          entityType: "view",
+          entityClientId: "view-1",
+          entityServerId: null,
+          operationType: "create",
+          payload: {
+            name: "Priorities",
+            tagIds: ["tag-1"],
+            matchMode: "ALL",
+            orderKey: "a0",
+          },
+        })],
+        db: createDb(tx),
+      });
+
+      expect(results[0]).toMatchObject({ status: "rejected" });
+      expect(results[0]?.errorMessage).toBe(
+        "View id belongs to another user.",
+      );
+      expect(tx.view.create).not.toHaveBeenCalled();
+    });
+  });
+
   it("updates lists with an id-and-user scoped write", async () => {
     const tx = createTx();
     tx.list.findUnique.mockResolvedValue({
