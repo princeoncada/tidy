@@ -1,6 +1,6 @@
 {
-    "version":  "2.2.0-alpha",
-    "state":  "alpha",
+    "version":  "2.2.0",
+    "state":  "stable",
     "phase":  "2.2.0",
     "phaseTitle":  "Visual Review Pass",
     "nextPhase":  "2.2.1 - Retire test:e2e:replicache Render Gate",
