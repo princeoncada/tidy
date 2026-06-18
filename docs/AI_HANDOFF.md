@@ -1,11 +1,11 @@
-<!-- Current Version: 2.2.1 -->
+<!-- Current Version: 2.2.2-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.2.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 2.2.1 - Retire test:e2e:replicache Render Gate
-**Next**: 2.2.2 - View Create Idempotency Hardening
+**Current Version**: 2.2.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.2.2 - View Create Idempotency Hardening
+**Next**: 2.2.3 - seriesComplete Flag Reconciliation
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
