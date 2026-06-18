@@ -313,12 +313,13 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 2.2.2 - View Create Idempotency Hardening (active) - see Planned
 ---
 
 ## Planned
 
 ### 2.2.2 - View Create Idempotency Hardening
-- **Status:** Open | Priority: P3 (repro-gated concurrency hardening)
+- **Status:** In progress | Priority: P3 (repro-gated concurrency hardening)
 - **Type:** product behavior
 - **Files:** lib/sync/server-apply.ts (view `create` handler `tx.view.create`, ~line 1086); a regression test under tests/ reproducing a duplicate/concurrent view-create push.
 - **Implementation goal:** FIRST confirm on a clean database whether a duplicate/concurrent view-create push can 500 on the unique `id` constraint. The sequential-replay path is ALREADY idempotent (the handler runs `tx.view.findUnique({ where: { id: entityClientId } })` and returns `already-applied` before inserting, lib/sync/server-apply.ts:1049-1057), so this phase targets only the residual concurrent same-id race between that check and `tx.view.create`. If reproduced, make the insert idempotent under concurrency (create->upsert on the primary key, or treat a unique-violation as `already-applied`).
