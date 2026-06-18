@@ -140,6 +140,20 @@ A repeatable release runs in this order:
 5. `npm run build` - runs `prisma generate` then `next build`.
 6. `npm start` - serve the production build (`next start`).
 
+## Post-Deploy Smoke Checklist
+
+After each production deploy, manually walk the core path before announcing the release. This is a fast confidence check, not a replacement for the automated suites.
+
+1. **Log in** - sign in with a real account; the dashboard loads without an auth redirect loop.
+2. **Dashboard loads** - existing lists and items render.
+3. **Create a list and an item** - both appear instantly.
+4. **Tag / custom view** - open a tag or custom view and confirm the expected items are projected.
+5. **Reorder** - drag an item (or list) to a new position; the new order holds.
+6. **Refresh** - reload the page; everything created and reordered above is still present.
+7. **Two-client sync** - in a second client signed in to the same (or a shared) workspace, make a change in one and confirm it appears in the other within a few seconds via the realtime poke, or after the next periodic pull.
+
+If a step fails, recheck `npx prisma migrate status`, that the `prisma/sql/*` policies were applied, and that every Required and Prod environment variable from the tables above is set in the host.
+
 ---
 
 Made by Prince Oncada.
