@@ -298,6 +298,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.1.1 - Build/Migration Readiness~~ (stable 2026-06-18)
 
+- ~~2.1.2 - Production Smoke Checklist~~ (stable 2026-06-18)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -307,21 +309,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.1.2 - Production Smoke Checklist (active) - see Planned
 ---
 
 ## Planned
-
-### 2.1.2 - Production Smoke Checklist
-- **Status:** In progress | Priority: P2 production readiness (pushed back from 1.10.2)
-- **Type:** docs
-- **Files:** README.md, docs/FUTURE_PLANS.md
-- **Implementation goal:** document a small post-deploy smoke checklist (login, dashboard load, create list / item, tag view, reorder, refresh, two-client sync).
-- **Product impact:** none - guards releases.
-- **Runtime integration target:** none.
-- **Deferral boundary:** does not duplicate full test docs.
-- **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
-- **Acceptance:** a smoke checklist exists and does not duplicate full test docs.
 
 ### 2.2.0 - Visual Review Pass
 - **Status:** Open | Priority: P3 late UI/UX (pushed back from 1.11.3)
