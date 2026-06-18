@@ -327,6 +327,28 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - **Validation target:** targeted alpha (typecheck/lint unaffected; confirm scripts still parse); full test:ci before stable.
 - **Acceptance:** no retired Replicache env gate remains in package.json scripts and the e2e suite still runs.
 
+### 2.2.2 - View Create Idempotency Hardening
+- **Status:** Open | Priority: P3 (repro-gated concurrency hardening)
+- **Type:** product behavior
+- **Files:** lib/sync/server-apply.ts (view `create` handler `tx.view.create`, ~line 1086); a regression test under tests/ reproducing a duplicate/concurrent view-create push.
+- **Implementation goal:** FIRST confirm on a clean database whether a duplicate/concurrent view-create push can 500 on the unique `id` constraint. The sequential-replay path is ALREADY idempotent (the handler runs `tx.view.findUnique({ where: { id: entityClientId } })` and returns `already-applied` before inserting, lib/sync/server-apply.ts:1049-1057), so this phase targets only the residual concurrent same-id race between that check and `tx.view.create`. If reproduced, make the insert idempotent under concurrency (create->upsert on the primary key, or treat a unique-violation as `already-applied`).
+- **Product impact:** none in the happy path; hardens the sync push handler against a duplicate/concurrent view-create 500.
+- **Runtime integration target:** the /api/replicache/push server-apply view `create` case.
+- **Deferral boundary:** if the 500 does NOT reproduce on a clean DB under concurrency, do not change server-apply - downgrade or close the phase and record the negative result. Scope only the view-create path; do not audit other server-apply creates.
+- **Validation target:** targeted alpha (a regression test driving a duplicate/concurrent view-create asserting idempotent success, not 500); full test:ci before stable.
+- **Acceptance:** either a reproduced concurrent view-create 500 is fixed with a regression test, or the phase records it does not reproduce and closes without a server-apply change.
+
+### 2.2.3 - seriesComplete Flag Reconciliation
+- **Status:** Open | Priority: P4 (workflow hygiene)
+- **Type:** decision
+- **Files:** STATE.json (`seriesComplete`), scripts/validate.ps1 (the nextPhase-ordering short-circuit), docs/VERSIONING.md and/or docs/WORKFLOW.md (document the decision).
+- **Implementation goal:** decide and document what `seriesComplete` means once new patch phases are planned after a series was marked complete. It was set true at 2.0.9 for the 2.0 local-first arc and currently short-circuits validate.ps1's nextPhase-ordering checks, so 2.1.x/2.2.x promoted without them. Decide one of: (a) reset `seriesComplete=false` while 2.2.x phases remain Planned to re-enable the ordering checks, (b) scope the flag to "the 2.0 arc is complete" and document that it intentionally disables those checks, or (c) refine validate.ps1 so the flag does not disable ordering for an in-progress minor.
+- **Product impact:** none - workflow tooling/validation only.
+- **Runtime integration target:** none - validate.ps1 gating + STATE.json semantics.
+- **Deferral boundary:** decision phase; if it changes validate.ps1, keep it minimal and covered by the existing consistency gate. Do not rewrite past phase records.
+- **Validation target:** targeted alpha (validate.ps1 still passes; consistency gate green); full test:ci before stable.
+- **Acceptance:** `seriesComplete` semantics are documented and STATE.json/validate.ps1 reflect the decision.
+
 ---
 
 ## Potential Next Directions (unversioned)
