@@ -1,11 +1,11 @@
-<!-- Current Version: 2.1.0 -->
+<!-- Current Version: 2.1.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 2.1.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 2.1.0 - Deploy Env Documentation
-**Next**: 2.1.1 - Build/Migration Readiness
+**Current Version**: 2.1.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 2.1.1 - Build/Migration Readiness
+**Next**: 2.1.2 - Production Smoke Checklist
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
