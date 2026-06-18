@@ -296,6 +296,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.1.0 - Deploy Env Documentation~~ (stable 2026-06-17)
 
+- ~~2.1.1 - Build/Migration Readiness~~ (stable 2026-06-18)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -305,21 +307,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.1.1 - Build/Migration Readiness (active) - see Planned
 ---
 
 ## Planned
-
-### 2.1.1 - Build/Migration Readiness
-- **Status:** In progress | Priority: P2 production readiness (pushed back from 1.10.1)
-- **Type:** docs
-- **Files:** README.md, prisma/*, package.json only if needed
-- **Implementation goal:** document Prisma generate, migration, and build steps (including any Replicache / Yjs persistence migrations) for a repeatable release path.
-- **Product impact:** none - enables repeatable releases.
-- **Runtime integration target:** none.
-- **Deferral boundary:** smoke checklist -> 2.1.2.
-- **Validation target:** targeted alpha (doc presence checks); full validate.ps1 at the gate.
-- **Acceptance:** the production build / migration flow is clear and repeatable.
 
 ### 2.1.2 - Production Smoke Checklist
 - **Status:** Open | Priority: P2 production readiness (pushed back from 1.10.2)
