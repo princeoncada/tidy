@@ -107,7 +107,38 @@ Local vs production differences:
 - `SUPABASE_SERVICE_ROLE_KEY` - set in production so realtime pokes are delivered; keep it server-only. Optional locally (pokes no-op without it).
 - `VERCEL_URL` - provided automatically on Vercel; never set it manually.
 
-The production build runs with `npm run build` then `npm start` (the build step runs `prisma generate`). Database migration and build-readiness details are documented separately.
+Database migration and production build steps are documented in **Database & Migrations** and **Production Build & Release** below.
+
+## Database & Migrations
+
+Prisma reads `DATABASE_URL` through `prisma.config.ts`, which loads `dotenv/config` and sets `datasource.url` from the environment. The schema's `datasource` block intentionally has no `url`: the runtime client connects through the `pg` driver adapter (`@prisma/adapter-pg`), while the Prisma CLI reads the connection from `prisma.config.ts`.
+
+Common commands:
+
+- `npx prisma generate` - regenerate the typed client into `app/generated/prisma`. Runs automatically on `postinstall` and at the start of `npm run build`.
+- `npx prisma migrate dev` - local only: create a new migration from schema changes and apply it to your dev database.
+- `npx prisma migrate deploy` - production/CI: apply all pending migrations in `prisma/migrations/` in order, without diffing the schema. Run this against the production database as part of every release.
+- `npx prisma migrate status` - report which migrations are applied or pending.
+
+### Manual SQL policies (not in the Prisma migration history)
+
+`prisma/sql/` holds Supabase Realtime RLS setup that Prisma migrations do **not** manage. Apply each file once per environment (e.g. via the Supabase SQL editor or `psql`), in addition to `prisma migrate deploy`:
+
+- `2_0_3_realtime_poke_rls.sql` - authenticated users can receive only their own broadcast pokes.
+- `2_0_6_note_collab_rls.sql` - RLS for Yjs collaborative item notes.
+
+Without these policies the realtime poke and Yjs note paths degrade (clients fall back to periodic pull).
+
+## Production Build & Release
+
+A repeatable release runs in this order:
+
+1. Set every Required and Prod environment variable from the table above in the host.
+2. `npm ci` - install exact dependencies; `postinstall` runs `prisma generate`.
+3. `npx prisma migrate deploy` - apply pending migrations to the production database.
+4. Apply any not-yet-applied `prisma/sql/*` policies (see above).
+5. `npm run build` - runs `prisma generate` then `next build`.
+6. `npm start` - serve the production build (`next start`).
 
 ---
 
