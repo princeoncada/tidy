@@ -302,6 +302,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.2.0 - Visual Review Pass~~ (stable 2026-06-18)
 
+- ~~2.2.1 - Retire test:e2e:replicache Render Gate~~ (stable 2026-06-18)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -311,21 +313,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.2.1 - Retire test:e2e:replicache Render Gate (active) - see Planned
 ---
 
 ## Planned
-
-### 2.2.1 - Retire test:e2e:replicache Render Gate
-- **Status:** In progress | Priority: P4 cleanup (2.0.9 leftover)
-- **Type:** cleanup
-- **Files:** package.json (the `test:e2e:replicache` script); confirm at phase open whether the `replicache-render` Playwright project is also orphaned (playwright config).
-- **Implementation goal:** remove the retired `NEXT_PUBLIC_REPLICACHE_RENDER_ENABLED` env gate the `test:e2e:replicache` script still sets; the gate was deleted in 2.0.9 when Replicache became the sole render path, leaving the script setting a dead variable.
-- **Product impact:** none - developer test tooling only.
-- **Runtime integration target:** none - test script.
-- **Deferral boundary:** decide at phase open whether the entire `test:e2e:replicache` script / `replicache-render` project is dead and should be removed wholesale vs. just dropping the env gate; do not delete the project blindly in that phase.
-- **Validation target:** targeted alpha (typecheck/lint unaffected; confirm scripts still parse); full test:ci before stable.
-- **Acceptance:** no retired Replicache env gate remains in package.json scripts and the e2e suite still runs.
 
 ### 2.2.2 - View Create Idempotency Hardening
 - **Status:** Open | Priority: P3 (repro-gated concurrency hardening)
