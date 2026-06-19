@@ -7,10 +7,13 @@
 # of session startup. It reads files only; it never edits, commits, or validates.
 #
 # Token estimate heuristic: characters / 4 (a rough average, not a tokenizer).
+# Use -EnforceStartupBudget to exit nonzero when startup cost is at or above
+# StartupBudget; validate.ps1 uses this strict mode as a promotion gate.
 
 param(
     [int]$TopN = 5,
-    [int]$StartupBudget = 8000
+    [int]$StartupBudget = 8000,
+    [switch]$EnforceStartupBudget
 )
 
 $ErrorActionPreference = "Stop"
@@ -46,7 +49,7 @@ function Show-Rows([string]$title, $rows, [int]$budget) {
     }
     if ($budget -gt 0) {
         $status = "within budget"; $color = "Green"
-        if ($total -gt $budget) { $status = "OVER budget"; $color = "Red" }
+        if ($total -ge $budget) { $status = "OVER budget"; $color = "Red" }
         Write-Host ("  Subtotal: {0:N0} tokens (target < {1:N0}: {2})" -f $total, $budget, $status) -ForegroundColor $color
     }
     else {
@@ -125,3 +128,8 @@ foreach ($r in ($allRows | Sort-Object Tokens -Descending | Select-Object -First
 Write-Host ""
 Write-Host "Trim guidance: reduce Startup docs first (they load every session)," -ForegroundColor Gray
 Write-Host "then large Task-routed docs. Optional/historical files cost nothing until read." -ForegroundColor Gray
+
+if ($EnforceStartupBudget -and $startupTotal -ge $StartupBudget) {
+    Write-Error ("Startup context budget exceeded: {0:N0} tokens; required < {1:N0}." -f $startupTotal, $StartupBudget)
+    exit 1
+}

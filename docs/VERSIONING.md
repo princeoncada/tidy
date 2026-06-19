@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.0.2
-- **Current phase:** 3.0.2 - Repo, Docs & Skills Cleanup
-- **Next phase:** 3.0.3 - Design System Source of Truth
+- **Current version:** 3.0.3-alpha
+- **Current phase:** 3.0.3 - Startup Context Budget Rebaseline
+- **Next phase:** 3.0.4 - Design System Source of Truth
 
 ---
 

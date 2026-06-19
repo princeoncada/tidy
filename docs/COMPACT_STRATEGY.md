@@ -80,7 +80,8 @@ Before this strategy: opening entrypoint + all feature docs + phase logs at sess
 Run `npm run budget:context` (or `scripts/ai-context-budget.ps1`) on demand to
 estimate the token cost of the AI workflow surface and catch docs-led bloat
 before it creeps back. The audit is never part of session startup and calls no
-external service.
+external service. `validate.ps1` invokes the audit's strict mode and fails when
+the startup estimate is at or above the 8,000-token ceiling.
 
 It groups files by how often they load:
 - Startup docs (STATE.json, docs/FUTURE_PLANS.md, AGENTS.md, CLAUDE.md), measured

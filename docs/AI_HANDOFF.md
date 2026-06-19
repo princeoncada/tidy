@@ -1,11 +1,11 @@
-<!-- Current Version: 3.0.2 -->
+<!-- Current Version: 3.0.3-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.0.2 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.0.2 - Repo, Docs & Skills Cleanup
-**Next**: 3.0.3 - Design System Source of Truth
+**Current Version**: 3.0.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.0.3 - Startup Context Budget Rebaseline
+**Next**: 3.0.4 - Design System Source of Truth
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -94,7 +94,7 @@ The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration A
 - One Replicache sync spine serves both web and the future Expo/React Native client (4.0); do not fork a second structural-sync path.
 - Structural sync (lists/items/board via Replicache) and ephemeral presence (cursors/typing/who-is-here) ride SEPARATE transports. Presence must not be coupled into the Replicache push/pull path.
 - The existing workspace model is KEPT, not replaced.
-- From 3.0.3, UI/design is governed by `docs/design.md` as the single source of truth.
+- From 3.0.4, UI/design is governed by `docs/design.md` as the single source of truth.
 
 ## Removed Legacy Paths
 

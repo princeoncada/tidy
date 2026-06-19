@@ -637,6 +637,9 @@ if ($skillErrors.Count -eq 0) {
     Add-Result "skill surface" $false ($skillErrors -join "; ")
 }
 
+# Startup context budget
+Run-Step "startup context budget" @("powershell", "-ExecutionPolicy", "Bypass", "-File", "scripts/ai-context-budget.ps1", "-EnforceStartupBudget") "Subtotal:\s+[\d,]+\s+tokens \(target < [\d,]+: within budget\)"
+
 # Typecheck
 Run-Step "typecheck" @("npm", "run", "typecheck")
 

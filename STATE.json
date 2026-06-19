@@ -1,9 +1,9 @@
 {
-    "version":  "3.0.2",
-    "state":  "stable",
-    "phase":  "3.0.2",
-    "phaseTitle":  "Repo, Docs \u0026 Skills Cleanup",
-    "nextPhase":  "3.0.3 - Design System Source of Truth",
+    "version":  "3.0.3-alpha",
+    "state":  "alpha",
+    "phase":  "3.0.3",
+    "phaseTitle":  "Startup Context Budget Rebaseline",
+    "nextPhase":  "3.0.4 - Design System Source of Truth",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-19"
 }
