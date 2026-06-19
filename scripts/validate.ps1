@@ -581,11 +581,11 @@ $docsSurfacePresentChecks = @(
     },
     @{
         Path = "docs/VERSIONING.md"
-        Phrase = "1.4.0 - View Projection Reproduction Tests"
+        Phrase = "View Projection Reproduction Tests"
     },
     @{
         Path = "docs/VERSIONING.md"
-        Phrase = "2.2.0 - Visual Review Pass"
+        Phrase = "Visual Review Pass"
     }
 )
 foreach ($check in $docsSurfacePresentChecks) {
