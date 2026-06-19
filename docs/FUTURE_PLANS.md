@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.1.0 - Sync Latency Measurement Spike (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.1.0 - Sync Latency Measurement Spike
-- **Status:** Open
+- **Status:** In progress
 - **Type:** decision (spike)
 - **Implementation goal:** Instrument and measure real Replicache push/pull + poke latency (local mutation to peer render) under representative load; produce a numbers report. Throwaway instrumentation.
 - **Product impact:** none - measurement only.
