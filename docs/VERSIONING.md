@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.0.4
-- **Current phase:** 3.0.4 - Design System Source of Truth
-- **Next phase:** 3.1.0 - Sync Latency Measurement Spike
+- **Current version:** 3.1.0-alpha
+- **Current phase:** 3.1.0 - Sync Latency Measurement Spike
+- **Next phase:** 3.1.1 - Sync Latency Fix
 
 ---
 
