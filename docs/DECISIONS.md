@@ -192,6 +192,8 @@ The dashboard read authority is the server: the tRPC All-Lists payload (view.get
 
 ## 2026-06-07: Completed-version history single-owner is FUTURE_PLANS Completed; VERSIONING history table retired (1.9.14)
 
+**Superseded by 3.0.1:** completed-version history is now owned by the rich `docs/VERSIONING.md` `## Version History` table, and FUTURE_PLANS Completed points to it.
+
 **Decision**: `docs/FUTURE_PLANS.md` `## Completed` is the single owner of completed-version history (version, title, and stable date for every released phase). The `## Version History` table in `docs/VERSIONING.md` is retired and replaced with a pointer. `docs/VERSIONING.md` now owns the version format, the five-location rules, the Doc Continuity Model, current state, and the pre-versioning baseline only.
 
 **Reason**: The VERSIONING history table duplicated FUTURE_PLANS Completed on version+title+date for ~190 rows; its only unique columns were a `state` field (always "stable" for history) and a `notes` field that promotion never populated (it stayed at the open-phase "(in progress)" placeholder). FUTURE_PLANS Completed already records version+title+stable-date and is the roadmap-closeout owner per the Doc Continuity Model, so it is the natural single owner. Retiring the table also dissolves the stale "(in progress)" notes finding.

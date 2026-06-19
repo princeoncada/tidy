@@ -1,9 +1,10 @@
 # promote.ps1 - Tidy version promotion script
 #
 # Strips -alpha from the current STATE.json version, marks all five
-# versioning locations as stable, closes the promoted roadmap item in
-# docs/FUTURE_PLANS.md, and refreshes codebase-graph.json when graph tooling
-# exists. FUTURE_PLANS.md is roadmap state, not a sixth versioning location.
+# versioning locations as stable, records the release in docs/VERSIONING.md,
+# closes the promoted roadmap item in docs/FUTURE_PLANS.md, and refreshes
+# codebase-graph.json when graph tooling exists. FUTURE_PLANS.md is roadmap
+# state, not a sixth versioning location.
 # codebase-graph.json is a generated artifact, not a sixth versioning location.
 #
 # Usage:
@@ -97,9 +98,28 @@ function Test-PlannedHeading {
     return $Content -match $pattern
 }
 
-function Test-CompletedPhase {
-    param([string]$Content, [string]$Bullet)
-    return $Content.Contains($Bullet)
+function Test-VersionHistoryRow {
+    param([string]$Content, [string]$Version)
+    $section = Get-MatchedSection $Content "Version History"
+    if (-not $section.Success) { return $false }
+    $pattern = "(?m)^\|\s*" + [regex]::Escape($Version) + "\s*\|"
+    return $section.Groups["body"].Value -match $pattern
+}
+
+function Get-DeclaredField {
+    param([string]$Content, [string]$Name)
+    $pattern = "(?m)^-\s+\*\*" + [regex]::Escape($Name) + ":\*\*\s*(?<value>.+?)\s*$"
+    $match = [regex]::Match($Content, $pattern)
+    if (-not $match.Success -or [string]::IsNullOrWhiteSpace($match.Groups["value"].Value)) {
+        return "not recorded"
+    }
+    return $match.Groups["value"].Value.Trim()
+}
+
+function ConvertTo-MarkdownTableCell {
+    param([string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value)) { return "not recorded" }
+    return (($Value -replace "\r?\n", " ") -replace "\|", "\|").Trim()
 }
 
 function Get-FirstPlannedHeading {
@@ -178,9 +198,12 @@ if (-not (Test-Path $futurePlansPath)) {
 }
 
 $futurePlansBefore = Get-Content $futurePlansPath -Raw -Encoding UTF8
-$completedBullet = "- ~~$stableVer - $phaseTitle~~ (stable $today)"
+$plannedPhasePattern = "(?ms)^###\s+" + [regex]::Escape($stableVer) + "\s+-\s+" + [regex]::Escape($phaseTitle) + "\s*\r?\n(?<body>.*?)(?=^###\s+|^---\s*$|^##\s+|\z)"
+$plannedPhaseMatch = [regex]::Match($futurePlansBefore, $plannedPhasePattern)
+$versioningPath = "docs/VERSIONING.md"
+$versioningBefore = Get-Content $versioningPath -Raw -Encoding UTF8
 $alreadyClosed = (
-    (Test-CompletedPhase $futurePlansBefore $completedBullet) -and
+    (Test-VersionHistoryRow $versioningBefore $stableVer) -and
     (-not (Test-InProgressPhase $futurePlansBefore $stableVer $phaseTitle)) -and
     (-not (Test-PlannedHeading $futurePlansBefore $stableVer $phaseTitle))
 )
@@ -193,20 +216,36 @@ if ((-not $hadPlannedHeading) -and (-not $alreadyClosed)) {
 
 $futurePlansUpdated = $futurePlansBefore
 
-if (-not (Test-CompletedPhase $futurePlansUpdated $completedBullet)) {
-    $completedSection = Get-MatchedSection $futurePlansUpdated "Completed"
-    if (-not $completedSection.Success) {
-        Write-Error "$futurePlansPath is missing the Completed section."
+if (-not (Test-VersionHistoryRow $versioningBefore $stableVer)) {
+    if (-not $plannedPhaseMatch.Success) {
+        Write-Error "$futurePlansPath is missing the Planned entry needed to build the $stableVer version-history row."
         exit 1
     }
-    $completedBody = $completedSection.Groups["body"].Value
-    $preVersioningIndex = $completedBody.IndexOf("Pre-versioning")
-    if ($preVersioningIndex -ge 0) {
-        $insertAt = $completedSection.Groups["body"].Index + $preVersioningIndex
-    } else {
-        $insertAt = $completedSection.Index + $completedSection.Length
+
+    $plannedBody = $plannedPhaseMatch.Groups["body"].Value
+    $historySection = Get-MatchedSection $versioningBefore "Version History"
+    if (-not $historySection.Success) {
+        Write-Error "$versioningPath is missing the Version History section."
+        exit 1
     }
-    $futurePlansUpdated = $futurePlansUpdated.Insert($insertAt, "$completedBullet`n`n")
+
+    $historyType = ConvertTo-MarkdownTableCell (Get-DeclaredField $plannedBody "Type")
+    $historyProductImpact = ConvertTo-MarkdownTableCell (Get-DeclaredField $plannedBody "Product impact")
+    $historyRuntimeTarget = ConvertTo-MarkdownTableCell (Get-DeclaredField $plannedBody "Runtime integration target")
+    $historyValidationTarget = ConvertTo-MarkdownTableCell (Get-DeclaredField $plannedBody "Validation target")
+    $historyFiles = ConvertTo-MarkdownTableCell (Get-DeclaredField $plannedBody "Files")
+    $historyNotes = ConvertTo-MarkdownTableCell (Get-DeclaredField $plannedBody "Implementation goal")
+    $historyTitle = ConvertTo-MarkdownTableCell $phaseTitle
+    $historyRow = "| $stableVer | $today | $historyTitle | $historyType | $historyProductImpact | $historyRuntimeTarget | $historyValidationTarget | $historyFiles | $historyNotes |"
+
+    $historyBody = $historySection.Groups["body"].Value -replace "\s+$", ""
+    $newHistoryBody = "$historyBody`n$historyRow`n`n"
+    $versioningUpdated = $versioningBefore.Substring(0, $historySection.Groups["body"].Index) +
+        $newHistoryBody +
+        $versioningBefore.Substring($historySection.Groups["body"].Index + $historySection.Groups["body"].Length)
+    [System.IO.File]::WriteAllText((Resolve-Path $versioningPath).Path, $versioningUpdated, $utf8NoBom)
+    $versioningBefore = $versioningUpdated
+    Write-Host "  Updated: $versioningPath (version-history row)" -ForegroundColor Green
 }
 
 $inProgressSection = Get-MatchedSection $futurePlansUpdated "In Progress"
@@ -319,8 +358,8 @@ $postWorkflow = Get-Content "docs/WORKFLOW.md" -Raw -Encoding UTF8
 if ($postWorkflow -notmatch ("<!-- Current Version: " + [regex]::Escape($stableVer) + " -->")) { $verifyErrors += "WORKFLOW.md comment" }
 $postVersioning = Get-Content "docs/VERSIONING.md" -Raw -Encoding UTF8
 if ($postVersioning -notmatch ("Current version:\*\*\s*" + [regex]::Escape($stableVer) + "(\s|$)")) { $verifyErrors += "VERSIONING.md current line" }
+if (-not (Test-VersionHistoryRow $postVersioning $stableVer)) { $verifyErrors += "VERSIONING.md version-history row" }
 $postFuturePlans = Get-Content "docs/FUTURE_PLANS.md" -Raw -Encoding UTF8
-if (-not (Test-CompletedPhase $postFuturePlans $completedBullet)) { $verifyErrors += "FUTURE_PLANS.md completed closeout" }
 if (Test-InProgressPhase $postFuturePlans $stableVer $phaseTitle) { $verifyErrors += "FUTURE_PLANS.md still in progress" }
 if (Test-PlannedHeading $postFuturePlans $stableVer $phaseTitle) { $verifyErrors += "FUTURE_PLANS.md still planned" }
 if (Test-Path "codebase-graph.json") {
@@ -342,7 +381,7 @@ if ($verifyErrors.Count -gt 0) {
     Write-Error ("Promote self-verify FAILED - locations inconsistent: " + ($verifyErrors -join ", "))
     exit 1
 }
-Write-Host "  Self-verify: all five locations at $stableVer, roadmap closeout complete, graph artifact verified" -ForegroundColor Green
+Write-Host "  Self-verify: all five locations at $stableVer, version-history row recorded, roadmap closeout complete, graph artifact verified" -ForegroundColor Green
 
 # Done
 Write-Host ""

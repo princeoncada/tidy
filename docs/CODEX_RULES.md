@@ -299,7 +299,7 @@ After every implementation:
 - Version open/close movement remains owned by `open-phase.ps1` and `promote.ps1`.
 - `docs/FUTURE_PLANS.md` remains roadmap state, not a sixth versioning location.
 
-When a user-approved phase sequence exists before implementation, the scoped phase may update `docs/FUTURE_PLANS.md` to reflect that sequence before product work continues. Preserve monotonic version order and do not silently move roadmap items between Planned, In Progress, and Completed unless explicitly scoped.
+When a user-approved phase sequence exists before implementation, the scoped phase may update `docs/FUTURE_PLANS.md` to reflect that sequence before product work continues. Preserve monotonic version order and do not silently move roadmap items between Planned and In Progress unless explicitly scoped. Completed-version history is owned by the `docs/VERSIONING.md` `## Version History` table.
 
 Codex must not set or preserve a `STATE.json.nextPhase` that is absent from `docs/FUTURE_PLANS.md` unless the prompt explicitly scopes adding or renumbering that roadmap entry in the same phase. If a prompt changes `nextPhase`, the prompt must also update `docs/FUTURE_PLANS.md` or explicitly instruct `open-phase.ps1` to use `-AllowMissingNextPhase` and then fix `docs/FUTURE_PLANS.md` during the phase.
 

@@ -1,17 +1,17 @@
-<!-- Current Version: 3.0.0 -->
+<!-- Current Version: 3.0.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.0.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.0.0 - Collab Arc Roadmap Pin
-**Next**: 3.0.1 - Repo, Docs & Skills Cleanup
+**Current Version**: 3.0.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.0.1 - Version History Re-Ownership
+**Next**: 3.0.2 - Repo, Docs & Skills Cleanup
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
 - `docs/FUTURE_PLANS.md` - roadmap and next planned backlog item.
 - `docs/CONTEXT_INDEX.md` - routing/scoping map for the smallest correct read set.
-- `docs/VERSIONING.md` - version rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
+- `docs/VERSIONING.md` - version rules, current state, and the completed-version history table.
 - `docs/PHASE_LOG.md` - historical traceability only, not active implementation guidance.
 
 ## Current Product Snapshot
