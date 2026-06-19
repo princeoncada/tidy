@@ -1,6 +1,6 @@
 {
-    "version":  "3.0.1-alpha",
-    "state":  "alpha",
+    "version":  "3.0.1",
+    "state":  "stable",
     "phase":  "3.0.1",
     "phaseTitle":  "Version History Re-Ownership",
     "nextPhase":  "3.0.2 - Repo, Docs \u0026 Skills Cleanup",
