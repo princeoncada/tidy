@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.0.2 - Repo, Docs & Skills Cleanup (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.0.2 - Repo, Docs & Skills Cleanup
-- **Status:** Open
+- **Status:** In progress
 - **Type:** cleanup
 - **Implementation goal:** Reconcile docs/skills for the new arc - prune or redirect Potential Next Directions now superseded by pinned phases, align AI_HANDOFF invariants/known-risks with the arc spine, confirm the skill surface still matches the workflow.
 - **Product impact:** none - internal hygiene.
