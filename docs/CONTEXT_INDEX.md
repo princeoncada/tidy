@@ -27,6 +27,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `STATE.json` = machine-readable version, state, phase, nextPhase oracle
 - `docs/FUTURE_PLANS.md` = roadmap owner
 - `docs/AI_HANDOFF.md` = current product state, invariants, risks, next-session guidance
+- `docs/design.md` = canonical UI/design contracts and parity rules for visual implementation
 - `docs/CODEX_RULES.md` = implementation rules, validation boundaries, testing rules, commit discipline
 - `docs/WORKFLOW.md` = process and phase workflow
 - `docs/VERSIONING.md` = versioning rules, current state, and completed-version history
@@ -56,6 +57,12 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/FUTURE_PLANS.md`
 - `docs/WORKFLOW.md` only if process changes
 - `docs/VERSIONING.md` only if versioning rules change
+
+### UI / Design Contract Work
+
+- `docs/design.md`
+- `docs/AI_HANDOFF.md` when current product invariants are affected
+- graph-selected source files only when runtime implementation or parity review is in scope
 
 ### Product Implementation
 
