@@ -115,13 +115,6 @@
       "imports": []
     },
     {
-      "path": "ai-docs/testing-workflow.md",
-      "kind": "file",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
       "path": "ai-harness/hooks/hooks.template.json",
       "kind": "file",
       "extension": ".json",
@@ -1236,13 +1229,6 @@
       "imports": []
     },
     {
-      "path": "docs/deprecated/backlog.md",
-      "kind": "documentation",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
       "path": "docs/deprecated/codex-prompt-template.md",
       "kind": "documentation",
       "extension": ".md",
@@ -1251,13 +1237,6 @@
     },
     {
       "path": "docs/deprecated/optimistic-updates.md",
-      "kind": "documentation",
-      "extension": ".md",
-      "symbols": [],
-      "imports": []
-    },
-    {
-      "path": "docs/deprecated/phase-1-dexie-foundation.md",
       "kind": "documentation",
       "extension": ".md",
       "symbols": [],
