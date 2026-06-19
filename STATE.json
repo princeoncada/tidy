@@ -1,6 +1,6 @@
 {
-    "version":  "3.0.3-alpha",
-    "state":  "alpha",
+    "version":  "3.0.3",
+    "state":  "stable",
     "phase":  "3.0.3",
     "phaseTitle":  "Startup Context Budget Rebaseline",
     "nextPhase":  "3.0.4 - Design System Source of Truth",
