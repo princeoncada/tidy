@@ -1,9 +1,9 @@
 {
-    "version":  "2.2.3",
-    "state":  "stable",
-    "phase":  "2.2.3",
-    "phaseTitle":  "seriesComplete Flag Reconciliation",
-    "nextPhase":  "",
+    "version":  "3.0.0-alpha",
+    "state":  "alpha",
+    "phase":  "3.0.0",
+    "phaseTitle":  "Collab Arc Roadmap Pin",
+    "nextPhase":  "3.0.1 - Repo, Docs \u0026 Skills Cleanup",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-19"
 }

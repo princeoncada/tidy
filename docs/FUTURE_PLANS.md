@@ -317,9 +317,226 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
+- 3.0.0 - Collab Arc Roadmap Pin (active) - see Planned
 ---
 
 ## Planned
+
+**3.0 Collaboration Arc - Context (orientation, not a phase)**
+
+Arc goal: evolve Tidy from a personal list app into a small-team PM collaboration tool, kept portfolio-grade.
+
+Architecture spine (invariant across the arc):
+- One Replicache sync spine serves both web and the future Expo/React Native client (4.0).
+- Structural sync (lists/items/board via Replicache) and ephemeral presence (cursors/typing/who-is-here) ride SEPARATE transports; presence must not be coupled into the Replicache push/pull path.
+- The existing workspace model is KEPT, not replaced.
+- UI/design is governed by docs/design.md (created in 3.0.2) as the single source of truth.
+
+Execution discipline (anti-loop rails):
+- Spike before commit: 3.1.0 and 3.4.0 are throwaway measurement/feasibility spikes that produce the scope for the phase after them.
+- Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
+- Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
+- Done = a named proof (test or manual product proof), never "looks done".
+
+### 3.0.0 - Collab Arc Roadmap Pin
+- **Status:** In progress
+- **Type:** docs/workflow
+- **Implementation goal:** Pin the full 3.0/4.0 collaboration-arc roadmap into this Planned section, each phase declaring the Product-First Planning Contract fields.
+- **Product impact:** none - roadmap/planning only.
+- **Runtime integration target:** none - no product code runs from this phase.
+- **Deferral boundary:** Repo/docs/skills cleanup is 3.0.1; docs/design.md creation is 3.0.2; no source/test/design work here.
+- **Validation target:** doc-consistency gates via .\scripts\validate.ps1 -SkipE2E. No manual product proof (non-product phase).
+- **Files:** docs/FUTURE_PLANS.md
+
+### 3.0.1 - Repo, Docs & Skills Cleanup
+- **Status:** Open
+- **Type:** cleanup
+- **Implementation goal:** Reconcile docs/skills for the new arc - prune or redirect Potential Next Directions now superseded by pinned phases, align AI_HANDOFF invariants/known-risks with the arc spine, confirm the skill surface still matches the workflow.
+- **Product impact:** none - internal hygiene.
+- **Runtime integration target:** none.
+- **Deferral boundary:** No design tokens (3.2.0) and no docs/design.md (3.0.2); no product behavior.
+- **Validation target:** .\scripts\validate.ps1 -SkipE2E doc gates.
+- **Files:** docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, .claude/skills/* (as needed)
+
+### 3.0.2 - Design System Source of Truth
+- **Status:** Open
+- **Type:** docs/workflow
+- **Implementation goal:** Create docs/design.md as the single UI/design source of truth (tokens, layout shells, component contracts, dark-mode intent) governing all 3.2+ visual work.
+- **Product impact:** none directly - governs later visual phases.
+- **Runtime integration target:** none - reference doc; tokens are implemented in 3.2.0.
+- **Deferral boundary:** No token implementation or dark mode (3.2.0); no component code.
+- **Validation target:** doc gates; establish the design.md bidirectional-consistency rule.
+- **Files:** docs/design.md (new), docs/CONTEXT_INDEX.md (route entry)
+
+### 3.1.0 - Sync Latency Measurement Spike
+- **Status:** Open
+- **Type:** decision (spike)
+- **Implementation goal:** Instrument and measure real Replicache push/pull + poke latency (local mutation to peer render) under representative load; produce a numbers report. Throwaway instrumentation.
+- **Product impact:** none - measurement only.
+- **Runtime integration target:** none - spike artifacts removed or gated; findings feed 3.1.1.
+- **Deferral boundary:** No latency fix here; 3.1.1 scopes the fix from these numbers (measure-before-fix).
+- **Validation target:** spike report committed (numbers + bottleneck hypothesis).
+- **Files:** lib/sync/* (temporary instrumentation), docs/ (spike report)
+
+### 3.1.1 - Sync Latency Fix
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Implement the latency fix scoped FROM 3.1.0's findings (exact change named at 3.1.1 scope time, not now).
+- **Product impact:** faster shared-change propagation (user-visible responsiveness).
+- **Runtime integration target:** the chosen fix runs in the live sync path, flag-gated if risky.
+- **Deferral boundary:** Scope is owned by 3.1.0's report; do not pre-commit a mechanism now.
+- **Validation target:** before/after latency proof vs the 3.1.0 baseline; targeted + manual product proof.
+- **Files:** TBD - scoped from 3.1.0
+
+### 3.2.0 - Design Tokens & Dark Mode
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Implement the docs/design.md token system and a working light/dark theme switch.
+- **Product impact:** user-visible theming + dark mode.
+- **Runtime integration target:** tokens + theme run app-wide.
+- **Deferral boundary:** No new layout shell (3.2.1) or workspace nav (3.2.2).
+- **Validation target:** targeted + manual product proof (toggle dark mode); design.md parity.
+- **Files:** token layer (app/globals.css or equivalent), theme provider, components touched for tokens
+
+### 3.2.1 - Collapsible Left Sidebar & Canvas Shell
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Introduce the ChatGPT-style collapsible left sidebar + main canvas app shell per docs/design.md.
+- **Product impact:** new navigation/layout shell (user-visible).
+- **Runtime integration target:** the shell wraps the dashboard.
+- **Deferral boundary:** Workspace-switching nav is 3.2.2; item detail panel is 3.3.0.
+- **Validation target:** targeted + manual product proof (collapse/expand, responsive); design.md parity.
+- **Files:** components/layout/* (new shell), app layout
+
+### 3.2.2 - Workspace Navigation
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Surface workspace switching/navigation in the new shell (workspace model is KEPT).
+- **Product impact:** user-visible workspace nav.
+- **Runtime integration target:** workspace nav runs in the sidebar/shell.
+- **Deferral boundary:** No sharing/permissions UX changes (3.4.2); no board.
+- **Validation target:** targeted + manual product proof (switch workspaces).
+- **Files:** components/layout/*, lib/sync/permissions.ts (read-only use)
+
+### 3.3.0 - Item Detail Panel & Notes
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Notion-style item detail panel hosting the existing Yjs notes + item metadata.
+- **Product impact:** user-visible item panel.
+- **Runtime integration target:** panel opens from list/board items; notes use the existing Yjs path.
+- **Deferral boundary:** Status/assignee properties are 3.3.1; board is 3.4.1.
+- **Validation target:** targeted + manual product proof (open panel, edit notes); preserve Yjs invariants.
+- **Files:** components/item/* (new panel), existing notes integration
+
+### 3.3.1 - Item Properties (Status & Assignee)
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Add structured item properties (status, assignee) synced via Replicache.
+- **Product impact:** user-visible item properties.
+- **Runtime integration target:** properties sync through the Replicache spine.
+- **Deferral boundary:** Board grouping on status is 3.4.1; presence is 3.4.x.
+- **Validation target:** targeted + manual product proof; schema/migration if needed.
+- **Files:** prisma/schema.prisma (+migration), lib/sync/*, components/item/*
+
+### 3.4.0 - Presence Transport Spike
+- **Status:** Open
+- **Type:** decision (spike)
+- **Implementation goal:** Spike the ephemeral-presence transport (cursors/typing/who-is-here) SEPARATE from Replicache; choose the mechanism and prove feasibility.
+- **Product impact:** none - spike.
+- **Runtime integration target:** none - chosen transport feeds 3.4.3.
+- **Deferral boundary:** No production presence UI here; board is 3.4.1.
+- **Validation target:** spike decision record (transport choice + proof).
+- **Files:** lib/realtime/* (spike), docs/ (decision)
+
+### 3.4.1 - Multiplayer Board
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** The flagship multiplayer board view (grouped items, drag across columns) on the Replicache spine.
+- **Product impact:** major user-visible board.
+- **Runtime integration target:** board renders + writes through Replicache; flag-gated rollout.
+- **Deferral boundary:** Live presence overlays are 3.4.3; sharing UX is 3.4.2; progress rollups are 3.4.4.
+- **Validation target:** targeted + manual product proof (two-user board); preserve DnD/order invariants.
+- **Files:** components/board/* (new), lib/sync/*
+
+### 3.4.2 - Collaboration & Sharing UX
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Polished sharing/collaboration UX over the existing permissions model (invite/redeem/roles surfaced in the new shell).
+- **Product impact:** user-visible sharing flows.
+- **Runtime integration target:** uses lib/sync/permissions.ts + share redeem.
+- **Deferral boundary:** Live presence is 3.4.3; no new permission model.
+- **Validation target:** targeted + manual product proof (share + redeem).
+- **Files:** components/share/*, lib/sync/permissions.ts
+
+### 3.4.3 - Live Presence
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Implement live presence (cursors/typing/who-is-here) using 3.4.0's chosen transport, on the board + panel.
+- **Product impact:** user-visible presence.
+- **Runtime integration target:** presence transport runs alongside Replicache, not through it.
+- **Deferral boundary:** Progress rollups are 3.4.4; transport scope is fixed by 3.4.0.
+- **Validation target:** targeted + manual product proof (two-user presence).
+- **Files:** lib/realtime/*, components/board/*, components/item/*
+
+### 3.4.4 - Board Progress & Rollups
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Progress/rollup surfaces for the board (completion %, per-column counts) computed from real synced data.
+- **Product impact:** user-visible progress.
+- **Runtime integration target:** rollups read live Replicache state (data-before-visualization).
+- **Deferral boundary:** No version history (3.5.x).
+- **Validation target:** targeted + manual product proof.
+- **Files:** components/board/*, lib/*
+
+### 3.5.0 - Mutation Ledger
+- **Status:** Open
+- **Type:** infrastructure
+- **Implementation goal:** Persist an append-only mutation ledger (who/what/when) as the substrate for history.
+- **Product impact:** none directly - enables 3.5.1/3.5.2.
+- **Runtime integration target:** ledger records mutations from the sync push path.
+- **Deferral boundary:** Read/time-travel UI is 3.5.1; revert is 3.5.2.
+- **Validation target:** targeted; ledger write proof.
+- **Files:** prisma/schema.prisma (+migration), lib/sync/*
+
+### 3.5.1 - Time-Travel Read
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Read-only time-travel/history view over the 3.5.0 ledger.
+- **Product impact:** user-visible history view (read-only).
+- **Runtime integration target:** history reads the ledger.
+- **Deferral boundary:** Revert/write-back is 3.5.2.
+- **Validation target:** targeted + manual product proof (view past state).
+- **Files:** components/history/*, lib/*
+
+### 3.5.2 - Revert
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Revert-to-a-prior-state action built on the ledger + time-travel read.
+- **Product impact:** user-visible revert.
+- **Runtime integration target:** revert writes through the Replicache spine.
+- **Deferral boundary:** Closes the 3.5 history sub-arc.
+- **Validation target:** targeted + manual product proof (revert + sync).
+- **Files:** lib/sync/*, components/history/*
+
+### 4.0 - Expo / React Native Mobile
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Native mobile client on the SAME Replicache spine. Decompose into sub-phases at 4.0 scope time.
+- **Product impact:** mobile app.
+- **Runtime integration target:** Expo/React Native client shares the web sync spine.
+- **Deferral boundary:** MCP is 4.1; sub-phase breakdown deferred to 4.0 scope time.
+- **Validation target:** defined at 4.0 decomposition.
+- **Files:** TBD - new Expo/React Native surface
+
+### 4.1 - MCP Integration
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Expose Tidy via MCP. Decompose when reached.
+- **Product impact:** programmatic/agent access.
+- **Runtime integration target:** MCP server over Tidy data.
+- **Deferral boundary:** Full decomposition deferred to 4.1 scope time.
+- **Validation target:** defined at 4.1 decomposition.
+- **Files:** TBD - decompose at 4.1
 
 ---
 

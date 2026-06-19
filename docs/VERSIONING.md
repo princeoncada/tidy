@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 2.2.3
-- **Current phase:** 2.2.3 - seriesComplete Flag Reconciliation
-- **Next phase:** 
+- **Current version:** 3.0.0-alpha
+- **Current phase:** 3.0.0 - Collab Arc Roadmap Pin
+- **Next phase:** 3.0.1 - Repo, Docs & Skills Cleanup
 
 ---
 
