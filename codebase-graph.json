@@ -1278,6 +1278,13 @@
       "imports": []
     },
     {
+      "path": "docs/design.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": "docs/evals/README.md",
       "kind": "documentation",
       "extension": ".md",
