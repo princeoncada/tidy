@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.0.1-alpha
+- **Current version:** 3.0.1
 - **Current phase:** 3.0.1 - Version History Re-Ownership
 - **Next phase:** 3.0.2 - Repo, Docs & Skills Cleanup
 
@@ -311,6 +311,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 2.2.2 | 2026-06-18 | View Create Idempotency Hardening | product behavior | not recorded | not recorded | not recorded | not recorded | Released View Create Idempotency Hardening. |
 | 2.2.3 | 2026-06-19 | seriesComplete Flag Reconciliation | product behavior | not recorded | not recorded | not recorded | not recorded | Released seriesComplete Flag Reconciliation. |
 | 3.0.0 | 2026-06-19 | Collab Arc Roadmap Pin | docs/workflow | none | none | doc-consistency gates (validate -SkipE2E) | docs/FUTURE_PLANS.md | Pinned the 3.0/4.0 collaboration-arc roadmap into Planned. |
+| 3.0.1 | 2026-06-19 | Version History Re-Ownership | docs/workflow (release tooling + docs) | none - internal release/doc machinery. | none - no product runtime change; the new owner is exercised by promote.ps1 at this phase's own closeout. | .\scripts\validate.ps1 -SkipE2E with the rewired gates green; manual proof = this phase's promotion writes its own VERSIONING row. Script behavior has no PowerShell unit harness (documented gap). | docs/VERSIONING.md, docs/FUTURE_PLANS.md, scripts/validate.ps1, scripts/promote.ps1, ownership references in docs/CODEX_RULES.md and AGENTS.md. | Re-own completed-version history in docs/VERSIONING.md as a rich table (Version, Date, Title, Type, Product Impact, Runtime Target, Validation Target, Files, Notes); backfill all released versions; repoint FUTURE_PLANS Completed; rewire promote.ps1 and validate.ps1 to the new owner. |
 
 ---
 
