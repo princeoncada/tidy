@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.0.2 - Repo, Docs & Skills Cleanup (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.0.2 - Repo, Docs & Skills Cleanup
-- **Status:** In progress
-- **Type:** cleanup
-- **Implementation goal:** Reconcile docs/skills for the new arc - prune or redirect Potential Next Directions now superseded by pinned phases, align AI_HANDOFF invariants/known-risks with the arc spine, confirm the skill surface still matches the workflow.
-- **Product impact:** none - internal hygiene.
-- **Runtime integration target:** none.
-- **Deferral boundary:** No design tokens (3.2.0) and no docs/design.md (3.0.3); no product behavior.
-- **Validation target:** .\scripts\validate.ps1 -SkipE2E doc gates.
-- **Files:** docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, .claude/skills/* (as needed)
 
 ### 3.0.3 - Design System Source of Truth
 - **Status:** Open
