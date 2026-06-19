@@ -94,7 +94,7 @@ The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration A
 - One Replicache sync spine serves both web and the future Expo/React Native client (4.0); do not fork a second structural-sync path.
 - Structural sync (lists/items/board via Replicache) and ephemeral presence (cursors/typing/who-is-here) ride SEPARATE transports. Presence must not be coupled into the Replicache push/pull path.
 - The existing workspace model is KEPT, not replaced.
-- From 3.0.3, UI/design is governed by `docs/design.md` as the single source of truth.
+- From 3.0.4, UI/design is governed by `docs/design.md` as the single source of truth.
 
 ## Removed Legacy Paths
 
