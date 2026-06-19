@@ -476,3 +476,27 @@ deferred.
 server-authoritative structure and permission model already used by Replicache.
 Keeping binary CRDT state separate avoids forcing Yjs semantics into structural
 pull/rebase behavior.
+
+---
+
+## 2026-06-19: seriesComplete no longer disables the nextPhase-ordering gate (2.2.3)
+
+`STATE.json.seriesComplete` marks that a numbered product arc has concluded; it was
+set `true` at 2.0.9 for the 2.0 local-first arc. The same flag was read by
+`validate.ps1` and `promote.ps1` to short-circuit the nextPhase-ordering drift gate,
+so every phase opened after 2.0.9 (2.1.x, 2.2.x) promoted with that drift check
+silently disabled.
+
+**Decision - keep `seriesComplete = true`; decouple it from the drift gate.** The
+flag keeps its single meaning ("the 2.0 arc is complete"). Both scripts are refined
+so the nextPhase-ordering check runs whenever `nextPhase` is set and names a real
+Planned heading. `seriesComplete` now only relaxes the gate for a genuine series
+boundary - when `nextPhase` names a future direction not yet broken out as a Planned
+heading. A new minor opened after a completed arc stays drift-checked even while the
+flag is `true`. Option (a) (reset the flag to `false`) was rejected as a band-aid
+that recurs each arc; option (b) (document the gate as intentionally disabled) was
+rejected for permanently abandoning a drift guardrail.
+
+**Impact:** No product or runtime change. `STATE.json.seriesComplete` stays `true`.
+Behavior is validated by `validate.ps1` running green; there is no PowerShell test
+harness, so no app unit/e2e tests change.
