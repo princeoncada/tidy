@@ -1,9 +1,9 @@
-<!-- Current Version: 3.0.0-alpha -->
+<!-- Current Version: 3.0.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.0.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.0.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.0.0 - Collab Arc Roadmap Pin
 **Next**: 3.0.1 - Repo, Docs & Skills Cleanup
 
