@@ -53,7 +53,7 @@ Architecture spine (invariant across the arc):
 - One Replicache sync spine serves both web and the future Expo/React Native client (4.0).
 - Structural sync (lists/items/board via Replicache) and ephemeral presence (cursors/typing/who-is-here) ride SEPARATE transports; presence must not be coupled into the Replicache push/pull path.
 - The existing workspace model is KEPT, not replaced.
-- UI/design is governed by docs/design.md (created in 3.0.3) as the single source of truth.
+- UI/design is governed by docs/design.md (created in 3.0.4) as the single source of truth.
 
 Execution discipline (anti-loop rails):
 - Spike before commit: 3.1.0 and 3.4.0 are throwaway measurement/feasibility spikes that produce the scope for the phase after them.
@@ -61,7 +61,17 @@ Execution discipline (anti-loop rails):
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
 
-### 3.0.3 - Design System Source of Truth
+### 3.0.3 - Startup Context Budget Rebaseline
+- **Status:** In progress
+- **Type:** docs/workflow
+- **Implementation goal:** Compress startup-loaded guidance without weakening its rails, bring the startup context estimate below 8,000 tokens with margin, and enforce that ceiling during validation.
+- **Product impact:** none - internal AI workflow efficiency and drift prevention.
+- **Runtime integration target:** `scripts/ai-context-budget.ps1` remains the on-demand report and exposes strict enforcement used by `scripts/validate.ps1`.
+- **Deferral boundary:** No product behavior or design-system work; docs/design.md remains 3.0.4.
+- **Validation target:** `npm run budget:context` reports startup context below 8,000 tokens (target below 7,500 for margin); `./scripts/validate.ps1 -SkipE2E` proves the enforced gate. Script behavior has no PowerShell unit harness.
+- **Files:** AGENTS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, docs/COMPACT_STRATEGY.md, scripts/ai-context-budget.ps1, scripts/validate.ps1, .claude/skills/tidy-context-budget/SKILL.md.
+
+### 3.0.4 - Design System Source of Truth
 - **Status:** Open
 - **Type:** docs/workflow
 - **Implementation goal:** Create docs/design.md as the single UI/design source of truth (tokens, layout shells, component contracts, dark-mode intent) governing all 3.2+ visual work.
