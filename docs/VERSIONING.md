@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.0.4-alpha
+- **Current version:** 3.0.4
 - **Current phase:** 3.0.4 - Design System Source of Truth
 - **Next phase:** 3.1.0 - Sync Latency Measurement Spike
 
@@ -314,6 +314,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.0.1 | 2026-06-19 | Version History Re-Ownership | docs/workflow (release tooling + docs) | none - internal release/doc machinery. | none - no product runtime change; the new owner is exercised by promote.ps1 at this phase's own closeout. | .\scripts\validate.ps1 -SkipE2E with the rewired gates green; manual proof = this phase's promotion writes its own VERSIONING row. Script behavior has no PowerShell unit harness (documented gap). | docs/VERSIONING.md, docs/FUTURE_PLANS.md, scripts/validate.ps1, scripts/promote.ps1, ownership references in docs/CODEX_RULES.md and AGENTS.md. | Re-own completed-version history in docs/VERSIONING.md as a rich table (Version, Date, Title, Type, Product Impact, Runtime Target, Validation Target, Files, Notes); backfill all released versions; repoint FUTURE_PLANS Completed; rewire promote.ps1 and validate.ps1 to the new owner. |
 | 3.0.2 | 2026-06-19 | Repo, Docs & Skills Cleanup | cleanup | none - internal hygiene. | none. | .\scripts\validate.ps1 -SkipE2E doc gates. | docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, .claude/skills/* (as needed) | Reconcile docs/skills for the new arc - prune or redirect Potential Next Directions now superseded by pinned phases, align AI_HANDOFF invariants/known-risks with the arc spine, confirm the skill surface still matches the workflow. |
 | 3.0.3 | 2026-06-19 | Startup Context Budget Rebaseline | docs/workflow | none - internal AI workflow efficiency and drift prevention. | `scripts/ai-context-budget.ps1` remains the on-demand report and exposes strict enforcement used by `scripts/validate.ps1`. | `npm run budget:context` reports startup context below 8,000 tokens (target below 7,500 for margin); `./scripts/validate.ps1 -SkipE2E` proves the enforced gate. Script behavior has no PowerShell unit harness. | AGENTS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, docs/COMPACT_STRATEGY.md, scripts/ai-context-budget.ps1, scripts/validate.ps1, .claude/skills/tidy-context-budget/SKILL.md. | Compress startup-loaded guidance without weakening its rails, bring the startup context estimate below 8,000 tokens with margin, and enforce that ceiling during validation. |
+| 3.0.4 | 2026-06-19 | Design System Source of Truth | docs/workflow | none directly - governs later visual phases. | none - reference doc; tokens are implemented in 3.2.0. | doc gates; establish the design.md bidirectional-consistency rule. | docs/design.md (new), docs/CONTEXT_INDEX.md (route entry) | Create docs/design.md as the single UI/design source of truth (tokens, layout shells, component contracts, dark-mode intent) governing all 3.2+ visual work. |
 
 ---
 
