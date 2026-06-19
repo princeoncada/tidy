@@ -308,6 +308,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.2.3 - seriesComplete Flag Reconciliation~~ (stable 2026-06-19)
 
+- ~~3.0.0 - Collab Arc Roadmap Pin~~ (stable 2026-06-19)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -317,7 +319,6 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 3.0.0 - Collab Arc Roadmap Pin (active) - see Planned
 ---
 
 ## Planned
@@ -337,16 +338,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.0.0 - Collab Arc Roadmap Pin
-- **Status:** In progress
-- **Type:** docs/workflow
-- **Implementation goal:** Pin the full 3.0/4.0 collaboration-arc roadmap into this Planned section, each phase declaring the Product-First Planning Contract fields.
-- **Product impact:** none - roadmap/planning only.
-- **Runtime integration target:** none - no product code runs from this phase.
-- **Deferral boundary:** Repo/docs/skills cleanup is 3.0.1; docs/design.md creation is 3.0.2; no source/test/design work here.
-- **Validation target:** doc-consistency gates via .\scripts\validate.ps1 -SkipE2E. No manual product proof (non-product phase).
-- **Files:** docs/FUTURE_PLANS.md
 
 ### 3.0.1 - Repo, Docs & Skills Cleanup
 - **Status:** Open
