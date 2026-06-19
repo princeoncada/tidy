@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.0.3",
+  "version": "3.0.4-alpha",
   "generatedAt": "2026-06-19",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1272,6 +1272,13 @@
     },
     {
       "path": "docs/deprecated/testing.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/design.md",
       "kind": "documentation",
       "extension": ".md",
       "symbols": [],

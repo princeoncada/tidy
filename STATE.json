@@ -1,9 +1,9 @@
 {
-    "version":  "3.0.3",
-    "state":  "stable",
-    "phase":  "3.0.3",
-    "phaseTitle":  "Startup Context Budget Rebaseline",
-    "nextPhase":  "3.0.4 - Design System Source of Truth",
+    "version":  "3.0.4-alpha",
+    "state":  "alpha",
+    "phase":  "3.0.4",
+    "phaseTitle":  "Design System Source of Truth",
+    "nextPhase":  "3.1.0 - Sync Latency Measurement Spike",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-19"
 }

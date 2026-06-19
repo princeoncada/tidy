@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.0.3
-- **Current phase:** 3.0.3 - Startup Context Budget Rebaseline
-- **Next phase:** 3.0.4 - Design System Source of Truth
+- **Current version:** 3.0.4-alpha
+- **Current phase:** 3.0.4 - Design System Source of Truth
+- **Next phase:** 3.1.0 - Sync Latency Measurement Spike
 
 ---
 
