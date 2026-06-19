@@ -1,9 +1,9 @@
-<!-- Current Version: 3.0.3-alpha -->
+<!-- Current Version: 3.0.3 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.0.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.0.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.0.3 - Startup Context Budget Rebaseline
 **Next**: 3.0.4 - Design System Source of Truth
 
