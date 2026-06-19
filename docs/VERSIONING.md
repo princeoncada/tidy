@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.0.0
-- **Current phase:** 3.0.0 - Collab Arc Roadmap Pin
-- **Next phase:** 3.0.1 - Repo, Docs & Skills Cleanup
+- **Current version:** 3.0.1-alpha
+- **Current phase:** 3.0.1 - Version History Re-Ownership
+- **Next phase:** 3.0.2 - Repo, Docs & Skills Cleanup
 
 ---
 
