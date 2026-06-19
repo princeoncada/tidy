@@ -1,6 +1,6 @@
 {
-    "version":  "3.0.2-alpha",
-    "state":  "alpha",
+    "version":  "3.0.2",
+    "state":  "stable",
     "phase":  "3.0.2",
     "phaseTitle":  "Repo, Docs \u0026 Skills Cleanup",
     "nextPhase":  "3.0.3 - Design System Source of Truth",
