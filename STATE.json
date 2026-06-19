@@ -1,6 +1,6 @@
 {
-    "version":  "2.2.3-alpha",
-    "state":  "alpha",
+    "version":  "2.2.3",
+    "state":  "stable",
     "phase":  "2.2.3",
     "phaseTitle":  "seriesComplete Flag Reconciliation",
     "nextPhase":  "",
