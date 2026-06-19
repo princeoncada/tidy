@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.0.4 - Design System Source of Truth (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.0.4 - Design System Source of Truth
-- **Status:** Open
+- **Status:** In progress
 - **Type:** docs/workflow
 - **Implementation goal:** Create docs/design.md as the single UI/design source of truth (tokens, layout shells, component contracts, dark-mode intent) governing all 3.2+ visual work.
 - **Product impact:** none directly - governs later visual phases.
