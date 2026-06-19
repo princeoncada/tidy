@@ -721,7 +721,8 @@
         "react",
         "@/lib/sync/replicache/client",
         "@/lib/realtime/poke-client",
-        "@/lib/supabase/client"
+        "@/lib/supabase/client",
+        "@/lib/sync/sync-latency-spike"
       ]
     },
     {
@@ -1327,6 +1328,13 @@
       "imports": []
     },
     {
+      "path": "docs/spikes/3.1.0-sync-latency-measurement.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": "docs/VERSIONING.md",
       "kind": "documentation",
       "extension": ".md",
@@ -1384,7 +1392,8 @@
       ],
       "imports": [
         "react",
-        "@/components/ReplicacheProvider"
+        "@/components/ReplicacheProvider",
+        "@/lib/sync/sync-latency-spike"
       ]
     },
     {
@@ -1940,7 +1949,8 @@
       ],
       "imports": [
         "replicache",
-        "@/lib/sync/replicache/mutators"
+        "@/lib/sync/replicache/mutators",
+        "@/lib/sync/sync-latency-spike"
       ]
     },
     {
@@ -2076,6 +2086,24 @@
       "imports": [
         "@/lib/local-db/outbox-schema"
       ]
+    },
+    {
+      "path": "lib/sync/sync-latency-spike.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "SYNC_LATENCY_SPIKE_STORAGE_KEY",
+        "SyncLatencyEvent",
+        "SyncLatencyRecorder",
+        "SyncLatencyStage",
+        "SyncLatencyWindowApi",
+        "installSyncLatencySpikeWindowApi",
+        "isSyncLatencySpikeEnabled",
+        "measureSyncLatencyOperation",
+        "recordRuntimeSyncLatencyEvent",
+        "wrapSyncLatencyMutators"
+      ],
+      "imports": []
     },
     {
       "path": "lib/trpc.ts",
@@ -2978,6 +3006,16 @@
         "vitest",
         "@/lib/sync/sync-endpoint-contract",
         "@/lib/local-db/outbox-schema"
+      ]
+    },
+    {
+      "path": "tests/unit/sync-latency-spike.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/sync-latency-spike"
       ]
     },
     {
@@ -4143,6 +4181,12 @@
       "import": "@/lib/sync/replicache/client"
     },
     {
+      "from": "components/ReplicacheProvider.tsx",
+      "to": "lib/sync/sync-latency-spike.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-latency-spike"
+    },
+    {
       "from": "components/sharing/ShareDialog.tsx",
       "to": "components/ui/button.tsx",
       "type": "imports",
@@ -4569,6 +4613,12 @@
       "import": "@/components/ReplicacheProvider"
     },
     {
+      "from": "hooks/useDashboardMutations.ts",
+      "to": "lib/sync/sync-latency-spike.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-latency-spike"
+    },
+    {
       "from": "hooks/useLocalFirstDashboardBoot.ts",
       "to": "lib/dashboard-cache.ts",
       "type": "imports",
@@ -4855,6 +4905,12 @@
       "to": "lib/sync/replicache/mutators.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/mutators"
+    },
+    {
+      "from": "lib/sync/replicache/client.ts",
+      "to": "lib/sync/sync-latency-spike.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-latency-spike"
     },
     {
       "from": "lib/sync/replicache/mutators.ts",
@@ -5611,6 +5667,12 @@
       "to": "lib/sync/sync-endpoint-contract.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-endpoint-contract"
+    },
+    {
+      "from": "tests/unit/sync-latency-spike.test.ts",
+      "to": "lib/sync/sync-latency-spike.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-latency-spike"
     },
     {
       "from": "tests/unit/view-helpers.test.ts",
