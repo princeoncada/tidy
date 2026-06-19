@@ -11,7 +11,7 @@ Use these source-of-truth pointers instead of treating this file as a full histo
 - `STATE.json` - version, state, phase, phase title, next phase.
 - `docs/FUTURE_PLANS.md` - roadmap and next planned backlog item.
 - `docs/CONTEXT_INDEX.md` - routing/scoping map for the smallest correct read set.
-- `docs/VERSIONING.md` - version rules and current state; completed-version history lives in `docs/FUTURE_PLANS.md` Completed.
+- `docs/VERSIONING.md` - version rules, current state, and the completed-version history table.
 - `docs/PHASE_LOG.md` - historical traceability only, not active implementation guidance.
 
 ## Current Product Snapshot
