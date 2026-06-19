@@ -1,11 +1,11 @@
-<!-- Current Version: 3.0.4 -->
+<!-- Current Version: 3.1.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.0.4 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.0.4 - Design System Source of Truth
-**Next**: 3.1.0 - Sync Latency Measurement Spike
+**Current Version**: 3.1.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.1.0 - Sync Latency Measurement Spike
+**Next**: 3.1.1 - Sync Latency Fix
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
