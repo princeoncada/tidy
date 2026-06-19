@@ -306,6 +306,8 @@ Phases need not be user-visible, but none may silently defer expected product in
 
 - ~~2.2.2 - View Create Idempotency Hardening~~ (stable 2026-06-18)
 
+- ~~2.2.3 - seriesComplete Flag Reconciliation~~ (stable 2026-06-19)
+
 Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 - ~~Phase 1 - Dexie Foundation~~ (merged to master)
 - ~~Phase 2 - Outbox Sync Queue~~ (ready for merge review)
@@ -315,21 +317,9 @@ Pre-versioning (full detail in `docs/PHASE_LOG.md`):
 ## In Progress
 
 
-- 2.2.3 - seriesComplete Flag Reconciliation (active) - see Planned
 ---
 
 ## Planned
-
-### 2.2.3 - seriesComplete Flag Reconciliation
-- **Status:** In progress | Priority: P4 (workflow hygiene)
-- **Type:** decision
-- **Files:** STATE.json (`seriesComplete`), scripts/validate.ps1 (the nextPhase-ordering short-circuit), docs/VERSIONING.md and/or docs/WORKFLOW.md (document the decision).
-- **Implementation goal:** decide and document what `seriesComplete` means once new patch phases are planned after a series was marked complete. It was set true at 2.0.9 for the 2.0 local-first arc and currently short-circuits validate.ps1's nextPhase-ordering checks, so 2.1.x/2.2.x promoted without them. Decide one of: (a) reset `seriesComplete=false` while 2.2.x phases remain Planned to re-enable the ordering checks, (b) scope the flag to "the 2.0 arc is complete" and document that it intentionally disables those checks, or (c) refine validate.ps1 so the flag does not disable ordering for an in-progress minor.
-- **Product impact:** none - workflow tooling/validation only.
-- **Runtime integration target:** none - validate.ps1 gating + STATE.json semantics.
-- **Deferral boundary:** decision phase; if it changes validate.ps1, keep it minimal and covered by the existing consistency gate. Do not rewrite past phase records.
-- **Validation target:** targeted alpha (validate.ps1 still passes; consistency gate green); full test:ci before stable.
-- **Acceptance:** `seriesComplete` semantics are documented and STATE.json/validate.ps1 reflect the decision.
 
 ---
 
