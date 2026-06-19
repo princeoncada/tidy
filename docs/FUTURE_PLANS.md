@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.0.4 - Design System Source of Truth (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.0.4 - Design System Source of Truth
-- **Status:** In progress
-- **Type:** docs/workflow
-- **Implementation goal:** Create docs/design.md as the single UI/design source of truth (tokens, layout shells, component contracts, dark-mode intent) governing all 3.2+ visual work.
-- **Product impact:** none directly - governs later visual phases.
-- **Runtime integration target:** none - reference doc; tokens are implemented in 3.2.0.
-- **Deferral boundary:** No token implementation or dark mode (3.2.0); no component code.
-- **Validation target:** doc gates; establish the design.md bidirectional-consistency rule.
-- **Files:** docs/design.md (new), docs/CONTEXT_INDEX.md (route entry)
 
 ### 3.1.0 - Sync Latency Measurement Spike
 - **Status:** Open
