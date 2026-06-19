@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.0.3 - Startup Context Budget Rebaseline (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.0.3 - Startup Context Budget Rebaseline
-- **Status:** In progress
-- **Type:** docs/workflow
-- **Implementation goal:** Compress startup-loaded guidance without weakening its rails, bring the startup context estimate below 8,000 tokens with margin, and enforce that ceiling during validation.
-- **Product impact:** none - internal AI workflow efficiency and drift prevention.
-- **Runtime integration target:** `scripts/ai-context-budget.ps1` remains the on-demand report and exposes strict enforcement used by `scripts/validate.ps1`.
-- **Deferral boundary:** No product behavior or design-system work; docs/design.md remains 3.0.4.
-- **Validation target:** `npm run budget:context` reports startup context below 8,000 tokens (target below 7,500 for margin); `./scripts/validate.ps1 -SkipE2E` proves the enforced gate. Script behavior has no PowerShell unit harness.
-- **Files:** AGENTS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, docs/COMPACT_STRATEGY.md, scripts/ai-context-budget.ps1, scripts/validate.ps1, .claude/skills/tidy-context-budget/SKILL.md.
 
 ### 3.0.4 - Design System Source of Truth
 - **Status:** Open
