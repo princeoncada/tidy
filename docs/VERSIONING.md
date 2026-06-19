@@ -65,6 +65,14 @@ Rules:
 - When opening alpha, `open-phase.ps1` requires `STATE.json.nextPhase` to exist
   in Planned unless `-AllowMissingNextPhase` is used for a scoped roadmap rewrite
   patch that adds or renumbers FUTURE_PLANS before validation.
+- `STATE.json.seriesComplete` marks that a numbered product arc has concluded
+  (set `true` at 2.0.9 for the 2.0 local-first arc). As of 2.2.3 it no longer
+  blanket-disables the nextPhase-ordering gate in `validate.ps1` and `promote.ps1`:
+  that gate now runs whenever `nextPhase` is set and names a real Planned heading.
+  `seriesComplete` only relaxes the gate for a genuine series boundary - when
+  `nextPhase` names a future direction not yet broken out as a Planned heading. A
+  new minor opened after a completed arc therefore stays drift-checked even while
+  `seriesComplete` remains `true`.
 - Prompt format safety is a workflow invariant. Docs that define prompt
   templates must avoid nested fenced code blocks. Workflow prompts should be
   emitted as separate top-level sections: Section 1 master prompt, Section 2
