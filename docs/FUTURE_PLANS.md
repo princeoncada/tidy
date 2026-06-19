@@ -259,19 +259,19 @@ Assigned a version only when scoped.
 - View-create concurrent same-id idempotency: stand up a real-Postgres integration harness and add a transaction-abort-aware fix (`ROLLBACK TO SAVEPOINT` recovery, or an atomic `INSERT ... ON CONFLICT`) for the `findUnique` -> `create` TOCTOU in `lib/sync/server-apply.ts` view-create. Deferred from 2.2.2 (unreproducible in the mock-only test layer; prevented client-side).
 - Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
 - Rate limiting and abuse controls
-- Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency
+- Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency (distinct from the 3.5.0 mutation ledger, which serves history/time-travel)
 - Observability
 - Scale/performance profiling
 - Order compaction
-- PWA manifest, icon set, service-worker plan (app/layout.tsx, public/*)
+- Installable-PWA polish: manifest metadata + icon set (the app-shell service worker and app/manifest.ts already ship)
 - Mobile/touch drag-drop + responsive QA (components/list/*)
-- Accessibility + UI polish pass (components/list/*, components/views/ViewsSidebarPreview.tsx)
-- Sync or retire older root docs (docs/deprecated/*, README.md)
+- Accessibility + UI polish pass (folds into 3.2.x design-token + shell work when scoped)
 - Migration/backfill playbook (prisma/schema.prisma, prisma/migrations/*)
-- Share tags and custom views with collaborators instead of projecting recipient shared lists with `listTags: []`.
-- Allow recipients to place/reorder shared lists within their own All Lists/custom-view organization without materializing owner view state.
-- Add rich-text item notes plus Yjs awareness/presence for remote cursors after the plain-text collaboration path is stable.
-- Realtime poke delivery latency: shared changes propagate in ~20s while pull/push return 200. Hypothesis: the 2.0.3 realtime RLS added only a SELECT policy on realtime.messages, so the server REST broadcast cannot SEND to the private poke topic and the recipient falls back to the 60s pullInterval. (lib/realtime/poke-server.ts, prisma/sql/2_0_3_realtime_poke_rls.sql, lib/sync/replicache/client.ts)
+- Retire the remaining docs/deprecated/* legacy archive (~25 files: the 00-16 reverse-engineering set plus app-reverse-engineering, codex-prompt-template, optimistic-updates, task-routing-guide, testing, and testing-validation docs) after per-file verification that each is superseded by a live owner; backlog.md and phase-1-dexie-foundation.md were already removed in 3.0.2. Resolve README.md in the same pass (sync or retire).
+
+Superseded by pinned arc phases (pointers, not separate backlog):
+- Finer-grained shared-list collaboration - sharing owner tags/custom views with recipients, and letting recipients reorder shared lists within their own organization - is owned by 3.4.2 (Collaboration & Sharing UX).
+- Rich-text/structured item notes and remote-cursor presence are owned by 3.3.0 (item panel/notes) and 3.4.0/3.4.3 (presence transport + live presence); plain-text Yjs notes already shipped in 2.0.6.
 
 ---
 
@@ -289,12 +289,5 @@ Assigned a version only when scoped.
 
 ## Known Cross-Cutting Risks
 
-- Optimistic queue mechanics are baselined by `tests/unit/optimistic-sync-baseline.test.ts` (1.7.1); broader cross-component optimistic race behavior and blind snapshot rollback containment are still not fully proven.
-- The reconciled Dexie fallback is structurally complete, but offline freshness is bounded by the last successful server seed and pending local work.
-- Direct dashboard tRPC persistence is retired and Dexie-first writes are default-on in 1.9.29; phase acceptance remains blocked on online read correctness.
-- 1.9.26 adds backoff-ready `failed` selection and stranded `syncing` recovery; cross-tab flush coordination remains a follow-up.
-- Retiring direct tRPC persistence before a generalized pending overlay lets settling/refocused dashboard queries clobber unsynced optimistic create/tag/view entries; the 1.9.28 overlay closes this and is a hard prerequisite for 1.9.29.
-- The 1.9.28 online overlay does not yet keep locally-created entities visible across the flush-to-server-confirmed window; list presence, `listTags`/tag rendering, and a performance-safe local refresh are the remaining 1.9.29 work.
-- Large components increase risk for focused changes.
-- Frontend projection and backend refresh must agree before UI/UX polish.
+Live cross-cutting risks are owned by `docs/AI_HANDOFF.md` ("Known Risks"), kept current with the Replicache architecture. The 1.9.x optimistic-queue, Dexie-fallback, and pending-overlay risks formerly listed here were retired by the 2.0 Replicache render inversion; see `docs/AI_HANDOFF.md` "Removed Legacy Paths".
 
