@@ -76,10 +76,12 @@ function Get-PlannedPhaseSection {
     return [regex]::Match($Content, $pattern)
 }
 
-function Test-CompletedPhase {
-    param([string]$Content, [string]$PhaseLabel)
-    $pattern = "(?m)^\s*-\s+~~" + [regex]::Escape($PhaseLabel) + "~~\s+\(stable\s+\d{4}-\d{2}-\d{2}\)"
-    return $Content -match $pattern
+function Test-VersionHistoryRow {
+    param([string]$Content, [string]$Version)
+    $section = Get-MarkdownSection $Content "Version History"
+    if (-not $section.Success) { return $false }
+    $pattern = "(?m)^\|\s*" + [regex]::Escape($Version) + "\s*\|"
+    return $section.Groups["body"].Value -match $pattern
 }
 
 function Get-FirstPlannedHeading {
@@ -175,7 +177,7 @@ if (Test-Path "STATE.json") {
         $inProgress = Test-InProgressPhase $futurePlans $phaseLabel
         $plannedHeading = Test-PlannedPhaseHeading $futurePlans $phaseLabel
         $plannedPhaseSection = Get-PlannedPhaseSection $futurePlans $phaseLabel
-        $completed = Test-CompletedPhase $futurePlans $phaseLabel
+        $completed = Test-VersionHistoryRow $versioning $phaseState.phase
         $firstPlannedHeading = Get-FirstPlannedHeading $futurePlans
 
         if ($phaseState.state -eq "alpha") {
@@ -189,7 +191,7 @@ if (Test-Path "STATE.json") {
             }
         } elseif ($phaseState.state -eq "stable") {
             if (-not $completed) {
-                $phaseErrors += "docs/FUTURE_PLANS.md Completed is missing stable phase '$phaseLabel'"
+                $phaseErrors += "docs/VERSIONING.md Version History is missing stable version '$($phaseState.phase)'"
             }
             if ($inProgress) {
                 $phaseErrors += "docs/FUTURE_PLANS.md In Progress still contains stable phase '$phaseLabel'"
@@ -578,11 +580,11 @@ $docsSurfacePresentChecks = @(
         Phrase = "Every product implementation phase must add or update useful tests"
     },
     @{
-        Path = "docs/FUTURE_PLANS.md"
+        Path = "docs/VERSIONING.md"
         Phrase = "1.4.0 - View Projection Reproduction Tests"
     },
     @{
-        Path = "docs/FUTURE_PLANS.md"
+        Path = "docs/VERSIONING.md"
         Phrase = "2.2.0 - Visual Review Pass"
     }
 )
