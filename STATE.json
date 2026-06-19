@@ -1,6 +1,6 @@
 {
-    "version":  "3.0.0-alpha",
-    "state":  "alpha",
+    "version":  "3.0.0",
+    "state":  "stable",
     "phase":  "3.0.0",
     "phaseTitle":  "Collab Arc Roadmap Pin",
     "nextPhase":  "3.0.1 - Repo, Docs \u0026 Skills Cleanup",
