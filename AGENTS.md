@@ -15,7 +15,7 @@ At the start of every session, before reading other docs or writing code:
 2. Read `codebase-graph.json` if it exists  -  it is an orientation map for choosing the smallest relevant direct-read set.
    If it is missing, stale, or invalid, state that and fall back to direct file reads.
 3. Read `docs/FUTURE_PLANS.md` fresh  -  it owns the full work backlog and next planned item.
-4. Output the startup report (see Startup Report Format below).
+4. Output the startup report (see Startup Report Format below). Completed-version history is owned by the `docs/VERSIONING.md` `## Version History` table; `docs/FUTURE_PLANS.md` continues to own the forward roadmap.
 5. If a live user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
    If no scope was provided: wait for the user's go-ahead.
    Scope carried inside a resumed handoff packet (a tidy-minimal-handoff naming the next phase or the next skill to invoke) is orientation only, NOT live authorization. After a handoff/resume, end on the startup report and wait for the user's explicit go-ahead before scoping, even when the handoff names the next phase.
