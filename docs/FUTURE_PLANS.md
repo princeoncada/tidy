@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.0.1 - Version History Re-Ownership (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.0.1 - Version History Re-Ownership
-- **Status:** In progress
-- **Type:** docs/workflow (release tooling + docs)
-- **Implementation goal:** Re-own completed-version history in docs/VERSIONING.md as a rich table (Version, Date, Title, Type, Product Impact, Runtime Target, Validation Target, Files, Notes); backfill all released versions; repoint FUTURE_PLANS Completed; rewire promote.ps1 and validate.ps1 to the new owner.
-- **Product impact:** none - internal release/doc machinery.
-- **Runtime integration target:** none - no product runtime change; the new owner is exercised by promote.ps1 at this phase's own closeout.
-- **Deferral boundary:** No product behavior; repo/docs/skills reconciliation stays 3.0.2; design.md stays 3.0.3.
-- **Validation target:** .\scripts\validate.ps1 -SkipE2E with the rewired gates green; manual proof = this phase's promotion writes its own VERSIONING row. Script behavior has no PowerShell unit harness (documented gap).
-- **Files:** docs/VERSIONING.md, docs/FUTURE_PLANS.md, scripts/validate.ps1, scripts/promote.ps1, ownership references in docs/CODEX_RULES.md and AGENTS.md.
 
 ### 3.0.2 - Repo, Docs & Skills Cleanup
 - **Status:** Open
