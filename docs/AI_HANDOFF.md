@@ -96,6 +96,13 @@ The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration A
 - The existing workspace model is KEPT, not replaced.
 - From 3.0.4, UI/design is governed by `docs/design.md` as the single source of truth.
 
+## Active 3.1.0 Sync Latency Spike
+
+- `lib/sync/sync-latency-spike.ts` contains temporary, development-only instrumentation gated by browser local storage key `tidy:sync-latency-spike=1`; it is disabled by default and always disabled in production.
+- The gated path records bounded in-memory events at local mutation, push, poke, pull, and generated-marker DOM-render boundaries. It records identifiers, counts, stages, and timestamps only; it does not alter replicated data or wire contracts.
+- `docs/spikes/3.1.0-sync-latency-measurement.md` owns the two-profile measurement protocol, result tables, limitations, and removal steps.
+- Real measurements and the bottleneck hypothesis are still pending controller execution. Do not scope the 3.1.1 fix until that report contains measured numbers.
+
 ## Removed Legacy Paths
 
 2.0.9 retires the old dashboard compatibility paths:
