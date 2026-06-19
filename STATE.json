@@ -1,9 +1,9 @@
 {
-    "version":  "2.2.2",
-    "state":  "stable",
-    "phase":  "2.2.2",
-    "phaseTitle":  "View Create Idempotency Hardening",
-    "nextPhase":  "2.2.3 - seriesComplete Flag Reconciliation",
+    "version":  "2.2.3-alpha",
+    "state":  "alpha",
+    "phase":  "2.2.3",
+    "phaseTitle":  "seriesComplete Flag Reconciliation",
+    "nextPhase":  "",
     "seriesComplete":  true,
-    "lastUpdated":  "2026-06-18"
+    "lastUpdated":  "2026-06-19"
 }
