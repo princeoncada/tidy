@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.0.3 - Startup Context Budget Rebaseline (active) - see Planned
 ---
 
 ## Planned
