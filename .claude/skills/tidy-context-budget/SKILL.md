@@ -15,6 +15,8 @@ Do not read: product source, docs/PHASE_LOG.md, docs/SESSION_LOG/.
 
 Allowed actions: run npm run budget:context; report the top bloat sources against the budget.
 
+Validation enforcement: scripts/validate.ps1 runs scripts/ai-context-budget.ps1 with -EnforceStartupBudget. The audit remains on-demand for humans and is never added to session startup.
+
 Prohibited actions: treating the characters/4 estimate as an exact tokenizer; adding the audit to session startup; calling any external service.
 
 Output contract:
