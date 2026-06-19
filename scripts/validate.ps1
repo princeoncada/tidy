@@ -204,13 +204,22 @@ if (Test-Path "STATE.json") {
             $phaseErrors += "STATE.json state '$($phaseState.state)' is not alpha or stable"
         }
 
-        if (-not $phaseState.seriesComplete -and -not [string]::IsNullOrWhiteSpace($nextPhase)) {
+        # seriesComplete no longer blanket-disables this gate (2.2.3). The nextPhase-ordering
+        # check runs whenever nextPhase is set; seriesComplete only permits the genuine
+        # series-boundary case where nextPhase names a future direction that is not yet
+        # broken out as a Planned heading.
+        if (-not [string]::IsNullOrWhiteSpace($nextPhase)) {
+            $nextPhasePlanned = Test-PlannedPhaseHeadingInPlanned $futurePlans $nextPhase
             if ($phaseState.state -eq "stable") {
-                if ($firstPlannedHeading -ne $nextPhase) {
-                    $phaseErrors += "docs/FUTURE_PLANS.md first Planned heading '$firstPlannedHeading' does not match STATE.json nextPhase '$nextPhase'"
+                if ($nextPhasePlanned) {
+                    if ($firstPlannedHeading -ne $nextPhase) {
+                        $phaseErrors += "docs/FUTURE_PLANS.md first Planned heading '$firstPlannedHeading' does not match STATE.json nextPhase '$nextPhase'"
+                    }
+                } elseif (-not $phaseState.seriesComplete) {
+                    $phaseErrors += "docs/FUTURE_PLANS.md Planned is missing STATE.json nextPhase '$nextPhase' and seriesComplete is false"
                 }
             } elseif ($phaseState.state -eq "alpha") {
-                if (-not (Test-PlannedPhaseHeadingInPlanned $futurePlans $nextPhase)) {
+                if (-not $nextPhasePlanned -and -not $phaseState.seriesComplete) {
                     $phaseErrors += "docs/FUTURE_PLANS.md Planned is missing STATE.json nextPhase '$nextPhase'"
                 }
             }

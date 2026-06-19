@@ -111,6 +111,14 @@ function Get-FirstPlannedHeading {
     return ""
 }
 
+function Test-PlannedHeadingInPlanned {
+    param([string]$Content, [string]$Heading)
+    $section = Get-MatchedSection $Content "Planned"
+    if (-not $section.Success) { return $false }
+    $pattern = "(?m)^###\s+" + [regex]::Escape($Heading) + "\s*$"
+    return $section.Groups["body"].Value -match $pattern
+}
+
 # 1. STATE.json
 $state.version     = $stableVer
 $state.state       = "stable"
@@ -224,10 +232,19 @@ if ($futurePlansUpdated -ne $futurePlansBefore) {
     Write-Host "  Roadmap already closed: $futurePlansPath" -ForegroundColor Yellow
 }
 
-if (-not $state.seriesComplete -and -not [string]::IsNullOrWhiteSpace($state.nextPhase)) {
+# seriesComplete no longer blanket-disables this gate (2.2.3). The post-promotion
+# ordering check runs whenever nextPhase is set and names a real Planned heading;
+# seriesComplete only permits the genuine series-boundary case where nextPhase names
+# a future direction not yet broken out as a Planned heading.
+if (-not [string]::IsNullOrWhiteSpace($state.nextPhase)) {
     $firstPlannedHeading = Get-FirstPlannedHeading $futurePlansUpdated
-    if ($firstPlannedHeading -ne $state.nextPhase) {
-        Write-Error "Post-promotion roadmap drift: first FUTURE_PLANS Planned heading '$firstPlannedHeading' does not match STATE.json nextPhase '$($state.nextPhase)'."
+    if (Test-PlannedHeadingInPlanned $futurePlansUpdated $state.nextPhase) {
+        if ($firstPlannedHeading -ne $state.nextPhase) {
+            Write-Error "Post-promotion roadmap drift: first FUTURE_PLANS Planned heading '$firstPlannedHeading' does not match STATE.json nextPhase '$($state.nextPhase)'."
+            exit 1
+        }
+    } elseif (-not $state.seriesComplete) {
+        Write-Error "Post-promotion roadmap drift: STATE.json nextPhase '$($state.nextPhase)' is not a Planned heading and seriesComplete is false."
         exit 1
     }
 }
