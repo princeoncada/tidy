@@ -3,44 +3,49 @@
 <!-- BEGIN:nextjs-agent-rules -->
 ## This is NOT the Next.js you know
 
-This project uses newer framework versions with breaking changes  -  APIs, conventions, and file structure may differ from older assumptions. Follow existing repo patterns first. If you are changing Next.js app APIs and `node_modules/next/dist/docs/` exists, read the relevant local Next guide before writing code. Heed deprecation notices.
+This project uses newer framework versions with breaking changes. Follow existing repo patterns first. If changing Next.js app APIs and `node_modules/next/dist/docs/` exists, read the relevant local guide and heed deprecations.
 <!-- END:nextjs-agent-rules -->
 
 ## Session Start Protocol
 
-At the start of every session, before reading other docs or writing code:
+At the start of every session, before other docs or edits:
 
-0. If operating in a local repo, run `git pull origin master` first. If local git is unavailable, report why and continue with remote/direct reads only.
-1. Read `STATE.json` first  -  it is the machine-readable oracle for version, active phase, next phase, and notes.
-2. Read `codebase-graph.json` if it exists  -  it is an orientation map for choosing the smallest relevant direct-read set.
-   If it is missing, stale, or invalid, state that and fall back to direct file reads.
-3. Read `docs/FUTURE_PLANS.md` fresh  -  it owns the full work backlog and next planned item.
-4. Output the startup report (see Startup Report Format below). Completed-version history is owned by the `docs/VERSIONING.md` `## Version History` table; `docs/FUTURE_PLANS.md` continues to own the forward roadmap.
-5. If a live user provided scope in their opening message: proceed directly to writing Codex prompts. Do not ask for confirmation.
-   If no scope was provided: wait for the user's go-ahead.
-   Scope carried inside a resumed handoff packet (a tidy-minimal-handoff naming the next phase or the next skill to invoke) is orientation only, NOT live authorization. After a handoff/resume, end on the startup report and wait for the user's explicit go-ahead before scoping, even when the handoff names the next phase.
+0. In a local repo, run `git pull origin master`. If git is unavailable, report why and continue with remote/direct reads.
+1. Read `STATE.json` first. It is the version, state, phase, and next-phase oracle.
+2. Read `codebase-graph.json` when present for orientation only. If missing, stale, invalid, or version-mismatched, report that and use direct reads.
+3. Read `docs/FUTURE_PLANS.md` fresh for the forward roadmap and first Planned item.
+4. Emit the Startup Report exactly.
+5. With live opening-message scope, proceed directly to Codex prompts. Without live scope, wait. A resumed minimal handoff is orientation, not authorization; after handoff/resume emit the report and wait for explicit go-ahead.
 
-Repo docs are the only source of truth. Never answer state queries,
-version questions, or "what's next" from session memory of docs.
-Always read STATE.json and docs/FUTURE_PLANS.md fresh.
+Never answer version, phase, or "what's next" from memory. Completed-version history is owned by `docs/VERSIONING.md` `## Version History`; FUTURE_PLANS owns the forward roadmap.
+
+## Startup Report Format
+
+    Version: X.Y.Z-[state]
+    Phase: [phaseTitle]
+    Next phase (roadmap): [STATE.json nextPhase]
+    Next backlog item: [first Planned heading in docs/FUTURE_PLANS.md]
+    [one of:]
+    Proceeding to Codex prompts for [scope].
+    Waiting for your go-ahead.
+
+"Next phase (roadmap)" and "Next backlog item" are distinct and must not be conflated.
+
+## Drift Guardrails
+
+- `STATE.json` is the single owner of version/state/phase identity. Stop on disagreement; never guess or silently reconcile.
+- When state is stable, the same phase must not remain In Progress or first Planned. `STATE.json.nextPhase` must equal the first Planned heading unless the documented series-boundary exception applies.
+- A user-referenced phase/version/work item must have one roadmap home: a Planned heading or explicit Potential Next Direction. If absent, stop and reconcile intent before scoping.
+- Verify the current conversation before claiming continuity or handoff loss; never invent a lost-state narrative.
+- `scripts/validate.ps1` gates all five version locations. Version changes are script-owned.
+- The graph is routing-only. Do not treat it as source of truth or run graph audit at startup.
+- For implementation, directly read `docs/AI_HANDOFF.md`, `docs/CODEX_RULES.md`, and the smallest relevant source set after graph routing.
 
 ## ChatGPT Reviewer Mode
 
-Claude Code is the architect/scoper/planner/validator/prompt builder and owns
-phase scoping and Codex-prompt authoring locally. ChatGPT is a reviewer,
-weak-point finder, and handoff reviewer: it reviews pushed GitHub master plus
-pasted local evidence and surfaces risks, gaps, and weak points; it does not
-scope phases or write Codex prompts. ChatGPT cannot directly read local
-uncommitted files, local git status, local git diff, local-only branch files,
-or local-only generated graph changes. Anything not pushed or pasted does not
-exist to ChatGPT.
+Claude Code owns local architecture, scoping, planning, validation, and Codex prompts. ChatGPT reviews pushed GitHub state plus pasted evidence; it cannot see local uncommitted work, branch-only files, local diffs/status, validation output, or generated graph changes.
 
-For docs-only review that only concerns pushed files, GitHub remote reads may be
-enough. For source-heavy phases, local-only work, active branches, or any phase
-where graph output matters, the user/controller must provide a Local Evidence
-Packet before ChatGPT reviews the implementation.
-
-Local Evidence Packet (required for source-heavy or local-sensitive scoping):
+Source-heavy, branch-local, or graph-sensitive ChatGPT review requires a Local Evidence Packet:
 
     git status --short
     git log --oneline -5
@@ -48,259 +53,72 @@ Local Evidence Packet (required for source-heavy or local-sensitive scoping):
     npm run graph:codebase
     git diff --stat
 
-Optional when relevant:
+Optional targeted diffs or doc searches may be added. A local Claude session self-gathers this evidence before scoping; emit-and-wait is only for ChatGPT reviewer context or sessions without local access. If evidence is absent, state that review is pushed-remote-only. Never imply connector reads include local state.
 
-    git diff -- <path>
-    Select-String -Path "docs\FUTURE_PLANS.md" -Pattern "<phase>"
-    Select-String -Path "docs\AI_HANDOFF.md" -Pattern "<topic>"
+## Routing and Graph Use
 
-Rules:
-- Before scoping any source-heavy or local-sensitive phase, the evidence in the
-  Local Evidence Packet above must exist. Scope the method by actor: a LOCAL
-  Claude Code session self-gathers it with its own tools (run git status, read
-  STATE.json, run npm run graph:codebase, run git diff --stat directly) and then
-  scopes; it does not emit the packet for the user to paste back. The
-  emit-as-a-copy-paste-block-and-wait form is reserved for providing ChatGPT
-  reviewer context, or for a Claude session that genuinely lacks local access. This
-  pre-scope evidence step is separate from the Section 2 `npm run graph:codebase`
-  refresh that precedes validate.ps1; do not conflate the two.
-- If local evidence is required for review but missing, ChatGPT must either ask
-  for the packet or explicitly note it is reviewing from pushed remote state only
-  and state that limitation.
-- Do not pretend GitHub connector reads include local uncommitted work.
-- Pasted validation output may be used as local evidence, but it does not
-  replace direct file reads when implementation details matter.
-- Do not expand the normal startup read set for local Claude/Codex sessions.
+Normal startup reads only STATE.json, codebase-graph.json when present, and FUTURE_PLANS. During task work:
 
-## Drift Guardrails
+- Use `docs/CONTEXT_INDEX.md` to select the smallest route.
+- Read `docs/WORKFLOW.md` only for prompt/process or post-validation work.
+- Read `docs/CODEX_RULES.md` for implementation, testing, validation boundaries, and commit discipline.
+- Read `docs/AI_HANDOFF.md` for current product invariants and risks.
+- Use `docs/PHASE_LOG.md` only for historical investigation.
+- For script/tooling scope, inspect `scripts/` for an existing implementation first.
+- Do not broadly scan unrelated source or generated Prisma output.
 
-These rules exist so lower-capability models cannot silently drift:
-
-- STATE.json is the single source of truth for version and state. If any
-  other doc disagrees with STATE.json, STOP and flag the conflict - never
-  guess which is correct and never reconcile silently.
-- "Next phase" (roadmap, from STATE.json nextPhase) and "Next backlog item"
-  (docs/FUTURE_PLANS.md first Planned item) are different questions with
-  different answers. Report both, labeled distinctly. Never conflate them.
-- If STATE.json says state = stable, the same phase must not remain in
-  FUTURE_PLANS In Progress or as the first Planned item. If that mismatch
-  exists, STOP and flag roadmap drift before continuing. Next phase from
-  STATE.json and next backlog item from FUTURE_PLANS remain separate concepts.
-- Never state version, phase, or "what's next" from memory. Read the files
-  fresh every session.
-- When the user references a phase, version, or work item that is not a heading
-  in `docs/FUTURE_PLANS.md`, STOP and reconcile intent vs docs with the user
-  before scoping; never silently default to `STATE.json.nextPhase`. Before
-  asserting a continuity or handoff failure, verify against the current
-  session's own history - never fabricate a lost-state narrative for a
-  reference the assistant itself introduced. Any agreed future work must be
-  pinned to a single home (a Planned heading or an explicit Potential Next
-  Direction), never left floating in conversation.
-- scripts/validate.ps1 enforces version consistency across all five
-  versioning locations. A failing consistency gate blocks promotion.
-- If `codebase-graph.json` exists but its version does not match `STATE.json`,
-  report graph drift and refresh the graph before relying on it.
-- `codebase-graph.json` is an orientation map, not a source of truth. For
-  implementation, still read `docs/AI_HANDOFF.md`, `docs/CODEX_RULES.md`, and
-  directly relevant source files before editing.
-- Do not run graph audit during normal startup. Startup reads `STATE.json` and
-  `codebase-graph.json` for orientation; graph audit is validation/proof only.
-  If graph audit fails, treat Graphify as untrusted until fixed.
-
-## Graph Routing Summary
-
-Normal startup still reads only `STATE.json`, `codebase-graph.json` when present,
-and `docs/FUTURE_PLANS.md`. Do not add graph audit, graph drills, or broader
-graph proof work to normal startup.
-
-Use `docs/CONTEXT_INDEX.md` during task scoping to choose the smallest correct
-document/source read set. It is routing-only and must not expand startup reads
-unless a later workflow phase changes the startup protocol.
-
-For implementation scoping responses, include a concise Graph Routing Summary
-before the Codex prompt. Keep it short so it does not become another token
-burden. It must include:
-
-1. Task category
-2. Graph-selected files
-3. Why each file was selected
-4. Intentionally skipped files or broad docs
-5. Whether direct reads are still required before editing
-
-The graph is still an orientation map, not a source of truth. For
-implementation, directly relevant files must still be read before editing. If
-`codebase-graph.json` is missing, stale, invalid, or unhelpful, state that and
-fall back to direct file reads.
+Implementation-scoping responses include a concise Graph Routing Summary: task category, selected files and why, intentionally skipped files, and whether direct reads remain required. If the graph is unhelpful, say so and use direct reads. Detailed prompt formatting is owned by `.claude/skills/tidy-codex-prompt-builder/SKILL.md`.
 
 ## Session Continuity
 
-Context can be compacted or lost in long sessions. To survive compaction or a
-model handoff, Claude Code must protect continuity proactively:
+Normal continuation uses `tidy-minimal-handoff`, not SESSION_LOG. Offer it when a session runs long, a phase is promoted, or the user stops/switches. SESSION_LOG is optional historical audit for retrospectives or risky operations. `docs/WORKFLOW.md` owns both contracts.
 
-- Normal continuation uses a minimal handoff, not a SESSION_LOG checkpoint.
-  Proactively OFFER a minimal handoff (the tidy-minimal-handoff procedure) when
-  any of:
-  - the session has run long or context may be compacted soon
-  - a phase was just promoted to stable
-  - the user signals stopping, switching tasks, or stepping away
-- Offer a SESSION_LOG checkpoint only for the rarer audit cases: a phase
-  retrospective, a durable record before or after a large, risky, or many-file
-  operation, or investigating why a past decision was made. SESSION_LOG is
-  historical audit only, not the normal continuation mechanism.
-- The user decides whether to hand off or checkpoint; Claude Code only proposes it.
-- `docs/WORKFLOW.md` owns both formats: the minimal handoff is the default
-  continuation path; the Session Checkpoint Output Contract is the optional audit
-  path. Session logs live under `docs/SESSION_LOG/`; `docs/SESSION_LOG.md` is
-  only an index.
-- Continuity invariant: STATE.json + docs/FUTURE_PLANS.md + docs/AI_HANDOFF.md +
-  a minimal handoff must together let a brand-new model resume with no prior
-  conversation. If they would not, say so and fix the docs before continuing.
+Continuity must be recoverable from STATE.json + FUTURE_PLANS + AI_HANDOFF + the minimal handoff. One phase per session; after promotion, hand off and continue in a fresh session.
 
-## Working Posture (Strict Rails, Active Initiative)
+## Working Posture
 
-Follow the docs strictly AND work with initiative. The rails are non-negotiable;
-within them, do not be passive.
+- Rails are strict: implementation gate, version scripts, validation boundary, scope control, and commit discipline.
+- Surface conflicts and risks immediately.
+- Use best judgment on non-material ambiguity; ask only for choices the user must make.
+- Name out-of-scope issues and their location; do not silently fix them.
+- After each step, state what was checked and the next action.
 
-Strict (never cross without the authorization phrase):
-- The Implementation Gate, commit discipline, scope control, and five-location
-  versioning rules are absolute.
-- Never invent state, version, or "what's next" - read the docs fresh.
+## Roles and Implementation Gate
 
-Initiative (expected, not optional):
-- Surface drift, conflicts, and risks the moment you see them - STOP and flag,
-  do not smooth over (see Drift Guardrails).
-- After finishing a step, state what you verified and recommend the next action
-  or phase; do not wait to be asked "what now".
-- Proactively offer a minimal handoff (or, for audit cases only, a SESSION_LOG checkpoint) per Session Continuity.
-- On ambiguity, propose your best interpretation and proceed - flag it once, do
-  not stall. Ask only when the answer is genuinely the user's to make.
-- If you notice an out-of-scope issue, name it and where - do not silently fix it.
+Claude Code scopes/plans/validates and writes Codex prompts. Codex implements the scoped change. ChatGPT reviews.
 
-## Startup Report Format
-
-Always output this exact structure at session start:
-
-    Version: X.Y.Z-[state]
-    Phase: [phaseTitle]
-    Next phase (roadmap): [nextPhase from STATE.json]
-    Next backlog item: [title of first item in the Planned section of docs/FUTURE_PLANS.md]
-    [one of:]
-    Proceeding to Codex prompts for [scope].
-    Waiting for your go-ahead.
-
-## File Read Priority
-
-Use `docs/CONTEXT_INDEX.md` for task-based read routing. Startup remains
-strictly owned by the Session Start Protocol above and stays limited to
-`STATE.json`, `codebase-graph.json` when present, and `docs/FUTURE_PLANS.md`.
-
-Do not read `docs/WORKFLOW.md` at startup. Read it only when writing or reviewing a Codex prompt format or the post-validation workflow.
-
-## Claude Code Command Vocabulary
-
-| Phrase | What Claude Code does |
-|--------|----------------------|
-| "scope it out" | Write the full Codex prompt + Section 2 validation block |
-| "what's next" | Read docs/FUTURE_PLANS.md fresh, report the next item in the Planned section and summarize it. This is the next planned item, not the roadmap "Next phase" (which comes from STATE.json nextPhase) - distinguish them if both are relevant |
-| "session start" / "continue" | Run Session Start Protocol and output Startup Report |
-| "handoff" / "continue elsewhere" | Run the tidy-minimal-handoff procedure: emit the lowest-token handoff packet (repo, user intent, fresh state from STATE.json, smallest next read set, which Tidy skill to invoke next, do-not-read list). This is the normal continuation mechanism. |
-| "session checkpoint" | Optional audit mode only. Provide the Session Checkpoint Output Contract from docs/WORKFLOW.md (Codex session log prompt, checkpoint commit script, next-ChatGPT handoff prompt) for a retrospective or a risky-op record, not normal continuation. Session files live under docs/SESSION_LOG/; docs/SESSION_LOG.md is only an index. |
-| "I AUTHORIZE CLAUDE CODE TO IMPLEMENT - [reason]" | Fallback only  -  use when Codex hits its token limit mid-implementation. Claude Code never suggests this phrase; the user initiates it. |
-
-When validation checks fail after a Codex implementation, Claude Code must provide a fix master prompt immediately. Never ask the user to authorize direct implementation.
-
-## Codex Validation Boundary
-
-- Codex does implementation only.
-- Validation is user/controller-run, not Codex-run.
-- Codex must not report validation results unless the user provided those results.
-- If Codex says it ran validation despite instructions, treat the response as workflow drift and correct docs before continuing.
-- Assistant responses should not ask Codex to self-verify by running commands.
-
-## Implementation Gate
-
-Claude Code may implement directly **only** when the user provides this exact phrase:
+Claude Code may implement directly only with this exact user-provided phrase:
 
     I AUTHORIZE CLAUDE CODE TO IMPLEMENT - [reason]
 
-Without this phrase, Claude Code writes Codex prompts using the 2-section format in `docs/WORKFLOW.md`. Claude Code never commits, pushes, creates branches, or runs `npm run test:ci` regardless of authorization.
+Without it, Claude writes the two-section Codex prompt defined in WORKFLOW. The phrase is a user-initiated fallback when Codex cannot finish; Claude never suggests it. Even when authorized, Claude never commits, pushes, creates branches, or runs `npm run test:ci`.
 
-Exception  -  in-alpha fixes: when STATE.json state = "alpha", fixes and
-corrections extend the current phase directly. Do not write a new full
-Codex prompt and do not bump versions. Only open a new phase when the
-current version is stable.
+When `STATE.json.state = alpha`, corrections extend the active phase without a version bump or full re-scope. Stable fixes open a new phase.
 
-The authorization phrase exists only as a fallback when Codex hits its
-token limit mid-implementation and cannot continue. Claude Code must
-never suggest it as an alternative to writing a Codex prompt.
+## Codex Validation Boundary
 
-## Required Reading Path
+Codex edits only the scoped files and does not run validation, npm, build, graph audit, git, commit, push, or branch commands. Validation is user/controller-run. Codex reports results only when the user supplied them and must say "Validation not run by Codex" otherwise.
 
-Before editing any file, route yourself through the repo-specific AI docs instead of scanning the whole repository:
+Behavior changes require matching tests in the same branch. Before implementation, identify happy/common/edge cases and unit/E2E needs. `docs/CODEX_RULES.md` owns commands, manual regressions, scope control, and definition of done.
 
-0. Read `STATE.json` first  -  compact project oracle (version, active phase, notes).
-1. Read `codebase-graph.json` when present  -  orientation only, to pick the smallest relevant source file set.
-2. Use `docs/CONTEXT_INDEX.md` to select the smallest correct task-specific doc/source set.
-3. For implementation, still read `docs/AI_HANDOFF.md` for current product context and `docs/CODEX_RULES.md` for implementation rules before editing.
+## Command Vocabulary
 
-See `docs/FUTURE_PLANS.md` for the prioritized work backlog. Use `docs/PHASE_LOG.md` only for historical investigation, not active implementation guidance.
+- "scope it out": emit the full Codex prompt and Section 2 validation via `tidy-codex-prompt-builder`.
+- "what's next": read FUTURE_PLANS fresh and report its first Planned item; distinguish STATE.nextPhase.
+- "session start" / "continue": run Session Start Protocol.
+- "handoff" / "continue elsewhere": run `tidy-minimal-handoff`.
+- "session checkpoint": emit the optional audit contract from WORKFLOW.
+- Failed validation: classify it and provide the smallest fix prompt immediately; never ask for direct-implementation authorization.
 
-Do not broadly inspect the repo unless the task cannot be understood from the AI docs plus the smallest relevant source files.
+## Scope, Commits, and Output
 
-## Required Test Workflow
+- Keep diffs focused; do not refactor unrelated code, rename public contracts, edit generated Prisma output, or change lockfiles/packages/versions unless scoped.
+- `docs/WORKFLOW.md` owns branch lifecycle and closeout. `docs/CODEX_RULES.md` owns implementation and commit discipline.
+- The user runs per-file `commit.ps1` commands. Commit-before-fix is mandatory for meaningful alpha work. Never add AI co-author trailers.
+- Prompt/output formatting is owned by `tidy-codex-prompt-builder`: headings outside fences, prompt and PowerShell blocks separate, copy-safe commands, and no re-emission of script-printed Next steps.
 
-Every Codex implementation must update or add tests in the same branch when behavior changes. Before coding, identify the happy path, common cases, edge cases, unit coverage, and E2E coverage. After coding, provide the required validation commands for the user/controller to run. Codex must not run validation, npm test scripts, graph audit, build, git, or commit commands, and must not claim checks passed unless the user provided the output.
+## Behavior and Documentation
 
-Use `docs/CODEX_RULES.md` (Required Tests section) as the source of truth for test commands, the manual regression checklist, and definition of done.
+Unless explicitly changed, preserve optimistic/rollback behavior, query keys/cache shapes, projection rules, local-only drag hover and committed-write invariants, ordering semantics, Supabase user scoping, and protected procedures.
 
-## Scope Control
-
-- Keep diffs small and focused on the requested task.
-- Do not touch unrelated files.
-- Do not broadly refactor while implementing a narrow change.
-- Do not rename public APIs, routes, models, query keys, or component contracts unless the task explicitly requires it.
-- Do not modify generated Prisma output under `app/generated/prisma`.
-- Do not modify lockfiles unless the package manager automatically requires it for an explicitly requested dependency change.
-- Do not update package versions unless explicitly asked.
-- Before scoping any phase that involves scripts or tooling, read the
-  scripts/ directory to check for existing implementations.
-
-## Commit Discipline
-
-- `docs/WORKFLOW.md` owns the finalized phase branch lifecycle. `docs/CODEX_RULES.md` owns Codex implementation and commit discipline.
-- Claude Code writes commit.ps1 call sequences; the user runs each call.
-- Do not batch multiple files into one commit.
-- Commit-before-fix is mandatory: a prior implementation (broken or not) must be committed before its in-alpha fix; never fold prior work into the fix commit. Only genuinely accidental, never-meaningful edits may be corrected without a commit.
-- Do not add Co-Authored-By or any AI co-author trailer to commit messages.
-
-## Assistant Output Formatting
-
-When writing Codex prompts or command instructions for the user:
-
-- Keep section headings outside code blocks.
-- Never place "Section 1 - Master Prompt" or "Section 2 - Validation" inside
-  the copyable code block.
-- Never house Codex prompt text and PowerShell validation commands in the same code block.
-- Provide alpha commit commands as one PowerShell code block.
-- Never re-emit commands a script already prints in its Next steps - this covers both open-phase.ps1 (opener commits) and promote.ps1 (stable commits and push). Point the user to run the script's printed Next steps. Single owner: the Script-printed command rule in .claude/skills/tidy-codex-prompt-builder/SKILL.md.
-- Provide push commands separately.
-- Prefer fewer, larger runnable command blocks over many one-line code blocks
-  when commands belong to the same execution phase.
-- Make every code block copy-paste safe for its target tool.
-
-## Behavior to Preserve
-
-Unless the task specifically changes these areas, preserve:
-
-- Optimistic updates and rollback behavior.
-- TanStack Query keys and cache shapes.
-- Dashboard cache projection rules.
-- Drag-and-drop invariants, including local-only hover state and stable cache/server writes on committed actions.
-- View/list/item ordering semantics.
-- Supabase user scoping and protected tRPC procedure patterns.
-
-## Documentation Expectations
-
-- Update `docs/AI_HANDOFF.md` when behavior, data flow, invariants, or risks change.
-- Update `docs/FUTURE_PLANS.md` when completing documented work or discovering follow-up risks.
-- Prefer concise docs updates that help future agents avoid extra repo scanning.
+Update AI_HANDOFF when invariants, data flow, or risks change. Update FUTURE_PLANS only for scoped roadmap work or discovered follow-ups. Prefer concise pointers to live owners over duplicated guidance.
