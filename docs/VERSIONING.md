@@ -105,8 +105,8 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.1.1
-- **Current phase:** 3.1.1 - Sync Latency Fix
+- **Current version:** 3.1.2-alpha
+- **Current phase:** 3.1.2 - Automated Two-User Sync-Latency Harness
 - **Next phase:** 3.2.0 - Design Tokens & Dark Mode
 
 ---
