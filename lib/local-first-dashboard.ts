@@ -150,6 +150,7 @@ export function mapLocalListToDashboardList(
     id: listId,
     userId: list.userId,
     name: list.name,
+    workspaceId: null,
     order,
     createdAt: toDate(list.createdAt),
     updatedAt: toDate(list.updatedAt),
