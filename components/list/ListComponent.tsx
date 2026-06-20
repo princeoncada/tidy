@@ -276,8 +276,8 @@ const ListComponent = ({
 
               <Separator />
 
-              <div className={cn("border border-zinc-100 border-dashed rounded-lg duration-200 mx-2 my-1.5 flex-col", {
-                "border-zinc-400": shouldHighlightList
+              <div className={cn("border border-border border-dashed rounded-lg duration-200 mx-2 my-1.5 flex-col", {
+                "border-border-strong": shouldHighlightList
               })}>
 
                 <ScrollArea
@@ -287,14 +287,14 @@ const ListComponent = ({
                 >
                   {canEdit && <div
                     className={cn(
-                      `flex items-start max-h-12 gap-1.5 pl-px py-px rounded-md pr-2 hover:bg-gray-50 hover:border-gray-100 overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group`, {
+                      `flex items-start max-h-12 gap-1.5 pl-px py-px rounded-md pr-2 hover:bg-surface-muted hover:border-border overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group`, {
                       "max-h-0 opacity-0 py-0": !viewListItemAdder,
                     }
                     )}
                   >
                     <div
                       data-testid="item-drag-handle-placeholder"
-                      className="touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-gray-400"
+                      className="touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-text-muted"
                     >
                       <GripVertical className="w-3.5 h-3.5" />
                     </div>
@@ -356,7 +356,7 @@ const ListComponent = ({
                   {children}
                   {totalItems == 0 &&
                     <div className="w-0 h-0 absolute flex items-center justify-center left-1/2 top-1/2">
-                      <StickyNote className="overflow-clip text-zinc-400/80" />
+                      <StickyNote className="overflow-clip text-text-muted/80" />
                     </div>}
                 </ScrollArea>
               </div>

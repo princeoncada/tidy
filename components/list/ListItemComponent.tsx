@@ -96,9 +96,9 @@ const ListItemComponent = ({
       data-testid="list-item"
       ref={ref}
       className={cn(
-        `flex items-start gap-1.5 pr-1.5 rounded-md border border-white hover:bg-gray-50 hover:border-gray-100 overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group`,
+        `flex items-start gap-1.5 pr-1.5 rounded-md border border-transparent hover:bg-surface-muted hover:border-border overflow-hidden transition-[max-height,opacity,transform,padding,scale,shadow] duration-200 ease-in-out group`,
         {
-          "scale-[1.01] backdrop-blur-[5px] shadow-md bg-gray-50 border border-gray-100": isDragging,
+          "scale-[1.01] backdrop-blur-[5px] shadow-md bg-surface-muted border border-border": isDragging,
           "max-h-200 opacity-100 scale-100": !itemDeleted && itemRevealed,
           "max-h-0 opacity-0 py-0": itemDeleted || !itemRevealed,
         }
@@ -108,7 +108,7 @@ const ListItemComponent = ({
         data-testid="item-drag-handle"
         ref={canEdit ? itemHandle : undefined}
         className={cn(
-          "touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-gray-400",
+          "touch-none select-none p-1.5 -mt-px -mr-1 shrink-0 text-text-muted",
           canEdit
             ? "cursor-grab active:cursor-grabbing"
             : "cursor-default opacity-30",
@@ -130,7 +130,7 @@ const ListItemComponent = ({
           inputTestId="list-title-input"
           className={cn(
             "block w-full min-w-0 text-sm whitespace-normal break-all break-normal transition-colors duration-300 leading-6!",
-            listItem.completed && "line-through text-gray-500"
+            listItem.completed && "line-through text-text-muted"
           )}
           id={listItem.id}
           value={listItem.name}

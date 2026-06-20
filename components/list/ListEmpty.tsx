@@ -13,7 +13,7 @@ const ListEmpty = ({ boot }: ListEmptyProps) => {
     <Empty className='mt-12'>
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          <FolderOpen className='text-zinc-400' />
+          <FolderOpen className='text-text-muted' />
         </EmptyMedia>
         <EmptyTitle>No Lists Yet</EmptyTitle>
         <EmptyDescription>
