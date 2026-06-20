@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import { useTidyReplicache } from "@/components/ReplicacheProvider";
+import { wrapSyncLatencyMutators } from "@/lib/sync/sync-latency-spike";
 
 export function useDashboardMutations() {
   const { rep } = useTidyReplicache();
@@ -10,7 +11,7 @@ export function useDashboardMutations() {
   return useMemo(
     () => ({
       enabled: Boolean(rep),
-      mutate: rep?.mutate ?? null,
+      mutate: rep ? wrapSyncLatencyMutators(rep.mutate) : null,
     }),
     [rep],
   );

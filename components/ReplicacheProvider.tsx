@@ -15,6 +15,10 @@ import {
 } from "@/lib/sync/replicache/client";
 import { subscribeToPokes } from "@/lib/realtime/poke-client";
 import { createClient } from "@/lib/supabase/client";
+import {
+  installSyncLatencySpikeWindowApi,
+  recordRuntimeSyncLatencyEvent,
+} from "@/lib/sync/sync-latency-spike";
 
 type ReplicacheContextValue = {
   rep: TidyReplicache | null;
@@ -43,6 +47,8 @@ export function ReplicacheProvider({
     rep: TidyReplicache;
   } | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => installSyncLatencySpikeWindowApi(), []);
 
   useEffect(() => {
     if (closeTimerRef.current !== null) {
@@ -98,6 +104,7 @@ export function ReplicacheProvider({
           userId,
           accessToken,
           onPoke: () => {
+            recordRuntimeSyncLatencyEvent("poke_received");
             void rep.pull().catch(() => {});
           },
         });
