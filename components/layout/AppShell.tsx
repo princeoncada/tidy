@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -114,6 +115,9 @@ export function AppShell({ sidebar, children }: AppShellProps) {
             )}
           >
             <DialogTitle className="sr-only">Dashboard navigation</DialogTitle>
+            <DialogDescription className="sr-only">
+              Switch between your saved views.
+            </DialogDescription>
             <div className="flex h-14 shrink-0 items-center justify-end px-3">
               <DialogClose asChild>
                 <Button
