@@ -39,17 +39,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 
 ## In Progress
 
-- 3.2.2 - Workspace Navigation (active)
-
-### 3.2.2 - Workspace Navigation
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Surface workspace switching in the shell sidebar that filters the lists canvas, carrying workspace context through the Replicache render store (workspace model is KEPT).
-- **Product impact:** user-visible workspace nav.
-- **Runtime integration target:** workspace nav runs in the sidebar/shell.
-- **Deferral boundary:** No sharing/permissions UX changes (3.4.2); no board; no dedicated "Personal/unassigned" bucket beyond "All workspaces"; no sync of shared (non-owned) workspace rosters.
-- **Validation target:** targeted + manual product proof (switch workspaces).
-- **Files:** lib/sync/replicache/keys.ts, lib/sync/replicache/pull-cvr.ts, lib/sync/replicache/mutators.ts, lib/dashboard/server-read.ts, lib/dashboard/workspace-filter.ts, components/layout/WorkspaceSwitcher.tsx, components/Dashboard.tsx, components/list/ListsContainer.tsx, components/list/ListAdder.tsx, lib/local-first-dashboard.ts, docs/design.md, tests
 
 ---
 
