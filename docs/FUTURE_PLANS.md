@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.0 - Design Tokens & Dark Mode (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.0 - Design Tokens & Dark Mode
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Implement the docs/design.md token system and a working light/dark theme switch.
-- **Product impact:** user-visible theming + dark mode.
-- **Runtime integration target:** tokens + theme run app-wide.
-- **Deferral boundary:** No new layout shell (3.2.1) or workspace nav (3.2.2).
-- **Validation target:** targeted + manual product proof (toggle dark mode); design.md parity.
-- **Files:** token layer (app/globals.css or equivalent), theme provider, components touched for tokens
 
 ### 3.2.1 - Collapsible Left Sidebar & Canvas Shell
 - **Status:** Open
