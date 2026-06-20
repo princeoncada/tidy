@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.2 - Workspace Navigation (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.2 - Workspace Navigation
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Surface workspace switching/navigation in the new shell (workspace model is KEPT).
 - **Product impact:** user-visible workspace nav.
