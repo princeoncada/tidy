@@ -1,6 +1,6 @@
 {
-    "version":  "3.1.1-alpha",
-    "state":  "alpha",
+    "version":  "3.1.1",
+    "state":  "stable",
     "phase":  "3.1.1",
     "phaseTitle":  "Sync Latency Fix",
     "nextPhase":  "3.2.0 - Design Tokens \u0026 Dark Mode",
