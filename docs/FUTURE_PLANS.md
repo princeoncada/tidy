@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.1.0 - Sync Latency Measurement Spike (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.1.0 - Sync Latency Measurement Spike
-- **Status:** In progress
-- **Type:** decision (spike)
-- **Implementation goal:** Instrument and measure real Replicache push/pull + poke latency (local mutation to peer render) under representative load; produce a numbers report. Throwaway instrumentation.
-- **Product impact:** none - measurement only.
-- **Runtime integration target:** none - spike artifacts removed or gated; findings feed 3.1.1.
-- **Deferral boundary:** No latency fix here; 3.1.1 scopes the fix from these numbers (measure-before-fix).
-- **Validation target:** spike report committed (numbers + bottleneck hypothesis).
-- **Files:** lib/sync/* (temporary instrumentation), docs/ (spike report)
 
 ### 3.1.1 - Sync Latency Fix
 - **Status:** Open
