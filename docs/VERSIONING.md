@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.1-alpha
+- **Current version:** 3.2.1
 - **Current phase:** 3.2.1 - Collapsible Left Sidebar & Canvas Shell
 - **Next phase:** 3.2.2 - Workspace Navigation
 
@@ -319,6 +319,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.1.1 | 2026-06-19 | Sync Latency Fix | product behavior | faster shared-change propagation (user-visible responsiveness). | server REST broadcasts reach existing private per-user Realtime subscriptions; Replicache pull remains the structural-sync authority. | targeted private-broadcast tests plus 30-sample baseline/moderate/burst proof against the 22,078 ms periodic-fallback diagnostic baseline from 3.1.0. | lib/realtime/poke-server.ts, tests/unit/realtime-poke.test.ts, docs/spikes/3.1.0-sync-latency-measurement.md | Restore private Supabase REST poke delivery by matching the private client subscription, make non-success delivery observable, and prove the result with the 3.1.0 measurement protocol. |
 | 3.1.2 | 2026-06-20 | Automated Two-User Sync-Latency Harness | infrastructure | none - internal measurement tooling. | opt-in local Playwright harness via `npm run test:e2e:latency`, with gitignored raw artifacts and an env-gated report writer that fills all three scenario tables (Baseline, Moderate, Burst). | Vitest coverage for metric calculation plus a controller-run two-user harness producing valid end-to-end distributions across all three scenarios (Baseline, Moderate, Burst). | tests/e2e/sync-latency.spec.ts, tests/e2e/utils/sync-latency-*.ts, tests/unit/sync-latency-metrics.test.ts, playwright.config.ts, package.json, docs/spikes/3.1.0-sync-latency-measurement.md | Automate two-user shared-list propagation measurement with retained dev-only instrumentation, deterministic metric calculation, and report fill markers. |
 | 3.2.0 | 2026-06-20 | Design Tokens & Dark Mode | product behavior | user-visible theming + dark mode. | tokens + theme run app-wide. | targeted + manual product proof (toggle dark mode); design.md parity. | token layer (app/globals.css or equivalent), theme provider, components touched for tokens | Implement the docs/design.md token system and a working light/dark theme switch. |
+| 3.2.1 | 2026-06-20 | Collapsible Left Sidebar & Canvas Shell | product behavior | new navigation/layout shell (user-visible). | the shell wraps the dashboard. | targeted + manual product proof (collapse/expand, responsive); design.md parity. | components/layout/* (new shell), app layout | Introduce the ChatGPT-style collapsible left sidebar + main canvas app shell per docs/design.md. |
 
 ---
 
