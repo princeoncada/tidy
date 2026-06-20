@@ -88,6 +88,12 @@ The semantic layer is additive over the existing shadcn variables. The logical
 `--accent` variables. The `border` and `destructive` roles intentionally reuse
 the existing `--border` and `--destructive` variables.
 
+shadcn primitive surfaces (popover, card, dialog) realize the surface and
+surface-raised roles through their existing shadcn tokens (`--popover`,
+`--card`); feature code must not override a primitive's background with a
+semantic `bg-*` utility, because tailwind-merge does not dedupe custom theme
+colors against the primitive's default background.
+
 | Role | Runtime variable | Light | Dark |
 | --- | --- | --- | --- |
 | canvas | `--canvas` | `oklch(0.985 0 0)` | `oklch(0.145 0 0)` |

@@ -146,6 +146,11 @@ Keep these because Replicache still uses them:
 - Hardcoded colors outside the migrated dashboard chrome remain for later
   visual phases; auth, landing, shadcn primitives, and product-data tag colors
   were intentionally not included in 3.2.0.
+- Theme tokens: do not override a shadcn primitive's background (for example,
+  `DropdownMenuContent`, `Card`, or `Dialog`) with a semantic `bg-*` utility;
+  tailwind-merge will not dedupe it against the primitive's `bg-popover` or
+  `bg-card` and the surface drops out. Primitives keep their shadcn surface
+  tokens; feature chrome uses semantic utilities.
 
 ## Validation Boundary
 
