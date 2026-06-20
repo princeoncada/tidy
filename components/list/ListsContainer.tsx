@@ -7,6 +7,7 @@ import { useDashboardMutations } from '@/hooks/useDashboardMutations';
 import type { LocalFirstDashboardBoot } from '@/hooks/useLocalFirstDashboardBoot';
 import { useReplicacheDashboard } from '@/hooks/useReplicacheDashboard';
 import { measureOptimisticEvent, OptimisticProfiler, useRenderMeasure } from '@/lib/optimistic-debug';
+import { filterListsByWorkspace } from '@/lib/dashboard/workspace-filter';
 import { keyBetween } from '@/lib/sync/fractional-index';
 import { replicacheKeys } from '@/lib/sync/replicache/keys';
 import ListComponent from './ListComponent';
@@ -18,6 +19,7 @@ import { List, Lists, OptimisticList, OptimisticListItem } from './types';
 type DragPreviewLists = Lists;
 type ListsContainerProps = {
   boot: LocalFirstDashboardBoot;
+  activeWorkspaceId: string | null;
 };
 
 function canEditListContent(list: List, userId: string | null) {
@@ -205,7 +207,7 @@ function movedEntityOrderKey(
   );
 }
 
-const ListsContainer = ({ boot }: ListsContainerProps) => {
+const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
   const replicacheDashboard = useReplicacheDashboard();
   const dashboardMutations = useDashboardMutations();
 
@@ -219,7 +221,10 @@ const ListsContainer = ({ boot }: ListsContainerProps) => {
   const dragPreviewListsRef = useRef<DragPreviewLists | null>(null);
   const currentView = replicacheDashboard.currentView;
   const allListsView = replicacheDashboard.views.find((view) => view.type === "ALL_LISTS");
-  const lists = currentView?.lists ?? [];
+  const lists = filterListsByWorkspace(
+    currentView?.lists ?? [],
+    activeWorkspaceId,
+  );
   const visibleLists = dragPreviewLists ?? lists;
 
   const scheduleReorderListsSave = useCallback(async (
