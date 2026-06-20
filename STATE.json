@@ -1,9 +1,9 @@
 {
-    "version":  "3.2.1",
-    "state":  "stable",
-    "phase":  "3.2.1",
-    "phaseTitle":  "Collapsible Left Sidebar \u0026 Canvas Shell",
-    "nextPhase":  "3.2.2 - Workspace Navigation",
+    "version":  "3.2.2-alpha",
+    "state":  "alpha",
+    "phase":  "3.2.2",
+    "phaseTitle":  "Workspace Navigation",
+    "nextPhase":  "3.2.3 - Views Reorder Snap-Back Patch",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-20"
 }
