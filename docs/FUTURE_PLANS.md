@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.1.1 - Sync Latency Fix (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.1.1 - Sync Latency Fix
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Restore private Supabase REST poke delivery by matching the private client subscription, make non-success delivery observable, and prove the result with the 3.1.0 measurement protocol.
-- **Product impact:** faster shared-change propagation (user-visible responsiveness).
-- **Runtime integration target:** server REST broadcasts reach existing private per-user Realtime subscriptions; Replicache pull remains the structural-sync authority.
-- **Deferral boundary:** Do not change pull intervals, Replicache contracts, recipient authorization, or add a second sync transport.
-- **Validation target:** targeted private-broadcast tests plus 30-sample baseline/moderate/burst proof against the 22,078 ms periodic-fallback diagnostic baseline from 3.1.0.
-- **Files:** lib/realtime/poke-server.ts, tests/unit/realtime-poke.test.ts, docs/spikes/3.1.0-sync-latency-measurement.md
 
 ### 3.2.0 - Design Tokens & Dark Mode
 - **Status:** Open
