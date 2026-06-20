@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.1.2",
+  "version": "3.2.0-alpha",
   "generatedAt": "2026-06-20",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -321,6 +321,7 @@
       ],
       "imports": [
         "@/components/AppShellServiceWorker",
+        "@/components/theme/ThemeProvider",
         "@/components/ui/sonner",
         "@/trpc/client",
         "next",
@@ -810,6 +811,31 @@
       ]
     },
     {
+      "path": "components/theme/ThemeProvider.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ThemeProvider"
+      ],
+      "imports": [
+        "next-themes"
+      ]
+    },
+    {
+      "path": "components/theme/ThemeToggle.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ThemeToggle"
+      ],
+      "imports": [
+        "lucide-react",
+        "next-themes",
+        "react",
+        "@/components/ui/button"
+      ]
+    },
+    {
       "path": "components/ui/avatar.tsx",
       "kind": "component",
       "extension": ".tsx",
@@ -1036,6 +1062,7 @@
         "@/trpc/client",
         "@tanstack/react-query",
         "lucide-react",
+        "./theme/ThemeToggle",
         "./ui/avatar",
         "./ui/button",
         "./ui/dropdown-menu"
@@ -2135,6 +2162,15 @@
       "imports": []
     },
     {
+      "path": "lib/theme/tokens.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "REQUIRED_COLOR_ROLES"
+      ],
+      "imports": []
+    },
+    {
       "path": "lib/trpc.ts",
       "kind": "library",
       "extension": ".ts",
@@ -3113,6 +3149,30 @@
       ]
     },
     {
+      "path": "tests/unit/theme-toggle.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/theme/ThemeProvider",
+        "@/components/theme/ThemeToggle"
+      ]
+    },
+    {
+      "path": "tests/unit/theme-tokens.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "node:fs",
+        "node:path",
+        "vitest",
+        "@/lib/theme/tokens"
+      ]
+    },
+    {
       "path": "tests/unit/view-helpers.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3553,6 +3613,12 @@
       "to": "components/AppShellServiceWorker.tsx",
       "type": "imports",
       "import": "@/components/AppShellServiceWorker"
+    },
+    {
+      "from": "app/layout.tsx",
+      "to": "components/theme/ThemeProvider.tsx",
+      "type": "imports",
+      "import": "@/components/theme/ThemeProvider"
     },
     {
       "from": "app/layout.tsx",
@@ -4377,6 +4443,12 @@
       "import": "@/trpc/client"
     },
     {
+      "from": "components/theme/ThemeToggle.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
+    },
+    {
       "from": "components/ui/avatar.tsx",
       "to": "lib/utils.ts",
       "type": "imports",
@@ -4531,6 +4603,12 @@
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
+    },
+    {
+      "from": "components/UserAccountNav.tsx",
+      "to": "components/theme/ThemeToggle.tsx",
+      "type": "imports",
+      "import": "./theme/ThemeToggle"
     },
     {
       "from": "components/UserAccountNav.tsx",
@@ -5833,6 +5911,24 @@
       "to": "lib/sync/sync-latency-spike.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-latency-spike"
+    },
+    {
+      "from": "tests/unit/theme-toggle.test.tsx",
+      "to": "components/theme/ThemeProvider.tsx",
+      "type": "imports",
+      "import": "@/components/theme/ThemeProvider"
+    },
+    {
+      "from": "tests/unit/theme-toggle.test.tsx",
+      "to": "components/theme/ThemeToggle.tsx",
+      "type": "imports",
+      "import": "@/components/theme/ThemeToggle"
+    },
+    {
+      "from": "tests/unit/theme-tokens.test.ts",
+      "to": "lib/theme/tokens.ts",
+      "type": "imports",
+      "import": "@/lib/theme/tokens"
     },
     {
       "from": "tests/unit/view-helpers.test.ts",

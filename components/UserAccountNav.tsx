@@ -3,6 +3,7 @@
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
+import { ThemeToggle } from "./theme/ThemeToggle";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -22,7 +23,7 @@ const UserAccountNav = ({ logout }: { logout: () => void; }) => {
         asChild
         className="overflow-visible"
       >
-        <Button className="rounded-full h-7 w-7 md:h-9 md:w-9 bg-slate-400">
+        <Button className="rounded-full h-7 w-7 md:h-9 md:w-9 bg-surface-muted">
           <Avatar className='relative h-7 w-7 md:h-9 md:w-9'>
             <AvatarFallback>
               <User className="scale-90 md:scale-100" />
@@ -30,13 +31,13 @@ const UserAccountNav = ({ logout }: { logout: () => void; }) => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-white w-40 p-1 m-1" align="start">
+      <DropdownMenuContent className="w-40 p-1 m-1" align="start">
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-0.5 leading-none min-w-0">
-            {name && <p className="font-medium text-xs text-black">{name}</p>}
+            {name && <p className="font-medium text-xs text-text">{name}</p>}
             {
               user && (
-                <p className="truncate text-xs text-zinc-700">{user.email}</p>
+                <p className="truncate text-xs text-text-muted">{user.email}</p>
               )
             }
           </div>
@@ -55,6 +56,10 @@ const UserAccountNav = ({ logout }: { logout: () => void; }) => {
             </Button>
           </div>
         </DropdownMenuItem> */}
+
+        <DropdownMenuSeparator />
+
+        <ThemeToggle />
 
         <DropdownMenuSeparator />
 

@@ -1,11 +1,11 @@
-<!-- Current Version: 3.1.2 -->
+<!-- Current Version: 3.2.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.1.2 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.1.2 - Automated Two-User Sync-Latency Harness
-**Next**: 3.2.0 - Design Tokens & Dark Mode
+**Current Version**: 3.2.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.2.0 - Design Tokens & Dark Mode
+**Next**: 3.2.1 - Collapsible Left Sidebar & Canvas Shell
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -24,6 +24,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Create, update, delete, attach, and detach tags.
 - Create, edit, delete, select, and reorder custom tag-based views.
 - Redeem share links and manage workspaces/list shares.
+- Switch the app theme among light, dark, and system from the account menu.
 
 **Routes**:
 - `/` - landing card.
@@ -47,8 +48,16 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - `trpc/routers/*` - retained protected API for auth-adjacent and non-dashboard management flows such as sharing.
 - `components/sharing/*`, `lib/sync/permissions.ts`, `app/share/[token]/page.tsx` - sharing role authority, management API, owner controls, and invite redemption.
 - `app/manifest.ts`, `public/sw.js`, `components/AppShellServiceWorker.tsx`, `hooks/use-app-shell-service-worker.ts`, `lib/sw/*` - app-shell service worker.
+- `app/globals.css`, `lib/theme/tokens.ts`, and `components/theme/*` - additive
+  semantic color tokens and root-mounted theme controls.
 
 ## Architecture Invariants
+
+**Theme and semantic color layer:**
+- Semantic color roles are additive over the existing shadcn variables; shadcn
+  primitives remain wired to their original tokens.
+- `next-themes` applies the light/dark/system class strategy from the root
+  layout, and the account menu owns the theme toggle until the later shell phase.
 
 **Replicache is the only dashboard render/write path:**
 - The dashboard always mounts `ReplicacheProvider` for an authenticated user after local boot identifies the user.
@@ -134,6 +143,14 @@ Keep these because Replicache still uses them:
 - Collaborative notes require the manually applied per-item Realtime RLS policy.
 - Repeating the full authenticated suite across multiple app processes can still exhaust the external Postgres session pool; connection hygiene remains a candidate follow-up.
 - `package.json` still owns script naming and cannot be changed by Codex implementation phases that explicitly prohibit package edits.
+- Hardcoded colors outside the migrated dashboard chrome remain for later
+  visual phases; auth, landing, shadcn primitives, and product-data tag colors
+  were intentionally not included in 3.2.0.
+- Theme tokens: do not override a shadcn primitive's background (for example,
+  `DropdownMenuContent`, `Card`, or `Dialog`) with a semantic `bg-*` utility;
+  tailwind-merge will not dedupe it against the primitive's `bg-popover` or
+  `bg-card` and the surface drops out. Primitives keep their shadcn surface
+  tokens; feature chrome uses semantic utilities.
 
 ## Validation Boundary
 

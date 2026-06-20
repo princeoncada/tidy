@@ -58,7 +58,7 @@ const Dashboard = () => {
               <div className="w-full flex justify-between items-end h-12">
                 <div className="flex gap-3 items-end">
                   <UserAccountNav logout={handleLogout} />
-                  <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                  <h1 className="text-xl md:text-2xl font-bold text-text">
                     Your Todo Lists
                   </h1>
                 </div>
@@ -73,7 +73,7 @@ const Dashboard = () => {
               <ViewsSidebarPreview userId={localFirstBoot.userId} />
             </div>
 
-            <Separator className="bg-zinc-200 md:bg-zinc-200/30" />
+            <Separator className="bg-border md:bg-border/30" />
           </div>
 
           <ListsContainer boot={localFirstBoot} />

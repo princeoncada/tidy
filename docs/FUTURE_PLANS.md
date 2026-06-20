@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.0 - Design Tokens & Dark Mode (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.0 - Design Tokens & Dark Mode
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Implement the docs/design.md token system and a working light/dark theme switch.
 - **Product impact:** user-visible theming + dark mode.

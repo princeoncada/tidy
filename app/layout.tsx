@@ -1,4 +1,5 @@
 import { AppShellServiceWorker } from "@/components/AppShellServiceWorker";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCReactProvider } from "@/trpc/client";
 import type { Metadata } from "next";
@@ -82,20 +83,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased font-extralight`}
     >
       <body className="min-h-full flex justify-center font-normal">
-        <AppShellServiceWorker />
-        <TRPCReactProvider>
-          {children}
-          <Toaster
-            toastOptions={{
-              classNames: {
-                description: "!text-zinc-700"
-              }
-            }}
-          />
-        </TRPCReactProvider>
+        <ThemeProvider>
+          <AppShellServiceWorker />
+          <TRPCReactProvider>
+            {children}
+            <Toaster
+              toastOptions={{
+                classNames: {
+                  description: "!text-text-muted",
+                },
+              }}
+            />
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

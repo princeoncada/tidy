@@ -108,16 +108,16 @@ function SortableViewRowComponent({
       ref={ref}
       className={cn(
         "group/view-row flex items-center gap-0.5 rounded-md border border-transparent pr-0.5 transition",
-        "hover:border-zinc-200 hover:bg-zinc-50",
-        isDragging && "scale-[1.01] border-zinc-300 bg-zinc-100 shadow-sm"
+        "hover:border-border hover:bg-surface-muted",
+        isDragging && "scale-[1.01] border-border bg-surface-muted shadow-sm"
       )}
     >
       <button
         ref={handleRef}
         type="button"
         className={cn(
-          "cursor-grab rounded-sm p-1 text-zinc-400 transition",
-          "hover:bg-zinc-200/70 hover:text-zinc-700 active:cursor-grabbing"
+          "cursor-grab rounded-sm p-1 text-text-muted transition",
+          "hover:bg-surface-muted/70 hover:text-text-muted active:cursor-grabbing"
         )}
         aria-label={`Reorder ${view.name}`}
         data-testid="view-drag-handle"
@@ -130,14 +130,14 @@ function SortableViewRowComponent({
         onClick={() => onSelect(view.id)}
         className={cn(
           "flex min-w-0 flex-1 items-center justify-between rounded-sm px-1.5 py-1 text-left text-xs transition",
-          isSelected ? "text-zinc-900" : "text-zinc-700 hover:text-zinc-900"
+          isSelected ? "text-text" : "text-text-muted hover:text-text"
         )}
       >
         <span className="truncate">{view.name}</span>
         <Check
           className={cn(
             "size-3.5 shrink-0",
-            isSelected ? "opacity-100 text-zinc-700" : "opacity-0"
+            isSelected ? "opacity-100 text-text-muted" : "opacity-0"
           )}
         />
       </button>
@@ -177,7 +177,7 @@ const SortableViewRow = memo(SortableViewRowComponent);
 
 function ViewsSidebarSkeleton() {
   return (
-    <Card className="w-full border-zinc-200/80 bg-white/90 shadow-none py-0 mt-3">
+    <Card className="w-full border-border/80 bg-surface/90 shadow-none py-0 mt-3">
       <CardHeader className="px-3 py-3">
         <CardTitle className="flex items-center justify-between text-sm">
           <span className="inline-flex items-center gap-1.5">
@@ -189,7 +189,7 @@ function ViewsSidebarSkeleton() {
       </CardHeader>
 
       <CardContent className="space-y-2 px-3 pb-3 pt-0">
-        <div className="flex w-full items-center justify-between rounded-md border border-zinc-200 px-2 py-1.5">
+        <div className="flex w-full items-center justify-between rounded-md border border-border px-2 py-1.5">
           <span className="inline-flex items-center gap-1.5">
             <Skeleton className="size-3.5" />
             <Skeleton className="h-3.5 w-16" />
@@ -312,7 +312,7 @@ function ViewDialog({
                           toggleTag(tag.id);
                         }
                       }}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition hover:bg-zinc-50"
+                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition hover:bg-surface-muted"
                     >
                       <Checkbox checked={selected} />
                       <span className="min-w-0 flex-1 truncate">{tag.name}</span>
@@ -506,11 +506,11 @@ export default function ViewsSidebarPreview({
 
   return (
     <>
-      <Card className="w-full border-zinc-200/80 bg-white/90 shadow-none py-0 mt-3">
+      <Card className="w-full border-border/80 bg-surface/90 shadow-none py-0 mt-3">
         <CardHeader className="px-3 py-3">
           <CardTitle className="flex items-center justify-between text-sm">
             <span className="inline-flex items-center gap-1.5">
-              <ListFilter className="size-3.5 text-zinc-500" />
+              <ListFilter className="size-3.5 text-text-muted" />
               Views
             </span>
             <Button
@@ -532,10 +532,10 @@ export default function ViewsSidebarPreview({
             type="button"
             onClick={() => selectView(allListsView?.id)}
             className={cn(
-              "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-zinc-200 hover:bg-zinc-50",
+              "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-border hover:bg-surface-muted",
               selectedViewId === allListsView?.id
-                ? "border-zinc-300 bg-zinc-50 text-zinc-900"
-                : "text-zinc-700 hover:text-zinc-900"
+                ? "border-border bg-selection text-text"
+                : "text-text-muted hover:text-text"
             )}
           >
             <span className="inline-flex items-center gap-1.5">
@@ -546,7 +546,7 @@ export default function ViewsSidebarPreview({
               className={cn(
                 "size-3.5",
                 selectedViewId === allListsView?.id
-                  ? "opacity-100 text-zinc-700"
+                  ? "opacity-100 text-text-muted"
                   : "opacity-0"
               )}
             />
