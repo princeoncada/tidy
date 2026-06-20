@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.1.2 - Automated Two-User Sync-Latency Harness (active) - see Planned
 ---
 
 ## Planned
