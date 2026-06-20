@@ -520,7 +520,8 @@
         "@/hooks/useLocalFirstDashboardBoot",
         "@/components/ReplicacheProvider",
         "@/components/sharing/WorkspacesDialog",
-        "@/components/layout/AppShell"
+        "@/components/layout/AppShell",
+        "@/components/layout/WorkspaceSwitcher"
       ]
     },
     {
@@ -536,6 +537,22 @@
         "@/components/ui/button",
         "@/components/ui/dialog",
         "@/lib/utils"
+      ]
+    },
+    {
+      "path": "components/layout/WorkspaceSwitcher.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "WorkspaceSwitcher"
+      ],
+      "imports": [
+        "@tanstack/react-query",
+        "lucide-react",
+        "@/components/ui/card",
+        "@/components/ui/skeleton",
+        "@/lib/utils",
+        "@/trpc/client"
       ]
     },
     {
@@ -674,6 +691,7 @@
         "@/hooks/useLocalFirstDashboardBoot",
         "@/hooks/useReplicacheDashboard",
         "@/lib/optimistic-debug",
+        "@/lib/dashboard/workspace-filter",
         "@/lib/sync/fractional-index",
         "@/lib/sync/replicache/keys",
         "./ListComponent",
@@ -1638,6 +1656,15 @@
         "@/lib/sync/permissions",
         "@/trpc/routers/viewHelpers"
       ]
+    },
+    {
+      "path": "lib/dashboard/workspace-filter.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "filterListsByWorkspace"
+      ],
+      "imports": []
     },
     {
       "path": "lib/db.ts",
@@ -2740,6 +2767,18 @@
       ]
     },
     {
+      "path": "tests/e2e/workspace-nav.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "./utils/fixtures",
+        "./utils/app",
+        "./utils/assertions",
+        "./utils/seed"
+      ]
+    },
+    {
       "path": "tests/setup.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3209,6 +3248,16 @@
         "vitest",
         "@/app/generated/prisma/client",
         "@/trpc/routers/viewHelpers"
+      ]
+    },
+    {
+      "path": "tests/unit/workspace-filter.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/dashboard/workspace-filter"
       ]
     },
     {
@@ -3842,6 +3891,12 @@
     },
     {
       "from": "components/Dashboard.tsx",
+      "to": "components/layout/WorkspaceSwitcher.tsx",
+      "type": "imports",
+      "import": "@/components/layout/WorkspaceSwitcher"
+    },
+    {
+      "from": "components/Dashboard.tsx",
       "to": "components/list/ListAdder.tsx",
       "type": "imports",
       "import": "./list/ListAdder"
@@ -3917,6 +3972,30 @@
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/card.tsx",
+      "type": "imports",
+      "import": "@/components/ui/card"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/skeleton.tsx",
+      "type": "imports",
+      "import": "@/components/ui/skeleton"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "lib/utils.ts",
+      "type": "imports",
+      "import": "@/lib/utils"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "trpc/client.tsx",
+      "type": "imports",
+      "import": "@/trpc/client"
     },
     {
       "from": "components/list/ItemNotesEditor.tsx",
@@ -4253,6 +4332,12 @@
       "to": "hooks/useReplicacheDashboard.ts",
       "type": "imports",
       "import": "@/hooks/useReplicacheDashboard"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
+      "to": "lib/dashboard/workspace-filter.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/workspace-filter"
     },
     {
       "from": "components/list/ListsContainer.tsx",
@@ -5575,6 +5660,30 @@
       "import": "./utils/seed"
     },
     {
+      "from": "tests/e2e/workspace-nav.spec.ts",
+      "to": "tests/e2e/utils/app.ts",
+      "type": "imports",
+      "import": "./utils/app"
+    },
+    {
+      "from": "tests/e2e/workspace-nav.spec.ts",
+      "to": "tests/e2e/utils/assertions.ts",
+      "type": "imports",
+      "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/workspace-nav.spec.ts",
+      "to": "tests/e2e/utils/fixtures.ts",
+      "type": "imports",
+      "import": "./utils/fixtures"
+    },
+    {
+      "from": "tests/e2e/workspace-nav.spec.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
       "from": "tests/unit/app-shell-strategy.test.ts",
       "to": "lib/sw/app-shell-strategy.ts",
       "type": "imports",
@@ -5993,6 +6102,12 @@
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
       "import": "@/trpc/routers/viewHelpers"
+    },
+    {
+      "from": "tests/unit/workspace-filter.test.ts",
+      "to": "lib/dashboard/workspace-filter.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/workspace-filter"
     },
     {
       "from": "tests/unit/yjs-note-doc.test.ts",
