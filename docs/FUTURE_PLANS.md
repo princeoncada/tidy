@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.1.2 - Automated Two-User Sync-Latency Harness (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.1.2 - Automated Two-User Sync-Latency Harness
-- **Status:** In progress
-- **Type:** infrastructure
-- **Implementation goal:** Automate two-user shared-list propagation measurement with retained dev-only instrumentation, deterministic metric calculation, and report fill markers.
-- **Product impact:** none - internal measurement tooling.
-- **Runtime integration target:** opt-in local Playwright harness via `npm run test:e2e:latency`, with gitignored raw artifacts and an env-gated report writer that fills all three scenario tables (Baseline, Moderate, Burst).
-- **Deferral boundary:** Not a CI gate (local-run, latency-variant); all three scenarios (Baseline/Moderate/Burst) are in scope and fill their Results tables; no scenario deferral.
-- **Validation target:** Vitest coverage for metric calculation plus a controller-run two-user harness producing valid end-to-end distributions across all three scenarios (Baseline, Moderate, Burst).
-- **Files:** tests/e2e/sync-latency.spec.ts, tests/e2e/utils/sync-latency-*.ts, tests/unit/sync-latency-metrics.test.ts, playwright.config.ts, package.json, docs/spikes/3.1.0-sync-latency-measurement.md
 
 ### 3.2.0 - Design Tokens & Dark Mode
 - **Status:** Open
