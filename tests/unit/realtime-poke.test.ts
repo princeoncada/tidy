@@ -17,6 +17,7 @@ afterEach(() => {
   } else {
     process.env.SUPABASE_SERVICE_ROLE_KEY = originalServiceRoleKey;
   }
+  vi.restoreAllMocks();
 });
 
 describe("realtime poke", () => {
@@ -24,15 +25,16 @@ describe("realtime poke", () => {
     expect(pokeTopicForUser("u1")).toBe("tidy:user:u1");
   });
 
-  it("posts a broadcast poke authenticated with the service-role key", async () => {
+  it("posts a private broadcast poke authenticated with the service-role key", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
     const fetchImpl = vi.fn<typeof fetch>(async () => new Response(null, {
-      status: 200,
+      status: 202,
     }));
 
-    await pokeUser("u1", { fetchImpl });
+    const result = await pokeUser("u1", { fetchImpl });
 
+    expect(result).toEqual({ delivered: true, status: 202 });
     expect(fetchImpl).toHaveBeenCalledOnce();
     const [url, init] = fetchImpl.mock.calls[0]!;
     expect(url).toBe(
@@ -45,17 +47,44 @@ describe("realtime poke", () => {
     expect(body.messages[0]).toMatchObject({
       topic: "tidy:user:u1",
       event: "poke",
+      private: true,
     });
   });
 
-  it("does not throw when the broadcast request fails", async () => {
+  it("surfaces a non-success broadcast response without throwing", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const fetchImpl = vi.fn<typeof fetch>(async () => new Response(null, {
+      status: 403,
+    }));
+
+    const result = await pokeUser("u1", { fetchImpl });
+
+    expect(result).toEqual({
+      delivered: false,
+      reason: "rejected",
+      status: 403,
+    });
+    expect(warn).toHaveBeenCalledOnce();
+  });
+
+  it("surfaces a thrown broadcast error without throwing", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const fetchImpl = vi.fn<typeof fetch>(async () => {
       throw new Error("network unavailable");
     });
 
-    await expect(pokeUser("u1", { fetchImpl })).resolves.toBeUndefined();
+    const result = await pokeUser("u1", { fetchImpl });
+
+    expect(result).toEqual({
+      delivered: false,
+      reason: "error",
+      error: "network unavailable",
+    });
+    expect(warn).toHaveBeenCalledOnce();
   });
 
   it("does not send when the Supabase URL is missing", async () => {
@@ -63,8 +92,9 @@ describe("realtime poke", () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
     const fetchImpl = vi.fn<typeof fetch>();
 
-    await pokeUser("u1", { fetchImpl });
+    const result = await pokeUser("u1", { fetchImpl });
 
+    expect(result).toEqual({ delivered: false, reason: "not-configured" });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
@@ -73,8 +103,9 @@ describe("realtime poke", () => {
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     const fetchImpl = vi.fn<typeof fetch>();
 
-    await pokeUser("u1", { fetchImpl });
+    const result = await pokeUser("u1", { fetchImpl });
 
+    expect(result).toEqual({ delivered: false, reason: "not-configured" });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 });

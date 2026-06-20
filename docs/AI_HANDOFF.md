@@ -1,11 +1,11 @@
-<!-- Current Version: 3.1.0 -->
+<!-- Current Version: 3.1.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.1.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.1.0 - Sync Latency Measurement Spike
-**Next**: 3.1.1 - Sync Latency Fix
+**Current Version**: 3.1.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.1.1 - Sync Latency Fix
+**Next**: 3.2.0 - Design Tokens & Dark Mode
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -102,7 +102,7 @@ The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration A
 - The gated path records bounded in-memory events at local mutation, push, poke, pull, and generated-marker DOM-render boundaries. It records identifiers, counts, stages, and timestamps only; it does not alter replicated data or wire contracts.
 - `docs/spikes/3.1.0-sync-latency-measurement.md` owns the two-profile measurement protocol, result tables, limitations, and removal steps.
 - Configured `smoke-004` measured 22,078 ms end-to-end through periodic pull, with an 18,168 ms wait after push before the peer pull began and no peer `poke_received` event.
-- The confirmed 3.1.1 hypothesis is a private-channel REST mismatch: the client subscribes privately, while `pokeUser()` omits `private: true` and masks non-success HTTP responses. The product fix remains deferred to 3.1.1; see the spike report for evidence and validation scope.
+- 3.1.1 fixed the private-channel REST mismatch: `pokeUser()` now sends `private: true` on the broadcast message (matching the private client subscription) and returns a structured delivery result plus a `console.warn` instead of masking non-success HTTP responses. A post-fix representative trial verified poke delivery is restored (end-to-end 22,078 ms -> ~4,094 ms). The gated instrumentation is RETAINED (not removed at 3.1.1 close): the follow-up automated two-user sync-latency harness phase reuses it as a kept dev-only test hook and produces the full distribution. See the spike report for the protocol and the superseded removal steps.
 
 ## Removed Legacy Paths
 

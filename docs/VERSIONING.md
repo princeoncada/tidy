@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.1.0
-- **Current phase:** 3.1.0 - Sync Latency Measurement Spike
-- **Next phase:** 3.1.1 - Sync Latency Fix
+- **Current version:** 3.1.1-alpha
+- **Current phase:** 3.1.1 - Sync Latency Fix
+- **Next phase:** 3.2.0 - Design Tokens & Dark Mode
 
 ---
 
