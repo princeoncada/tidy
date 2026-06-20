@@ -23,7 +23,7 @@ and design-parity review succeed.
 | --- | --- |
 | Semantic tokens and dark mode | Current |
 | Collapsible sidebar and canvas shell | Current |
-| Workspace navigation in the shell | Target: 3.2.2 |
+| Workspace navigation in the shell | Current |
 | Item detail panel and existing notes integration | Deferred: 3.3.0 |
 | Item status and assignee properties | Deferred: 3.3.1 |
 | Board, sharing polish, presence, and rollups | Deferred: 3.4.x |
@@ -187,8 +187,24 @@ becomes an overlay/drawer and the canvas retains the full viewport width. The
 overlay must trap focus while open, close predictably, and return focus to its
 trigger. No supported viewport may introduce page-level horizontal overflow.
 
-Workspace switching and navigation behavior are deferred to 3.2.2. This shell
-contract does not claim that the shell exists before 3.2.1.
+Workspace switching is Current as of 3.2.2. The sidebar hosts a workspace
+switcher with an "All workspaces" default; selecting a workspace filters the
+canvas to that workspace's lists. Selection state is expressed beyond color,
+and every workspace entry is keyboard operable.
+
+## Workspace Navigation
+
+**Maturity: Current**
+
+The workspace switcher lives in the shell sidebar. Its entries are the
+"All workspaces" default followed by owned workspaces. The canvas filter reads
+each list's synced `workspaceId` from the render store, preserving a local-first
+render and filter path with no blocking server round trip. The workspace roster
+may use the existing read-only owned-workspaces read.
+
+Lists without a workspace appear only under "All workspaces"; there is no
+separate personal or unassigned bucket. Every entry must be keyboard operable
+with visible focus, and the selected entry must expose state beyond color.
 
 ## Component Contracts
 
@@ -265,7 +281,7 @@ Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.
 
 The sidebar/canvas-shell contract is Current as of 3.2.1; the
-workspace-navigation contract remains Target for 3.2.2.
+workspace-navigation contract is Current as of 3.2.2.
 
 ## Visual Phase Parity Checklist
 

@@ -192,6 +192,7 @@ function dashboardSnapshot(view: ViewCacheItem, listName = "Inbox"): DashboardSn
         id: "list-1",
         userId: "user-1",
         name: listName,
+        workspaceId: null,
         order: 4,
         createdAt: new Date(createdAt),
         updatedAt: new Date(updatedAt),

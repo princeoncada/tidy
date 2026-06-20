@@ -143,6 +143,7 @@ export const replicacheMutators = {
       id: args.id,
       userId: args.userId,
       name: args.name,
+      workspaceId: null,
       createdAt: args.now,
       updatedAt: args.now,
     };

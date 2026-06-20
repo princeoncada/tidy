@@ -160,7 +160,7 @@ test("reorder lists inside a custom view persists after reload", async ({ page }
   await dragByMouseAndWaitForMutation(
     page,
     targetListCard.getByTestId(testIds.listDragHandle),
-    sourceListCard.getByTestId(testIds.listDragHandle)
+    sourceListCard
   );
 
   await expectListOrder(page, swappedOrder);
@@ -185,7 +185,7 @@ test("reorder lists if drag/drop is currently implemented", async ({ page }) => 
   await dragByMouseAndWaitForMutation(
     page,
     firstCard.getByTestId(testIds.listDragHandle),
-    secondCard.getByTestId(testIds.listDragHandle)
+    secondCard
   );
 
   await expectListOrder(page, [first, second]);

@@ -15,6 +15,7 @@ import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { ReplicacheProvider } from "@/components/ReplicacheProvider";
 import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
 import { AppShell } from "@/components/layout/AppShell";
+import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
 
 const supabase = createClient();
 
@@ -22,6 +23,7 @@ const Dashboard = () => {
 
   const [loggingOut, setLoggingOut] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -51,7 +53,15 @@ const Dashboard = () => {
   }
 
   const dashboard = (
-    <AppShell sidebar={<ViewsSidebarPreview userId={localFirstBoot.userId} />}>
+    <AppShell sidebar={(
+      <>
+        <WorkspaceSwitcher
+          activeWorkspaceId={activeWorkspaceId}
+          onSelect={setActiveWorkspaceId}
+        />
+        <ViewsSidebarPreview userId={localFirstBoot.userId} />
+      </>
+    )}>
       <main
         data-testid="app-shell"
         className="h-dvh min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-2 lg:px-4 xl:px-6 2xl:px-8"
@@ -77,7 +87,10 @@ const Dashboard = () => {
               <Separator className="bg-border md:bg-border/30" />
             </div>
 
-            <ListsContainer boot={localFirstBoot} />
+            <ListsContainer
+              boot={localFirstBoot}
+              activeWorkspaceId={activeWorkspaceId}
+            />
           </div>
         </MaxWidthWrapper>
       </main>

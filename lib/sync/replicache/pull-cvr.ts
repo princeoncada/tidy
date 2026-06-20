@@ -71,6 +71,7 @@ export function buildReplicacheClientView({
       id: list.id,
       userId: list.userId,
       name: list.name,
+      workspaceId: list.workspaceId ?? null,
       accessRole: list.accessRole ?? "OWNER",
       createdAt: toIso(list.createdAt),
       updatedAt: toIso(list.updatedAt),

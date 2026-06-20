@@ -16,14 +16,6 @@ function omitOrderKey<T extends { orderKey: unknown }>(
   return legacyValue;
 }
 
-function omitLegacyListFields<T extends { workspaceId: unknown }>(
-  value: T,
-): Omit<T, "workspaceId"> {
-  const legacyValue = { ...value };
-  Reflect.deleteProperty(legacyValue, "workspaceId");
-  return legacyValue;
-}
-
 export async function readViewsForUser(userId: string) {
   await ensureDefaultView(userId);
 
@@ -92,14 +84,11 @@ export async function readViewSnapshotForUser(
 
   return {
     view,
-    lists: viewLists.map((viewList) => {
-      const list = omitLegacyListFields(viewList.list);
-      return {
-        ...list,
-        order: viewList.order,
-        listItems: viewList.list.listItems.map(omitOrderKey),
-      };
-    }),
+    lists: viewLists.map((viewList) => ({
+      ...viewList.list,
+      order: viewList.order,
+      listItems: viewList.list.listItems.map(omitOrderKey),
+    })),
   };
 }
 

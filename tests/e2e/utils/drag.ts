@@ -31,8 +31,9 @@ export async function dragByMouse(page: Page, source: Locator, target: Locator) 
   await page.mouse.move(activationX, activationY, { steps: 2 });
   await page.waitForTimeout(50);
   await page.mouse.move(to.x, to.y, { steps: 12 });
-  await page.mouse.move(to.x, to.y);
-  await page.waitForTimeout(150);
+  await page.mouse.move(to.x + 8, to.y + 8, { steps: 4 });
+  await page.mouse.move(to.x, to.y, { steps: 4 });
+  await page.waitForTimeout(250);
 
   await page.mouse.up();
 

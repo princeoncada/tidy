@@ -39,6 +39,17 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 
 ## In Progress
 
+- 3.2.2 - Workspace Navigation (active)
+
+### 3.2.2 - Workspace Navigation
+- **Status:** In progress
+- **Type:** product behavior
+- **Implementation goal:** Surface workspace switching in the shell sidebar that filters the lists canvas, carrying workspace context through the Replicache render store (workspace model is KEPT).
+- **Product impact:** user-visible workspace nav.
+- **Runtime integration target:** workspace nav runs in the sidebar/shell.
+- **Deferral boundary:** No sharing/permissions UX changes (3.4.2); no board; no dedicated "Personal/unassigned" bucket beyond "All workspaces"; no sync of shared (non-owned) workspace rosters.
+- **Validation target:** targeted + manual product proof (switch workspaces).
+- **Files:** lib/sync/replicache/keys.ts, lib/sync/replicache/pull-cvr.ts, lib/sync/replicache/mutators.ts, lib/dashboard/server-read.ts, lib/dashboard/workspace-filter.ts, components/layout/WorkspaceSwitcher.tsx, components/Dashboard.tsx, components/list/ListsContainer.tsx, components/list/ListAdder.tsx, lib/local-first-dashboard.ts, docs/design.md, tests
 
 ---
 
@@ -60,16 +71,6 @@ Execution discipline (anti-loop rails):
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
 
-### 3.2.2 - Workspace Navigation
-- **Status:** Open
-- **Type:** product behavior
-- **Implementation goal:** Surface workspace switching/navigation in the new shell (workspace model is KEPT).
-- **Product impact:** user-visible workspace nav.
-- **Runtime integration target:** workspace nav runs in the sidebar/shell.
-- **Deferral boundary:** No sharing/permissions UX changes (3.4.2); no board.
-- **Validation target:** targeted + manual product proof (switch workspaces).
-- **Files:** components/layout/*, lib/sync/permissions.ts (read-only use)
-
 ### 3.2.3 - Views Reorder Snap-Back Patch
 - **Status:** Open
 - **Type:** product behavior (bug fix)
@@ -89,6 +90,16 @@ Execution discipline (anti-loop rails):
 - **Deferral boundary:** builds on the 3.2.2 workspace-switching nav and does not redefine the workspace/permissions model; the item detail panel remains 3.3.0. Reuses the existing components/ui/separator.tsx primitive (no new shadcn install).
 - **Validation target:** targeted + manual product proof (add list from the sidebar; open, reorder, and add inside both dropdowns; collapse with the fixed toggle; avatar footer dropdown opens upward; full-width lists with no horizontal overflow) and docs/design.md shell-parity update.
 - **Files:** components/layout/*, components/views/*, components/MaxWidthWrapper.tsx, components/UserAccountNav.tsx, components/list/ListAdder.tsx
+
+### 3.2.5 - Create-Path Idempotency Hardening (TOCTOU)
+- **Status:** Open
+- **Type:** infrastructure
+- **Implementation goal:** Close the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag) with a transaction-abort-aware fix (atomic `INSERT ... ON CONFLICT` / upsert, or `ROLLBACK TO SAVEPOINT` recovery) so a post-reload client replay racing the original push cannot 500.
+- **Product impact:** none directly - removes intermittent `tx.*.create` P2002 (`Unique constraint failed on the fields: (id)`) 500s under concurrent same-id pushes; not tied to any UI phase.
+- **Runtime integration target:** the Replicache push apply path (`lib/sync/server-apply.ts`) inside the existing Prisma transaction.
+- **Deferral boundary:** no change to the Replicache wire contract, projection, ordering, or any UI; absorbs the former view-create idempotency Potential Next Direction.
+- **Validation target:** a real-Postgres integration harness proving concurrent same-id create returns `already-applied` (not P2002); targeted unit coverage; previously surfaced only in the authenticated Playwright suite under reload-replay.
+- **Files:** lib/sync/server-apply.ts, prisma/schema.prisma (only if a constraint/index change is needed), tests
 
 ### 3.3.0 - Item Detail Panel & Notes
 - **Status:** Open
@@ -215,7 +226,6 @@ Execution discipline (anti-loop rails):
 ## Potential Next Directions (unversioned)
 
 Assigned a version only when scoped.
-- Create-path concurrent same-id idempotency: stand up a real-Postgres integration harness and add a transaction-abort-aware fix (`ROLLBACK TO SAVEPOINT` recovery, or an atomic `INSERT ... ON CONFLICT`) for the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag). The list-create variant surfaces intermittently in the authenticated Playwright suite as a `tx.list.create` P2002 (`Unique constraint failed on the fields: (id)`) 500 when a post-reload client replay races the original push; it is not tied to any UI phase. Deferred from 2.2.2 (unreproducible in the mock-only test layer; prevented in normal use by the Replicache client's per-client push serialization).
 - Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
 - Rate limiting and abuse controls
 - Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency (distinct from the 3.5.0 mutation ledger, which serves history/time-travel)
