@@ -81,6 +81,16 @@ Execution discipline (anti-loop rails):
 - **Validation target:** targeted + manual product proof (switch workspaces).
 - **Files:** components/layout/*, lib/sync/permissions.ts (read-only use)
 
+### 3.2.3 - Views Reorder Snap-Back Patch
+- **Status:** Open
+- **Type:** product behavior (bug fix)
+- **Implementation goal:** Fix the custom-view reorder snap-back-then-pop flash: the optimistic overlay relinquishes the dragged row's position before the committed reorder write confirms, and the row's transition makes the gap visible.
+- **Product impact:** reordering a view in the Views list commits in place with no visible snap-back.
+- **Runtime integration target:** the dashboard view-reorder handler + the lib/sync overlay path (NOT theming; verified not a 3.2.0 regression - the 3.2.0 diff to ViewsSidebarPreview.tsx was color-token-only).
+- **Deferral boundary:** scoped precisely at 3.2.3; no shell/theming changes.
+- **Validation target:** targeted + a Playwright "reorder commits in place, no snap-back" proof.
+- **Files:** components/views/ViewsSidebarPreview.tsx, dashboard view-reorder handler, lib/sync overlay path
+
 ### 3.3.0 - Item Detail Panel & Notes
 - **Status:** Open
 - **Type:** product behavior
