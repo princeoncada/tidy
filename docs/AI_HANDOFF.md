@@ -1,9 +1,9 @@
-<!-- Current Version: 3.1.2-alpha -->
+<!-- Current Version: 3.1.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.1.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.1.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.1.2 - Automated Two-User Sync-Latency Harness
 **Next**: 3.2.0 - Design Tokens & Dark Mode
 
