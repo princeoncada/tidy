@@ -226,7 +226,7 @@ Execution discipline (anti-loop rails):
 ## Potential Next Directions (unversioned)
 
 Assigned a version only when scoped.
-- View-create concurrent same-id idempotency: stand up a real-Postgres integration harness and add a transaction-abort-aware fix (`ROLLBACK TO SAVEPOINT` recovery, or an atomic `INSERT ... ON CONFLICT`) for the `findUnique` -> `create` TOCTOU in `lib/sync/server-apply.ts` view-create. Deferred from 2.2.2 (unreproducible in the mock-only test layer; prevented client-side).
+- Create-path concurrent same-id idempotency: stand up a real-Postgres integration harness and add a transaction-abort-aware fix (`ROLLBACK TO SAVEPOINT` recovery, or an atomic `INSERT ... ON CONFLICT`) for the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag). The list-create variant surfaces intermittently in the authenticated Playwright suite as a `tx.list.create` P2002 (`Unique constraint failed on the fields: (id)`) 500 when a post-reload client replay races the original push; it is not tied to any UI phase. Deferred from 2.2.2 (unreproducible in the mock-only test layer; prevented in normal use by the Replicache client's per-client push serialization).
 - Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
 - Rate limiting and abuse controls
 - Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency (distinct from the 3.5.0 mutation ledger, which serves history/time-travel)
