@@ -1,9 +1,9 @@
 {
-    "version":  "3.2.0",
-    "state":  "stable",
-    "phase":  "3.2.0",
-    "phaseTitle":  "Design Tokens \u0026 Dark Mode",
-    "nextPhase":  "3.2.1 - Collapsible Left Sidebar \u0026 Canvas Shell",
+    "version":  "3.2.1-alpha",
+    "state":  "alpha",
+    "phase":  "3.2.1",
+    "phaseTitle":  "Collapsible Left Sidebar \u0026 Canvas Shell",
+    "nextPhase":  "3.2.2 - Workspace Navigation",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-20"
 }
