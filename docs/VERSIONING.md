@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.1.1-alpha
+- **Current version:** 3.1.1
 - **Current phase:** 3.1.1 - Sync Latency Fix
 - **Next phase:** 3.2.0 - Design Tokens & Dark Mode
 
@@ -316,6 +316,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.0.3 | 2026-06-19 | Startup Context Budget Rebaseline | docs/workflow | none - internal AI workflow efficiency and drift prevention. | `scripts/ai-context-budget.ps1` remains the on-demand report and exposes strict enforcement used by `scripts/validate.ps1`. | `npm run budget:context` reports startup context below 8,000 tokens (target below 7,500 for margin); `./scripts/validate.ps1 -SkipE2E` proves the enforced gate. Script behavior has no PowerShell unit harness. | AGENTS.md, docs/FUTURE_PLANS.md, docs/AI_HANDOFF.md, docs/COMPACT_STRATEGY.md, scripts/ai-context-budget.ps1, scripts/validate.ps1, .claude/skills/tidy-context-budget/SKILL.md. | Compress startup-loaded guidance without weakening its rails, bring the startup context estimate below 8,000 tokens with margin, and enforce that ceiling during validation. |
 | 3.0.4 | 2026-06-19 | Design System Source of Truth | docs/workflow | none directly - governs later visual phases. | none - reference doc; tokens are implemented in 3.2.0. | doc gates; establish the design.md bidirectional-consistency rule. | docs/design.md (new), docs/CONTEXT_INDEX.md (route entry) | Create docs/design.md as the single UI/design source of truth (tokens, layout shells, component contracts, dark-mode intent) governing all 3.2+ visual work. |
 | 3.1.0 | 2026-06-19 | Sync Latency Measurement Spike | decision (spike) | none - measurement only. | none - spike artifacts removed or gated; findings feed 3.1.1. | spike report committed (numbers + bottleneck hypothesis). | lib/sync/* (temporary instrumentation), docs/ (spike report) | Instrument and measure real Replicache push/pull + poke latency (local mutation to peer render) under representative load; produce a numbers report. Throwaway instrumentation. |
+| 3.1.1 | 2026-06-19 | Sync Latency Fix | product behavior | faster shared-change propagation (user-visible responsiveness). | server REST broadcasts reach existing private per-user Realtime subscriptions; Replicache pull remains the structural-sync authority. | targeted private-broadcast tests plus 30-sample baseline/moderate/burst proof against the 22,078 ms periodic-fallback diagnostic baseline from 3.1.0. | lib/realtime/poke-server.ts, tests/unit/realtime-poke.test.ts, docs/spikes/3.1.0-sync-latency-measurement.md | Restore private Supabase REST poke delivery by matching the private client subscription, make non-success delivery observable, and prove the result with the 3.1.0 measurement protocol. |
 
 ---
 
