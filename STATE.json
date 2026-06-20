@@ -1,6 +1,6 @@
 {
-    "version":  "3.2.1-alpha",
-    "state":  "alpha",
+    "version":  "3.2.1",
+    "state":  "stable",
     "phase":  "3.2.1",
     "phaseTitle":  "Collapsible Left Sidebar \u0026 Canvas Shell",
     "nextPhase":  "3.2.2 - Workspace Navigation",
