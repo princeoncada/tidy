@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.1 - Collapsible Left Sidebar & Canvas Shell (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.1 - Collapsible Left Sidebar & Canvas Shell
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Introduce the ChatGPT-style collapsible left sidebar + main canvas app shell per docs/design.md.
-- **Product impact:** new navigation/layout shell (user-visible).
-- **Runtime integration target:** the shell wraps the dashboard.
-- **Deferral boundary:** Workspace-switching nav is 3.2.2; item detail panel is 3.3.0.
-- **Validation target:** targeted + manual product proof (collapse/expand, responsive); design.md parity.
-- **Files:** components/layout/* (new shell), app layout
 
 ### 3.2.2 - Workspace Navigation
 - **Status:** Open
