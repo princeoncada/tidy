@@ -20,7 +20,7 @@ export async function waitForSyncBatch(page: Page) {
         response.request().method() === "POST" &&
         response.url().includes("/api/replicache/push") &&
         response.ok(),
-      { timeout: 1_500 },
+      { timeout: 5_000 },
     )
     .catch(() => {});
 }
@@ -108,7 +108,7 @@ export async function openAllLists(page: Page) {
   const allListsButton = await firstVisible(page.getByRole("button", { name: /all lists/i }));
   const buttonClass = await allListsButton.getAttribute("class");
 
-  if (buttonClass?.includes("border-zinc-300")) return;
+  if (buttonClass?.split(/\s+/).includes("bg-selection")) return;
 
   const persisted = waitForSyncBatch(page);
   await allListsButton.click();
@@ -120,7 +120,7 @@ export async function openViewByName(page: Page, viewName: string) {
   const viewButton = viewCard.getByRole("button", { name: viewName, exact: true });
   const buttonClass = await viewButton.getAttribute("class");
 
-  if (buttonClass?.split(/\s+/).includes("text-zinc-900")) return;
+  if (buttonClass?.split(/\s+/).includes("bg-selection")) return;
 
   const persisted = waitForSyncBatch(page);
   await viewButton.click();
@@ -196,7 +196,7 @@ export async function createTag(page: Page, listName: string, tagName: string) {
   await expect(card.getByText(tagName, { exact: true })).toBeVisible();
   await applied;
   if (await tagSearchInput.count() > 0) {
-    await card.getByTestId(testIds.tagSelector).click();
+    await page.keyboard.press("Escape");
   }
   await expect(tagSearchInput).toHaveCount(0);
 }
