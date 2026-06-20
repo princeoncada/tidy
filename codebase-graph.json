@@ -1816,6 +1816,7 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "PokeDeliveryResult",
         "pokeUser"
       ],
       "imports": [
