@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.1.1 - Sync Latency Fix (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.1.1 - Sync Latency Fix
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Restore private Supabase REST poke delivery by matching the private client subscription, make non-success delivery observable, and prove the result with the 3.1.0 measurement protocol.
 - **Product impact:** faster shared-change propagation (user-visible responsiveness).
