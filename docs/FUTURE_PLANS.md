@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.1 - Collapsible Left Sidebar & Canvas Shell (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.1 - Collapsible Left Sidebar & Canvas Shell
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Introduce the ChatGPT-style collapsible left sidebar + main canvas app shell per docs/design.md.
 - **Product impact:** new navigation/layout shell (user-visible).
