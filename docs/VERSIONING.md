@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.1.2
-- **Current phase:** 3.1.2 - Automated Two-User Sync-Latency Harness
-- **Next phase:** 3.2.0 - Design Tokens & Dark Mode
+- **Current version:** 3.2.0-alpha
+- **Current phase:** 3.2.0 - Design Tokens & Dark Mode
+- **Next phase:** 3.2.1 - Collapsible Left Sidebar & Canvas Shell
 
 ---
 
