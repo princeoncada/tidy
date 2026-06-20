@@ -64,6 +64,7 @@ export default defineConfig({
         /auth\.setup\.ts/,
         /data-reset\.setup\.ts/,
         /replicache-render\.spec\.ts/,
+        /sync-latency\.spec\.ts/,
       ],
       dependencies: ["e2e-reset"],
       use: {
@@ -73,6 +74,14 @@ export default defineConfig({
     {
       name: "replicache-render",
       testMatch: /replicache-render\.spec\.ts/,
+      dependencies: ["e2e-reset"],
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
+    {
+      name: "sync-latency",
+      testMatch: /sync-latency\.spec\.ts/,
       dependencies: ["e2e-reset"],
       use: {
         ...devices["Desktop Chrome"],

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.1.1",
-  "generatedAt": "2026-06-19",
+  "version": "3.1.2-alpha",
+  "generatedAt": "2026-06-20",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -2482,6 +2482,24 @@
       ]
     },
     {
+      "path": "tests/e2e/sync-latency.spec.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@playwright/test",
+        "dotenv",
+        "node:fs",
+        "node:path",
+        "@/lib/sync/sync-latency-spike",
+        "./utils/assertions",
+        "./utils/app",
+        "./utils/sync-latency-metrics",
+        "./utils/seed",
+        "./utils/sync-latency-seed"
+      ]
+    },
+    {
       "path": "tests/e2e/utils/app.ts",
       "kind": "test",
       "extension": ".ts",
@@ -2581,6 +2599,42 @@
         "@playwright/test",
         "./assertions",
         "./test-ids"
+      ]
+    },
+    {
+      "path": "tests/e2e/utils/sync-latency-metrics.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [
+        "SyncLatencyMetricKey",
+        "SyncLatencyMetricSummary",
+        "SyncLatencySummary",
+        "SyncLatencyTrialMetrics",
+        "joinTrialEvents",
+        "percentile",
+        "renderBurstResultsMarkdown",
+        "renderResultsMarkdown",
+        "summarize",
+        "summarizeValues",
+        "syncLatencyMetricKeys"
+      ],
+      "imports": [
+        "@/lib/sync/sync-latency-spike"
+      ]
+    },
+    {
+      "path": "tests/e2e/utils/sync-latency-seed.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [
+        "cleanupSharedList",
+        "resolveUserIdByEmail",
+        "seedSharedList"
+      ],
+      "imports": [
+        "@supabase/supabase-js",
+        "./seed",
+        "@/lib/db"
       ]
     },
     {
@@ -3007,6 +3061,17 @@
         "vitest",
         "@/lib/sync/sync-endpoint-contract",
         "@/lib/local-db/outbox-schema"
+      ]
+    },
+    {
+      "path": "tests/unit/sync-latency-metrics.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/sync-latency-spike",
+        "@/tests/e2e/utils/sync-latency-metrics"
       ]
     },
     {
@@ -5232,6 +5297,42 @@
       "import": "./utils/test-ids"
     },
     {
+      "from": "tests/e2e/sync-latency.spec.ts",
+      "to": "lib/sync/sync-latency-spike.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-latency-spike"
+    },
+    {
+      "from": "tests/e2e/sync-latency.spec.ts",
+      "to": "tests/e2e/utils/app.ts",
+      "type": "imports",
+      "import": "./utils/app"
+    },
+    {
+      "from": "tests/e2e/sync-latency.spec.ts",
+      "to": "tests/e2e/utils/assertions.ts",
+      "type": "imports",
+      "import": "./utils/assertions"
+    },
+    {
+      "from": "tests/e2e/sync-latency.spec.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./utils/seed"
+    },
+    {
+      "from": "tests/e2e/sync-latency.spec.ts",
+      "to": "tests/e2e/utils/sync-latency-metrics.ts",
+      "type": "imports",
+      "import": "./utils/sync-latency-metrics"
+    },
+    {
+      "from": "tests/e2e/sync-latency.spec.ts",
+      "to": "tests/e2e/utils/sync-latency-seed.ts",
+      "type": "imports",
+      "import": "./utils/sync-latency-seed"
+    },
+    {
       "from": "tests/e2e/utils/app.ts",
       "to": "tests/e2e/utils/assertions.ts",
       "type": "imports",
@@ -5272,6 +5373,24 @@
       "to": "tests/e2e/utils/test-ids.ts",
       "type": "imports",
       "import": "./test-ids"
+    },
+    {
+      "from": "tests/e2e/utils/sync-latency-metrics.ts",
+      "to": "lib/sync/sync-latency-spike.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-latency-spike"
+    },
+    {
+      "from": "tests/e2e/utils/sync-latency-seed.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "tests/e2e/utils/sync-latency-seed.ts",
+      "to": "tests/e2e/utils/seed.ts",
+      "type": "imports",
+      "import": "./seed"
     },
     {
       "from": "tests/e2e/views.spec.ts",
@@ -5668,6 +5787,18 @@
       "to": "lib/sync/sync-endpoint-contract.ts",
       "type": "imports",
       "import": "@/lib/sync/sync-endpoint-contract"
+    },
+    {
+      "from": "tests/unit/sync-latency-metrics.test.ts",
+      "to": "lib/sync/sync-latency-spike.ts",
+      "type": "imports",
+      "import": "@/lib/sync/sync-latency-spike"
+    },
+    {
+      "from": "tests/unit/sync-latency-metrics.test.ts",
+      "to": "tests/e2e/utils/sync-latency-metrics.ts",
+      "type": "imports",
+      "import": "@/tests/e2e/utils/sync-latency-metrics"
     },
     {
       "from": "tests/unit/sync-latency-spike.test.ts",

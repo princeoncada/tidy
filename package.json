@@ -1,6 +1,6 @@
 {
   "name": "todo-app",
-  "version": "3.1.1",
+  "version": "3.1.2-alpha",
   "private": true,
   "scripts": {
     "graph:codebase": "powershell -ExecutionPolicy Bypass -File scripts/generate-codebase-graph.ps1",
@@ -20,6 +20,7 @@
     "test:e2e:smoke": "playwright test --project=smoke",
     "test:e2e:auth": "node tests/e2e/check-auth-state.mjs && playwright test --project=authenticated-dashboard --workers=2",
     "test:e2e:replicache": "playwright test --project=replicache-render --workers=1",
+    "test:e2e:latency": "playwright test --project=sync-latency --workers=1",
     "test:e2e:dashboard": "npm run test:e2e:auth",
     "test:e2e:auth:setup": "playwright test --project=auth-setup",
     "test:e2e:ui": "playwright test --project=smoke --project=dashboard --ui",
