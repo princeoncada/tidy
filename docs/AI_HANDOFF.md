@@ -1,9 +1,9 @@
-<!-- Current Version: 3.1.0-alpha -->
+<!-- Current Version: 3.1.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.1.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.1.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.1.0 - Sync Latency Measurement Spike
 **Next**: 3.1.1 - Sync Latency Fix
 
