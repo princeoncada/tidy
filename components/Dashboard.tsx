@@ -14,6 +14,7 @@ import ViewsSidebarPreview from "./views/ViewsSidebarPreview";
 import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { ReplicacheProvider } from "@/components/ReplicacheProvider";
 import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
+import { AppShell } from "@/components/layout/AppShell";
 
 const supabase = createClient();
 
@@ -50,42 +51,37 @@ const Dashboard = () => {
   }
 
   const dashboard = (
-    <MaxWidthWrapper>
-      <div className="flex gap-4">
-        <main data-testid="app-shell" className="min-w-0 flex-1 flex flex-col gap-3 py-10">
-          <div className="flex flex-col gap-2.5 w-full items-center">
-            <div className="w-full flex flex-col">
-              <div className="w-full flex justify-between items-end h-12">
-                <div className="flex gap-3 items-end">
-                  <UserAccountNav logout={handleLogout} />
-                  <h1 className="text-xl md:text-2xl font-bold text-text">
-                    Your Todo Lists
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2">
-                  <WorkspacesDialog />
-                  <ListAdder boot={localFirstBoot} />
+    <AppShell sidebar={<ViewsSidebarPreview userId={localFirstBoot.userId} />}>
+      <main
+        data-testid="app-shell"
+        className="h-dvh min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-2 lg:px-4 xl:px-6 2xl:px-8"
+      >
+        <MaxWidthWrapper>
+          <div className="flex min-w-0 flex-col gap-3 py-12 lg:py-10">
+            <div className="flex flex-col gap-2.5 w-full items-center">
+              <div className="w-full flex flex-col">
+                <div className="w-full flex justify-between items-end h-12">
+                  <div className="flex gap-3 items-end">
+                    <UserAccountNav logout={handleLogout} />
+                    <h1 className="text-xl md:text-2xl font-bold text-text">
+                      Your Todo Lists
+                    </h1>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <WorkspacesDialog />
+                    <ListAdder boot={localFirstBoot} />
+                  </div>
                 </div>
               </div>
+
+              <Separator className="bg-border md:bg-border/30" />
             </div>
 
-            <div className="w-full lg:hidden">
-              <ViewsSidebarPreview userId={localFirstBoot.userId} />
-            </div>
-
-            <Separator className="bg-border md:bg-border/30" />
+            <ListsContainer boot={localFirstBoot} />
           </div>
-
-          <ListsContainer boot={localFirstBoot} />
-        </main>
-
-        <aside className="hidden lg:block w-64 shrink-0 py-11">
-          <div className="sticky top-4">
-            <ViewsSidebarPreview userId={localFirstBoot.userId} />
-          </div>
-        </aside>
-      </div>
-    </MaxWidthWrapper>
+        </MaxWidthWrapper>
+      </main>
+    </AppShell>
   );
 
   if (!localFirstBoot.localBootReady) {
