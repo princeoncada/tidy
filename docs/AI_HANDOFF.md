@@ -1,9 +1,9 @@
-<!-- Current Version: 3.2.2-alpha -->
+<!-- Current Version: 3.2.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.2.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.2.2 - Workspace Navigation
 **Next**: 3.2.3 - Views Reorder Snap-Back Patch
 
