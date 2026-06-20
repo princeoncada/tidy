@@ -164,5 +164,45 @@ describe("Replicache CVR pull diff", () => {
     ).not.toThrow();
     expect(() => keyBetween(firstItem.order, secondItem.order)).not.toThrow();
   });
+
+  it("projects assigned and unassigned workspace ids onto list values", () => {
+    const now = new Date("2026-06-20T12:00:00.000Z");
+    const view = buildReplicacheClientView({
+      views: [],
+      allLists: {
+        view: {} as never,
+        lists: [
+          {
+            id: "assigned-list",
+            userId: "user-1",
+            name: "Assigned",
+            workspaceId: "workspace-1",
+            createdAt: now,
+            updatedAt: now,
+            listTags: [],
+            listItems: [],
+          },
+          {
+            id: "unassigned-list",
+            userId: "user-1",
+            name: "Unassigned",
+            workspaceId: null,
+            createdAt: now,
+            updatedAt: now,
+            listTags: [],
+            listItems: [],
+          },
+        ],
+      } as never,
+      tags: [],
+    });
+
+    expect(view[replicacheKeys.list("assigned-list")].value).toMatchObject({
+      workspaceId: "workspace-1",
+    });
+    expect(view[replicacheKeys.list("unassigned-list")].value).toMatchObject({
+      workspaceId: null,
+    });
+  });
 });
 
