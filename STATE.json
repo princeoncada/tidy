@@ -1,9 +1,9 @@
 {
-    "version":  "3.1.0",
-    "state":  "stable",
-    "phase":  "3.1.0",
-    "phaseTitle":  "Sync Latency Measurement Spike",
-    "nextPhase":  "3.1.1 - Sync Latency Fix",
+    "version":  "3.1.1-alpha",
+    "state":  "alpha",
+    "phase":  "3.1.1",
+    "phaseTitle":  "Sync Latency Fix",
+    "nextPhase":  "3.2.0 - Design Tokens \u0026 Dark Mode",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-19"
 }
