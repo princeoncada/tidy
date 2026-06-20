@@ -41,6 +41,7 @@ function serverGraph(listIds = ["server-list-a", "server-list-b"]): {
         id,
         userId: "user-1",
         name: id,
+        workspaceId: null,
         order,
         createdAt: new Date(createdAt),
         updatedAt: new Date(updatedAt),
