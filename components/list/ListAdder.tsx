@@ -61,12 +61,6 @@ const ListAdder = ({ boot }: ListAdderProps) => {
     setCreateListName("");
   };
 
-  const handleExit = () => {
-    setTimeout(() => {
-      setCreateListName('');
-    }, 200);
-  };
-
   if (!replicacheDashboard.ready || !allListsView) {
     return (
       <div className="h-full flex items-end">
@@ -79,7 +73,10 @@ const ListAdder = ({ boot }: ListAdderProps) => {
   return (
     <Dialog
       open={dialogOpen}
-      onOpenChange={setDialogOpen}
+      onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open) setCreateListName("");
+      }}
     >
       <DialogTrigger className="h-full" asChild>
         <div className="h-full flex items-end">
@@ -105,9 +102,7 @@ const ListAdder = ({ boot }: ListAdderProps) => {
           </Button>
         </div>
       </DialogTrigger>
-      <DialogContent
-        onCloseAutoFocus={handleExit}
-      >
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New List</DialogTitle>
           <DialogDescription>
