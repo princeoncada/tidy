@@ -66,6 +66,7 @@ const list = (id: string, tagIds: string[] = [], order = 0, overrides = {}) => (
   id,
   userId: "user-1",
   name: id,
+  workspaceId: null,
   order,
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
