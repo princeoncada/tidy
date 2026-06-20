@@ -91,6 +91,16 @@ Execution discipline (anti-loop rails):
 - **Validation target:** targeted + a Playwright "reorder commits in place, no snap-back" proof.
 - **Files:** components/views/ViewsSidebarPreview.tsx, dashboard view-reorder handler, lib/sync overlay path
 
+### 3.2.4 - Sidebar Navigation Redesign
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Rework the left sidebar into a ChatGPT-style nav: an "Add List" action pinned at the top (icon-leading, like a "new session" entry); a Workspaces dropdown and a Views dropdown that each list their entries with an in-dropdown add button and in-dropdown reordering, each bounded by a max-height with the sidebar handling overflow; replacing the current Views card surface. Move the user avatar to the sidebar footer above a shadcn Separator with its account dropdown opening upward; pin the collapse toggle to a fixed position that does not move with the sidebar show/hide (locked at its collapsed-state position); and let the lists canvas use the full site width.
+- **Product impact:** redesigned sidebar navigation plus full-width lists (user-visible).
+- **Runtime integration target:** the shell sidebar (components/layout/*) hosts Add List, the Workspaces and Views dropdowns, and the account footer; lists render full-width in the canvas.
+- **Deferral boundary:** builds on the 3.2.2 workspace-switching nav and does not redefine the workspace/permissions model; the item detail panel remains 3.3.0. Reuses the existing components/ui/separator.tsx primitive (no new shadcn install).
+- **Validation target:** targeted + manual product proof (add list from the sidebar; open, reorder, and add inside both dropdowns; collapse with the fixed toggle; avatar footer dropdown opens upward; full-width lists with no horizontal overflow) and docs/design.md shell-parity update.
+- **Files:** components/layout/*, components/views/*, components/MaxWidthWrapper.tsx, components/UserAccountNav.tsx, components/list/ListAdder.tsx
+
 ### 3.3.0 - Item Detail Panel & Notes
 - **Status:** Open
 - **Type:** product behavior
