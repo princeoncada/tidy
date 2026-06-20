@@ -24,6 +24,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Create, update, delete, attach, and detach tags.
 - Create, edit, delete, select, and reorder custom tag-based views.
 - Redeem share links and manage workspaces/list shares.
+- Switch the app theme among light, dark, and system from the account menu.
 
 **Routes**:
 - `/` - landing card.
@@ -47,8 +48,16 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - `trpc/routers/*` - retained protected API for auth-adjacent and non-dashboard management flows such as sharing.
 - `components/sharing/*`, `lib/sync/permissions.ts`, `app/share/[token]/page.tsx` - sharing role authority, management API, owner controls, and invite redemption.
 - `app/manifest.ts`, `public/sw.js`, `components/AppShellServiceWorker.tsx`, `hooks/use-app-shell-service-worker.ts`, `lib/sw/*` - app-shell service worker.
+- `app/globals.css`, `lib/theme/tokens.ts`, and `components/theme/*` - additive
+  semantic color tokens and root-mounted theme controls.
 
 ## Architecture Invariants
+
+**Theme and semantic color layer:**
+- Semantic color roles are additive over the existing shadcn variables; shadcn
+  primitives remain wired to their original tokens.
+- `next-themes` applies the light/dark/system class strategy from the root
+  layout, and the account menu owns the theme toggle until the later shell phase.
 
 **Replicache is the only dashboard render/write path:**
 - The dashboard always mounts `ReplicacheProvider` for an authenticated user after local boot identifies the user.
@@ -134,6 +143,9 @@ Keep these because Replicache still uses them:
 - Collaborative notes require the manually applied per-item Realtime RLS policy.
 - Repeating the full authenticated suite across multiple app processes can still exhaust the external Postgres session pool; connection hygiene remains a candidate follow-up.
 - `package.json` still owns script naming and cannot be changed by Codex implementation phases that explicitly prohibit package edits.
+- Hardcoded colors outside the migrated dashboard chrome remain for later
+  visual phases; auth, landing, shadcn primitives, and product-data tag colors
+  were intentionally not included in 3.2.0.
 
 ## Validation Boundary
 
