@@ -21,7 +21,7 @@ and design-parity review succeed.
 
 | Contract | Maturity |
 | --- | --- |
-| Semantic tokens and dark mode | Target: 3.2.0 |
+| Semantic tokens and dark mode | Current |
 | Collapsible sidebar and canvas shell | Target: 3.2.1 |
 | Workspace navigation in the shell | Target: 3.2.2 |
 | Item detail panel and existing notes integration | Deferred: 3.3.0 |
@@ -45,7 +45,7 @@ and design-parity review succeed.
 
 ## Semantic Token Contract
 
-**Maturity: Target: 3.2.0**
+**Maturity: Current**
 
 Feature code must consume semantic roles rather than raw color names or values.
 Phase 3.2.0 owns the runtime variable names and final color values. If those
@@ -79,6 +79,34 @@ same semantic hierarchy rather than mechanically invert luminance. Text,
 interactive controls, status indicators, and focus rings must meet applicable
 WCAG contrast expectations. Muted and disabled styling must remain legible and
 must not rely on color alone to communicate meaning.
+
+### Runtime Color Values
+
+The semantic layer is additive over the existing shadcn variables. The logical
+`accent` and `accent-foreground` roles use `--accent-role` and
+`--accent-foreground-role` at runtime to avoid colliding with shadcn's
+`--accent` variables. The `border` and `destructive` roles intentionally reuse
+the existing `--border` and `--destructive` variables.
+
+| Role | Runtime variable | Light | Dark |
+| --- | --- | --- | --- |
+| canvas | `--canvas` | `oklch(0.985 0 0)` | `oklch(0.145 0 0)` |
+| surface | `--surface` | `oklch(1 0 0)` | `oklch(0.205 0 0)` |
+| surface-raised | `--surface-raised` | `oklch(1 0 0)` | `oklch(0.245 0 0)` |
+| surface-muted | `--surface-muted` | `oklch(0.97 0 0)` | `oklch(0.269 0 0)` |
+| text | `--text` | `oklch(0.205 0 0)` | `oklch(0.985 0 0)` |
+| text-muted | `--text-muted` | `oklch(0.556 0 0)` | `oklch(0.708 0 0)` |
+| text-inverse | `--text-inverse` | `oklch(0.985 0 0)` | `oklch(0.205 0 0)` |
+| border | `--border` | `oklch(0.922 0 0)` | `oklch(1 0 0 / 10%)` |
+| border-strong | `--border-strong` | `oklch(0.85 0 0)` | `oklch(1 0 0 / 22%)` |
+| accent | `--accent-role` | `oklch(0.55 0.18 264)` | `oklch(0.62 0.17 264)` |
+| accent-foreground | `--accent-foreground-role` | `oklch(0.985 0 0)` | `oklch(0.985 0 0)` |
+| success | `--success` | `oklch(0.60 0.13 150)` | `oklch(0.68 0.14 150)` |
+| warning | `--warning` | `oklch(0.75 0.15 80)` | `oklch(0.80 0.14 80)` |
+| destructive | `--destructive` | `oklch(0.577 0.245 27.325)` | `oklch(0.704 0.191 22.216)` |
+| focus | `--focus` | `oklch(0.55 0.18 264)` | `oklch(0.62 0.17 264)` |
+| selection | `--selection` | `oklch(0.95 0.03 264)` | `oklch(0.30 0.05 264)` |
+| overlay | `--overlay` | `oklch(0 0 0 / 40%)` | `oklch(0 0 0 / 55%)` |
 
 ### Typography
 
@@ -223,12 +251,15 @@ Design and runtime implementation must remain consistent in both directions:
 
 | Phase | Owned design contracts | Required design proof |
 | --- | --- | --- |
-| 3.2.0 | Semantic token implementation, final light/dark values, theme behavior, shared primitive parity | Theme toggle manual proof, contrast/focus review, and token parity |
+| 3.2.0 | Current: semantic token implementation, final light/dark values, theme behavior, shared primitive parity | Theme toggle manual proof, contrast/focus review, and token parity |
 | 3.2.1 | Desktop/mobile shell, sidebar collapse, canvas sizing, responsive overflow and focus behavior | Collapse/expand and responsive manual proof plus shell parity |
 | 3.2.2 | Workspace navigation inside the established shell | Workspace-switch proof plus navigation-state and accessibility parity |
 
 Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.
+
+The sidebar/canvas-shell and workspace-navigation contracts remain Target for
+3.2.1 and 3.2.2 respectively.
 
 ## Visual Phase Parity Checklist
 
