@@ -1,9 +1,9 @@
 {
-    "version":  "3.1.2",
-    "state":  "stable",
-    "phase":  "3.1.2",
-    "phaseTitle":  "Automated Two-User Sync-Latency Harness",
-    "nextPhase":  "3.2.0 - Design Tokens \u0026 Dark Mode",
+    "version":  "3.2.0-alpha",
+    "state":  "alpha",
+    "phase":  "3.2.0",
+    "phaseTitle":  "Design Tokens \u0026 Dark Mode",
+    "nextPhase":  "3.2.1 - Collapsible Left Sidebar \u0026 Canvas Shell",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-20"
 }
