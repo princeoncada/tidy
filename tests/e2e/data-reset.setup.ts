@@ -11,6 +11,7 @@ test("reset leftover e2e data", async () => {
   try {
     await db.$transaction([
       db.list.deleteMany({ where: { name: e2eNameScope } }),
+      db.workspace.deleteMany({ where: { name: e2eNameScope } }),
       db.tag.deleteMany({ where: { name: e2eNameScope } }),
       db.view.deleteMany({ where: { name: e2eNameScope } }),
     ]);
