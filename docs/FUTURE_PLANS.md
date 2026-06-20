@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.1 - Collapsible Left Sidebar & Canvas Shell (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.1 - Collapsible Left Sidebar & Canvas Shell
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Introduce the ChatGPT-style collapsible left sidebar + main canvas app shell per docs/design.md.
 - **Product impact:** new navigation/layout shell (user-visible).
@@ -79,6 +80,26 @@ Execution discipline (anti-loop rails):
 - **Deferral boundary:** No sharing/permissions UX changes (3.4.2); no board.
 - **Validation target:** targeted + manual product proof (switch workspaces).
 - **Files:** components/layout/*, lib/sync/permissions.ts (read-only use)
+
+### 3.2.3 - Views Reorder Snap-Back Patch
+- **Status:** Open
+- **Type:** product behavior (bug fix)
+- **Implementation goal:** Fix the custom-view reorder snap-back-then-pop flash: the optimistic overlay relinquishes the dragged row's position before the committed reorder write confirms, and the row's transition makes the gap visible.
+- **Product impact:** reordering a view in the Views list commits in place with no visible snap-back.
+- **Runtime integration target:** the dashboard view-reorder handler + the lib/sync overlay path (NOT theming; verified not a 3.2.0 regression - the 3.2.0 diff to ViewsSidebarPreview.tsx was color-token-only).
+- **Deferral boundary:** scoped precisely at 3.2.3; no shell/theming changes.
+- **Validation target:** targeted + a Playwright "reorder commits in place, no snap-back" proof.
+- **Files:** components/views/ViewsSidebarPreview.tsx, dashboard view-reorder handler, lib/sync overlay path
+
+### 3.2.4 - Sidebar Navigation Redesign
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Rework the left sidebar into a ChatGPT-style nav: an "Add List" action pinned at the top (icon-leading, like a "new session" entry); a Workspaces dropdown and a Views dropdown that each list their entries with an in-dropdown add button and in-dropdown reordering, each bounded by a max-height with the sidebar handling overflow; replacing the current Views card surface. Move the user avatar to the sidebar footer above a shadcn Separator with its account dropdown opening upward; pin the collapse toggle to a fixed position that does not move with the sidebar show/hide (locked at its collapsed-state position); and let the lists canvas use the full site width.
+- **Product impact:** redesigned sidebar navigation plus full-width lists (user-visible).
+- **Runtime integration target:** the shell sidebar (components/layout/*) hosts Add List, the Workspaces and Views dropdowns, and the account footer; lists render full-width in the canvas.
+- **Deferral boundary:** builds on the 3.2.2 workspace-switching nav and does not redefine the workspace/permissions model; the item detail panel remains 3.3.0. Reuses the existing components/ui/separator.tsx primitive (no new shadcn install).
+- **Validation target:** targeted + manual product proof (add list from the sidebar; open, reorder, and add inside both dropdowns; collapse with the fixed toggle; avatar footer dropdown opens upward; full-width lists with no horizontal overflow) and docs/design.md shell-parity update.
+- **Files:** components/layout/*, components/views/*, components/MaxWidthWrapper.tsx, components/UserAccountNav.tsx, components/list/ListAdder.tsx
 
 ### 3.3.0 - Item Detail Panel & Notes
 - **Status:** Open
@@ -205,7 +226,7 @@ Execution discipline (anti-loop rails):
 ## Potential Next Directions (unversioned)
 
 Assigned a version only when scoped.
-- View-create concurrent same-id idempotency: stand up a real-Postgres integration harness and add a transaction-abort-aware fix (`ROLLBACK TO SAVEPOINT` recovery, or an atomic `INSERT ... ON CONFLICT`) for the `findUnique` -> `create` TOCTOU in `lib/sync/server-apply.ts` view-create. Deferred from 2.2.2 (unreproducible in the mock-only test layer; prevented client-side).
+- Create-path concurrent same-id idempotency: stand up a real-Postgres integration harness and add a transaction-abort-aware fix (`ROLLBACK TO SAVEPOINT` recovery, or an atomic `INSERT ... ON CONFLICT`) for the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag). The list-create variant surfaces intermittently in the authenticated Playwright suite as a `tx.list.create` P2002 (`Unique constraint failed on the fields: (id)`) 500 when a post-reload client replay races the original push; it is not tied to any UI phase. Deferred from 2.2.2 (unreproducible in the mock-only test layer; prevented in normal use by the Replicache client's per-client push serialization).
 - Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
 - Rate limiting and abuse controls
 - Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency (distinct from the 3.5.0 mutation ledger, which serves history/time-travel)

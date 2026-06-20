@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.0
-- **Current phase:** 3.2.0 - Design Tokens & Dark Mode
-- **Next phase:** 3.2.1 - Collapsible Left Sidebar & Canvas Shell
+- **Current version:** 3.2.1-alpha
+- **Current phase:** 3.2.1 - Collapsible Left Sidebar & Canvas Shell
+- **Next phase:** 3.2.2 - Workspace Navigation
 
 ---
 

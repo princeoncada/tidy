@@ -1,11 +1,11 @@
-<!-- Current Version: 3.2.0 -->
+<!-- Current Version: 3.2.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.2.0 - Design Tokens & Dark Mode
-**Next**: 3.2.1 - Collapsible Left Sidebar & Canvas Shell
+**Current Version**: 3.2.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.2.1 - Collapsible Left Sidebar & Canvas Shell
+**Next**: 3.2.2 - Workspace Navigation
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -40,6 +40,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - `hooks/useDashboardMutations.ts` - exposes Replicache mutators to dashboard components.
 - `components/list/ListsContainer.tsx`, `ListAdder.tsx`, `ListComponent.tsx`, `ListItemComponent.tsx`, `ListTagPicker.tsx` - dashboard list/item/tag UI.
 - `components/views/ViewsSidebarPreview.tsx` - custom view UI and view selection/reorder behavior.
+- `components/layout/*` - authenticated dashboard sidebar and canvas shell.
 - `lib/sync/replicache/*` - keys, mutators, push/pull, CVR diff, and client construction.
 - `lib/sync/server-apply.ts`, `lib/sync/sync-batch-contract.ts`, `lib/sync/sync-endpoint-contract.ts` - shared mutation validation and server apply contract used by Replicache push.
 - `lib/dashboard/server-read.ts` - user-scoped server graph reads for Replicache pull.
@@ -57,7 +58,14 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Semantic color roles are additive over the existing shadcn variables; shadcn
   primitives remain wired to their original tokens.
 - `next-themes` applies the light/dark/system class strategy from the root
-  layout, and the account menu owns the theme toggle until the later shell phase.
+  layout, and the account menu owns the theme toggle.
+
+**Authenticated dashboard shell:**
+- The collapsible left sidebar and canvas shell wraps the authenticated dashboard;
+  collapse/expand does not remount or reset the dashboard data surface.
+- Below `lg`, the sidebar is a focus-trapping Radix Dialog drawer that returns
+  focus to its trigger. The canvas main retains `data-testid="app-shell"`, and
+  the theme toggle remains in the account menu.
 
 **Replicache is the only dashboard render/write path:**
 - The dashboard always mounts `ReplicacheProvider` for an authenticated user after local boot identifies the user.

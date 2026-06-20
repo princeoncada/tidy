@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.0",
+  "version": "3.2.1-alpha",
   "generatedAt": "2026-06-20",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -519,7 +519,23 @@
         "./views/ViewsSidebarPreview",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/components/ReplicacheProvider",
-        "@/components/sharing/WorkspacesDialog"
+        "@/components/sharing/WorkspacesDialog",
+        "@/components/layout/AppShell"
+      ]
+    },
+    {
+      "path": "components/layout/AppShell.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "AppShell"
+      ],
+      "imports": [
+        "lucide-react",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/dialog",
+        "@/lib/utils"
       ]
     },
     {
@@ -2743,6 +2759,18 @@
       ]
     },
     {
+      "path": "tests/unit/app-shell.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "react",
+        "vitest",
+        "@/components/layout/AppShell"
+      ]
+    },
+    {
       "path": "tests/unit/collab-note-route.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3808,6 +3836,12 @@
     },
     {
       "from": "components/Dashboard.tsx",
+      "to": "components/layout/AppShell.tsx",
+      "type": "imports",
+      "import": "@/components/layout/AppShell"
+    },
+    {
+      "from": "components/Dashboard.tsx",
       "to": "components/list/ListAdder.tsx",
       "type": "imports",
       "import": "./list/ListAdder"
@@ -3865,6 +3899,24 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "components/layout/AppShell.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
+    },
+    {
+      "from": "components/layout/AppShell.tsx",
+      "to": "components/ui/dialog.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dialog"
+    },
+    {
+      "from": "components/layout/AppShell.tsx",
+      "to": "lib/utils.ts",
+      "type": "imports",
+      "import": "@/lib/utils"
     },
     {
       "from": "components/list/ItemNotesEditor.tsx",
@@ -5527,6 +5579,12 @@
       "to": "lib/sw/app-shell-strategy.ts",
       "type": "imports",
       "import": "@/lib/sw/app-shell-strategy"
+    },
+    {
+      "from": "tests/unit/app-shell.test.tsx",
+      "to": "components/layout/AppShell.tsx",
+      "type": "imports",
+      "import": "@/components/layout/AppShell"
     },
     {
       "from": "tests/unit/collab-note-route.test.ts",

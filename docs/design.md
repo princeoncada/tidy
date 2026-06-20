@@ -22,7 +22,7 @@ and design-parity review succeed.
 | Contract | Maturity |
 | --- | --- |
 | Semantic tokens and dark mode | Current |
-| Collapsible sidebar and canvas shell | Target: 3.2.1 |
+| Collapsible sidebar and canvas shell | Current |
 | Workspace navigation in the shell | Target: 3.2.2 |
 | Item detail panel and existing notes integration | Deferred: 3.3.0 |
 | Item status and assignee properties | Deferred: 3.3.1 |
@@ -170,7 +170,7 @@ the final light/dark values are explicitly deferred to 3.2.0.
 
 ## Sidebar and Canvas Shell
 
-**Maturity: Target: 3.2.1**
+**Maturity: Current**
 
 On desktop, the sidebar and main canvas form one application shell. The sidebar
 is persistent while expanded and becomes an icon rail when collapsed. Collapse
@@ -264,8 +264,8 @@ Design and runtime implementation must remain consistent in both directions:
 Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.
 
-The sidebar/canvas-shell and workspace-navigation contracts remain Target for
-3.2.1 and 3.2.2 respectively.
+The sidebar/canvas-shell contract is Current as of 3.2.1; the
+workspace-navigation contract remains Target for 3.2.2.
 
 ## Visual Phase Parity Checklist
 
