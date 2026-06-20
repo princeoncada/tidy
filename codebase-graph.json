@@ -101,6 +101,34 @@
       "imports": []
     },
     {
+      "path": ".tidy-ai/sync-latency/baseline-2026-06-20T04-21-10-262Z.json",
+      "kind": "file",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".tidy-ai/sync-latency/baseline-2026-06-20T04-30-54-301Z.json",
+      "kind": "file",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".tidy-ai/sync-latency/burst-2026-06-20T05-13-37-128Z.json",
+      "kind": "file",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": ".tidy-ai/sync-latency/moderate-2026-06-20T04-34-46-218Z.json",
+      "kind": "file",
+      "extension": ".json",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": ".vscode/settings.json",
       "kind": "file",
       "extension": ".json",
