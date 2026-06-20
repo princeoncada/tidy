@@ -17,9 +17,9 @@ function graph(matchMode: "ALL" | "ANY"): ReplicacheDashboardGraph {
 
   return {
     lists: [
-      { id: "list-b", userId: "user-1", name: "B", createdAt: now, updatedAt: now },
-      { id: "list-a", userId: "user-1", name: "A", createdAt: now, updatedAt: now },
-      { id: "untagged", userId: "user-1", name: "U", createdAt: now, updatedAt: now },
+      { id: "list-b", userId: "user-1", name: "B", workspaceId: null, createdAt: now, updatedAt: now },
+      { id: "list-a", userId: "user-1", name: "A", workspaceId: null, createdAt: now, updatedAt: now },
+      { id: "untagged", userId: "user-1", name: "U", workspaceId: null, createdAt: now, updatedAt: now },
     ],
     listItems: [
       { id: "item-b", listId: "list-a", name: "B", order: itemKeys[1], completed: false, notes: null, createdAt: now, updatedAt: now },
