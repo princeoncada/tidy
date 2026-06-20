@@ -31,7 +31,7 @@ const UserAccountNav = ({ logout }: { logout: () => void; }) => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-surface-raised w-40 p-1 m-1" align="start">
+      <DropdownMenuContent className="w-40 p-1 m-1" align="start">
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-0.5 leading-none min-w-0">
             {name && <p className="font-medium text-xs text-text">{name}</p>}
