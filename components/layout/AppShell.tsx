@@ -39,7 +39,10 @@ function getServerDesktopSnapshot() {
 
 type AppShellProps = {
   sidebar: ReactNode;
-  footer?: ReactNode;
+  footer?: (context: {
+    collapsed: boolean;
+    requestExpand: () => void;
+  }) => ReactNode;
   children: ReactNode;
 };
 
@@ -50,6 +53,7 @@ export function AppShell({ sidebar, footer, children }: AppShellProps) {
     getServerDesktopSnapshot,
   );
   const [collapsed, setCollapsed] = useState(false);
+  const requestExpand = () => setCollapsed(false);
 
   const collapseLabel = collapsed ? "Expand navigation" : "Collapse navigation";
 
@@ -96,7 +100,14 @@ export function AppShell({ sidebar, footer, children }: AppShellProps) {
           </nav>
           {footer && (
             <div className="shrink-0 overflow-hidden">
-              <div className="flex w-64 px-2 py-2">{footer}</div>
+              <div
+                className={cn(
+                  "flex py-2",
+                  collapsed ? "w-14 justify-center px-0" : "w-64 px-2",
+                )}
+              >
+                {footer({ collapsed, requestExpand })}
+              </div>
               <Separator />
             </div>
           )}
@@ -150,7 +161,9 @@ export function AppShell({ sidebar, footer, children }: AppShellProps) {
             </nav>
             {footer && (
               <div className="shrink-0">
-                <div className="px-2 py-2">{footer}</div>
+                <div className="px-2 py-2">
+                  {footer({ collapsed: false, requestExpand })}
+                </div>
                 <Separator />
               </div>
             )}
