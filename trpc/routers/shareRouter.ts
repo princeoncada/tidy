@@ -143,6 +143,40 @@ export const shareRouter = createTRPCRouter({
     });
   }),
 
+  renameWorkspace: protectedProcedure.input(
+    z.object({
+      id: z.uuid(),
+      name: z.string().trim().min(1).max(255),
+    }),
+  ).mutation(async ({ ctx: { userId }, input }) => {
+    const workspace = await db.workspace.findUnique({
+      where: { id: input.id },
+      select: { ownerId: true },
+    });
+    if (!workspace || workspace.ownerId !== userId) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    return db.workspace.update({
+      where: { id: input.id },
+      data: { name: input.name },
+      select: { id: true, name: true },
+    });
+  }),
+
+  deleteWorkspace: protectedProcedure.input(
+    z.object({ id: z.uuid() }),
+  ).mutation(async ({ ctx: { userId }, input }) => {
+    const workspace = await db.workspace.findUnique({
+      where: { id: input.id },
+      select: { ownerId: true },
+    });
+    if (!workspace || workspace.ownerId !== userId) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    await db.workspace.delete({ where: { id: input.id } });
+    return { id: input.id };
+  }),
+
   getOwnedLists: protectedProcedure.query(async ({ ctx: { userId } }) =>
     db.list.findMany({
       where: { userId },
