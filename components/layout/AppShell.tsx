@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -38,10 +39,11 @@ function getServerDesktopSnapshot() {
 
 type AppShellProps = {
   sidebar: ReactNode;
+  footer?: ReactNode;
   children: ReactNode;
 };
 
-export function AppShell({ sidebar, children }: AppShellProps) {
+export function AppShell({ sidebar, footer, children }: AppShellProps) {
   const isDesktop = useSyncExternalStore(
     subscribeToDesktopQuery,
     getDesktopSnapshot,
@@ -53,6 +55,21 @@ export function AppShell({ sidebar, children }: AppShellProps) {
 
   return (
     <div className="relative flex h-dvh w-full min-w-0 overflow-hidden bg-canvas text-text">
+      {isDesktop && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          data-testid="sidebar-collapse-toggle"
+          aria-label={collapseLabel}
+          title={collapseLabel}
+          aria-expanded={!collapsed}
+          onClick={() => setCollapsed((current) => !current)}
+          className="absolute left-2 top-2 z-20 active:bg-surface-muted focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+        </Button>
+      )}
       {isDesktop ? (
         <aside
           aria-label="Dashboard navigation"
@@ -63,23 +80,10 @@ export function AppShell({ sidebar, children }: AppShellProps) {
             collapsed ? "w-14" : "w-64",
           )}
         >
-          <div className="flex h-14 shrink-0 items-center justify-end px-3">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label={collapseLabel}
-              title={collapseLabel}
-              aria-expanded={!collapsed}
-              onClick={() => setCollapsed((current) => !current)}
-              className="active:bg-surface-muted focus-visible:ring-2 focus-visible:ring-focus"
-            >
-              {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
-            </Button>
-          </div>
+          <div className="h-14 shrink-0" />
 
           <nav
-            aria-label="Views"
+            aria-label="Sidebar navigation"
             aria-hidden={collapsed}
             className={cn(
               "w-64 flex-1 overflow-y-auto px-2 pb-4 transition-opacity duration-150 motion-reduce:transition-none",
@@ -90,6 +94,12 @@ export function AppShell({ sidebar, children }: AppShellProps) {
           >
             {sidebar}
           </nav>
+          {footer && (
+            <div className="shrink-0 overflow-hidden">
+              <div className="flex w-64 px-2 py-2">{footer}</div>
+              <Separator />
+            </div>
+          )}
         </aside>
       ) : (
         <Dialog>
@@ -116,7 +126,7 @@ export function AppShell({ sidebar, children }: AppShellProps) {
           >
             <DialogTitle className="sr-only">Dashboard navigation</DialogTitle>
             <DialogDescription className="sr-only">
-              Switch between your saved views.
+              Create lists and switch between workspaces or saved views.
             </DialogDescription>
             <div className="flex h-14 shrink-0 items-center justify-end px-3">
               <DialogClose asChild>
@@ -133,11 +143,17 @@ export function AppShell({ sidebar, children }: AppShellProps) {
               </DialogClose>
             </div>
             <nav
-              aria-label="Views"
+              aria-label="Sidebar navigation"
               className="min-h-0 flex-1 overflow-y-auto px-2 pb-4"
             >
               {sidebar}
             </nav>
+            {footer && (
+              <div className="shrink-0">
+                <div className="px-2 py-2">{footer}</div>
+                <Separator />
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       )}
