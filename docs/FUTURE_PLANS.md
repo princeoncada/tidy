@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.3 - Views Reorder Snap-Back Patch (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.3 - Views Reorder Snap-Back Patch
-- **Status:** In progress
-- **Type:** product behavior (bug fix)
-- **Implementation goal:** Fix the custom-view reorder snap-back-then-pop flash: the optimistic overlay relinquishes the dragged row's position before the committed reorder write confirms, and the row's transition makes the gap visible.
-- **Product impact:** reordering a view in the Views list commits in place with no visible snap-back.
-- **Runtime integration target:** the dashboard view-reorder handler + the lib/sync overlay path (NOT theming; verified not a 3.2.0 regression - the 3.2.0 diff to ViewsSidebarPreview.tsx was color-token-only).
-- **Deferral boundary:** scoped precisely at 3.2.3; no shell/theming changes.
-- **Validation target:** targeted + a Playwright "reorder commits in place, no snap-back" proof.
-- **Files:** components/views/ViewsSidebarPreview.tsx, dashboard view-reorder handler, lib/sync overlay path
 
 ### 3.2.4 - Sidebar Navigation Redesign
 - **Status:** Open
