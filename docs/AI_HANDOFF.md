@@ -1,11 +1,11 @@
-<!-- Current Version: 3.2.5 -->
+<!-- Current Version: 3.2.6-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.5 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.2.5 - List Item Cross-List Move Snap-Back Patch
-**Next**: 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
+**Current Version**: 3.2.6-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
+**Next**: 3.2.7 - Workspace Section Parity & Selection Styling
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -63,6 +63,12 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 **Authenticated dashboard shell:**
 - The collapsible left sidebar and canvas shell wraps the authenticated dashboard;
   collapse/expand does not remount or reset the dashboard data surface.
+- The expanded sidebar's Workspaces and Views navigation uses independent inline
+  accordion sections rather than floating dropdowns. Each section owns its
+  internal scroll, in-section add, and in-section drag reorder; expanding one
+  pushes lower sections down in the sidebar flow.
+- From the collapsed desktop rail, activating the footer account avatar first
+  expands the sidebar and then opens the upward account-menu dropdown.
 - Below `lg`, the sidebar is a focus-trapping Radix Dialog drawer that returns
   focus to its trigger. The canvas main retains `data-testid="app-shell"`, and
   the theme toggle remains in the account menu.

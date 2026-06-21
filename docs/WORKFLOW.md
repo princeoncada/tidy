@@ -1,6 +1,6 @@
 # Agent Workflow
 
-<!-- Current Version: 3.2.5 -->
+<!-- Current Version: 3.2.6-alpha -->
 
 This file governs how Claude Code and Codex operate together in Tidy. Session startup is owned by the AGENTS.md Session Start Protocol; read this file only when writing or reviewing a Codex prompt or running the post-validation/closeout workflow, not at session startup. It is the authoritative protocol for all implementation phases.
 
@@ -392,7 +392,7 @@ Commit-before-fix is mandatory. While any uncommitted implementation or fix
 work exists on the phase branch, the assistant must provide commit commands for
 that work first - committed as its own granular unit(s), even when validation is
 red - and must not issue an in-alpha fix prompt until that work is committed. A
-broken implementation is committed, never folded into its fix commit. The only
+broken implementation is committed, never folded into its fix commit. These commit commands are emitted as a granular block - one `.\scripts\commit.ps1` command per changed file - placed before the in-alpha fix prompt in the same message, and repeated before every successive in-alpha fix; when the user notes there are "no commit commands before the in-alpha block," they are flagging that this block is missing, never prohibiting it. `.claude/skills/tidy-codex-prompt-builder` (In-Alpha Correction Contract) owns emitting this block. The only
 exception is genuinely accidental, never-meaningful edits (a stray edit, a wrong
 paste, a typo'd command that changed no real files), which may be corrected
 without a commit because committing them would be a forbidden fake-activity commit.

@@ -24,7 +24,7 @@ and design-parity review succeed.
 | Semantic tokens and dark mode | Current |
 | Collapsible sidebar and canvas shell | Current |
 | Workspace navigation in the shell | Current |
-| Sidebar navigation redesign (dropdown nav, footer account, fixed collapse, full-width canvas) | Current |
+| Sidebar navigation redesign (inline accordion nav, footer account, fixed collapse, full-width canvas) | Current |
 | Item detail panel and existing notes integration | Deferred: 3.3.0 |
 | Item status and assignee properties | Deferred: 3.3.1 |
 | Board, sharing polish, presence, and rollups | Deferred: 3.4.x |
@@ -181,11 +181,15 @@ at the collapsed rail's top position so its viewport coordinates do not move as
 the sidebar changes width.
 
 The expanded sidebar pins Add List at the top as an icon-leading navigation
-row, followed by bounded Workspaces and Views dropdowns. Each dropdown owns
-internal scrolling, in-dropdown add, and in-dropdown drag reorder; drag hover
-is local-only and persistence occurs on drop. The account avatar lives in the
-sidebar footer above a Separator, and its account menu opens upward while
-retaining theme and logout actions.
+row, followed by bounded Workspaces and Views inline disclosure (accordion)
+sections. Expanding a section reveals its list inside the sidebar column and
+pushes lower sections down rather than floating an overlay; both sections open
+and close independently. Each section owns internal scrolling, in-section add,
+and in-section drag reorder; drag hover is local-only and persistence occurs on
+drop. The account avatar lives in the sidebar footer above a Separator, and its
+account menu remains a dropdown that opens upward while retaining theme and
+logout actions. From the collapsed rail, activating the account avatar first
+expands the sidebar and then opens that menu.
 
 The canvas owns primary page scrolling unless a bounded component has a clear
 independent-scroll contract. Sticky regions must not obscure focused content.
@@ -198,9 +202,9 @@ becomes an overlay/drawer and the canvas retains the full viewport width. The
 overlay must trap focus while open, close predictably, and return focus to its
 trigger. No supported viewport may introduce page-level horizontal overflow.
 
-Workspace switching is Current as of 3.2.2 and its dropdown redesign is Current
-as of 3.2.4. The sidebar hosts a Workspaces dropdown with an "All workspaces"
-default; selecting a workspace filters the canvas to that workspace's lists.
+Workspace switching is Current as of 3.2.2 and its inline disclosure redesign
+is Current as of 3.2.6. The sidebar hosts a Workspaces accordion section with
+an "All workspaces" default; selecting a workspace filters the canvas to that workspace's lists.
 Selection state is expressed beyond color, and every workspace entry is
 keyboard operable.
 
@@ -208,13 +212,13 @@ keyboard operable.
 
 **Maturity: Current**
 
-The workspace switcher is a bounded-height dropdown in the shell sidebar. Its
+The workspace switcher is a bounded-height inline accordion section in the shell sidebar. Its
 entries are the "All workspaces" default followed by owned workspaces, with add
-and drag reorder available inside the dropdown. Workspace reorder is
+and drag reorder available inside the section. Workspace reorder is
 optimistic, keeps drag hover local-only, and persists one moved row's fractional
 `Workspace.orderKey` through the protected `reorderWorkspace` tRPC mutation;
-workspaces do not become Replicache entities. The Views dropdown follows the
-same bounded-scroll and in-dropdown add/reorder structure, while committed view
+workspaces do not become Replicache entities. The Views accordion section follows the
+same bounded-scroll and in-section add/reorder structure, while committed view
 reorder continues through the existing one-row Replicache order-key path.
 
 The canvas filter reads
@@ -297,13 +301,15 @@ Design and runtime implementation must remain consistent in both directions:
 | 3.2.1 | Desktop/mobile shell, sidebar collapse, canvas sizing, responsive overflow and focus behavior | Collapse/expand and responsive manual proof plus shell parity |
 | 3.2.2 | Workspace navigation inside the established shell | Workspace-switch proof plus navigation-state and accessibility parity |
 | 3.2.4 | Sidebar navigation redesign: dropdown nav, in-dropdown add/reorder, footer account menu, fixed collapse toggle, full-width canvas | Manual product proof (add list from sidebar; reorder/add in both dropdowns; fixed-position collapse; upward account menu; full-width no-overflow) plus shell parity |
+| 3.2.6 | Inline Workspaces/Views accordion sections (replaces 3.2.4 dropdown panels) + collapsed-rail account-avatar expands sidebar before opening the account menu | Manual product proof (both sections open independently and push lower content down; add/select/reorder remain in-section; collapsed avatar expands the sidebar before the upward account menu opens) plus shell parity |
 
 Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.
 
 The sidebar/canvas-shell contract is Current as of 3.2.1; the
 workspace-navigation contract is Current as of 3.2.2; the sidebar-navigation
-redesign is Current as of 3.2.4.
+redesign is Current as of 3.2.4 and its inline accordion realization is Current
+as of 3.2.6.
 
 ## Visual Phase Parity Checklist
 

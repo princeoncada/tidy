@@ -3,6 +3,7 @@
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
+import { useState } from "react";
 import { ThemeToggle } from "./theme/ThemeToggle";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
@@ -10,14 +11,31 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 
 
-const UserAccountNav = ({ logout }: { logout: () => void; }) => {
+const UserAccountNav = ({
+  logout,
+  collapsed = false,
+  onRequestExpand,
+}: {
+  logout: () => void;
+  collapsed?: boolean;
+  onRequestExpand?: () => void;
+}) => {
 
   const trpc = useTRPC();
   const { data } = useQuery(trpc.user.getUser.queryOptions());
   const user = data;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      open={menuOpen}
+      onOpenChange={(nextOpen) => {
+        if (nextOpen && collapsed) {
+          onRequestExpand?.();
+        }
+        setMenuOpen(nextOpen);
+      }}
+    >
       <DropdownMenuTrigger
         asChild
         className="overflow-visible"

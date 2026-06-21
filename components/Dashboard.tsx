@@ -58,7 +58,13 @@ const Dashboard = () => {
           onSelectWorkspace={setActiveWorkspaceId}
         />
       )}
-      footer={<UserAccountNav logout={handleLogout} />}
+      footer={({ collapsed, requestExpand }) => (
+        <UserAccountNav
+          logout={handleLogout}
+          collapsed={collapsed}
+          onRequestExpand={requestExpand}
+        />
+      )}
     >
       <main
         data-testid="app-shell"

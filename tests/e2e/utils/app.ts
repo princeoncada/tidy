@@ -104,7 +104,7 @@ export async function deleteList(page: Page, name: string) {
   await deleted;
 }
 
-async function ensureDropdownOpen(page: Page, name: string) {
+async function ensureSectionOpen(page: Page, name: string) {
   const trigger = page.getByRole("button", { name, exact: true });
   await expect(async () => {
     if ((await trigger.getAttribute("aria-expanded")) !== "true") {
@@ -116,16 +116,16 @@ async function ensureDropdownOpen(page: Page, name: string) {
   }).toPass({ timeout: 10_000 });
 }
 
-export async function openViewsDropdown(page: Page) {
-  await ensureDropdownOpen(page, "Views");
+export async function openViewsSection(page: Page) {
+  await ensureSectionOpen(page, "Views");
 }
 
-export async function openWorkspacesDropdown(page: Page) {
-  await ensureDropdownOpen(page, "Workspaces");
+export async function openWorkspacesSection(page: Page) {
+  await ensureSectionOpen(page, "Workspaces");
 }
 
 export async function openAllLists(page: Page) {
-  await openViewsDropdown(page);
+  await openViewsSection(page);
   const allListsButton = await firstVisible(page.getByRole("button", { name: /all lists/i }));
 
   if (await allListsButton.getAttribute("aria-current") === "page") {
@@ -139,7 +139,7 @@ export async function openAllLists(page: Page) {
 }
 
 export async function openViewByName(page: Page, viewName: string) {
-  await openViewsDropdown(page);
+  await openViewsSection(page);
   const viewCard = await getVisibleViewCard(page, viewName);
   const viewButton = viewCard.getByRole("button", { name: viewName, exact: true });
 
@@ -237,7 +237,7 @@ export async function removeTagFromList(page: Page, listName: string, tagName: s
 }
 
 export async function createView(page: Page, viewName: string, tagName: string) {
-  await openViewsDropdown(page);
+  await openViewsSection(page);
   const createViewButton = await firstVisible(page.getByTestId(testIds.viewCreateButton));
 
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -254,14 +254,14 @@ export async function createView(page: Page, viewName: string, tagName: string) 
   const persisted = waitForSyncBatch(page);
   await dialog.getByTestId(testIds.saveViewButton).click();
   await persisted;
-  await openViewsDropdown(page);
+  await openViewsSection(page);
   const viewCard = await getVisibleViewCard(page, viewName);
   await expect(viewCard).toBeVisible();
   await expect(viewCard.getByRole("button", { name: viewName, exact: true })).toBeVisible();
 }
 
 export async function deleteView(page: Page, viewName: string) {
-  await openViewsDropdown(page);
+  await openViewsSection(page);
   const viewCard = await getVisibleViewCard(page, viewName);
 
   await expect(viewCard).toBeVisible();

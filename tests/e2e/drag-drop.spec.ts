@@ -10,7 +10,7 @@ import {
   deleteView,
   openViewByName,
   openAllLists,
-  openViewsDropdown,
+  openViewsSection,
   waitForSyncBatch,
 } from "./utils/app";
 import {
@@ -106,7 +106,7 @@ test("reorder custom view cards persists after reload", async ({ page }) => {
   await createPersistedTag(page, listName, secondTag);
   await createView(page, firstView, firstTag);
   await createView(page, secondView, secondTag);
-  await openViewsDropdown(page);
+  await openViewsSection(page);
 
   const initialOrder = await getOrderedVisibleNames(
     page,
@@ -129,7 +129,7 @@ test("reorder custom view cards persists after reload", async ({ page }) => {
   await page.waitForTimeout(500);
   await expectViewOrder(page, swappedOrder);
   await page.reload();
-  await openViewsDropdown(page);
+  await openViewsSection(page);
   await expectViewOrder(page, swappedOrder);
   await deleteView(page, firstView);
   await deleteView(page, secondView);

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.5",
+  "version": "3.2.6-alpha",
   "generatedAt": "2026-06-21",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -566,7 +566,6 @@
         "react",
         "@/components/sharing/WorkspacesDialog",
         "@/components/ui/button",
-        "@/components/ui/dropdown-menu",
         "@/components/ui/skeleton",
         "@/lib/dashboard/views-reorder",
         "@/lib/trpc",
@@ -1116,6 +1115,7 @@
         "@/trpc/client",
         "@tanstack/react-query",
         "lucide-react",
+        "react",
         "./theme/ThemeToggle",
         "./ui/avatar",
         "./ui/button",
@@ -2664,8 +2664,8 @@
         "deleteView",
         "openAllLists",
         "openViewByName",
-        "openViewsDropdown",
-        "openWorkspacesDropdown",
+        "openViewsSection",
+        "openWorkspacesSection",
         "removeTagFromList",
         "renameItem",
         "renameList",
@@ -4062,12 +4062,6 @@
       "to": "components/ui/button.tsx",
       "type": "imports",
       "import": "@/components/ui/button"
-    },
-    {
-      "from": "components/layout/WorkspaceSwitcher.tsx",
-      "to": "components/ui/dropdown-menu.tsx",
-      "type": "imports",
-      "import": "@/components/ui/dropdown-menu"
     },
     {
       "from": "components/layout/WorkspaceSwitcher.tsx",
