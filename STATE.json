@@ -1,9 +1,9 @@
 {
-    "version":  "3.2.3",
-    "state":  "stable",
-    "phase":  "3.2.3",
-    "phaseTitle":  "Views Reorder Snap-Back Patch",
-    "nextPhase":  "3.2.4 - Sidebar Navigation Redesign",
+    "version":  "3.2.4-alpha",
+    "state":  "alpha",
+    "phase":  "3.2.4",
+    "phaseTitle":  "Sidebar Navigation Redesign",
+    "nextPhase":  "3.2.5 - Create-Path Idempotency Hardening (TOCTOU)",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-20"
 }

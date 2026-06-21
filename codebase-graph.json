@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.3",
+  "version": "3.2.4-alpha",
   "generatedAt": "2026-06-20",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -511,17 +511,14 @@
         "lucide-react",
         "next/navigation",
         "react",
-        "./list/ListAdder",
         "./list/ListsContainer",
         "./ui/separator",
         "./UserAccountNav",
         "@tanstack/react-query",
-        "./views/ViewsSidebarPreview",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/components/ReplicacheProvider",
-        "@/components/sharing/WorkspacesDialog",
         "@/components/layout/AppShell",
-        "@/components/layout/WorkspaceSwitcher"
+        "@/components/layout/SidebarNav"
       ]
     },
     {
@@ -536,7 +533,22 @@
         "react",
         "@/components/ui/button",
         "@/components/ui/dialog",
+        "@/components/ui/separator",
         "@/lib/utils"
+      ]
+    },
+    {
+      "path": "components/layout/SidebarNav.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "SidebarNav"
+      ],
+      "imports": [
+        "@/hooks/useLocalFirstDashboardBoot",
+        "@/components/list/ListAdder",
+        "@/components/views/ViewsSidebarPreview",
+        "./WorkspaceSwitcher"
       ]
     },
     {
@@ -547,10 +559,17 @@
         "WorkspaceSwitcher"
       ],
       "imports": [
+        "@dnd-kit/react",
+        "@dnd-kit/react/sortable",
         "@tanstack/react-query",
         "lucide-react",
-        "@/components/ui/card",
+        "react",
+        "@/components/sharing/WorkspacesDialog",
+        "@/components/ui/button",
+        "@/components/ui/dropdown-menu",
         "@/components/ui/skeleton",
+        "@/lib/dashboard/views-reorder",
+        "@/lib/trpc",
         "@/lib/utils",
         "@/trpc/client"
       ]
@@ -1133,7 +1152,6 @@
         "react",
         "@/components/ui/badge",
         "@/components/ui/button",
-        "@/components/ui/card",
         "@/components/ui/checkbox",
         "@/components/ui/dialog",
         "@/components/ui/dropdown-menu",
@@ -1663,9 +1681,12 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "movedRowOrderKey",
         "sameViewOrder"
       ],
-      "imports": []
+      "imports": [
+        "@/lib/sync/fractional-index"
+      ]
     },
     {
       "path": "lib/dashboard/workspace-filter.ts",
@@ -2632,6 +2653,8 @@
         "deleteView",
         "openAllLists",
         "openViewByName",
+        "openViewsDropdown",
+        "openWorkspacesDropdown",
         "removeTagFromList",
         "renameItem",
         "renameList",
@@ -2785,7 +2808,9 @@
         "./utils/fixtures",
         "./utils/app",
         "./utils/assertions",
-        "./utils/seed"
+        "./utils/seed",
+        "./utils/drag",
+        "./utils/test-ids"
       ]
     },
     {
@@ -3911,15 +3936,9 @@
     },
     {
       "from": "components/Dashboard.tsx",
-      "to": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/layout/SidebarNav.tsx",
       "type": "imports",
-      "import": "@/components/layout/WorkspaceSwitcher"
-    },
-    {
-      "from": "components/Dashboard.tsx",
-      "to": "components/list/ListAdder.tsx",
-      "type": "imports",
-      "import": "./list/ListAdder"
+      "import": "@/components/layout/SidebarNav"
     },
     {
       "from": "components/Dashboard.tsx",
@@ -3941,12 +3960,6 @@
     },
     {
       "from": "components/Dashboard.tsx",
-      "to": "components/sharing/WorkspacesDialog.tsx",
-      "type": "imports",
-      "import": "@/components/sharing/WorkspacesDialog"
-    },
-    {
-      "from": "components/Dashboard.tsx",
       "to": "components/ui/separator.tsx",
       "type": "imports",
       "import": "./ui/separator"
@@ -3956,12 +3969,6 @@
       "to": "components/UserAccountNav.tsx",
       "type": "imports",
       "import": "./UserAccountNav"
-    },
-    {
-      "from": "components/Dashboard.tsx",
-      "to": "components/views/ViewsSidebarPreview.tsx",
-      "type": "imports",
-      "import": "./views/ViewsSidebarPreview"
     },
     {
       "from": "components/Dashboard.tsx",
@@ -3989,21 +3996,75 @@
     },
     {
       "from": "components/layout/AppShell.tsx",
+      "to": "components/ui/separator.tsx",
+      "type": "imports",
+      "import": "@/components/ui/separator"
+    },
+    {
+      "from": "components/layout/AppShell.tsx",
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
     },
     {
-      "from": "components/layout/WorkspaceSwitcher.tsx",
-      "to": "components/ui/card.tsx",
+      "from": "components/layout/SidebarNav.tsx",
+      "to": "components/layout/WorkspaceSwitcher.tsx",
       "type": "imports",
-      "import": "@/components/ui/card"
+      "import": "./WorkspaceSwitcher"
+    },
+    {
+      "from": "components/layout/SidebarNav.tsx",
+      "to": "components/list/ListAdder.tsx",
+      "type": "imports",
+      "import": "@/components/list/ListAdder"
+    },
+    {
+      "from": "components/layout/SidebarNav.tsx",
+      "to": "components/views/ViewsSidebarPreview.tsx",
+      "type": "imports",
+      "import": "@/components/views/ViewsSidebarPreview"
+    },
+    {
+      "from": "components/layout/SidebarNav.tsx",
+      "to": "hooks/useLocalFirstDashboardBoot.ts",
+      "type": "imports",
+      "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/sharing/WorkspacesDialog.tsx",
+      "type": "imports",
+      "import": "@/components/sharing/WorkspacesDialog"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/dropdown-menu.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dropdown-menu"
     },
     {
       "from": "components/layout/WorkspaceSwitcher.tsx",
       "to": "components/ui/skeleton.tsx",
       "type": "imports",
       "import": "@/components/ui/skeleton"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "lib/dashboard/views-reorder.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/views-reorder"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "lib/trpc.ts",
+      "type": "imports",
+      "import": "@/lib/trpc"
     },
     {
       "from": "components/layout/WorkspaceSwitcher.tsx",
@@ -4835,12 +4896,6 @@
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
-      "to": "components/ui/card.tsx",
-      "type": "imports",
-      "import": "@/components/ui/card"
-    },
-    {
-      "from": "components/views/ViewsSidebarPreview.tsx",
       "to": "components/ui/checkbox.tsx",
       "type": "imports",
       "import": "@/components/ui/checkbox"
@@ -5072,6 +5127,12 @@
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
       "import": "@/trpc/routers/viewHelpers"
+    },
+    {
+      "from": "lib/dashboard/views-reorder.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
     },
     {
       "from": "lib/local-db/local-db-diagnostics.ts",
@@ -5699,6 +5760,12 @@
     },
     {
       "from": "tests/e2e/workspace-nav.spec.ts",
+      "to": "tests/e2e/utils/drag.ts",
+      "type": "imports",
+      "import": "./utils/drag"
+    },
+    {
+      "from": "tests/e2e/workspace-nav.spec.ts",
       "to": "tests/e2e/utils/fixtures.ts",
       "type": "imports",
       "import": "./utils/fixtures"
@@ -5708,6 +5775,12 @@
       "to": "tests/e2e/utils/seed.ts",
       "type": "imports",
       "import": "./utils/seed"
+    },
+    {
+      "from": "tests/e2e/workspace-nav.spec.ts",
+      "to": "tests/e2e/utils/test-ids.ts",
+      "type": "imports",
+      "import": "./utils/test-ids"
     },
     {
       "from": "tests/unit/app-shell-strategy.test.ts",

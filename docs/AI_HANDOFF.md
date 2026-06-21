@@ -1,11 +1,11 @@
-<!-- Current Version: 3.2.3 -->
+<!-- Current Version: 3.2.4-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.2.3 - Views Reorder Snap-Back Patch
-**Next**: 3.2.4 - Sidebar Navigation Redesign
+**Current Version**: 3.2.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.2.4 - Sidebar Navigation Redesign
+**Next**: 3.2.5 - Create-Path Idempotency Hardening (TOCTOU)
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -78,6 +78,9 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Sharing models: `Workspace`, `WorkspaceMember`, `ListShare`, and `ShareLink`.
 - `ItemNoteDoc` is a one-to-one binary Yjs document keyed by `ListItem.id`. It is not a Replicache entity; `ListItem.notes` remains the plain-text read projection.
 - Live dashboard ordering is owned by fractional order keys: `View.orderKey`, `ViewList.orderKey`, and `ListItem.orderKey`.
+- Owned workspace navigation order uses nullable `Workspace.orderKey` and a
+  protected, single-row `reorderWorkspace` tRPC mutation. Workspaces remain
+  management entities outside Replicache.
 - Integer `order` fields are retained for schema/backfill compatibility and historical helper types, but they are not the live dashboard ordering authority.
 - Replicache keys are `list/{id}`, `listItem/{id}`, `tag/{id}`, `view/{id}`, `viewList/{viewId}/{listId}`, `viewTag/{viewId}/{tagId}`, `listTag/{listId}/{tagId}`, and `metadata/selectedView`.
 
@@ -159,6 +162,7 @@ Keep these because Replicache still uses them:
   tailwind-merge will not dedupe it against the primitive's `bg-popover` or
   `bg-card` and the surface drops out. Primitives keep their shadcn surface
   tokens; feature chrome uses semantic utilities.
+- The Replicache pull (`lib/sync/replicache/pull-cvr.ts` `buildReplicacheClientView`) has a latent null-safety/concurrency gap on `list.listItems` that can throw under concurrent pulls during rapid view create/switch (observed only at Playwright `--workers=2`; single-worker is green). Tracked in `docs/FUTURE_PLANS.md` Potential Next Directions.
 
 ## Validation Boundary
 

@@ -111,7 +111,11 @@ export const shareRouter = createTRPCRouter({
     async ({ ctx: { userId } }) =>
       db.workspace.findMany({
         where: { ownerId: userId },
-        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        orderBy: [
+          { orderKey: "asc" },
+          { createdAt: "asc" },
+          { id: "asc" },
+        ],
         include: {
           lists: {
             where: { userId },
@@ -121,6 +125,23 @@ export const shareRouter = createTRPCRouter({
         },
       }),
   ),
+
+  reorderWorkspace: protectedProcedure.input(
+    z.object({ id: z.uuid(), orderKey: z.string().min(1) }),
+  ).mutation(async ({ ctx: { userId }, input }) => {
+    const workspace = await db.workspace.findUnique({
+      where: { id: input.id },
+      select: { ownerId: true },
+    });
+    if (!workspace || workspace.ownerId !== userId) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    return db.workspace.update({
+      where: { id: input.id },
+      data: { orderKey: input.orderKey },
+      select: { id: true, orderKey: true },
+    });
+  }),
 
   getOwnedLists: protectedProcedure.query(async ({ ctx: { userId } }) =>
     db.list.findMany({

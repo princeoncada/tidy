@@ -104,11 +104,34 @@ export async function deleteList(page: Page, name: string) {
   await deleted;
 }
 
-export async function openAllLists(page: Page) {
-  const allListsButton = await firstVisible(page.getByRole("button", { name: /all lists/i }));
-  const buttonClass = await allListsButton.getAttribute("class");
+async function ensureDropdownOpen(page: Page, name: string) {
+  const trigger = page.getByRole("button", { name, exact: true });
+  await expect(async () => {
+    if ((await trigger.getAttribute("aria-expanded")) !== "true") {
+      await trigger.click();
+    }
+    await expect(trigger).toHaveAttribute("aria-expanded", "true", {
+      timeout: 1_000,
+    });
+  }).toPass({ timeout: 10_000 });
+}
 
-  if (buttonClass?.split(/\s+/).includes("bg-selection")) return;
+export async function openViewsDropdown(page: Page) {
+  await ensureDropdownOpen(page, "Views");
+}
+
+export async function openWorkspacesDropdown(page: Page) {
+  await ensureDropdownOpen(page, "Workspaces");
+}
+
+export async function openAllLists(page: Page) {
+  await openViewsDropdown(page);
+  const allListsButton = await firstVisible(page.getByRole("button", { name: /all lists/i }));
+
+  if (await allListsButton.getAttribute("aria-current") === "page") {
+    await page.keyboard.press("Escape");
+    return;
+  }
 
   const persisted = waitForSyncBatch(page);
   await allListsButton.click();
@@ -116,11 +139,14 @@ export async function openAllLists(page: Page) {
 }
 
 export async function openViewByName(page: Page, viewName: string) {
+  await openViewsDropdown(page);
   const viewCard = await getVisibleViewCard(page, viewName);
   const viewButton = viewCard.getByRole("button", { name: viewName, exact: true });
-  const buttonClass = await viewButton.getAttribute("class");
 
-  if (buttonClass?.split(/\s+/).includes("bg-selection")) return;
+  if (await viewButton.getAttribute("aria-current") === "page") {
+    await page.keyboard.press("Escape");
+    return;
+  }
 
   const persisted = waitForSyncBatch(page);
   await viewButton.click();
@@ -211,6 +237,7 @@ export async function removeTagFromList(page: Page, listName: string, tagName: s
 }
 
 export async function createView(page: Page, viewName: string, tagName: string) {
+  await openViewsDropdown(page);
   const createViewButton = await firstVisible(page.getByTestId(testIds.viewCreateButton));
 
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -227,12 +254,14 @@ export async function createView(page: Page, viewName: string, tagName: string) 
   const persisted = waitForSyncBatch(page);
   await dialog.getByTestId(testIds.saveViewButton).click();
   await persisted;
+  await openViewsDropdown(page);
   const viewCard = await getVisibleViewCard(page, viewName);
   await expect(viewCard).toBeVisible();
   await expect(viewCard.getByRole("button", { name: viewName, exact: true })).toBeVisible();
 }
 
 export async function deleteView(page: Page, viewName: string) {
+  await openViewsDropdown(page);
   const viewCard = await getVisibleViewCard(page, viewName);
 
   await expect(viewCard).toBeVisible();

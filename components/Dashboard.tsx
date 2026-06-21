@@ -5,17 +5,14 @@ import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import ListAdder from "./list/ListAdder";
 import ListsContainer from "./list/ListsContainer";
 import { Separator } from "./ui/separator";
 import UserAccountNav from "./UserAccountNav";
 import { useQueryClient } from "@tanstack/react-query";
-import ViewsSidebarPreview from "./views/ViewsSidebarPreview";
 import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { ReplicacheProvider } from "@/components/ReplicacheProvider";
-import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
 import { AppShell } from "@/components/layout/AppShell";
-import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
+import { SidebarNav } from "@/components/layout/SidebarNav";
 
 const supabase = createClient();
 
@@ -53,34 +50,28 @@ const Dashboard = () => {
   }
 
   const dashboard = (
-    <AppShell sidebar={(
-      <>
-        <WorkspaceSwitcher
+    <AppShell
+      sidebar={(
+        <SidebarNav
+          boot={localFirstBoot}
           activeWorkspaceId={activeWorkspaceId}
-          onSelect={setActiveWorkspaceId}
+          onSelectWorkspace={setActiveWorkspaceId}
         />
-        <ViewsSidebarPreview userId={localFirstBoot.userId} />
-      </>
-    )}>
+      )}
+      footer={<UserAccountNav logout={handleLogout} />}
+    >
       <main
         data-testid="app-shell"
         className="h-dvh min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-2 lg:px-4 xl:px-6 2xl:px-8"
       >
-        <MaxWidthWrapper>
+        <MaxWidthWrapper fullWidth>
           <div className="flex min-w-0 flex-col gap-3 py-12 lg:py-10">
             <div className="flex flex-col gap-2.5 w-full items-center">
               <div className="w-full flex flex-col">
-                <div className="w-full flex justify-between items-end h-12">
-                  <div className="flex gap-3 items-end">
-                    <UserAccountNav logout={handleLogout} />
-                    <h1 className="text-xl md:text-2xl font-bold text-text">
-                      Your Todo Lists
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <WorkspacesDialog />
-                    <ListAdder boot={localFirstBoot} />
-                  </div>
+                <div className="flex h-12 w-full items-end">
+                  <h1 className="text-xl md:text-2xl font-bold text-text">
+                    Your Todo Lists
+                  </h1>
                 </div>
               </div>
 

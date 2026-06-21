@@ -46,20 +46,12 @@ vi.mock("@/components/UserAccountNav", () => ({
   default: () => <div>User</div>,
 }));
 
-vi.mock("@/components/sharing/WorkspacesDialog", () => ({
-  WorkspacesDialog: () => <div>Workspaces</div>,
-}));
-
-vi.mock("@/components/list/ListAdder", () => ({
-  default: () => <div>Add list</div>,
-}));
-
 vi.mock("@/components/list/ListsContainer", () => ({
   default: () => <div>Lists</div>,
 }));
 
-vi.mock("@/components/views/ViewsSidebarPreview", () => ({
-  default: () => <div>Views</div>,
+vi.mock("@/components/layout/SidebarNav", () => ({
+  SidebarNav: () => <div>Sidebar</div>,
 }));
 
 describe("dashboard hydration", () => {
@@ -79,9 +71,9 @@ describe("dashboard hydration", () => {
   it("server-renders the stable loading wrapper before client-only state is available", () => {
     const html = renderToString(<Dashboard />);
 
-    expect(html).toContain(
-      'class="w-full max-w-7xl min-h-full xl:px-0 px-2 flex items-center justify-center"',
-    );
+        expect(html).toContain(
+          'class="w-full min-h-full xl:px-0 px-2 max-w-7xl flex items-center justify-center"',
+        );
     expect(html).not.toContain('data-testid="app-shell"');
   });
 
