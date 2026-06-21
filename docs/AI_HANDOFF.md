@@ -163,7 +163,7 @@ Keep these because Replicache still uses them:
   tailwind-merge will not dedupe it against the primitive's `bg-popover` or
   `bg-card` and the surface drops out. Primitives keep their shadcn surface
   tokens; feature chrome uses semantic utilities.
-- The Replicache pull (`lib/sync/replicache/pull-cvr.ts` `buildReplicacheClientView`) has a latent null-safety/concurrency gap on `list.listItems` that can throw under concurrent pulls during rapid view create/switch (observed only at Playwright `--workers=2`; single-worker is green). Tracked in `docs/FUTURE_PLANS.md` Potential Next Directions.
+- The Replicache pull (`lib/sync/replicache/pull-cvr.ts` `buildReplicacheClientView`) has a latent null-safety/concurrency gap on `list.listItems` that can throw under concurrent pulls during rapid view create/switch (observed only at Playwright `--workers=2`; single-worker is green); the `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" convergence race rides the same scenario. Scoped as `docs/FUTURE_PLANS.md` phase 3.2.8 (Concurrent-Pull Resilience & Fast-Switch View Convergence).
 
 ## Validation Boundary
 
