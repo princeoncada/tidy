@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.7 - Workspace Section Parity & Selection Styling (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.7 - Workspace Section Parity & Selection Styling
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** (a) Make the Workspaces accordion section adopt the Views section's layout/organization (the ideal reference); (b) add a per-workspace ellipsis (...) control on the right of each workspace row for rename and delete; (c) selection styling: when a custom view OR a workspace is selected, apply only the existing list "selected" border - do not recolor all lists or the selected item; (d) remove the word "View" from the Views add-button label.
 - **Product impact:** user-visible - consistent workspace/views layout, a workspace rename/delete affordance, subtler border-only selection styling, and a cleaner add-button label.

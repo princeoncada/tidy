@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.6",
+  "version": "3.2.7-alpha",
   "generatedAt": "2026-06-21",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -567,6 +567,11 @@
         "@/components/sharing/WorkspacesDialog",
         "@/components/ui/button",
         "@/components/ui/skeleton",
+        "@/components/ui/dialog",
+        "@/components/ui/dropdown-menu",
+        "@/components/ui/input",
+        "@/components/ui/label",
+        "@/components/ReplicacheProvider",
         "@/lib/dashboard/views-reorder",
         "@/lib/trpc",
         "@/lib/utils",
@@ -4053,6 +4058,12 @@
     },
     {
       "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ReplicacheProvider.tsx",
+      "type": "imports",
+      "import": "@/components/ReplicacheProvider"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
       "to": "components/sharing/WorkspacesDialog.tsx",
       "type": "imports",
       "import": "@/components/sharing/WorkspacesDialog"
@@ -4062,6 +4073,30 @@
       "to": "components/ui/button.tsx",
       "type": "imports",
       "import": "@/components/ui/button"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/dialog.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dialog"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/dropdown-menu.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dropdown-menu"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/input.tsx",
+      "type": "imports",
+      "import": "@/components/ui/input"
+    },
+    {
+      "from": "components/layout/WorkspaceSwitcher.tsx",
+      "to": "components/ui/label.tsx",
+      "type": "imports",
+      "import": "@/components/ui/label"
     },
     {
       "from": "components/layout/WorkspaceSwitcher.tsx",

@@ -110,6 +110,7 @@ function SortableViewRowComponent({
       className={cn(
         "group/view-row flex items-center gap-0.5 rounded-md border border-transparent pr-0.5 transition",
         "hover:border-border hover:bg-surface-muted",
+        isSelected && "border-border-strong",
         isDragging && "scale-[1.01] border-border bg-surface-muted shadow-sm"
       )}
     >
@@ -518,10 +519,9 @@ export default function ViewsSidebarPreview({
       {open && (
         <div
           id="sidebar-views-section"
-          className="mt-1 rounded-md border border-border bg-surface-muted/40 p-2"
+          className="rounded-md border border-border bg-surface-muted/40 p-2"
         >
-          <div className="mb-1 flex items-center justify-between px-1">
-            <span className="text-xs font-medium text-text-muted">Views</span>
+          <div className="mb-1 flex items-center justify-end px-1">
             <Button
               data-testid="view-create-button"
               type="button"
@@ -531,7 +531,7 @@ export default function ViewsSidebarPreview({
               onClick={openCreateView}
             >
               <Plus className="size-3" />
-              Add View
+              Add
             </Button>
           </div>
 
@@ -543,7 +543,7 @@ export default function ViewsSidebarPreview({
             className={cn(
               "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-border hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
               selectedViewId === allListsView?.id
-                ? "border-border bg-selection text-text"
+                ? "border-border-strong text-text"
                 : "text-text-muted hover:text-text"
             )}
           >

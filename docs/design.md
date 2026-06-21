@@ -72,7 +72,7 @@ same phase.
 | warning | Caution requiring attention but not destructive action |
 | destructive | Destructive actions and errors |
 | focus | Keyboard focus indicator only |
-| selection | Selected rows, navigation, or text-adjacent selection state |
+| selection | Text-adjacent selection state and selected surfaces that explicitly call for a fill; sidebar navigation uses `border-strong` instead |
 | overlay | Backdrop separating modal content from the canvas |
 
 Every role must define light and dark values. Theme pairs must preserve the
@@ -186,7 +186,10 @@ sections. Expanding a section reveals its list inside the sidebar column and
 pushes lower sections down rather than floating an overlay; both sections open
 and close independently. Each section owns internal scrolling, in-section add,
 and in-section drag reorder; drag hover is local-only and persistence occurs on
-drop. The account avatar lives in the sidebar footer above a Separator, and its
+drop. The accordion trigger carries each section title, so expanded panels do
+not repeat an in-panel title; their panel header contains only a right-aligned
+control labelled "Add". Add List, Workspaces, and Views use one uniform vertical
+gap in the flattened sidebar flow. The account avatar lives in the sidebar footer above a Separator, and its
 account menu remains a dropdown that opens upward while retaining theme and
 logout actions. From the collapsed rail, activating the account avatar first
 expands the sidebar and then opens that menu.
@@ -206,7 +209,9 @@ Workspace switching is Current as of 3.2.2 and its inline disclosure redesign
 is Current as of 3.2.6. The sidebar hosts a Workspaces accordion section with
 an "All workspaces" default; selecting a workspace filters the canvas to that workspace's lists.
 Selection state is expressed beyond color, and every workspace entry is
-keyboard operable.
+keyboard operable. Default workspace/view buttons, workspace rows, and custom
+view rows express selection with the `border-strong` emphasis border plus a
+check indicator, not a selection-fill recolor.
 
 ## Workspace Navigation
 
@@ -221,6 +226,15 @@ workspaces do not become Replicache entities. The Views accordion section follow
 same bounded-scroll and in-section add/reorder structure, while committed view
 reorder continues through the existing one-row Replicache order-key path.
 
+Owned workspace rows mirror custom View row structure: grip handle, workspace
+name, and a trailing ellipsis menu with Rename and Delete actions. Workspace
+rows do not have a leading per-row icon. Rename uses a small dialog;
+`renameWorkspace` and `deleteWorkspace` are protected, owner-checked tRPC
+mutations on the same management lane as `reorderWorkspace`, not Replicache
+mutations. Deleting a workspace relies on `List.workspaceId` `onDelete: SetNull`,
+so affected lists fall back to "All workspaces", and then triggers a Replicache
+pull to refresh the dashboard projection.
+
 The canvas filter reads
 each list's synced `workspaceId` from the render store, preserving a local-first
 render and filter path with no blocking server round trip. The workspace roster
@@ -228,7 +242,9 @@ may use the existing read-only owned-workspaces read.
 
 Lists without a workspace appear only under "All workspaces"; there is no
 separate personal or unassigned bucket. Every entry must be keyboard operable
-with visible focus, and the selected entry must expose state beyond color.
+with visible focus, and the selected entry must expose state beyond color. The
+Workspaces and Views accordion triggers provide the section labels; expanded
+panels omit redundant labels and expose only a right-aligned "Add" control.
 
 ## Component Contracts
 
@@ -255,7 +271,10 @@ the sole carrier of essential meaning.
 Cards and surfaces use the elevation hierarchy consistently. Menus, popovers,
 dialogs, and panels must manage focus, dismissal, labelling, and stacking.
 List rows and navigation items must provide consistent density, selection, and
-action placement without shrinking required interaction targets.
+action placement without shrinking required interaction targets. Selected
+sidebar default buttons, workspace rows, and custom view rows use the
+`border-strong` emphasis border plus their check indicator; they must not use a
+selection fill to recolor the row.
 
 These contracts govern presentation and interaction quality. They do not add
 product behavior assigned to the item-panel, workspace, board, sharing, or
@@ -302,6 +321,7 @@ Design and runtime implementation must remain consistent in both directions:
 | 3.2.2 | Workspace navigation inside the established shell | Workspace-switch proof plus navigation-state and accessibility parity |
 | 3.2.4 | Sidebar navigation redesign: dropdown nav, in-dropdown add/reorder, footer account menu, fixed collapse toggle, full-width canvas | Manual product proof (add list from sidebar; reorder/add in both dropdowns; fixed-position collapse; upward account menu; full-width no-overflow) plus shell parity |
 | 3.2.6 | Inline Workspaces/Views accordion sections (replaces 3.2.4 dropdown panels) + collapsed-rail account-avatar expands sidebar before opening the account menu | Manual product proof (both sections open independently and push lower content down; add/select/reorder remain in-section; collapsed avatar expands the sidebar before the upward account menu opens) plus shell parity |
+| 3.2.7 | Workspace section parity, trailing ellipsis rename/delete, border-only sidebar selection styling, redundant-label removal, and Add-label cleanup | Manual product proof (rename/delete a workspace; default, workspace, and custom-view selection uses border plus check without fill; uniform trigger spacing and Add labels) plus shell parity |
 
 Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.
