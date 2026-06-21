@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.5 - List Item Cross-List Move Snap-Back Patch (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.5 - List Item Cross-List Move Snap-Back Patch
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Eliminate the cross-list item-move snap-back flicker: dragging an item onto another list briefly shows it dropped, snaps it back to the source list for a few ms, then re-lands it in the destination. The optimistic destination placement must be held until the committed write confirms (confirm-before-relinquish, paralleling 3.2.3 views-reorder) instead of relinquishing the optimistic preview before the write lands. Must also hold across rapid successive moves: each item already moved must not flicker back to the source as later moves confirm.
 - **Product impact:** user-visible - removes the drop -> revert -> re-land flicker on cross-list item drag, including the cascading flicker when moving several items in succession.
