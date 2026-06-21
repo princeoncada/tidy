@@ -110,13 +110,49 @@ test("sidebar navigation supports add, workspace reorder, fixed collapse, footer
     name: "Workspaces",
     exact: true,
   });
+  const viewsTrigger = page.getByRole("button", {
+    name: "Views",
+    exact: true,
+  });
+  if (await viewsTrigger.getAttribute("aria-expanded") === "true") {
+    await viewsTrigger.click();
+  }
+
+  await openWorkspacesDropdown(page);
+  const workspacesSection = page.locator("#sidebar-workspaces-section");
+  await expect(workspacesSection).toBeVisible();
+  expect(
+    await workspacesSection.evaluate((section) => section.closest('[role="menu"]') === null),
+  ).toBe(true);
+
+  await viewsTrigger.click();
+  const viewsSection = page.locator("#sidebar-views-section");
+  await expect(workspacesTrigger).toHaveAttribute("aria-expanded", "true");
+  await expect(viewsTrigger).toHaveAttribute("aria-expanded", "true");
+  await expect(viewsSection).toBeVisible();
+  expect(
+    await viewsSection.evaluate((section) => section.closest('[role="menu"]') === null),
+  ).toBe(true);
+  expect(await page.evaluate(() => {
+    const workspaces = document.querySelector("#sidebar-workspaces-section");
+    const viewsButton = document.querySelector('[aria-controls="sidebar-views-section"]');
+    const views = document.querySelector("#sidebar-views-section");
+    if (!workspaces || !viewsButton || !views) return false;
+
+    return Boolean(
+      workspaces.compareDocumentPosition(viewsButton) & Node.DOCUMENT_POSITION_FOLLOWING
+    ) && Boolean(
+      viewsButton.compareDocumentPosition(views) & Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  })).toBe(true);
+
   const workspaceNames = [
     uniqueTestName("workspace-reorder-first"),
     uniqueTestName("workspace-reorder-second"),
   ];
 
   for (const workspaceName of workspaceNames) {
-    await workspacesTrigger.click();
+    await openWorkspacesDropdown(page);
     await page.getByTestId(testIds.workspaceAddButton).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("Workspace name").fill(workspaceName);
@@ -125,7 +161,7 @@ test("sidebar navigation supports add, workspace reorder, fixed collapse, footer
     await expect(dialog).toBeHidden();
   }
 
-  await workspacesTrigger.click();
+  await openWorkspacesDropdown(page);
   const rows = page.getByTestId(testIds.workspaceRow);
   const firstRow = rows.filter({ hasText: workspaceNames[0] });
   const secondRow = rows.filter({ hasText: workspaceNames[1] });
@@ -152,13 +188,16 @@ test("sidebar navigation supports add, workspace reorder, fixed collapse, footer
   const collapse = page.getByTestId(testIds.sidebarCollapseToggle);
   const before = await collapse.boundingBox();
   await collapse.click();
+  await expect(collapse).toHaveAttribute("aria-expanded", "false");
   const after = await collapse.boundingBox();
   expect(after?.x).toBe(before?.x);
   expect(after?.y).toBe(before?.y);
-  await collapse.click();
 
   await page.getByTestId(testIds.accountMenuTrigger).click();
-  await expect(page.getByTestId(testIds.accountMenuContent)).toHaveAttribute("data-side", "top");
+  await expect(collapse).toHaveAttribute("aria-expanded", "true");
+  const accountMenu = page.getByTestId(testIds.accountMenuContent);
+  await expect(accountMenu).toBeVisible();
+  await expect(accountMenu).toHaveAttribute("data-side", "top");
   await page.keyboard.press("Escape");
 
   const fullWidthCanvas = page.getByTestId(testIds.fullWidthCanvas);
