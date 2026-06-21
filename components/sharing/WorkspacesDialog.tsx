@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Boxes, Plus } from "lucide-react";
 import { useState } from "react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +21,18 @@ import { useTRPC } from "@/trpc/client";
 
 import { ShareDialog } from "./ShareDialog";
 
-export function WorkspacesDialog() {
-  const [open, setOpen] = useState(false);
+export function WorkspacesDialog({
+  trigger,
+  open: controlledOpen,
+  onOpenChange,
+}: {
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+} = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [name, setName] = useState("");
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -66,12 +77,16 @@ export function WorkspacesDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          <Boxes />
-          Workspaces
-        </Button>
-      </DialogTrigger>
+      {(trigger || controlledOpen === undefined) && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button size="sm" variant="outline">
+              <Boxes />
+              Workspaces
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Workspaces</DialogTitle>
