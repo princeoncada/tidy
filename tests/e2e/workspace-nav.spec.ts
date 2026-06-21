@@ -1,6 +1,6 @@
 import { expect, test } from "./utils/fixtures";
 
-import { createList, deleteList, openAllLists, openWorkspacesDropdown } from "./utils/app";
+import { createList, deleteList, openAllLists, openWorkspacesSection } from "./utils/app";
 import { expectListNotVisible, expectListVisible } from "./utils/assertions";
 import {
   collectConsoleErrors,
@@ -53,7 +53,7 @@ test("workspace navigation filters synced lists and is keyboard operable", async
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 
-  await openWorkspacesDropdown(page);
+  await openWorkspacesSection(page);
   const workspaceButton = page.getByRole("button", {
     name: workspaceName,
     exact: true,
@@ -63,7 +63,7 @@ test("workspace navigation filters synced lists and is keyboard operable", async
   await expect(workspaceButton).toBeFocused();
   await workspaceButton.press("Enter");
 
-  await openWorkspacesDropdown(page);
+  await openWorkspacesSection(page);
   const selectedWorkspaceButton = page.getByRole("button", {
     name: workspaceName,
     exact: true,
@@ -76,7 +76,7 @@ test("workspace navigation filters synced lists and is keyboard operable", async
   await expectListVisible(page, assignedList);
   await expectListNotVisible(page, unassignedList);
 
-  await openWorkspacesDropdown(page);
+  await openWorkspacesSection(page);
   const allWorkspacesButton = page.getByRole("button", {
     name: "All workspaces",
     exact: true,
@@ -84,7 +84,7 @@ test("workspace navigation filters synced lists and is keyboard operable", async
   await allWorkspacesButton.focus();
   await allWorkspacesButton.press("Space");
 
-  await openWorkspacesDropdown(page);
+  await openWorkspacesSection(page);
   const selectedAllWorkspacesButton = page.getByRole("button", {
     name: "All workspaces",
     exact: true,
@@ -118,7 +118,7 @@ test("sidebar navigation supports add, workspace reorder, fixed collapse, footer
     await viewsTrigger.click();
   }
 
-  await openWorkspacesDropdown(page);
+  await openWorkspacesSection(page);
   const workspacesSection = page.locator("#sidebar-workspaces-section");
   await expect(workspacesSection).toBeVisible();
   expect(
@@ -152,7 +152,7 @@ test("sidebar navigation supports add, workspace reorder, fixed collapse, footer
   ];
 
   for (const workspaceName of workspaceNames) {
-    await openWorkspacesDropdown(page);
+    await openWorkspacesSection(page);
     await page.getByTestId(testIds.workspaceAddButton).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("Workspace name").fill(workspaceName);
@@ -161,7 +161,7 @@ test("sidebar navigation supports add, workspace reorder, fixed collapse, footer
     await expect(dialog).toBeHidden();
   }
 
-  await openWorkspacesDropdown(page);
+  await openWorkspacesSection(page);
   const rows = page.getByTestId(testIds.workspaceRow);
   const firstRow = rows.filter({ hasText: workspaceNames[0] });
   const secondRow = rows.filter({ hasText: workspaceNames[1] });
