@@ -1,6 +1,6 @@
 {
-    "version":  "3.2.5-alpha",
-    "state":  "alpha",
+    "version":  "3.2.5",
+    "state":  "stable",
     "phase":  "3.2.5",
     "phaseTitle":  "List Item Cross-List Move Snap-Back Patch",
     "nextPhase":  "3.2.6 - Sidebar Accordion Conversion \u0026 Collapsed-Avatar Open",
