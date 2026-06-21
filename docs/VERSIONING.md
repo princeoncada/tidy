@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.3-alpha
+- **Current version:** 3.2.3
 - **Current phase:** 3.2.3 - Views Reorder Snap-Back Patch
 - **Next phase:** 3.2.4 - Sidebar Navigation Redesign
 
@@ -321,6 +321,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.2.0 | 2026-06-20 | Design Tokens & Dark Mode | product behavior | user-visible theming + dark mode. | tokens + theme run app-wide. | targeted + manual product proof (toggle dark mode); design.md parity. | token layer (app/globals.css or equivalent), theme provider, components touched for tokens | Implement the docs/design.md token system and a working light/dark theme switch. |
 | 3.2.1 | 2026-06-20 | Collapsible Left Sidebar & Canvas Shell | product behavior | new navigation/layout shell (user-visible). | the shell wraps the dashboard. | targeted + manual product proof (collapse/expand, responsive); design.md parity. | components/layout/* (new shell), app layout | Introduce the ChatGPT-style collapsible left sidebar + main canvas app shell per docs/design.md. |
 | 3.2.2 | 2026-06-20 | Workspace Navigation | product behavior | user-visible workspace nav. | workspace nav runs in the sidebar/shell. | targeted + manual product proof (switch workspaces). | lib/sync/replicache/keys.ts, lib/sync/replicache/pull-cvr.ts, lib/sync/replicache/mutators.ts, lib/dashboard/server-read.ts, lib/dashboard/workspace-filter.ts, components/layout/WorkspaceSwitcher.tsx, components/Dashboard.tsx, components/list/ListsContainer.tsx, components/list/ListAdder.tsx, lib/local-first-dashboard.ts, docs/design.md, tests | Surface workspace switching in the shell sidebar that filters the lists canvas, carrying workspace context through the Replicache render store (workspace model is KEPT). |
+| 3.2.3 | 2026-06-20 | Views Reorder Snap-Back Patch | product behavior (bug fix) | reordering a view in the Views list commits in place with no visible snap-back. | the dashboard view-reorder handler + the lib/sync overlay path (NOT theming; verified not a 3.2.0 regression - the 3.2.0 diff to ViewsSidebarPreview.tsx was color-token-only). | targeted + a Playwright "reorder commits in place, no snap-back" proof. | components/views/ViewsSidebarPreview.tsx, dashboard view-reorder handler, lib/sync overlay path | Fix the custom-view reorder snap-back-then-pop flash: the optimistic overlay relinquishes the dragged row's position before the committed reorder write confirms, and the row's transition makes the gap visible. |
 
 ---
 
