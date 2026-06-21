@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.2
-- **Current phase:** 3.2.2 - Workspace Navigation
-- **Next phase:** 3.2.3 - Views Reorder Snap-Back Patch
+- **Current version:** 3.2.3-alpha
+- **Current phase:** 3.2.3 - Views Reorder Snap-Back Patch
+- **Next phase:** 3.2.4 - Sidebar Navigation Redesign
 
 ---
 
