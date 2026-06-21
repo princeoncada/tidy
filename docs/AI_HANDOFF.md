@@ -63,6 +63,12 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 **Authenticated dashboard shell:**
 - The collapsible left sidebar and canvas shell wraps the authenticated dashboard;
   collapse/expand does not remount or reset the dashboard data surface.
+- The expanded sidebar's Workspaces and Views navigation uses independent inline
+  accordion sections rather than floating dropdowns. Each section owns its
+  internal scroll, in-section add, and in-section drag reorder; expanding one
+  pushes lower sections down in the sidebar flow.
+- From the collapsed desktop rail, activating the footer account avatar first
+  expands the sidebar and then opens the upward account-menu dropdown.
 - Below `lg`, the sidebar is a focus-trapping Radix Dialog drawer that returns
   focus to its trigger. The canvas main retains `data-testid="app-shell"`, and
   the theme toggle remains in the account menu.
