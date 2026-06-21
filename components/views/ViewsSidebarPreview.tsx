@@ -4,6 +4,7 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import {
   Check,
+  ChevronDown,
   GripVertical,
   Layers,
   ListFilter,
@@ -16,7 +17,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -117,7 +117,7 @@ function SortableViewRowComponent({
         ref={handleRef}
         type="button"
         className={cn(
-          "cursor-grab rounded-sm p-1 text-text-muted transition",
+          "cursor-grab rounded-sm p-1 text-text-muted transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
           "hover:bg-surface-muted/70 hover:text-text-muted active:cursor-grabbing"
         )}
         aria-label={`Reorder ${view.name}`}
@@ -128,9 +128,10 @@ function SortableViewRowComponent({
 
       <button
         type="button"
+        aria-current={isSelected ? "page" : undefined}
         onClick={() => onSelect(view.id)}
         className={cn(
-          "flex min-w-0 flex-1 items-center justify-between rounded-sm px-1.5 py-1 text-left text-xs transition",
+          "flex min-w-0 flex-1 items-center justify-between rounded-sm px-1.5 py-1 text-left text-xs transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
           isSelected ? "text-text" : "text-text-muted hover:text-text"
         )}
       >
@@ -178,45 +179,10 @@ const SortableViewRow = memo(SortableViewRowComponent);
 
 function ViewsSidebarSkeleton() {
   return (
-    <Card className="w-full border-border/80 bg-surface/90 shadow-none py-0 mt-3">
-      <CardHeader className="px-3 py-3">
-        <CardTitle className="flex items-center justify-between text-sm">
-          <span className="inline-flex items-center gap-1.5">
-            <Skeleton className="size-3.5" />
-            <Skeleton className="h-4 w-12" />
-          </span>
-          <Skeleton className="h-6 w-20" />
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-2 px-3 pb-3 pt-0">
-        <div className="flex w-full items-center justify-between rounded-md border border-border px-2 py-1.5">
-          <span className="inline-flex items-center gap-1.5">
-            <Skeleton className="size-3.5" />
-            <Skeleton className="h-3.5 w-16" />
-          </span>
-          <Skeleton className="size-3.5" />
-        </div>
-
-        <Separator />
-
-        <div className="space-y-0.5">
-          {[72, 92, 64].map((width) => (
-            <div
-              key={width}
-              className="flex items-center gap-1 rounded-md border border-transparent pr-0.5"
-            >
-              <Skeleton className="size-5" />
-              <div className="flex min-w-0 flex-1 items-center justify-between px-1.5 py-1">
-                <Skeleton className="h-3.5" style={{ width }} />
-                <Skeleton className="size-3.5" />
-              </div>
-              <Skeleton className="size-5" />
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex h-9 items-center gap-2 px-2">
+      <Skeleton className="size-4" />
+      <Skeleton className="h-4 w-12" />
+    </div>
   );
 }
 
@@ -351,9 +317,11 @@ export default function ViewsSidebarPreview({
   const dragPreviewViewsRef = useRef<ViewItem[] | null>(null);
   const awaitingCommitRef = useRef(false);
   const relinquishFallbackRef = useRef<NodeJS.Timeout | null>(null);
+  const draggingRef = useRef(false);
 
   const [dialogState, setDialogState] = useState<ViewDialogState | null>(null);
   const [dragPreviewViews, setDragPreviewViews] = useState<ViewItem[] | null>(null);
+  const [open, setOpen] = useState(false);
 
   useRenderMeasure("ViewsSidebarPreview");
 
@@ -516,6 +484,7 @@ export default function ViewsSidebarPreview({
   }
 
   function openCreateView() {
+    setOpen(false);
     setDialogState({ mode: "create" });
   }
 
@@ -533,13 +502,36 @@ export default function ViewsSidebarPreview({
 
   return (
     <>
-      <Card className="w-full border-border/80 bg-surface/90 shadow-none py-0 mt-3">
-        <CardHeader className="px-3 py-3">
-          <CardTitle className="flex items-center justify-between text-sm">
+      <DropdownMenu
+        modal={false}
+        open={open}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && draggingRef.current) return;
+          setOpen(nextOpen);
+        }}
+      >
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full justify-between px-2 focus-visible:ring-2 focus-visible:ring-focus"
+          >
             <span className="inline-flex items-center gap-1.5">
-              <ListFilter className="size-3.5 text-text-muted" />
+              <ListFilter className="size-4" />
               Views
             </span>
+            <ChevronDown className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="w-60 p-2"
+          onCloseAutoFocus={(event) => {
+            if (draggingRef.current) event.preventDefault();
+          }}
+        >
+          <div className="mb-1 flex items-center justify-between px-1">
+            <span className="text-xs font-medium text-text-muted">Views</span>
             <Button
               data-testid="view-create-button"
               type="button"
@@ -551,15 +543,18 @@ export default function ViewsSidebarPreview({
               <Plus className="size-3" />
               Add View
             </Button>
-          </CardTitle>
-        </CardHeader>
+          </div>
 
-        <CardContent className="space-y-2 px-3 pb-3 pt-0">
+          <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
           <button
             type="button"
-            onClick={() => selectView(allListsView?.id)}
+            aria-current={selectedViewId === allListsView?.id ? "page" : undefined}
+            onClick={() => {
+              selectView(allListsView?.id);
+              setOpen(false);
+            }}
             className={cn(
-              "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-border hover:bg-surface-muted",
+              "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-border hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
               selectedViewId === allListsView?.id
                 ? "border-border bg-selection text-text"
                 : "text-text-muted hover:text-text"
@@ -583,6 +578,7 @@ export default function ViewsSidebarPreview({
 
           <DragDropProvider
             onDragStart={() => {
+              draggingRef.current = true;
               measureOptimisticEvent("views.drag.start", { count: customViews.length });
               awaitingCommitRef.current = false;
               if (relinquishFallbackRef.current) {
@@ -592,6 +588,7 @@ export default function ViewsSidebarPreview({
               setLocalViewPreview(customViews);
             }}
             onDragEnd={(event) => {
+              draggingRef.current = false;
               const finalPreview = dragPreviewViewsRef.current;
 
               if (event.canceled) {
@@ -643,7 +640,10 @@ export default function ViewsSidebarPreview({
                     view={view}
                     index={index}
                     isSelected={selectedViewId === view.id}
-                    onSelect={selectView}
+                    onSelect={(id) => {
+                      selectView(id);
+                      setOpen(false);
+                    }}
                     onEdit={openEditView}
                     onDelete={deleteView}
                   />
@@ -651,8 +651,9 @@ export default function ViewsSidebarPreview({
               </div>
             </OptimisticProfiler>
           </DragDropProvider>
-        </CardContent>
-      </Card>
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {dialogState && (
         <ViewDialog
