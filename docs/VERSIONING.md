@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.3
-- **Current phase:** 3.2.3 - Views Reorder Snap-Back Patch
-- **Next phase:** 3.2.4 - Sidebar Navigation Redesign
+- **Current version:** 3.2.4-alpha
+- **Current phase:** 3.2.4 - Sidebar Navigation Redesign
+- **Next phase:** 3.2.5 - Create-Path Idempotency Hardening (TOCTOU)
 
 ---
 
