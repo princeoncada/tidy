@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Replace the 3.2.4 Radix `DropdownMenu` panels for Workspaces and Views with an inline accordion inside the sidebar column: expanding Workspaces reveals its list inline and pushes the Views section down within the sidebar (and vice-versa), instead of floating an overlay panel. The in-panel add and drag-reorder behaviors are preserved, rehomed into the accordion sections. Separately, when the sidebar is collapsed, selecting the footer account avatar first expands the sidebar, then opens the account dropdown (no dropdown popped over a collapsed rail).
 - **Product impact:** user-visible - Workspaces/Views expand inline rather than as floating dropdowns; the account avatar reliably opens an expanded sidebar before its menu.
