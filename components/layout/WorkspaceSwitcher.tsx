@@ -8,11 +8,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { movedRowOrderKey } from "@/lib/dashboard/views-reorder";
 import type { RouterOutputs } from "@/lib/trpc";
@@ -137,76 +132,61 @@ export function WorkspaceSwitcher({
 
   return (
     <>
-      <DropdownMenu
-      modal={false}
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen && draggingRef.current) return;
-        setOpen(nextOpen);
-      }}
-    >
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className="w-full justify-between px-2 focus-visible:ring-2 focus-visible:ring-focus"
-        >
-          <span className="inline-flex items-center gap-2">
-            <Boxes className="size-4" />
-            Workspaces
-          </span>
-          <ChevronDown className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="w-60 p-2"
-        onCloseAutoFocus={(event) => {
-          if (draggingRef.current) event.preventDefault();
-        }}
+      <Button
+        type="button"
+        variant="ghost"
+        aria-expanded={open}
+        aria-controls="sidebar-workspaces-section"
+        onClick={() => setOpen((value) => !value)}
+        className="w-full justify-between px-2 focus-visible:ring-2 focus-visible:ring-focus"
       >
-        <div className="mb-1 flex items-center justify-between px-1">
-          <span className="text-xs font-medium text-text-muted">Workspaces</span>
-          <Button
-            type="button"
-            size="xs"
-            variant="outline"
-            data-testid="workspace-add-button"
-            onClick={() => {
-              setOpen(false);
-              setWorkspaceDialogOpen(true);
-            }}
-          >
-            <Plus className="size-3" />
-            Add
-          </Button>
-        </div>
-        <div className="max-h-72 space-y-0.5 overflow-y-auto pr-1">
-          <button
-            type="button"
-            aria-current={activeWorkspaceId === null ? "page" : undefined}
-            onClick={() => {
-              onSelect(null);
-              setOpen(false);
-            }}
-            className={cn(
-              "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs hover:border-border hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-              activeWorkspaceId === null
-                ? "border-border bg-selection text-text"
-                : "text-text-muted hover:text-text",
-            )}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <Layers className="size-3.5" />
-              All workspaces
-            </span>
-            {activeWorkspaceId === null && (
-              <Check
-                data-testid="workspace-selected-indicator"
-                className="size-3.5 text-text-muted"
-              />
-            )}
-          </button>
+        <span className="inline-flex items-center gap-2">
+          <Boxes className="size-4" />
+          Workspaces
+        </span>
+        <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} />
+      </Button>
+      {open && (
+        <div
+          id="sidebar-workspaces-section"
+          className="mt-1 rounded-md border border-border bg-surface-muted/40 p-2"
+        >
+          <div className="mb-1 flex items-center justify-between px-1">
+            <span className="text-xs font-medium text-text-muted">Workspaces</span>
+            <Button
+              type="button"
+              size="xs"
+              variant="outline"
+              data-testid="workspace-add-button"
+              onClick={() => setWorkspaceDialogOpen(true)}
+            >
+              <Plus className="size-3" />
+              Add
+            </Button>
+          </div>
+          <div className="max-h-72 space-y-0.5 overflow-y-auto pr-1">
+            <button
+              type="button"
+              aria-current={activeWorkspaceId === null ? "page" : undefined}
+              onClick={() => onSelect(null)}
+              className={cn(
+                "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs hover:border-border hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                activeWorkspaceId === null
+                  ? "border-border bg-selection text-text"
+                  : "text-text-muted hover:text-text",
+              )}
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <Layers className="size-3.5" />
+                All workspaces
+              </span>
+              {activeWorkspaceId === null && (
+                <Check
+                  data-testid="workspace-selected-indicator"
+                  className="size-3.5 text-text-muted"
+                />
+              )}
+            </button>
 
           {workspaces.isLoading ? (
             <div className="space-y-1 py-1">
@@ -269,10 +249,7 @@ export function WorkspaceSwitcher({
                     workspace={workspace}
                     index={index}
                     selected={activeWorkspaceId === workspace.id}
-                    onSelect={() => {
-                      onSelect(workspace.id);
-                      setOpen(false);
-                    }}
+                    onSelect={() => onSelect(workspace.id)}
                   />
                 ))}
               </div>
@@ -283,8 +260,8 @@ export function WorkspaceSwitcher({
             <p className="px-2 py-1 text-xs text-text-muted">No workspaces yet.</p>
           )}
         </div>
-      </DropdownMenuContent>
-      </DropdownMenu>
+        </div>
+      )}
       <WorkspacesDialog
         open={workspaceDialogOpen}
         onOpenChange={setWorkspaceDialogOpen}
