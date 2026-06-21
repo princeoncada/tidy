@@ -1,6 +1,6 @@
 {
-    "version":  "3.2.7-alpha",
-    "state":  "alpha",
+    "version":  "3.2.7",
+    "state":  "stable",
     "phase":  "3.2.7",
     "phaseTitle":  "Workspace Section Parity \u0026 Selection Styling",
     "nextPhase":  "3.2.8 - Concurrent-Pull Resilience \u0026 Fast-Switch View Convergence",
