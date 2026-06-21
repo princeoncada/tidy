@@ -8,6 +8,8 @@ export const testIds = {
   workspaceAddButton: "workspace-add-button",
   workspaceRow: "workspace-row",
   workspaceDragHandle: "workspace-drag-handle",
+  workspaceMenuTrigger: "workspace-menu-trigger",
+  workspaceRenameSave: "workspace-rename-save",
   workspaceSelectedIndicator: "workspace-selected-indicator",
   listCard: "list-card",
   listTitle: "list-title",
