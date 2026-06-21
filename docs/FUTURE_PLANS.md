@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.5 - List Item Cross-List Move Snap-Back Patch (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.5 - List Item Cross-List Move Snap-Back Patch
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Eliminate the cross-list item-move snap-back flicker: dragging an item onto another list briefly shows it dropped, snaps it back to the source list for a few ms, then re-lands it in the destination. The optimistic destination placement must be held until the committed write confirms (confirm-before-relinquish, paralleling 3.2.3 views-reorder) instead of relinquishing the optimistic preview before the write lands. Must also hold across rapid successive moves: each item already moved must not flicker back to the source as later moves confirm.
-- **Product impact:** user-visible - removes the drop -> revert -> re-land flicker on cross-list item drag, including the cascading flicker when moving several items in succession.
-- **Runtime integration target:** the list-item drag-drop move path and its optimistic/confirm handling on the Replicache spine.
-- **Deferral boundary:** in-list reorder and views reorder snap-back are already handled (3.2.3); no change to ordering/orderKey semantics, the Replicache wire contract, or projection.
-- **Validation target:** targeted unit/e2e proving a cross-list move holds the destination placement through confirm (single move and rapid succession); manual product proof (drag item(s) across lists, no flicker-back).
-- **Files:** components/list/* (drag-drop move handler), lib/sync/* (optimistic/confirm path), tests; exact files confirmed at scope time
 
 ### 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
 - **Status:** Open
