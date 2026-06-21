@@ -27,7 +27,15 @@ const UserAccountNav = ({
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+    <DropdownMenu
+      open={menuOpen}
+      onOpenChange={(nextOpen) => {
+        if (nextOpen && collapsed) {
+          onRequestExpand?.();
+        }
+        setMenuOpen(nextOpen);
+      }}
+    >
       <DropdownMenuTrigger
         asChild
         className="overflow-visible"
@@ -35,15 +43,6 @@ const UserAccountNav = ({
         <Button
           data-testid="account-menu-trigger"
           aria-label="Open account menu"
-          onClick={(event) => {
-            event.preventDefault();
-            if (collapsed) {
-              onRequestExpand?.();
-              setMenuOpen(true);
-              return;
-            }
-            setMenuOpen((value) => !value);
-          }}
           className="rounded-full h-9 w-9 bg-surface-muted"
         >
           <Avatar className='relative h-7 w-7 md:h-9 md:w-9'>
