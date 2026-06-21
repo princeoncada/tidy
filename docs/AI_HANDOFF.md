@@ -98,6 +98,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Committed list drops write one `ViewList.orderKey`.
 - Committed item reorders write one `ListItem.orderKey`.
 - Committed cross-list movement writes the moved item `listId` plus `orderKey`.
+- After a committing list/item drop, the optimistic drag preview is held until the projected dashboard `lists` converges to the committed placement (confirm-before-relinquish), with a 1500ms fallback relinquish, so cross-list item moves do not snap back to the source.
 - Committed custom-view reorders write one `View.orderKey`.
 - Drag ids are `list-${id}`, `list-item-${id}`, and `list-drop-${id}`.
 
