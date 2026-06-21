@@ -101,6 +101,40 @@ test("workspace navigation filters synced lists and is keyboard operable", async
   await deleteList(page, unassignedList);
 });
 
+test("workspace ellipsis renames and deletes a workspace", async ({ page }) => {
+  const original = uniqueTestName("workspace-rename-src");
+  const renamed = uniqueTestName("workspace-rename-dst");
+
+  await openWorkspacesSection(page);
+  await page.getByTestId(testIds.workspaceAddButton).click();
+  const addDialog = page.getByRole("dialog");
+  await addDialog.getByLabel("Workspace name").fill(original);
+  await addDialog.getByRole("button", { name: "Create", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(addDialog).toBeHidden();
+
+  await openWorkspacesSection(page);
+  const row = page.getByTestId(testIds.workspaceRow).filter({ hasText: original });
+  await expect(row).toBeVisible();
+  await row.getByTestId(testIds.workspaceMenuTrigger).click();
+  await page.getByRole("menuitem", { name: "Rename" }).click();
+  const renameDialog = page.getByRole("dialog");
+  await renameDialog.getByLabel("Workspace name").fill(renamed);
+  await renameDialog.getByTestId(testIds.workspaceRenameSave).click();
+  await expect(renameDialog).toBeHidden();
+
+  await openWorkspacesSection(page);
+  const renamedRow = page.getByTestId(testIds.workspaceRow).filter({ hasText: renamed });
+  await expect(renamedRow).toBeVisible();
+  await renamedRow.getByTestId(testIds.workspaceMenuTrigger).click();
+  await page.getByRole("menuitem", { name: "Delete" }).click();
+
+  await openWorkspacesSection(page);
+  await expect(
+    page.getByTestId(testIds.workspaceRow).filter({ hasText: renamed }),
+  ).toHaveCount(0);
+});
+
 test("sidebar navigation supports add, workspace reorder, fixed collapse, footer account, and full-width canvas", async ({ page }) => {
   const sidebarList = uniqueTestName("sidebar-list");
   await createList(page, sidebarList);
@@ -156,7 +190,20 @@ test("sidebar navigation supports add, workspace reorder, fixed collapse, footer
     await page.getByTestId(testIds.workspaceAddButton).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("Workspace name").fill(workspaceName);
-    await dialog.getByRole("button", { name: "Create", exact: true }).click();
+    const created = page.waitForResponse((response) =>
+      response.request().method() === "POST" &&
+      response.url().includes("createWorkspace"),
+    );
+    const createButton = dialog.getByRole("button", {
+      name: "Create",
+      exact: true,
+    });
+    await expect(createButton).toBeEnabled();
+    await createButton.click();
+    await created;
+    await expect(
+      dialog.locator(".rounded-lg").filter({ hasText: workspaceName }),
+    ).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
   }
