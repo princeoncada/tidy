@@ -1,13 +1,14 @@
 "use client";
 
 import { DragDropProvider } from '@dnd-kit/react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useDashboardMutations } from '@/hooks/useDashboardMutations';
 import type { LocalFirstDashboardBoot } from '@/hooks/useLocalFirstDashboardBoot';
 import { useReplicacheDashboard } from '@/hooks/useReplicacheDashboard';
-import { measureOptimisticEvent, OptimisticProfiler, useRenderMeasure } from '@/lib/optimistic-debug';
+import { itemPlacementMatches, listOrderMatches } from '@/lib/dashboard/list-items-reorder';
 import { filterListsByWorkspace } from '@/lib/dashboard/workspace-filter';
+import { measureOptimisticEvent, OptimisticProfiler, useRenderMeasure } from '@/lib/optimistic-debug';
 import { keyBetween } from '@/lib/sync/fractional-index';
 import { replicacheKeys } from '@/lib/sync/replicache/keys';
 import ListComponent from './ListComponent';
@@ -173,23 +174,6 @@ function reorderItemsForDrag(
   return nextLists;
 }
 
-function listOrderMatches(left: Lists, right: Lists) {
-  return left.length === right.length &&
-    left.every((list, index) => list.id === right[index]?.id);
-}
-
-function itemPlacementMatches(left: Lists, right: Lists) {
-  return left.length === right.length &&
-    left.every((list, listIndex) =>
-      list.id === right[listIndex]?.id &&
-      list.listItems.length === right[listIndex]?.listItems.length &&
-      list.listItems.every((item, itemIndex) =>
-        item.id === right[listIndex]?.listItems[itemIndex]?.id &&
-        item.listId === right[listIndex]?.listItems[itemIndex]?.listId
-      )
-    );
-}
-
 function movedEntityOrderKey(
   orderedIds: string[],
   movedId: string,
@@ -219,6 +203,8 @@ const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
   } | null>(null);
   const [dragPreviewLists, setDragPreviewLists] = useState<DragPreviewLists | null>(null);
   const dragPreviewListsRef = useRef<DragPreviewLists | null>(null);
+  const awaitingCommitRef = useRef(false);
+  const relinquishFallbackRef = useRef<NodeJS.Timeout | null>(null);
   const currentView = replicacheDashboard.currentView;
   const allListsView = replicacheDashboard.views.find((view) => view.type === "ALL_LISTS");
   const lists = filterListsByWorkspace(
@@ -310,6 +296,37 @@ const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
     setDragPreviewLists(nextLists);
   }, [setDragPreviewLists]);
 
+  const scheduleRelinquishFallback = useCallback(() => {
+    if (relinquishFallbackRef.current) {
+      clearTimeout(relinquishFallbackRef.current);
+    }
+    relinquishFallbackRef.current = setTimeout(() => {
+      relinquishFallbackRef.current = null;
+      awaitingCommitRef.current = false;
+      setLocalDragPreview(null);
+    }, 1500);
+  }, [setLocalDragPreview]);
+
+  useEffect(() => {
+    if (!awaitingCommitRef.current) return;
+
+    const preview = dragPreviewListsRef.current;
+    if (!preview || !itemPlacementMatches(lists, preview)) return;
+
+    awaitingCommitRef.current = false;
+    if (relinquishFallbackRef.current) {
+      clearTimeout(relinquishFallbackRef.current);
+      relinquishFallbackRef.current = null;
+    }
+    setLocalDragPreview(null);
+  }, [lists, setLocalDragPreview]);
+
+  useEffect(() => () => {
+    if (relinquishFallbackRef.current) {
+      clearTimeout(relinquishFallbackRef.current);
+    }
+  }, []);
+
   const [revealedItemIds, setRevealedItemIds] = useState(() => new Set<string>());
   const [revealedListIds, setRevealedListIds] = useState(() => new Set<string>());
 
@@ -342,6 +359,11 @@ const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
     <DragDropProvider
       onDragStart={() => {
         measureOptimisticEvent("drag.start", { lists: lists.length });
+        awaitingCommitRef.current = false;
+        if (relinquishFallbackRef.current) {
+          clearTimeout(relinquishFallbackRef.current);
+          relinquishFallbackRef.current = null;
+        }
         setLocalDragPreview(lists);
       }}
 
@@ -351,14 +373,18 @@ const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
         const { source, target } = e.operation;
         let finalPreview = dragPreviewListsRef.current;
 
-        setLocalDragPreview(null);
-
         if (e.canceled) {
+          awaitingCommitRef.current = false;
+          setLocalDragPreview(null);
           measureOptimisticEvent("drag.cancel");
           return;
         }
 
-        if (!source || !finalPreview) return;
+        if (!source || !finalPreview) {
+          awaitingCommitRef.current = false;
+          setLocalDragPreview(null);
+          return;
+        }
 
         measureOptimisticEvent("drag.end", {
           sourceType: source.type,
@@ -384,6 +410,8 @@ const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
           }
         }
 
+        let committed = false;
+
         switch (source.type) {
           case "list":
             if (!listOrderMatches(finalPreview, lists)) {
@@ -391,6 +419,7 @@ const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
                 finalPreview,
                 String(source.id).replace("list-", ""),
               );
+              committed = true;
             }
             break;
 
@@ -401,11 +430,21 @@ const ListsContainer = ({ boot, activeWorkspaceId }: ListsContainerProps) => {
                 finalPreview,
                 String(source.id).replace("list-item-", ""),
               );
+              committed = true;
             }
             break;
 
           default:
             break;
+        }
+
+        if (committed) {
+          setLocalDragPreview(finalPreview);
+          awaitingCommitRef.current = true;
+          scheduleRelinquishFallback();
+        } else {
+          awaitingCommitRef.current = false;
+          setLocalDragPreview(null);
         }
       }}
 
