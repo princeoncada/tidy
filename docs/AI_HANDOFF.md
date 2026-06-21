@@ -66,7 +66,16 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - The expanded sidebar's Workspaces and Views navigation uses independent inline
   accordion sections rather than floating dropdowns. Each section owns its
   internal scroll, in-section add, and in-section drag reorder; expanding one
-  pushes lower sections down in the sidebar flow.
+  pushes lower sections down in the sidebar flow. The accordion triggers carry
+  the section titles; expanded panels omit redundant labels and show only a
+  right-aligned control labelled "Add". Add List and both section triggers use
+  one uniform vertical gap.
+- Workspace rows mirror custom-view rows with a grip handle, name, and trailing
+  ellipsis menu; they do not render a leading per-row icon. The menu exposes a
+  small rename dialog and delete action.
+- Selected sidebar default buttons, workspace rows, and custom-view rows use the
+  `border-strong` emphasis border plus a check indicator, not a selection-fill
+  recolor.
 - From the collapsed desktop rail, activating the footer account avatar first
   expands the sidebar and then opens the upward account-menu dropdown.
 - Below `lg`, the sidebar is a focus-trapping Radix Dialog drawer that returns
@@ -87,6 +96,11 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Owned workspace navigation order uses nullable `Workspace.orderKey` and a
   protected, single-row `reorderWorkspace` tRPC mutation. Workspaces remain
   management entities outside Replicache.
+- Workspace rename and delete use protected, owner-checked `renameWorkspace`
+  and `deleteWorkspace` tRPC mutations on the same management lane as
+  `reorderWorkspace`. Deleting a workspace relies on `List.workspaceId`
+  `onDelete: SetNull`, causing affected lists to fall back to "All workspaces",
+  and the client triggers a Replicache pull after deletion.
 - Integer `order` fields are retained for schema/backfill compatibility and historical helper types, but they are not the live dashboard ordering authority.
 - Replicache keys are `list/{id}`, `listItem/{id}`, `tag/{id}`, `view/{id}`, `viewList/{viewId}/{listId}`, `viewTag/{viewId}/{tagId}`, `listTag/{listId}/{tagId}`, and `metadata/selectedView`.
 
