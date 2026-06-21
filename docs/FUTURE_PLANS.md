@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.4 - Sidebar Navigation Redesign (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.4 - Sidebar Navigation Redesign
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Rework the left sidebar into a ChatGPT-style nav: an "Add List" action pinned at the top (icon-leading, like a "new session" entry); a Workspaces dropdown and a Views dropdown that each list their entries with an in-dropdown add button and in-dropdown reordering, each bounded by a max-height with the sidebar handling overflow; replacing the current Views card surface. Move the user avatar to the sidebar footer above a shadcn Separator with its account dropdown opening upward; pin the collapse toggle to a fixed position that does not move with the sidebar show/hide (locked at its collapsed-state position); and let the lists canvas use the full site width.
 - **Product impact:** redesigned sidebar navigation plus full-width lists (user-visible).
