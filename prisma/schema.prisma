@@ -200,11 +200,14 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  orderKey String?
+
   lists      List[]
   members    WorkspaceMember[]
   shareLinks ShareLink[]
 
   @@index([ownerId])
+  @@index([ownerId, orderKey])
 }
 
 model WorkspaceMember {
