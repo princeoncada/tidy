@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Replace the 3.2.4 Radix `DropdownMenu` panels for Workspaces and Views with an inline accordion inside the sidebar column: expanding Workspaces reveals its list inline and pushes the Views section down within the sidebar (and vice-versa), instead of floating an overlay panel. The in-panel add and drag-reorder behaviors are preserved, rehomed into the accordion sections. Separately, when the sidebar is collapsed, selecting the footer account avatar first expands the sidebar, then opens the account dropdown (no dropdown popped over a collapsed rail).
-- **Product impact:** user-visible - Workspaces/Views expand inline rather than as floating dropdowns; the account avatar reliably opens an expanded sidebar before its menu.
-- **Runtime integration target:** the sidebar nav component (the 3.2.4 dropdown nav) and the sidebar collapse/expand state; the footer account menu remains a dropdown.
-- **Deferral boundary:** workspace per-row ellipsis CRUD, selection styling, and the Views add-button label are 3.2.7; no change to workspace ordering persistence (`Workspace.orderKey` / `reorderWorkspace` tRPC) or any Replicache path. Reverses the 3.2.4 dropdown-panel approach for these two sections only.
-- **Validation target:** targeted e2e (expanding one section pushes the other down inline; collapsed-avatar click expands sidebar then opens the menu); manual product proof; preserve the account-menu dropdown e2e lessons in `reference_radix_dropdown_nav_e2e`. Consult `docs/design.md` for shell parity and update it for the accordion.
-- **Files:** components/dashboard/sidebar/* (nav + account footer), sidebar collapse state, docs/design.md, tests; exact files confirmed at scope time
 
 ### 3.2.7 - Workspace Section Parity & Selection Styling
 - **Status:** Open
