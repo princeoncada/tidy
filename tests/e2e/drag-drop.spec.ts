@@ -227,6 +227,48 @@ test("move item between lists if implemented", async ({ page }) => {
   await cleanupNamedList(page, targetList);
 });
 
+test("moving several items across lists in succession keeps each in the destination", async ({ page }) => {
+  test.setTimeout(60_000);
+
+  const sourceList = uniqueTestName("successive-move-source");
+  const targetList = uniqueTestName("successive-move-target");
+  const firstItemName = uniqueTestName("successive-move-item-one");
+  const secondItemName = uniqueTestName("successive-move-item-two");
+  await createPersistedList(page, sourceList);
+  await createPersistedList(page, targetList);
+  await createItemInVisibleList(page, sourceList, firstItemName, { waitForPersistence: true });
+  await createItemInVisibleList(page, sourceList, secondItemName, { waitForPersistence: true });
+
+  const targetCard = await getVisibleListCard(page, targetList);
+  const firstItem = page.getByTestId(testIds.listItem).filter({ hasText: firstItemName }).first();
+  await dragByMouseAndWaitForMutation(
+    page,
+    firstItem.getByTestId(testIds.itemDragHandle),
+    targetCard.getByTestId(testIds.listDropZone)
+  );
+
+  await expectItemNotInList(page, sourceList, firstItemName);
+  await expectItemInList(page, targetList, firstItemName);
+
+  const secondItem = page.getByTestId(testIds.listItem).filter({ hasText: secondItemName }).first();
+  await dragByMouseAndWaitForMutation(
+    page,
+    secondItem.getByTestId(testIds.itemDragHandle),
+    targetCard.getByTestId(testIds.listDropZone)
+  );
+
+  await expectItemNotInList(page, sourceList, secondItemName);
+  await expectItemInList(page, targetList, secondItemName);
+  await expectItemInList(page, targetList, firstItemName);
+  await page.reload();
+  await expectItemNotInList(page, sourceList, firstItemName);
+  await expectItemNotInList(page, sourceList, secondItemName);
+  await expectItemInList(page, targetList, firstItemName);
+  await expectItemInList(page, targetList, secondItemName);
+  await cleanupNamedList(page, sourceList);
+  await cleanupNamedList(page, targetList);
+});
+
 test("move item into empty list if implemented", async ({ page }) => {
   const sourceList = uniqueTestName("empty-move-source");
   const targetList = uniqueTestName("empty-move-target");

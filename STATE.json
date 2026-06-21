@@ -1,9 +1,9 @@
 {
-    "version":  "3.2.4",
-    "state":  "stable",
-    "phase":  "3.2.4",
-    "phaseTitle":  "Sidebar Navigation Redesign",
-    "nextPhase":  "3.2.5 - Create-Path Idempotency Hardening (TOCTOU)",
+    "version":  "3.2.5-alpha",
+    "state":  "alpha",
+    "phase":  "3.2.5",
+    "phaseTitle":  "List Item Cross-List Move Snap-Back Patch",
+    "nextPhase":  "3.2.6 - Sidebar Accordion Conversion \u0026 Collapsed-Avatar Open",
     "seriesComplete":  true,
-    "lastUpdated":  "2026-06-20"
+    "lastUpdated":  "2026-06-21"
 }

@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.4
-- **Current phase:** 3.2.4 - Sidebar Navigation Redesign
-- **Next phase:** 3.2.5 - Create-Path Idempotency Hardening (TOCTOU)
+- **Current version:** 3.2.5-alpha
+- **Current phase:** 3.2.5 - List Item Cross-List Move Snap-Back Patch
+- **Next phase:** 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
 
 ---
 

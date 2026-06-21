@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.4",
-  "generatedAt": "2026-06-20",
+  "version": "3.2.5-alpha",
+  "generatedAt": "2026-06-21",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -709,8 +709,9 @@
         "@/hooks/useDashboardMutations",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/hooks/useReplicacheDashboard",
-        "@/lib/optimistic-debug",
+        "@/lib/dashboard/list-items-reorder",
         "@/lib/dashboard/workspace-filter",
+        "@/lib/optimistic-debug",
         "@/lib/sync/fractional-index",
         "@/lib/sync/replicache/keys",
         "./ListComponent",
@@ -1644,6 +1645,16 @@
         "@/lib/local-db/local-schema",
         "@/lib/dashboard/projection"
       ]
+    },
+    {
+      "path": "lib/dashboard/list-items-reorder.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "itemPlacementMatches",
+        "listOrderMatches"
+      ],
+      "imports": []
     },
     {
       "path": "lib/dashboard/projection.ts",
@@ -2922,6 +2933,16 @@
         "node:fs",
         "node:path",
         "vitest"
+      ]
+    },
+    {
+      "path": "tests/unit/list-items-reorder-relinquish.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/dashboard/list-items-reorder"
       ]
     },
     {
@@ -4416,6 +4437,12 @@
     },
     {
       "from": "components/list/ListsContainer.tsx",
+      "to": "lib/dashboard/list-items-reorder.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/list-items-reorder"
+    },
+    {
+      "from": "components/list/ListsContainer.tsx",
       "to": "lib/dashboard/workspace-filter.ts",
       "type": "imports",
       "import": "@/lib/dashboard/workspace-filter"
@@ -5847,6 +5874,12 @@
       "to": "components/list/ItemNotesEditor.tsx",
       "type": "imports",
       "import": "@/components/list/ItemNotesEditor"
+    },
+    {
+      "from": "tests/unit/list-items-reorder-relinquish.test.ts",
+      "to": "lib/dashboard/list-items-reorder.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/list-items-reorder"
     },
     {
       "from": "tests/unit/local-db-diagnostics.test.ts",
