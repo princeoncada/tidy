@@ -80,7 +80,17 @@ Execution discipline (anti-loop rails):
 - **Validation target:** targeted e2e (workspace ellipsis rename/delete; selecting a view/workspace shows the border only with no recolor; add button label has no "View"); manual product proof. Update `docs/design.md` for the workspace-section parity and selection styling.
 - **Files:** components/dashboard/sidebar/* (workspace + views sections), workspace tRPC router (rename/delete; add if missing), docs/design.md, tests; exact files confirmed at scope time
 
-### 3.2.8 - Create-Path Idempotency Hardening (TOCTOU)
+### 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
+- **Status:** Open
+- **Type:** infrastructure
+- **Implementation goal:** Harden the Replicache pull path against concurrent pulls during rapid view create/switch. `buildReplicacheClientView` (`lib/sync/replicache/pull-cvr.ts`, ~line 69) throws `Cannot read properties of undefined (reading 'length')` on `list.listItems`, returning a 500 from `/api/replicache/pull` (reproduced at Playwright `--workers=2`; green single-worker). Add null-safety/normalization to the pull list shape so a list with no joined items pulls cleanly, and resolve the `selectedView` convergence so `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" passes deterministically under concurrent pulls.
+- **Product impact:** none directly - removes intermittent pull-path 500s and the fast-switch selected-view race; no UI change.
+- **Runtime integration target:** the Replicache pull path (`lib/sync/replicache/pull-cvr.ts`, `app/api/replicache/pull/route.ts`) and selected-view convergence (`hooks/useReplicacheDashboard.ts` if needed).
+- **Deferral boundary:** no change to the pull/CVR wire contract beyond null-safety; create-path idempotency is 3.2.9 (TOCTOU); no projection or ordering semantic change.
+- **Validation target:** targeted unit coverage for the empty-/missing-`listItems` pull shape; `tests/e2e/views.spec.ts` fast-switch passes at `--workers=2`; the previously flaky `tests/e2e/drag-drop.spec.ts` "reorder lists in a custom view" no longer triggers the pull-cvr crash.
+- **Files:** lib/sync/replicache/pull-cvr.ts, app/api/replicache/pull/route.ts, hooks/useReplicacheDashboard.ts (selectedView convergence, if needed), tests/e2e/views.spec.ts, tests; exact files confirmed at scope time
+
+### 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
 - **Status:** Open
 - **Type:** infrastructure
 - **Implementation goal:** Close the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag) with a transaction-abort-aware fix (atomic `INSERT ... ON CONFLICT` / upsert, or `ROLLBACK TO SAVEPOINT` recovery) so a post-reload client replay racing the original push cannot 500.
@@ -229,7 +239,7 @@ Assigned a version only when scoped.
 
 Superseded by pinned arc phases (pointers, not separate backlog):
 - Finer-grained shared-list collaboration - sharing owner tags/custom views with recipients, and letting recipients reorder shared lists within their own organization - is owned by 3.4.2 (Collaboration & Sharing UX).
-- Replicache pull resiliency under concurrent pulls: `buildReplicacheClientView` (`lib/sync/replicache/pull-cvr.ts`) can throw `Cannot read properties of undefined (reading 'length')` on `list.listItems` during rapid view create/switch. Reproduced only under the authenticated Playwright suite at `--workers=2` (passes single-worker). Harden the pull list shape and investigate `selectedView` convergence for `tests/e2e/views.spec.ts` "latest selected view wins after fast switching". Pre-existing; surfaced during 3.2.4.
+- Replicache pull resiliency under concurrent pulls (`buildReplicacheClientView` `list.listItems` crash) and `selectedView` convergence for `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" - now owned by 3.2.8 (Concurrent-Pull Resilience & Fast-Switch View Convergence). Pre-existing; surfaced during 3.2.4, reconfirmed at `--workers=2` during 3.2.5.
 - Rich-text/structured item notes and remote-cursor presence are owned by 3.3.0 (item panel/notes) and 3.4.0/3.4.3 (presence transport + live presence); plain-text Yjs notes already shipped in 2.0.6.
 
 ---
