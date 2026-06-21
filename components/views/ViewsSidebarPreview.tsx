@@ -484,7 +484,6 @@ export default function ViewsSidebarPreview({
   }
 
   function openCreateView() {
-    setOpen(false);
     setDialogState({ mode: "create" });
   }
 
@@ -502,33 +501,24 @@ export default function ViewsSidebarPreview({
 
   return (
     <>
-      <DropdownMenu
-        modal={false}
-        open={open}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen && draggingRef.current) return;
-          setOpen(nextOpen);
-        }}
+      <Button
+        type="button"
+        variant="ghost"
+        aria-expanded={open}
+        aria-controls="sidebar-views-section"
+        onClick={() => setOpen((value) => !value)}
+        className="w-full justify-between px-2 focus-visible:ring-2 focus-visible:ring-focus"
       >
-        <DropdownMenuTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full justify-between px-2 focus-visible:ring-2 focus-visible:ring-focus"
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <ListFilter className="size-4" />
-              Views
-            </span>
-            <ChevronDown className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          className="w-60 p-2"
-          onCloseAutoFocus={(event) => {
-            if (draggingRef.current) event.preventDefault();
-          }}
+        <span className="inline-flex items-center gap-1.5">
+          <ListFilter className="size-4" />
+          Views
+        </span>
+        <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} />
+      </Button>
+      {open && (
+        <div
+          id="sidebar-views-section"
+          className="mt-1 rounded-md border border-border bg-surface-muted/40 p-2"
         >
           <div className="mb-1 flex items-center justify-between px-1">
             <span className="text-xs font-medium text-text-muted">Views</span>
@@ -549,10 +539,7 @@ export default function ViewsSidebarPreview({
           <button
             type="button"
             aria-current={selectedViewId === allListsView?.id ? "page" : undefined}
-            onClick={() => {
-              selectView(allListsView?.id);
-              setOpen(false);
-            }}
+            onClick={() => selectView(allListsView?.id)}
             className={cn(
               "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-border hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
               selectedViewId === allListsView?.id
@@ -640,10 +627,7 @@ export default function ViewsSidebarPreview({
                     view={view}
                     index={index}
                     isSelected={selectedViewId === view.id}
-                    onSelect={(id) => {
-                      selectView(id);
-                      setOpen(false);
-                    }}
+                    onSelect={selectView}
                     onEdit={openEditView}
                     onDelete={deleteView}
                   />
@@ -652,8 +636,8 @@ export default function ViewsSidebarPreview({
             </OptimisticProfiler>
           </DragDropProvider>
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </div>
+      )}
 
       {dialogState && (
         <ViewDialog
