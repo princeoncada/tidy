@@ -3,12 +3,30 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Check, ChevronDown, GripVertical, Layers, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Boxes, Check, ChevronDown, GripVertical, Layers, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { WorkspacesDialog } from "@/components/sharing/WorkspacesDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useTidyReplicache } from "@/components/ReplicacheProvider";
 import { movedRowOrderKey } from "@/lib/dashboard/views-reorder";
 import type { RouterOutputs } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
@@ -46,11 +64,15 @@ function SortableWorkspaceRow({
   index,
   selected,
   onSelect,
+  onRename,
+  onDelete,
 }: {
   workspace: Workspace;
   index: number;
   selected: boolean;
   onSelect: () => void;
+  onRename: (workspace: Workspace) => void;
+  onDelete: (workspace: Workspace) => void;
 }) {
   const { ref, handleRef, isDragging } = useSortable({
     id: workspace.id,
@@ -65,7 +87,8 @@ function SortableWorkspaceRow({
       ref={ref}
       data-testid="workspace-row"
       className={cn(
-        "flex items-center gap-0.5 rounded-md border border-transparent pr-1 transition hover:border-border hover:bg-surface-muted",
+        "group/workspace-row flex items-center gap-0.5 rounded-md border border-transparent pr-0.5 transition hover:border-border hover:bg-surface-muted",
+        selected && "border-border-strong",
         isDragging && "border-border bg-surface-muted shadow-sm",
       )}
     >
@@ -83,14 +106,11 @@ function SortableWorkspaceRow({
         aria-current={selected ? "page" : undefined}
         onClick={onSelect}
         className={cn(
-          "flex min-w-0 flex-1 items-center justify-between rounded-sm px-1.5 py-1.5 text-left text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-          selected ? "bg-selection text-text" : "text-text-muted hover:text-text",
+          "flex min-w-0 flex-1 items-center justify-between rounded-sm px-1.5 py-1 text-left text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+          selected ? "text-text" : "text-text-muted hover:text-text",
         )}
       >
-        <span className="inline-flex min-w-0 items-center gap-1.5">
-          <Boxes className="size-3.5 shrink-0" />
-          <span className="truncate">{workspace.name}</span>
-        </span>
+        <span className="truncate">{workspace.name}</span>
         {selected && (
           <Check
             data-testid="workspace-selected-indicator"
@@ -98,7 +118,88 @@ function SortableWorkspaceRow({
           />
         )}
       </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            data-testid="workspace-menu-trigger"
+            className="size-5 opacity-0 transition group-hover/workspace-row:opacity-100 aria-expanded:opacity-100"
+          >
+            <MoreHorizontal className="size-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-32">
+          <DropdownMenuItem onClick={() => onRename(workspace)} className="text-xs">
+            <Pencil className="size-3" />
+            Rename
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => onDelete(workspace)}
+            className="text-xs"
+          >
+            <Trash2 className="size-3" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
+  );
+}
+
+function WorkspaceRenameDialog({
+  workspace,
+  onOpenChange,
+  onSubmit,
+}: {
+  workspace: Workspace | null;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (name: string) => void;
+}) {
+  const [name, setName] = useState(workspace?.name ?? "");
+
+  function submit() {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    onSubmit(trimmed);
+  }
+
+  return (
+    <Dialog open={Boolean(workspace)} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Rename workspace</DialogTitle>
+          <DialogDescription>Update this workspace&apos;s name.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="workspace-rename">Workspace name</Label>
+          <Input
+            id="workspace-rename"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") submit();
+            }}
+          />
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            data-testid="workspace-rename-save"
+            disabled={!name.trim()}
+            onClick={submit}
+          >
+            Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -110,12 +211,16 @@ export function WorkspaceSwitcher({
   const queryClient = useQueryClient();
   const workspaces = useQuery(trpc.share.getOwnedWorkspaces.queryOptions());
   const reorderWorkspace = useMutation(trpc.share.reorderWorkspace.mutationOptions());
+  const renameWorkspace = useMutation(trpc.share.renameWorkspace.mutationOptions());
+  const deleteWorkspace = useMutation(trpc.share.deleteWorkspace.mutationOptions());
+  const { rep } = useTidyReplicache();
   const previewRef = useRef<Workspace[] | null>(null);
   const draggingRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [workspaceDialogOpen, setWorkspaceDialogOpen] = useState(false);
   const [preview, setPreview] = useState<Workspace[] | null>(null);
-  const savedWorkspaces = workspaces.data ?? [];
+  const [renameTarget, setRenameTarget] = useState<Workspace | null>(null);
+  const savedWorkspaces = useMemo(() => workspaces.data ?? [], [workspaces.data]);
   const visibleWorkspaces = preview ?? savedWorkspaces;
 
   useEffect(() => {
@@ -128,6 +233,29 @@ export function WorkspaceSwitcher({
   function setLocalPreview(next: Workspace[] | null) {
     previewRef.current = next;
     setPreview(next);
+  }
+
+  function invalidateWorkspaces() {
+    void queryClient.invalidateQueries({
+      queryKey: trpc.share.getOwnedWorkspaces.queryKey(),
+    });
+  }
+
+  function handleRename(workspace: Workspace) {
+    setRenameTarget(workspace);
+  }
+
+  function handleDelete(workspace: Workspace) {
+    deleteWorkspace.mutate(
+      { id: workspace.id },
+      {
+        onSuccess: () => {
+          if (activeWorkspaceId === workspace.id) onSelect(null);
+          invalidateWorkspaces();
+          void rep?.pull();
+        },
+      },
+    );
   }
 
   return (
@@ -149,10 +277,9 @@ export function WorkspaceSwitcher({
       {open && (
         <div
           id="sidebar-workspaces-section"
-          className="mt-1 rounded-md border border-border bg-surface-muted/40 p-2"
+          className="rounded-md border border-border bg-surface-muted/40 p-2"
         >
-          <div className="mb-1 flex items-center justify-between px-1">
-            <span className="text-xs font-medium text-text-muted">Workspaces</span>
+          <div className="mb-1 flex items-center justify-end px-1">
             <Button
               type="button"
               size="xs"
@@ -172,7 +299,7 @@ export function WorkspaceSwitcher({
               className={cn(
                 "flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1.5 text-left text-xs hover:border-border hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
                 activeWorkspaceId === null
-                  ? "border-border bg-selection text-text"
+                  ? "border-border-strong text-text"
                   : "text-text-muted hover:text-text",
               )}
             >
@@ -250,6 +377,8 @@ export function WorkspaceSwitcher({
                     index={index}
                     selected={activeWorkspaceId === workspace.id}
                     onSelect={() => onSelect(workspace.id)}
+                    onRename={handleRename}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
@@ -265,6 +394,25 @@ export function WorkspaceSwitcher({
       <WorkspacesDialog
         open={workspaceDialogOpen}
         onOpenChange={setWorkspaceDialogOpen}
+      />
+      <WorkspaceRenameDialog
+        key={renameTarget?.id ?? "closed"}
+        workspace={renameTarget}
+        onOpenChange={(open) => {
+          if (!open) setRenameTarget(null);
+        }}
+        onSubmit={(name) => {
+          if (!renameTarget) return;
+          renameWorkspace.mutate(
+            { id: renameTarget.id, name },
+            {
+              onSuccess: () => {
+                invalidateWorkspaces();
+                setRenameTarget(null);
+              },
+            },
+          );
+        }}
       />
     </>
   );
