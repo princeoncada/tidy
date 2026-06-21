@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.5
-- **Current phase:** 3.2.5 - List Item Cross-List Move Snap-Back Patch
-- **Next phase:** 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
+- **Current version:** 3.2.6-alpha
+- **Current phase:** 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
+- **Next phase:** 3.2.7 - Workspace Section Parity & Selection Styling
 
 ---
 
