@@ -1,6 +1,6 @@
 {
-    "version":  "3.2.3-alpha",
-    "state":  "alpha",
+    "version":  "3.2.3",
+    "state":  "stable",
     "phase":  "3.2.3",
     "phaseTitle":  "Views Reorder Snap-Back Patch",
     "nextPhase":  "3.2.4 - Sidebar Navigation Redesign",
