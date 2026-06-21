@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.2",
+  "version": "3.2.3-alpha",
   "generatedAt": "2026-06-20",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1144,6 +1144,7 @@
         "@/components/ui/skeleton",
         "@/hooks/useDashboardMutations",
         "@/hooks/useReplicacheDashboard",
+        "@/lib/dashboard/views-reorder",
         "@/lib/optimistic-debug",
         "@/lib/sync/fractional-index",
         "@/lib/trpc",
@@ -1656,6 +1657,15 @@
         "@/lib/sync/permissions",
         "@/trpc/routers/viewHelpers"
       ]
+    },
+    {
+      "path": "lib/dashboard/views-reorder.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "sameViewOrder"
+      ],
+      "imports": []
     },
     {
       "path": "lib/dashboard/workspace-filter.ts",
@@ -3248,6 +3258,16 @@
         "vitest",
         "@/app/generated/prisma/client",
         "@/trpc/routers/viewHelpers"
+      ]
+    },
+    {
+      "path": "tests/unit/views-reorder-relinquish.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/dashboard/views-reorder"
       ]
     },
     {
@@ -4881,6 +4901,12 @@
     },
     {
       "from": "components/views/ViewsSidebarPreview.tsx",
+      "to": "lib/dashboard/views-reorder.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/views-reorder"
+    },
+    {
+      "from": "components/views/ViewsSidebarPreview.tsx",
       "to": "lib/optimistic-debug.tsx",
       "type": "imports",
       "import": "@/lib/optimistic-debug"
@@ -6102,6 +6128,12 @@
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
       "import": "@/trpc/routers/viewHelpers"
+    },
+    {
+      "from": "tests/unit/views-reorder-relinquish.test.ts",
+      "to": "lib/dashboard/views-reorder.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/views-reorder"
     },
     {
       "from": "tests/unit/workspace-filter.test.ts",

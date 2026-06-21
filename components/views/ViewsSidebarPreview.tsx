@@ -12,7 +12,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
+import { sameViewOrder } from "@/lib/dashboard/views-reorder";
 import { measureOptimisticEvent, OptimisticProfiler, useRenderMeasure } from "@/lib/optimistic-debug";
 import { keyBetween } from "@/lib/sync/fractional-index";
 import type { RouterOutputs } from "@/lib/trpc";
@@ -347,8 +348,9 @@ export default function ViewsSidebarPreview({
 }) {
   const replicacheDashboard = useReplicacheDashboard();
   const dashboardMutations = useDashboardMutations();
-  const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dragPreviewViewsRef = useRef<ViewItem[] | null>(null);
+  const awaitingCommitRef = useRef(false);
+  const relinquishFallbackRef = useRef<NodeJS.Timeout | null>(null);
 
   const [dialogState, setDialogState] = useState<ViewDialogState | null>(null);
   const [dragPreviewViews, setDragPreviewViews] = useState<ViewItem[] | null>(null);
@@ -373,38 +375,32 @@ export default function ViewsSidebarPreview({
     setDragPreviewViews(nextViews);
   }, [setDragPreviewViews]);
 
-  const scheduleReorderSave = useCallback((
+  const commitReorderNow = useCallback((
     nextViews: ViewItem[],
     movedViewId: string,
   ) => {
-    if (reorderTimeoutRef.current) {
-      clearTimeout(reorderTimeoutRef.current);
-    }
+    if (!userId || nextViews.length === 0 || !dashboardMutations.mutate) return;
 
-    reorderTimeoutRef.current = setTimeout(() => {
-      if (!userId || nextViews.length === 0 || !dashboardMutations.mutate) return;
-
-      const movedIndex = nextViews.findIndex(
-        (view) => view.id === movedViewId,
-      );
-      const beforeId = movedIndex > 0
-        ? nextViews[movedIndex - 1]?.id
-        : allListsView?.id;
-      const afterId = movedIndex >= 0 && movedIndex < nextViews.length - 1
-        ? nextViews[movedIndex + 1]?.id
-        : undefined;
-      void dashboardMutations.mutate.reorderViews({
-        id: movedViewId,
-        orderKey: keyBetween(
-          beforeId
-            ? replicacheDashboard.orderKeys.views.get(beforeId) ?? null
-            : null,
-          afterId
-            ? replicacheDashboard.orderKeys.views.get(afterId) ?? null
-            : null,
-        ),
-      });
-    }, 300);
+    const movedIndex = nextViews.findIndex(
+      (view) => view.id === movedViewId,
+    );
+    const beforeId = movedIndex > 0
+      ? nextViews[movedIndex - 1]?.id
+      : allListsView?.id;
+    const afterId = movedIndex >= 0 && movedIndex < nextViews.length - 1
+      ? nextViews[movedIndex + 1]?.id
+      : undefined;
+    void dashboardMutations.mutate.reorderViews({
+      id: movedViewId,
+      orderKey: keyBetween(
+        beforeId
+          ? replicacheDashboard.orderKeys.views.get(beforeId) ?? null
+          : null,
+        afterId
+          ? replicacheDashboard.orderKeys.views.get(afterId) ?? null
+          : null,
+      ),
+    });
   }, [
     allListsView?.id,
     dashboardMutations.mutate,
@@ -417,8 +413,39 @@ export default function ViewsSidebarPreview({
     movedViewId: string,
   ) => {
     if (!userId) return;
-    scheduleReorderSave(nextViews, movedViewId);
-  }, [scheduleReorderSave, userId]);
+    commitReorderNow(nextViews, movedViewId);
+  }, [commitReorderNow, userId]);
+
+  const scheduleRelinquishFallback = useCallback(() => {
+    if (relinquishFallbackRef.current) {
+      clearTimeout(relinquishFallbackRef.current);
+    }
+    relinquishFallbackRef.current = setTimeout(() => {
+      relinquishFallbackRef.current = null;
+      awaitingCommitRef.current = false;
+      setLocalViewPreview(null);
+    }, 1500);
+  }, [setLocalViewPreview]);
+
+  useEffect(() => {
+    if (!awaitingCommitRef.current) return;
+
+    const preview = dragPreviewViewsRef.current;
+    if (!preview || !sameViewOrder(savedCustomViews, preview)) return;
+
+    awaitingCommitRef.current = false;
+    if (relinquishFallbackRef.current) {
+      clearTimeout(relinquishFallbackRef.current);
+      relinquishFallbackRef.current = null;
+    }
+    setLocalViewPreview(null);
+  }, [savedCustomViews, setLocalViewPreview]);
+
+  useEffect(() => () => {
+    if (relinquishFallbackRef.current) {
+      clearTimeout(relinquishFallbackRef.current);
+    }
+  }, []);
 
   const moveViewPreview = useCallback((sourceId: string, targetId: string) => {
     const baseViews = dragPreviewViewsRef.current ?? customViews;
@@ -557,22 +584,34 @@ export default function ViewsSidebarPreview({
           <DragDropProvider
             onDragStart={() => {
               measureOptimisticEvent("views.drag.start", { count: customViews.length });
+              awaitingCommitRef.current = false;
+              if (relinquishFallbackRef.current) {
+                clearTimeout(relinquishFallbackRef.current);
+                relinquishFallbackRef.current = null;
+              }
               setLocalViewPreview(customViews);
             }}
             onDragEnd={(event) => {
               const finalPreview = dragPreviewViewsRef.current;
-              setLocalViewPreview(null);
 
               if (event.canceled) {
+                awaitingCommitRef.current = false;
+                setLocalViewPreview(null);
                 measureOptimisticEvent("views.drag.cancel");
                 return;
               }
 
-              if (!event.operation.source || !finalPreview) return;
+              if (!event.operation.source || !finalPreview) {
+                awaitingCommitRef.current = false;
+                setLocalViewPreview(null);
+                return;
+              }
 
               measureOptimisticEvent("views.drag.end", {
                 count: finalPreview.length,
               });
+              awaitingCommitRef.current = true;
+              scheduleRelinquishFallback();
               commitViewOrder(
                 finalPreview,
                 String(event.operation.source.id),
