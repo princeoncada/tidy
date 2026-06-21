@@ -124,6 +124,8 @@ test("reorder custom view cards persists after reload", async ({ page }) => {
   );
 
   await expectViewOrder(page, swappedOrder);
+  await page.waitForTimeout(500);
+  await expectViewOrder(page, swappedOrder);
   await page.reload();
   await expectViewOrder(page, swappedOrder);
   await deleteView(page, firstView);
