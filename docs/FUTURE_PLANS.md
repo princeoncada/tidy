@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.3 - Views Reorder Snap-Back Patch (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.3 - Views Reorder Snap-Back Patch
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior (bug fix)
 - **Implementation goal:** Fix the custom-view reorder snap-back-then-pop flash: the optimistic overlay relinquishes the dragged row's position before the committed reorder write confirms, and the row's transition makes the gap visible.
 - **Product impact:** reordering a view in the Views list commits in place with no visible snap-back.
