@@ -64,12 +64,12 @@ Execution discipline (anti-loop rails):
 ### 3.2.4 - Sidebar Navigation Redesign
 - **Status:** In progress
 - **Type:** product behavior
-- **Implementation goal:** Rework the left sidebar into a ChatGPT-style nav: an "Add List" action pinned at the top (icon-leading, like a "new session" entry); a Workspaces dropdown and a Views dropdown that each list their entries with an in-dropdown add button and in-dropdown reordering, each bounded by a max-height with the sidebar handling overflow; replacing the current Views card surface. Move the user avatar to the sidebar footer above a shadcn Separator with its account dropdown opening upward; pin the collapse toggle to a fixed position that does not move with the sidebar show/hide (locked at its collapsed-state position); and let the lists canvas use the full site width.
+- **Implementation goal:** Rework the left sidebar into a ChatGPT-style nav: an "Add List" action pinned at the top (icon-leading, like a "new session" entry); a Workspaces dropdown and a Views dropdown that each list their entries with an in-dropdown add button and in-dropdown reordering, each bounded by a max-height with the sidebar handling overflow; replacing the current Views card surface. Persist owned-workspace ordering with a nullable fractional order key and a single-row tRPC reorder mutation. Move the user avatar to the sidebar footer above a shadcn Separator with its account dropdown opening upward; pin the collapse toggle to a fixed position that does not move with the sidebar show/hide (locked at its collapsed-state position); and let the lists canvas use the full site width.
 - **Product impact:** redesigned sidebar navigation plus full-width lists (user-visible).
 - **Runtime integration target:** the shell sidebar (components/layout/*) hosts Add List, the Workspaces and Views dropdowns, and the account footer; lists render full-width in the canvas.
-- **Deferral boundary:** builds on the 3.2.2 workspace-switching nav and does not redefine the workspace/permissions model; the item detail panel remains 3.3.0. Reuses the existing components/ui/separator.tsx primitive (no new shadcn install).
+- **Deferral boundary:** builds on the 3.2.2 workspace-switching nav and adds workspace ordering through `Workspace.orderKey` plus a `reorderWorkspace` tRPC mutation; workspaces remain in the tRPC management lane rather than becoming Replicache entities, and this phase does not otherwise redefine the workspace/permissions model. The item detail panel remains 3.3.0. Reuses the existing components/ui/separator.tsx primitive (no new shadcn install).
 - **Validation target:** targeted + manual product proof (add list from the sidebar; open, reorder, and add inside both dropdowns; collapse with the fixed toggle; avatar footer dropdown opens upward; full-width lists with no horizontal overflow) and docs/design.md shell-parity update.
-- **Files:** components/layout/*, components/views/*, components/MaxWidthWrapper.tsx, components/UserAccountNav.tsx, components/list/ListAdder.tsx
+- **Files:** components/layout/*, components/views/*, components/MaxWidthWrapper.tsx, components/UserAccountNav.tsx, components/list/ListAdder.tsx, prisma/schema.prisma (+migration), trpc/routers/shareRouter.ts
 
 ### 3.2.5 - Create-Path Idempotency Hardening (TOCTOU)
 - **Status:** Open
@@ -220,6 +220,7 @@ Assigned a version only when scoped.
 
 Superseded by pinned arc phases (pointers, not separate backlog):
 - Finer-grained shared-list collaboration - sharing owner tags/custom views with recipients, and letting recipients reorder shared lists within their own organization - is owned by 3.4.2 (Collaboration & Sharing UX).
+- Replicache pull resiliency under concurrent pulls: `buildReplicacheClientView` (`lib/sync/replicache/pull-cvr.ts`) can throw `Cannot read properties of undefined (reading 'length')` on `list.listItems` during rapid view create/switch. Reproduced only under the authenticated Playwright suite at `--workers=2` (passes single-worker). Harden the pull list shape and investigate `selectedView` convergence for `tests/e2e/views.spec.ts` "latest selected view wins after fast switching". Pre-existing; surfaced during 3.2.4.
 - Rich-text/structured item notes and remote-cursor presence are owned by 3.3.0 (item panel/notes) and 3.4.0/3.4.3 (presence transport + live presence); plain-text Yjs notes already shipped in 2.0.6.
 
 ---
