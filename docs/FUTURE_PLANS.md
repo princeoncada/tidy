@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.7 - Workspace Section Parity & Selection Styling (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.7 - Workspace Section Parity & Selection Styling
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** (a) Make the Workspaces accordion section adopt the Views section's layout/organization (the ideal reference); (b) add a per-workspace ellipsis (...) control on the right of each workspace row for rename and delete; (c) selection styling: when a custom view OR a workspace is selected, apply only the existing list "selected" border - do not recolor all lists or the selected item; (d) remove the word "View" from the Views add-button label.
-- **Product impact:** user-visible - consistent workspace/views layout, a workspace rename/delete affordance, subtler border-only selection styling, and a cleaner add-button label.
-- **Runtime integration target:** the workspace + views sidebar accordion sections (post-3.2.6), the selection-state styling, and workspace rename/delete wired to the existing tRPC management lane (the same lane as `reorderWorkspace`).
-- **Deferral boundary:** accordion mechanics are 3.2.6; no new workspace data model beyond what rename/delete requires; workspaces stay on the tRPC management lane (NOT Replicache).
-- **Validation target:** targeted e2e (workspace ellipsis rename/delete; selecting a view/workspace shows the border only with no recolor; add button label has no "View"); manual product proof. Update `docs/design.md` for the workspace-section parity and selection styling.
-- **Files:** components/dashboard/sidebar/* (workspace + views sections), workspace tRPC router (rename/delete; add if missing), docs/design.md, tests; exact files confirmed at scope time
 
 ### 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
 - **Status:** Open
