@@ -63,10 +63,7 @@ const ListAdder = ({ boot }: ListAdderProps) => {
 
   if (!replicacheDashboard.ready || !allListsView) {
     return (
-      <div className="h-full flex items-end">
-        <Skeleton className="hidden h-8 w-24 md:block" />
-        <Skeleton className="size-9 md:hidden" />
-      </div>
+      <Skeleton className="h-9 w-full" />
     );
   }
 
@@ -78,29 +75,16 @@ const ListAdder = ({ boot }: ListAdderProps) => {
         if (!open) setCreateListName("");
       }}
     >
-      <DialogTrigger className="h-full" asChild>
-        <div className="h-full flex items-end">
-          <Button
-            data-testid="create-list-button"
-            className="font-semibold hidden md:flex"
-            variant="outline"
-            onClick={() => {
-              setDialogOpen(true);
-            }}
-          >
-            <Plus className="-ml-1" />Add List
-          </Button>
-          <Button
-            data-testid="create-list-button"
-            className="font-semibold md:hidden p-4"
-            size="icon-lg"
-            onClick={() => {
-              setDialogOpen(true);
-            }}
-          >
-            <Plus className="w-5 h-5" />
-          </Button>
-        </div>
+      <DialogTrigger asChild>
+        <Button
+          data-testid="create-list-button"
+          className="w-full justify-start px-2 font-semibold focus-visible:ring-2 focus-visible:ring-focus"
+          variant="ghost"
+          onClick={() => setDialogOpen(true)}
+        >
+          <Plus className="size-4" />
+          Add List
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
