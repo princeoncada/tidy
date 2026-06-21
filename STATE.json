@@ -1,9 +1,9 @@
 {
-    "version":  "3.2.5",
-    "state":  "stable",
-    "phase":  "3.2.5",
-    "phaseTitle":  "List Item Cross-List Move Snap-Back Patch",
-    "nextPhase":  "3.2.6 - Sidebar Accordion Conversion \u0026 Collapsed-Avatar Open",
+    "version":  "3.2.6-alpha",
+    "state":  "alpha",
+    "phase":  "3.2.6",
+    "phaseTitle":  "Sidebar Accordion Conversion \u0026 Collapsed-Avatar Open",
+    "nextPhase":  "3.2.7 - Workspace Section Parity \u0026 Selection Styling",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-21"
 }
