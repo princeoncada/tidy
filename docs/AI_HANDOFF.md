@@ -1,11 +1,11 @@
-<!-- Current Version: 3.2.3 -->
+<!-- Current Version: 3.2.4-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.2.3 - Views Reorder Snap-Back Patch
-**Next**: 3.2.4 - Sidebar Navigation Redesign
+**Current Version**: 3.2.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.2.4 - Sidebar Navigation Redesign
+**Next**: 3.2.5 - Create-Path Idempotency Hardening (TOCTOU)
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
