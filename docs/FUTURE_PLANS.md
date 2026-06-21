@@ -60,7 +60,37 @@ Execution discipline (anti-loop rails):
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
 
-### 3.2.5 - Create-Path Idempotency Hardening (TOCTOU)
+### 3.2.5 - List Item Cross-List Move Snap-Back Patch
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Eliminate the cross-list item-move snap-back flicker: dragging an item onto another list briefly shows it dropped, snaps it back to the source list for a few ms, then re-lands it in the destination. The optimistic destination placement must be held until the committed write confirms (confirm-before-relinquish, paralleling 3.2.3 views-reorder) instead of relinquishing the optimistic preview before the write lands. Must also hold across rapid successive moves: each item already moved must not flicker back to the source as later moves confirm.
+- **Product impact:** user-visible - removes the drop -> revert -> re-land flicker on cross-list item drag, including the cascading flicker when moving several items in succession.
+- **Runtime integration target:** the list-item drag-drop move path and its optimistic/confirm handling on the Replicache spine.
+- **Deferral boundary:** in-list reorder and views reorder snap-back are already handled (3.2.3); no change to ordering/orderKey semantics, the Replicache wire contract, or projection.
+- **Validation target:** targeted unit/e2e proving a cross-list move holds the destination placement through confirm (single move and rapid succession); manual product proof (drag item(s) across lists, no flicker-back).
+- **Files:** components/list/* (drag-drop move handler), lib/sync/* (optimistic/confirm path), tests; exact files confirmed at scope time
+
+### 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Replace the 3.2.4 Radix `DropdownMenu` panels for Workspaces and Views with an inline accordion inside the sidebar column: expanding Workspaces reveals its list inline and pushes the Views section down within the sidebar (and vice-versa), instead of floating an overlay panel. The in-panel add and drag-reorder behaviors are preserved, rehomed into the accordion sections. Separately, when the sidebar is collapsed, selecting the footer account avatar first expands the sidebar, then opens the account dropdown (no dropdown popped over a collapsed rail).
+- **Product impact:** user-visible - Workspaces/Views expand inline rather than as floating dropdowns; the account avatar reliably opens an expanded sidebar before its menu.
+- **Runtime integration target:** the sidebar nav component (the 3.2.4 dropdown nav) and the sidebar collapse/expand state; the footer account menu remains a dropdown.
+- **Deferral boundary:** workspace per-row ellipsis CRUD, selection styling, and the Views add-button label are 3.2.7; no change to workspace ordering persistence (`Workspace.orderKey` / `reorderWorkspace` tRPC) or any Replicache path. Reverses the 3.2.4 dropdown-panel approach for these two sections only.
+- **Validation target:** targeted e2e (expanding one section pushes the other down inline; collapsed-avatar click expands sidebar then opens the menu); manual product proof; preserve the account-menu dropdown e2e lessons in `reference_radix_dropdown_nav_e2e`. Consult `docs/design.md` for shell parity and update it for the accordion.
+- **Files:** components/dashboard/sidebar/* (nav + account footer), sidebar collapse state, docs/design.md, tests; exact files confirmed at scope time
+
+### 3.2.7 - Workspace Section Parity & Selection Styling
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** (a) Make the Workspaces accordion section adopt the Views section's layout/organization (the ideal reference); (b) add a per-workspace ellipsis (...) control on the right of each workspace row for rename and delete; (c) selection styling: when a custom view OR a workspace is selected, apply only the existing list "selected" border - do not recolor all lists or the selected item; (d) remove the word "View" from the Views add-button label.
+- **Product impact:** user-visible - consistent workspace/views layout, a workspace rename/delete affordance, subtler border-only selection styling, and a cleaner add-button label.
+- **Runtime integration target:** the workspace + views sidebar accordion sections (post-3.2.6), the selection-state styling, and workspace rename/delete wired to the existing tRPC management lane (the same lane as `reorderWorkspace`).
+- **Deferral boundary:** accordion mechanics are 3.2.6; no new workspace data model beyond what rename/delete requires; workspaces stay on the tRPC management lane (NOT Replicache).
+- **Validation target:** targeted e2e (workspace ellipsis rename/delete; selecting a view/workspace shows the border only with no recolor; add button label has no "View"); manual product proof. Update `docs/design.md` for the workspace-section parity and selection styling.
+- **Files:** components/dashboard/sidebar/* (workspace + views sections), workspace tRPC router (rename/delete; add if missing), docs/design.md, tests; exact files confirmed at scope time
+
+### 3.2.8 - Create-Path Idempotency Hardening (TOCTOU)
 - **Status:** Open
 - **Type:** infrastructure
 - **Implementation goal:** Close the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag) with a transaction-abort-aware fix (atomic `INSERT ... ON CONFLICT` / upsert, or `ROLLBACK TO SAVEPOINT` recovery) so a post-reload client replay racing the original push cannot 500.
