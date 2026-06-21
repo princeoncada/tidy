@@ -1,6 +1,6 @@
 {
-    "version":  "3.2.6-alpha",
-    "state":  "alpha",
+    "version":  "3.2.6",
+    "state":  "stable",
     "phase":  "3.2.6",
     "phaseTitle":  "Sidebar Accordion Conversion \u0026 Collapsed-Avatar Open",
     "nextPhase":  "3.2.7 - Workspace Section Parity \u0026 Selection Styling",
