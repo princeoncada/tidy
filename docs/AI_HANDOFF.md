@@ -1,9 +1,9 @@
-<!-- Current Version: 3.2.5-alpha -->
+<!-- Current Version: 3.2.5 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.2.5 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.2.5 - List Item Cross-List Move Snap-Back Patch
 **Next**: 3.2.6 - Sidebar Accordion Conversion & Collapsed-Avatar Open
 
