@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.9 - Create-Path Idempotency Hardening (TOCTOU) (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
-- **Status:** In progress
-- **Type:** infrastructure
-- **Implementation goal:** Close the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag) with a transaction-abort-aware fix (atomic `INSERT ... ON CONFLICT` / upsert, or `ROLLBACK TO SAVEPOINT` recovery) so a post-reload client replay racing the original push cannot 500.
-- **Product impact:** none directly - removes intermittent `tx.*.create` P2002 (`Unique constraint failed on the fields: (id)`) 500s under concurrent same-id pushes; not tied to any UI phase.
-- **Runtime integration target:** the Replicache push apply path (`lib/sync/server-apply.ts`) inside the existing Prisma transaction.
-- **Deferral boundary:** no change to the Replicache wire contract, projection, ordering, or any UI; absorbs the former view-create idempotency Potential Next Direction.
-- **Validation target:** deterministic P2002-injection unit coverage in `tests/unit/server-apply.test.ts` proving each create case (list, listItem, tag, view) recovers a unique-constraint abort via SAVEPOINT/ROLLBACK and returns `already-applied` (not P2002); the true concurrent race stays exercised by the authenticated Playwright suite under reload-replay. A dedicated real-Postgres integration harness is deferred - no DB-backed test infra exists yet.
-- **Files:** lib/sync/server-apply.ts, prisma/schema.prisma (only if a constraint/index change is needed), tests
 
 ### 3.3.0 - Item Detail Panel & Notes
 - **Status:** Open
