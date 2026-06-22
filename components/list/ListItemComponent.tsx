@@ -1,7 +1,7 @@
 "use client";
 
 import { useSortable } from "@dnd-kit/react/sortable";
-import { GripVertical, X } from "lucide-react";
+import { GripVertical, StickyNote, X } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import ListInlineEdit from "./ListInlineEdit";
 import { Button } from "../ui/button";
@@ -10,8 +10,8 @@ import { ListItem } from "./types";
 import { cn } from "@/lib/utils";
 import { useRenderMeasure } from "@/lib/optimistic-debug";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
-import { ItemNotesEditor } from "./ItemNotesEditor";
-import { isYjsNotesEnabled } from "@/lib/collab/yjs-notes-gate";
+import { ItemDetailPanel } from "@/components/item/ItemDetailPanel";
+import { isItemPanelEnabled } from "@/lib/item-panel/item-panel-gate";
 
 
 interface ListItemComponentProps {
@@ -36,6 +36,7 @@ const ListItemComponent = ({
 
   const [itemDeleted, setItemDeleted] = useState<boolean>(false);
   const [itemRevealed, setItemRevealed] = useState(!shouldRevealOnMount);
+  const [panelOpen, setPanelOpen] = useState(false);
 
   useEffect(() => {
     if (!shouldRevealOnMount) return;
@@ -139,12 +140,25 @@ const ListItemComponent = ({
           displayClassName="whitespace-normal"
           inputClassName="text-sm! p-0! leading-6! break-normal!"
         />
-        {isYjsNotesEnabled() && (
-          <ItemNotesEditor
-            itemId={listItem.id}
-            canEdit={canEdit}
-            initialNotes={listItem.notes ?? ""}
-          />
+        {isItemPanelEnabled() && (
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              className="h-5 px-1 text-muted-foreground"
+              onClick={() => setPanelOpen(true)}
+            >
+              <StickyNote />
+              Open
+            </Button>
+            <ItemDetailPanel
+              open={panelOpen}
+              onOpenChange={setPanelOpen}
+              listItem={listItem}
+              canEdit={canEdit}
+            />
+          </>
         )}
       </div>
 

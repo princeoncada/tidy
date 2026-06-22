@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.9",
+  "version": "3.3.0-alpha",
   "generatedAt": "2026-06-22",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -522,6 +522,36 @@
       ]
     },
     {
+      "path": "components/item/ItemDetailPanel.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ItemDetailPanel"
+      ],
+      "imports": [
+        "@/components/item/ItemNotesField",
+        "@/components/list/types",
+        "@/components/ui/dialog",
+        "@/lib/collab/yjs-notes-gate",
+        "@/lib/item-panel/item-panel-gate"
+      ]
+    },
+    {
+      "path": "components/item/ItemNotesField.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ItemNotesField"
+      ],
+      "imports": [
+        "react",
+        "@/components/ui/textarea",
+        "@/lib/collab/note-provider",
+        "@/lib/collab/yjs-note-doc",
+        "@/lib/supabase/client"
+      ]
+    },
+    {
       "path": "components/layout/AppShell.tsx",
       "kind": "component",
       "extension": ".tsx",
@@ -576,24 +606,6 @@
         "@/lib/trpc",
         "@/lib/utils",
         "@/trpc/client"
-      ]
-    },
-    {
-      "path": "components/list/ItemNotesEditor.tsx",
-      "kind": "component",
-      "extension": ".tsx",
-      "symbols": [
-        "ItemNotesEditor"
-      ],
-      "imports": [
-        "lucide-react",
-        "react",
-        "@/components/ui/button",
-        "@/components/ui/textarea",
-        "@/lib/collab/note-provider",
-        "@/lib/collab/yjs-note-doc",
-        "@/lib/collab/yjs-notes-gate",
-        "@/lib/supabase/client"
       ]
     },
     {
@@ -687,8 +699,8 @@
         "@/lib/utils",
         "@/lib/optimistic-debug",
         "@/hooks/useDashboardMutations",
-        "./ItemNotesEditor",
-        "@/lib/collab/yjs-notes-gate"
+        "@/components/item/ItemDetailPanel",
+        "@/lib/item-panel/item-panel-gate"
       ]
     },
     {
@@ -1735,6 +1747,15 @@
       "imports": [
         "react"
       ]
+    },
+    {
+      "path": "lib/item-panel/item-panel-gate.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "isItemPanelEnabled"
+      ],
+      "imports": []
     },
     {
       "path": "lib/local-db/local-db-diagnostics.ts",
@@ -2919,14 +2940,36 @@
       ]
     },
     {
-      "path": "tests/unit/item-notes-editor.test.tsx",
+      "path": "tests/unit/item-detail-panel.test.tsx",
       "kind": "test",
       "extension": ".tsx",
       "symbols": [],
       "imports": [
         "@testing-library/react",
         "vitest",
-        "@/components/list/ItemNotesEditor"
+        "@/components/item/ItemDetailPanel",
+        "@/components/list/types"
+      ]
+    },
+    {
+      "path": "tests/unit/item-notes-field.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/item/ItemNotesField"
+      ]
+    },
+    {
+      "path": "tests/unit/item-panel-gate.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/item-panel/item-panel-gate"
       ]
     },
     {
@@ -4031,6 +4074,60 @@
       "import": "@/lib/supabase/client"
     },
     {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "components/item/ItemNotesField.tsx",
+      "type": "imports",
+      "import": "@/components/item/ItemNotesField"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "components/list/types.ts",
+      "type": "imports",
+      "import": "@/components/list/types"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "components/ui/dialog.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dialog"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "lib/collab/yjs-notes-gate.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-notes-gate"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "lib/item-panel/item-panel-gate.ts",
+      "type": "imports",
+      "import": "@/lib/item-panel/item-panel-gate"
+    },
+    {
+      "from": "components/item/ItemNotesField.tsx",
+      "to": "components/ui/textarea.tsx",
+      "type": "imports",
+      "import": "@/components/ui/textarea"
+    },
+    {
+      "from": "components/item/ItemNotesField.tsx",
+      "to": "lib/collab/note-provider.ts",
+      "type": "imports",
+      "import": "@/lib/collab/note-provider"
+    },
+    {
+      "from": "components/item/ItemNotesField.tsx",
+      "to": "lib/collab/yjs-note-doc.ts",
+      "type": "imports",
+      "import": "@/lib/collab/yjs-note-doc"
+    },
+    {
+      "from": "components/item/ItemNotesField.tsx",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
       "from": "components/layout/AppShell.tsx",
       "to": "components/ui/button.tsx",
       "type": "imports",
@@ -4149,42 +4246,6 @@
       "to": "trpc/client.tsx",
       "type": "imports",
       "import": "@/trpc/client"
-    },
-    {
-      "from": "components/list/ItemNotesEditor.tsx",
-      "to": "components/ui/button.tsx",
-      "type": "imports",
-      "import": "@/components/ui/button"
-    },
-    {
-      "from": "components/list/ItemNotesEditor.tsx",
-      "to": "components/ui/textarea.tsx",
-      "type": "imports",
-      "import": "@/components/ui/textarea"
-    },
-    {
-      "from": "components/list/ItemNotesEditor.tsx",
-      "to": "lib/collab/note-provider.ts",
-      "type": "imports",
-      "import": "@/lib/collab/note-provider"
-    },
-    {
-      "from": "components/list/ItemNotesEditor.tsx",
-      "to": "lib/collab/yjs-note-doc.ts",
-      "type": "imports",
-      "import": "@/lib/collab/yjs-note-doc"
-    },
-    {
-      "from": "components/list/ItemNotesEditor.tsx",
-      "to": "lib/collab/yjs-notes-gate.ts",
-      "type": "imports",
-      "import": "@/lib/collab/yjs-notes-gate"
-    },
-    {
-      "from": "components/list/ItemNotesEditor.tsx",
-      "to": "lib/supabase/client.ts",
-      "type": "imports",
-      "import": "@/lib/supabase/client"
     },
     {
       "from": "components/list/ListAdder.tsx",
@@ -4374,9 +4435,9 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
-      "to": "components/list/ItemNotesEditor.tsx",
+      "to": "components/item/ItemDetailPanel.tsx",
       "type": "imports",
-      "import": "./ItemNotesEditor"
+      "import": "@/components/item/ItemDetailPanel"
     },
     {
       "from": "components/list/ListItemComponent.tsx",
@@ -4410,9 +4471,9 @@
     },
     {
       "from": "components/list/ListItemComponent.tsx",
-      "to": "lib/collab/yjs-notes-gate.ts",
+      "to": "lib/item-panel/item-panel-gate.ts",
       "type": "imports",
-      "import": "@/lib/collab/yjs-notes-gate"
+      "import": "@/lib/item-panel/item-panel-gate"
     },
     {
       "from": "components/list/ListItemComponent.tsx",
@@ -5921,10 +5982,28 @@
       "import": "@/lib/sync/fractional-index"
     },
     {
-      "from": "tests/unit/item-notes-editor.test.tsx",
-      "to": "components/list/ItemNotesEditor.tsx",
+      "from": "tests/unit/item-detail-panel.test.tsx",
+      "to": "components/item/ItemDetailPanel.tsx",
       "type": "imports",
-      "import": "@/components/list/ItemNotesEditor"
+      "import": "@/components/item/ItemDetailPanel"
+    },
+    {
+      "from": "tests/unit/item-detail-panel.test.tsx",
+      "to": "components/list/types.ts",
+      "type": "imports",
+      "import": "@/components/list/types"
+    },
+    {
+      "from": "tests/unit/item-notes-field.test.tsx",
+      "to": "components/item/ItemNotesField.tsx",
+      "type": "imports",
+      "import": "@/components/item/ItemNotesField"
+    },
+    {
+      "from": "tests/unit/item-panel-gate.test.ts",
+      "to": "lib/item-panel/item-panel-gate.ts",
+      "type": "imports",
+      "import": "@/lib/item-panel/item-panel-gate"
     },
     {
       "from": "tests/unit/list-items-reorder-relinquish.test.ts",

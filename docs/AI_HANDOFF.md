@@ -1,11 +1,11 @@
-<!-- Current Version: 3.2.9 -->
+<!-- Current Version: 3.3.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.9 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
-**Next**: 3.3.0 - Item Detail Panel & Notes
+**Current Version**: 3.3.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.3.0 - Item Detail Panel & Notes
+**Next**: 3.3.1 - Item Properties (Status & Assignee)
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -45,7 +45,8 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - `lib/sync/server-apply.ts`, `lib/sync/sync-batch-contract.ts`, `lib/sync/sync-endpoint-contract.ts` - shared mutation validation and server apply contract used by Replicache push.
 - `lib/dashboard/server-read.ts` - user-scoped server graph reads for Replicache pull.
 - `lib/dashboard/projection.ts` and `lib/dashboard-cache.ts` - shared projection helpers and retained tRPC cache helper types/tests.
-- `lib/collab/*`, `components/list/ItemNotesEditor.tsx`, `app/api/collab/notes/[itemId]/route.ts` - gated per-item Yjs note documents.
+- `lib/collab/*`, `components/item/ItemNotesField.tsx`, `app/api/collab/notes/[itemId]/route.ts` - gated per-item Yjs note documents (the notes field is hosted by the item detail panel).
+- `components/item/ItemDetailPanel.tsx`, `lib/item-panel/item-panel-gate.ts` - centered item detail panel hosting item metadata and the collaborative notes field, gated by `NEXT_PUBLIC_ITEM_PANEL_ENABLED` (default off); opened per item from `components/list/ListItemComponent.tsx`.
 - `trpc/routers/*` - retained protected API for auth-adjacent and non-dashboard management flows such as sharing.
 - `components/sharing/*`, `lib/sync/permissions.ts`, `app/share/[token]/page.tsx` - sharing role authority, management API, owner controls, and invite redemption.
 - `app/manifest.ts`, `public/sw.js`, `components/AppShellServiceWorker.tsx`, `hooks/use-app-shell-service-worker.ts`, `lib/sw/*` - app-shell service worker.
@@ -169,6 +170,7 @@ Keep these because Replicache still uses them:
 
 ## Known Risks
 
+- The item detail panel and its notes field are flag-gated (`NEXT_PUBLIC_ITEM_PANEL_ENABLED` default off; notes also gated by the Yjs notes flag). The inline notes expander was removed in 3.3.0; the Yjs note path and `ItemNoteDoc` projection are unchanged.
 - Create-path idempotency (3.2.9): every create in `lib/sync/server-apply.ts` (list, listItem, tag, view) wraps `tx.<entity>.create` in a Postgres SAVEPOINT via `createWithinSavepoint`; a unique-constraint (P2002) abort rolls back only the nested savepoint and maps to `already-applied`, so a post-reload replay racing the original push no longer 500s the push route. Tag/view conflicts re-query by id to keep the existing "belongs to another user" / name-conflict rejects. Do not revert creates to bare `findUnique -> create`, and keep the view `isDefault` sweep AFTER a confirmed insert (excluding the new id) so an id-race cannot blank the default flag.
 - Fractional key backfill must complete before assuming every persisted row has a stored key; pull fallbacks prevent null keys from entering Replicache state during rollout.
 - Replicache correction surfacing is currently limited to push correction accounting and pull rebasing. Do not reintroduce the retired local-outbox status UI for this.

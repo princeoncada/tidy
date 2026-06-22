@@ -1,9 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
-vi.mock("@/lib/collab/yjs-notes-gate", () => ({
-  isYjsNotesEnabled: () => true,
-}));
 
 vi.mock("@/lib/collab/note-provider", () => ({
   connectNoteProvider: vi.fn(
@@ -26,19 +22,17 @@ vi.mock("@/lib/supabase/client", () => ({
   }),
 }));
 
-import { ItemNotesEditor } from "@/components/list/ItemNotesEditor";
+import { ItemNotesField } from "@/components/item/ItemNotesField";
 
-describe("ItemNotesEditor", () => {
+describe("ItemNotesField", () => {
   it("shows the stored note before the Yjs provider loads", () => {
     render(
-      <ItemNotesEditor
+      <ItemNotesField
         itemId="11111111-1111-4111-8111-111111111111"
         canEdit
         initialNotes="stored note"
       />,
     );
-
-    fireEvent.click(screen.getByRole("button", { name: "Notes" }));
 
     const textarea = screen.getByRole("textbox", { name: "Item notes" });
     expect(textarea).toHaveValue("stored note");

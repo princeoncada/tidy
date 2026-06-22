@@ -25,7 +25,7 @@ and design-parity review succeed.
 | Collapsible sidebar and canvas shell | Current |
 | Workspace navigation in the shell | Current |
 | Sidebar navigation redesign (inline accordion nav, footer account, fixed collapse, full-width canvas) | Current |
-| Item detail panel and existing notes integration | Deferred: 3.3.0 |
+| Item detail panel and existing notes integration | Current |
 | Item status and assignee properties | Deferred: 3.3.1 |
 | Board, sharing polish, presence, and rollups | Deferred: 3.4.x |
 
@@ -280,6 +280,21 @@ These contracts govern presentation and interaction quality. They do not add
 product behavior assigned to the item-panel, workspace, board, sharing, or
 presence phases.
 
+## Item Detail Panel
+
+**Maturity: Current**
+
+The item detail panel is a centered dialog built on the existing Dialog
+primitive. It hosts the item name, completion status, and the existing
+collaborative notes field. It opens per item from a list-item trigger that
+replaces the former inline notes expander.
+
+The panel is gated by `NEXT_PUBLIC_ITEM_PANEL_ENABLED` and is off by default.
+Its notes section additionally respects the existing Yjs notes flag. The panel
+must manage focus, dismissal, labelling, and stacking according to the
+surface/elevation and accessibility contracts. Status and assignee properties
+remain deferred to 3.3.1, and the board remains deferred to 3.4.x.
+
 ## Responsive, Accessibility, and Motion Rules
 
 - Use semantic HTML before adding ARIA. ARIA supplements rather than replaces
@@ -322,6 +337,7 @@ Design and runtime implementation must remain consistent in both directions:
 | 3.2.4 | Sidebar navigation redesign: dropdown nav, in-dropdown add/reorder, footer account menu, fixed collapse toggle, full-width canvas | Manual product proof (add list from sidebar; reorder/add in both dropdowns; fixed-position collapse; upward account menu; full-width no-overflow) plus shell parity |
 | 3.2.6 | Inline Workspaces/Views accordion sections (replaces 3.2.4 dropdown panels) + collapsed-rail account-avatar expands sidebar before opening the account menu | Manual product proof (both sections open independently and push lower content down; add/select/reorder remain in-section; collapsed avatar expands the sidebar before the upward account menu opens) plus shell parity |
 | 3.2.7 | Workspace section parity, trailing ellipsis rename/delete, border-only sidebar selection styling, redundant-label removal, and Add-label cleanup | Manual product proof (rename/delete a workspace; default, workspace, and custom-view selection uses border plus check without fill; uniform trigger spacing and Add labels) plus shell parity |
+| 3.3.0 | Item detail panel (centered dialog) hosting item name, completion status, and the existing collaborative notes; per-item open trigger replacing the inline notes expander; gated by NEXT_PUBLIC_ITEM_PANEL_ENABLED (default off) with notes still gated by the Yjs notes flag | Manual product proof (open the panel from a list item, edit notes, reopen and confirm persistence) plus unit tests and design parity |
 
 Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.

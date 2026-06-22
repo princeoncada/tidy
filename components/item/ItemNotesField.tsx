@@ -1,9 +1,7 @@
 "use client";
 
-import { StickyNote } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   connectNoteProvider,
@@ -15,10 +13,9 @@ import {
   getNoteText,
   replaceNoteText,
 } from "@/lib/collab/yjs-note-doc";
-import { isYjsNotesEnabled } from "@/lib/collab/yjs-notes-gate";
 import { createClient } from "@/lib/supabase/client";
 
-function ConnectedItemNotesEditor({
+export function ItemNotesField({
   itemId,
   canEdit,
   initialNotes,
@@ -99,48 +96,11 @@ function ConnectedItemNotesEditor({
       value={value}
       readOnly={!canEdit || !loaded}
       placeholder={canEdit ? "Add collaborative notes..." : "No notes"}
-      className="mb-1 min-h-16 resize-y text-xs"
+      className="min-h-40 resize-y text-sm"
       onChange={(event) => replaceNoteText(doc, event.target.value)}
       onBlur={() => {
         void providerRef.current?.flush().catch(() => {});
       }}
     />
-  );
-}
-
-export function ItemNotesEditor({
-  itemId,
-  canEdit,
-  initialNotes,
-}: {
-  itemId: string;
-  canEdit: boolean;
-  initialNotes: string;
-}) {
-  const [expanded, setExpanded] = useState(false);
-
-  if (!isYjsNotesEnabled()) return null;
-
-  return (
-    <div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="xs"
-        className="h-5 px-1 text-muted-foreground"
-        aria-expanded={expanded}
-        onClick={() => setExpanded((current) => !current)}
-      >
-        <StickyNote />
-        Notes
-      </Button>
-      {expanded && (
-        <ConnectedItemNotesEditor
-          itemId={itemId}
-          canEdit={canEdit}
-          initialNotes={initialNotes}
-        />
-      )}
-    </div>
   );
 }
