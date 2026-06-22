@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
-- **Status:** Open
+- **Status:** In progress
 - **Type:** infrastructure
 - **Implementation goal:** Harden the Replicache pull path against concurrent pulls during rapid view create/switch. `buildReplicacheClientView` (`lib/sync/replicache/pull-cvr.ts`, ~line 69) throws `Cannot read properties of undefined (reading 'length')` on `list.listItems`, returning a 500 from `/api/replicache/pull` (reproduced at Playwright `--workers=2`; green single-worker). Add null-safety/normalization to the pull list shape so a list with no joined items pulls cleanly, and resolve the `selectedView` convergence so `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" passes deterministically under concurrent pulls.
 - **Product impact:** none directly - removes intermittent pull-path 500s and the fast-switch selected-view race; no UI change.
