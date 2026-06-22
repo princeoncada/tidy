@@ -54,6 +54,10 @@ function put(
   };
 }
 
+function asArray<T>(value: readonly T[] | null | undefined): readonly T[] {
+  return value ?? [];
+}
+
 export function buildReplicacheClientView({
   views,
   allLists,
@@ -66,7 +70,9 @@ export function buildReplicacheClientView({
   const entities: ReplicacheClientView = {};
 
   for (const list of allLists.lists) {
-    const itemFallbackKeys = initialKeys(list.listItems.length);
+    const listItems = asArray(list.listItems);
+    const listTags = asArray(list.listTags);
+    const itemFallbackKeys = initialKeys(listItems.length);
     put(entities, replicacheKeys.list(list.id), {
       id: list.id,
       userId: list.userId,
@@ -77,7 +83,7 @@ export function buildReplicacheClientView({
       updatedAt: toIso(list.updatedAt),
     });
 
-    for (const [index, item] of list.listItems.entries()) {
+    for (const [index, item] of listItems.entries()) {
       put(entities, replicacheKeys.listItem(item.id), {
         id: item.id,
         name: item.name,
@@ -90,7 +96,7 @@ export function buildReplicacheClientView({
       });
     }
 
-    for (const listTag of list.listTags) {
+    for (const listTag of listTags) {
       put(entities, replicacheKeys.listTag(list.id, listTag.tagId), {
         listId: list.id,
         tagId: listTag.tagId,
@@ -123,8 +129,10 @@ export function buildReplicacheClientView({
       updatedAt: toIso(view.updatedAt),
     });
 
-    const viewListFallbackKeys = initialKeys(view.viewLists.length);
-    for (const [viewListIndex, viewList] of view.viewLists.entries()) {
+    const viewLists = asArray(view.viewLists);
+    const viewTags = asArray(view.viewTags);
+    const viewListFallbackKeys = initialKeys(viewLists.length);
+    for (const [viewListIndex, viewList] of viewLists.entries()) {
       put(
         entities,
         replicacheKeys.viewList(view.id, viewList.listId),
@@ -137,7 +145,7 @@ export function buildReplicacheClientView({
       );
     }
 
-    for (const viewTag of view.viewTags) {
+    for (const viewTag of viewTags) {
       put(entities, replicacheKeys.viewTag(view.id, viewTag.tagId), {
         viewId: view.id,
         tagId: viewTag.tagId,
