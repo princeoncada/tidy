@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.7
-- **Current phase:** 3.2.7 - Workspace Section Parity & Selection Styling
-- **Next phase:** 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
+- **Current version:** 3.2.8-alpha
+- **Current phase:** 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
+- **Next phase:** 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
 
 ---
 
