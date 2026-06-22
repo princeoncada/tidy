@@ -1,6 +1,6 @@
 {
-    "version":  "3.2.9-alpha",
-    "state":  "alpha",
+    "version":  "3.2.9",
+    "state":  "stable",
     "phase":  "3.2.9",
     "phaseTitle":  "Create-Path Idempotency Hardening (TOCTOU)",
     "nextPhase":  "3.3.0 - Item Detail Panel \u0026 Notes",
