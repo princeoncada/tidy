@@ -3217,7 +3217,8 @@
         "vitest",
         "@/lib/local-db/outbox-schema",
         "@/lib/sync/sync-batch-contract",
-        "@/lib/sync/server-apply"
+        "@/lib/sync/server-apply",
+        "@/app/generated/prisma/client"
       ]
     },
     {
