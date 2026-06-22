@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.9 - Create-Path Idempotency Hardening (TOCTOU) (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
-- **Status:** Open
+- **Status:** In progress
 - **Type:** infrastructure
 - **Implementation goal:** Close the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag) with a transaction-abort-aware fix (atomic `INSERT ... ON CONFLICT` / upsert, or `ROLLBACK TO SAVEPOINT` recovery) so a post-reload client replay racing the original push cannot 500.
 - **Product impact:** none directly - removes intermittent `tx.*.create` P2002 (`Unique constraint failed on the fields: (id)`) 500s under concurrent same-id pushes; not tied to any UI phase.
