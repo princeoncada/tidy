@@ -54,6 +54,13 @@ function toDate(value: string) {
   return new Date(value);
 }
 
+function safeLocaleCompare(
+  left: string | null | undefined,
+  right: string | null | undefined,
+) {
+  return (left ?? "").localeCompare(right ?? "");
+}
+
 function compareOrderKeys(
   leftKey: string,
   rightKey: string,
@@ -62,7 +69,7 @@ function compareOrderKeys(
 ) {
   if (leftKey < rightKey) return -1;
   if (leftKey > rightKey) return 1;
-  return leftId.localeCompare(rightId);
+  return safeLocaleCompare(leftId, rightId);
 }
 
 export function assembleReplicacheDashboard(
@@ -120,7 +127,7 @@ export function assembleReplicacheDashboard(
               }]
             : [];
         })
-        .sort((left, right) => left.tagId.localeCompare(right.tagId)),
+        .sort((left, right) => safeLocaleCompare(left.tagId, right.tagId)),
     }));
   const allListsView = views.find((view) => view.type === "ALL_LISTS");
   const allListsOrders = new Map(
@@ -166,10 +173,10 @@ export function assembleReplicacheDashboard(
                     }]
                   : [];
               })
-              .sort((left, right) => left.tagId.localeCompare(right.tagId)),
+              .sort((left, right) => safeLocaleCompare(left.tagId, right.tagId)),
           }))
           .sort((left, right) =>
-            left.order - right.order || left.id.localeCompare(right.id)
+            left.order - right.order || safeLocaleCompare(left.id, right.id)
           ),
       }
     : undefined;
