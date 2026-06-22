@@ -1,9 +1,9 @@
 {
-    "version":  "3.2.8",
-    "state":  "stable",
-    "phase":  "3.2.8",
-    "phaseTitle":  "Concurrent-Pull Resilience \u0026 Fast-Switch View Convergence",
-    "nextPhase":  "3.2.9 - Create-Path Idempotency Hardening (TOCTOU)",
+    "version":  "3.2.9-alpha",
+    "state":  "alpha",
+    "phase":  "3.2.9",
+    "phaseTitle":  "Create-Path Idempotency Hardening (TOCTOU)",
+    "nextPhase":  "3.3.0 - Item Detail Panel \u0026 Notes",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-22"
 }
