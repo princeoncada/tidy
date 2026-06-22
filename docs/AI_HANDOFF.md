@@ -1,9 +1,9 @@
-<!-- Current Version: 3.2.8-alpha -->
+<!-- Current Version: 3.2.8 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.8-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.2.8 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
 **Next**: 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
 
