@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
-- **Status:** In progress
-- **Type:** infrastructure
-- **Implementation goal:** Harden the Replicache pull path against concurrent pulls during rapid view create/switch. `buildReplicacheClientView` (`lib/sync/replicache/pull-cvr.ts`, ~line 69) throws `Cannot read properties of undefined (reading 'length')` on `list.listItems`, returning a 500 from `/api/replicache/pull` (reproduced at Playwright `--workers=2`; green single-worker). Add null-safety/normalization to the pull list shape so a list with no joined items pulls cleanly, and resolve the `selectedView` convergence so `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" passes deterministically under concurrent pulls.
-- **Product impact:** none directly - removes intermittent pull-path 500s and the fast-switch selected-view race; no UI change.
-- **Runtime integration target:** the Replicache pull path (`lib/sync/replicache/pull-cvr.ts`, `app/api/replicache/pull/route.ts`) and selected-view convergence (`hooks/useReplicacheDashboard.ts` if needed).
-- **Deferral boundary:** no change to the pull/CVR wire contract beyond null-safety; create-path idempotency is 3.2.9 (TOCTOU); no projection or ordering semantic change.
-- **Validation target:** targeted unit coverage for the empty-/missing-`listItems` pull shape; `tests/e2e/views.spec.ts` fast-switch passes at `--workers=2`; the previously flaky `tests/e2e/drag-drop.spec.ts` "reorder lists in a custom view" no longer triggers the pull-cvr crash.
-- **Files:** lib/sync/replicache/pull-cvr.ts, app/api/replicache/pull/route.ts, hooks/useReplicacheDashboard.ts (selectedView convergence, if needed), tests/e2e/views.spec.ts, tests; exact files confirmed at scope time
 
 ### 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
 - **Status:** Open
