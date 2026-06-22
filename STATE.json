@@ -1,6 +1,6 @@
 {
-    "version":  "3.2.8-alpha",
-    "state":  "alpha",
+    "version":  "3.2.8",
+    "state":  "stable",
     "phase":  "3.2.8",
     "phaseTitle":  "Concurrent-Pull Resilience \u0026 Fast-Switch View Convergence",
     "nextPhase":  "3.2.9 - Create-Path Idempotency Hardening (TOCTOU)",
