@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.8
-- **Current phase:** 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
-- **Next phase:** 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
+- **Current version:** 3.2.9-alpha
+- **Current phase:** 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
+- **Next phase:** 3.3.0 - Item Detail Panel & Notes
 
 ---
 
