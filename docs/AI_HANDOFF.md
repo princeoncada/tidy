@@ -1,9 +1,9 @@
-<!-- Current Version: 3.2.9-alpha -->
+<!-- Current Version: 3.2.9 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.9-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.2.9 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
 **Next**: 3.3.0 - Item Detail Panel & Notes
 
