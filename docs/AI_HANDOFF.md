@@ -183,7 +183,7 @@ Keep these because Replicache still uses them:
   tailwind-merge will not dedupe it against the primitive's `bg-popover` or
   `bg-card` and the surface drops out. Primitives keep their shadcn surface
   tokens; feature chrome uses semantic utilities.
-- The Replicache pull (`lib/sync/replicache/pull-cvr.ts` `buildReplicacheClientView`) has a latent null-safety/concurrency gap on `list.listItems` that can throw under concurrent pulls during rapid view create/switch (observed only at Playwright `--workers=2`; single-worker is green); the `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" convergence race rides the same scenario. Scoped as `docs/FUTURE_PLANS.md` phase 3.2.8 (Concurrent-Pull Resilience & Fast-Switch View Convergence).
+- Concurrent-pull partial entity shapes are null-safe on BOTH sync sides as of 3.2.8: the server CVR builder (`lib/sync/replicache/pull-cvr.ts` `buildReplicacheClientView`) normalizes its collection iteration, and the client `hooks/useReplicacheDashboard.ts` `assembleReplicacheDashboard` null-safes its id/tag sort comparisons. A transient incomplete pull no longer 500s the pull route or crashes dashboard assembly; both are covered by unit tests. Residual: `tests/e2e/drag-drop.spec.ts` "reorder lists inside a custom view persists after reload" is convergence-SPEED flaky on its post-reload assertion under a saturated local Postgres session pool. The data always converges to the correct order (verified by failure page snapshots), so this is test/env timing, not a correctness bug; characterize and harden it on a clean environment rather than by widening assertion timeouts. See also the auth-suite pool-exhaustion note above.
 
 ## Validation Boundary
 
