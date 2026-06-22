@@ -1,11 +1,11 @@
-<!-- Current Version: 3.2.7 -->
+<!-- Current Version: 3.2.8-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.7 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.2.7 - Workspace Section Parity & Selection Styling
-**Next**: 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
+**Current Version**: 3.2.8-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
+**Next**: 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
