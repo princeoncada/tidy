@@ -3108,6 +3108,16 @@
       ]
     },
     {
+      "path": "tests/unit/replicache-dashboard.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/hooks/useReplicacheDashboard"
+      ]
+    },
+    {
       "path": "tests/unit/replicache-mutators.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -6082,6 +6092,12 @@
       "to": "lib/sw/register-service-worker.ts",
       "type": "imports",
       "import": "@/lib/sw/register-service-worker"
+    },
+    {
+      "from": "tests/unit/replicache-dashboard.test.ts",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
     },
     {
       "from": "tests/unit/replicache-mutators.test.ts",
