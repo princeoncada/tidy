@@ -68,7 +68,7 @@ Execution discipline (anti-loop rails):
 - **Product impact:** none directly - removes intermittent `tx.*.create` P2002 (`Unique constraint failed on the fields: (id)`) 500s under concurrent same-id pushes; not tied to any UI phase.
 - **Runtime integration target:** the Replicache push apply path (`lib/sync/server-apply.ts`) inside the existing Prisma transaction.
 - **Deferral boundary:** no change to the Replicache wire contract, projection, ordering, or any UI; absorbs the former view-create idempotency Potential Next Direction.
-- **Validation target:** deterministic P2002-injection unit coverage in `tests/unit/server-apply.test.ts` proving each create case (list, listItem, tag, view) recovers a unique-constraint abort via SAVEPOINT/ROLLBACK and returns `already-applied` (not P2002); the true concurrent race stays exercised by the authenticated Playwright suite under reload-replay. A dedicated real-Postgres integration harness is deferred — no DB-backed test infra exists yet.
+- **Validation target:** deterministic P2002-injection unit coverage in `tests/unit/server-apply.test.ts` proving each create case (list, listItem, tag, view) recovers a unique-constraint abort via SAVEPOINT/ROLLBACK and returns `already-applied` (not P2002); the true concurrent race stays exercised by the authenticated Playwright suite under reload-replay. A dedicated real-Postgres integration harness is deferred - no DB-backed test infra exists yet.
 - **Files:** lib/sync/server-apply.ts, prisma/schema.prisma (only if a constraint/index change is needed), tests
 
 ### 3.3.0 - Item Detail Panel & Notes
