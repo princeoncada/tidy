@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.2.9",
+  "version": "3.3.0-alpha",
   "generatedAt": "2026-06-22",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
