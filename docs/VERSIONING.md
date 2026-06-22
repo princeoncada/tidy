@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.2.9
-- **Current phase:** 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
-- **Next phase:** 3.3.0 - Item Detail Panel & Notes
+- **Current version:** 3.3.0-alpha
+- **Current phase:** 3.3.0 - Item Detail Panel & Notes
+- **Next phase:** 3.3.1 - Item Properties (Status & Assignee)
 
 ---
 
