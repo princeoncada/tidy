@@ -1,11 +1,11 @@
-<!-- Current Version: 3.2.7 -->
+<!-- Current Version: 3.2.9-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.2.7 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.2.7 - Workspace Section Parity & Selection Styling
-**Next**: 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
+**Current Version**: 3.2.9-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
+**Next**: 3.3.0 - Item Detail Panel & Notes
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -169,6 +169,7 @@ Keep these because Replicache still uses them:
 
 ## Known Risks
 
+- Create-path idempotency (3.2.9): every create in `lib/sync/server-apply.ts` (list, listItem, tag, view) wraps `tx.<entity>.create` in a Postgres SAVEPOINT via `createWithinSavepoint`; a unique-constraint (P2002) abort rolls back only the nested savepoint and maps to `already-applied`, so a post-reload replay racing the original push no longer 500s the push route. Tag/view conflicts re-query by id to keep the existing "belongs to another user" / name-conflict rejects. Do not revert creates to bare `findUnique -> create`, and keep the view `isDefault` sweep AFTER a confirmed insert (excluding the new id) so an id-race cannot blank the default flag.
 - Fractional key backfill must complete before assuming every persisted row has a stored key; pull fallbacks prevent null keys from entering Replicache state during rollout.
 - Replicache correction surfacing is currently limited to push correction accounting and pull rebasing. Do not reintroduce the retired local-outbox status UI for this.
 - Shared-list recipient ordering and tag/custom-view sharing remain intentionally deferred.
@@ -183,7 +184,7 @@ Keep these because Replicache still uses them:
   tailwind-merge will not dedupe it against the primitive's `bg-popover` or
   `bg-card` and the surface drops out. Primitives keep their shadcn surface
   tokens; feature chrome uses semantic utilities.
-- The Replicache pull (`lib/sync/replicache/pull-cvr.ts` `buildReplicacheClientView`) has a latent null-safety/concurrency gap on `list.listItems` that can throw under concurrent pulls during rapid view create/switch (observed only at Playwright `--workers=2`; single-worker is green); the `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" convergence race rides the same scenario. Scoped as `docs/FUTURE_PLANS.md` phase 3.2.8 (Concurrent-Pull Resilience & Fast-Switch View Convergence).
+- Concurrent-pull partial entity shapes are null-safe on BOTH sync sides as of 3.2.8: the server CVR builder (`lib/sync/replicache/pull-cvr.ts` `buildReplicacheClientView`) normalizes its collection iteration, and the client `hooks/useReplicacheDashboard.ts` `assembleReplicacheDashboard` null-safes its id/tag sort comparisons. A transient incomplete pull no longer 500s the pull route or crashes dashboard assembly; both are covered by unit tests. Residual: `tests/e2e/drag-drop.spec.ts` "reorder lists inside a custom view persists after reload" is convergence-SPEED flaky on its post-reload assertion under a saturated local Postgres session pool. The data always converges to the correct order (verified by failure page snapshots), so this is test/env timing, not a correctness bug; characterize and harden it on a clean environment rather than by widening assertion timeouts. See also the auth-suite pool-exhaustion note above.
 
 ## Validation Boundary
 

@@ -174,6 +174,45 @@ function rejected(
   return result(decision.operationId, "rejected", errorMessage);
 }
 
+const UNIQUE_VIOLATION_CODE = "P2002";
+
+function isUniqueConstraintViolation(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === UNIQUE_VIOLATION_CODE
+  );
+}
+
+let savepointSequence = 0;
+
+type CreateOutcome = "inserted" | "conflict";
+
+// Run an idempotent create inside a Postgres SAVEPOINT. A concurrent push that
+// already inserted the same primary key aborts only this nested savepoint, not
+// the surrounding sync transaction, so the racing replay recovers instead of
+// failing the whole batch with P2002. Returns "inserted" when this call wrote
+// the row, "conflict" when a unique constraint already held it. The savepoint
+// name is server-generated (never from payload), so it is injection-safe.
+async function createWithinSavepoint(
+  tx: SyncTransaction,
+  run: () => Promise<void>,
+): Promise<CreateOutcome> {
+  const savepoint = `sync_create_${(savepointSequence += 1)}`;
+  await tx.$executeRawUnsafe(`SAVEPOINT "${savepoint}"`);
+  try {
+    await run();
+  } catch (error) {
+    if (isUniqueConstraintViolation(error)) {
+      await tx.$executeRawUnsafe(`ROLLBACK TO SAVEPOINT "${savepoint}"`);
+      await tx.$executeRawUnsafe(`RELEASE SAVEPOINT "${savepoint}"`);
+      return "conflict";
+    }
+    throw error;
+  }
+  await tx.$executeRawUnsafe(`RELEASE SAVEPOINT "${savepoint}"`);
+  return "inserted";
+}
+
 async function applyListOperation(
   userId: string,
   decision: AcceptedDecision,
@@ -229,21 +268,27 @@ async function applyListOperation(
         select: { order: true },
       });
 
-      await tx.list.create({
-        data: {
-          id: operation.entityClientId,
-          name,
-          userId,
-          listTags: uniqueTagIds.length > 0
-            ? {
-                createMany: {
-                  data: uniqueTagIds.map((tagId) => ({ tagId })),
-                  skipDuplicates: true,
-                },
-              }
-            : undefined,
-        },
+      const listOutcome = await createWithinSavepoint(tx, async () => {
+        await tx.list.create({
+          data: {
+            id: operation.entityClientId,
+            name,
+            userId,
+            listTags: uniqueTagIds.length > 0
+              ? {
+                  createMany: {
+                    data: uniqueTagIds.map((tagId) => ({ tagId })),
+                    skipDuplicates: true,
+                  },
+                }
+              : undefined,
+          },
+        });
       });
+      if (listOutcome === "conflict") {
+        uniqueTagIds.forEach((tagId) => effects.tagIds.add(tagId));
+        return result(decision.operationId, "already-applied");
+      }
       await tx.viewList.createMany({
         data: [{
           viewId: allListsView.id,
@@ -446,19 +491,23 @@ async function applyListItemOperation(
       });
       const notes = getOptionalString(operation, "notes");
 
-      await tx.listItem.create({
-        data: {
-          id: operation.entityClientId,
-          name,
-          listId,
-          order: getInteger(operation, "order") ?? (topItem ? topItem.order - 1 : 0),
-          ...(orderKey ? { orderKey } : {}),
-          completed: getBoolean(operation, "completed") ?? false,
-          ...(notes !== undefined ? { notes } : {}),
-        },
+      const itemOutcome = await createWithinSavepoint(tx, async () => {
+        await tx.listItem.create({
+          data: {
+            id: operation.entityClientId,
+            name,
+            listId,
+            order: getInteger(operation, "order") ?? (topItem ? topItem.order - 1 : 0),
+            ...(orderKey ? { orderKey } : {}),
+            completed: getBoolean(operation, "completed") ?? false,
+            ...(notes !== undefined ? { notes } : {}),
+          },
+        });
       });
 
-      return result(decision.operationId, "applied");
+      return itemOutcome === "inserted"
+        ? result(decision.operationId, "applied")
+        : result(decision.operationId, "already-applied");
     }
 
     case "update": {
@@ -776,15 +825,29 @@ async function applyTagOperation(
         return rejected(decision, "A tag with this name already exists.");
       }
 
-      await tx.tag.create({
-        data: {
-          id: operation.entityClientId,
-          name,
-          color: getTagColor(operation) ?? "gray",
-          userId,
-        },
+      const tagOutcome = await createWithinSavepoint(tx, async () => {
+        await tx.tag.create({
+          data: {
+            id: operation.entityClientId,
+            name,
+            color: getTagColor(operation) ?? "gray",
+            userId,
+          },
+        });
       });
-      return result(decision.operationId, "applied");
+      if (tagOutcome === "inserted") {
+        return result(decision.operationId, "applied");
+      }
+      const racedTag = await tx.tag.findUnique({
+        where: { id: operation.entityClientId },
+        select: { userId: true },
+      });
+      if (racedTag) {
+        return racedTag.userId === userId
+          ? result(decision.operationId, "already-applied")
+          : rejected(decision, "Tag id belongs to another user.");
+      }
+      return rejected(decision, "A tag with this name already exists.");
     }
 
     case "update": {
@@ -1079,27 +1142,41 @@ async function applyViewOperation(
         orderBy: { order: "asc" },
         select: { order: true },
       });
-      await tx.view.updateMany({
-        where: { userId },
-        data: { isDefault: false },
-      });
-      await tx.view.create({
-        data: {
-          id: operation.entityClientId,
-          name,
-          userId,
-          order: getInteger(operation, "order") ?? (topView ? topView.order - 1 : 0),
-          ...(orderKey ? { orderKey } : {}),
-          type: ViewType.CUSTOM,
-          matchMode: getViewMatchMode(operation) ?? "ALL",
-          isDefault: true,
-          viewTags: {
-            createMany: {
-              data: uniqueTagIds.map((tagId) => ({ tagId })),
-              skipDuplicates: true,
+      const viewOutcome = await createWithinSavepoint(tx, async () => {
+        await tx.view.create({
+          data: {
+            id: operation.entityClientId,
+            name,
+            userId,
+            order: getInteger(operation, "order") ?? (topView ? topView.order - 1 : 0),
+            ...(orderKey ? { orderKey } : {}),
+            type: ViewType.CUSTOM,
+            matchMode: getViewMatchMode(operation) ?? "ALL",
+            isDefault: true,
+            viewTags: {
+              createMany: {
+                data: uniqueTagIds.map((tagId) => ({ tagId })),
+                skipDuplicates: true,
+              },
             },
           },
-        },
+        });
+      });
+      if (viewOutcome === "conflict") {
+        const racedView = await tx.view.findUnique({
+          where: { id: operation.entityClientId },
+          select: { userId: true },
+        });
+        if (racedView) {
+          return racedView.userId === userId
+            ? result(decision.operationId, "already-applied")
+            : rejected(decision, "View id belongs to another user.");
+        }
+        return rejected(decision, "A view with this name already exists.");
+      }
+      await tx.view.updateMany({
+        where: { userId, id: { not: operation.entityClientId } },
+        data: { isDefault: false },
       });
       effects.viewIds.add(operation.entityClientId);
       return result(decision.operationId, "applied");

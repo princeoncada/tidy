@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.2.9 - Create-Path Idempotency Hardening (TOCTOU) (active) - see Planned
 ---
 
 ## Planned
@@ -60,24 +61,14 @@ Execution discipline (anti-loop rails):
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
 
-### 3.2.8 - Concurrent-Pull Resilience & Fast-Switch View Convergence
-- **Status:** Open
-- **Type:** infrastructure
-- **Implementation goal:** Harden the Replicache pull path against concurrent pulls during rapid view create/switch. `buildReplicacheClientView` (`lib/sync/replicache/pull-cvr.ts`, ~line 69) throws `Cannot read properties of undefined (reading 'length')` on `list.listItems`, returning a 500 from `/api/replicache/pull` (reproduced at Playwright `--workers=2`; green single-worker). Add null-safety/normalization to the pull list shape so a list with no joined items pulls cleanly, and resolve the `selectedView` convergence so `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" passes deterministically under concurrent pulls.
-- **Product impact:** none directly - removes intermittent pull-path 500s and the fast-switch selected-view race; no UI change.
-- **Runtime integration target:** the Replicache pull path (`lib/sync/replicache/pull-cvr.ts`, `app/api/replicache/pull/route.ts`) and selected-view convergence (`hooks/useReplicacheDashboard.ts` if needed).
-- **Deferral boundary:** no change to the pull/CVR wire contract beyond null-safety; create-path idempotency is 3.2.9 (TOCTOU); no projection or ordering semantic change.
-- **Validation target:** targeted unit coverage for the empty-/missing-`listItems` pull shape; `tests/e2e/views.spec.ts` fast-switch passes at `--workers=2`; the previously flaky `tests/e2e/drag-drop.spec.ts` "reorder lists in a custom view" no longer triggers the pull-cvr crash.
-- **Files:** lib/sync/replicache/pull-cvr.ts, app/api/replicache/pull/route.ts, hooks/useReplicacheDashboard.ts (selectedView convergence, if needed), tests/e2e/views.spec.ts, tests; exact files confirmed at scope time
-
 ### 3.2.9 - Create-Path Idempotency Hardening (TOCTOU)
-- **Status:** Open
+- **Status:** In progress
 - **Type:** infrastructure
 - **Implementation goal:** Close the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag) with a transaction-abort-aware fix (atomic `INSERT ... ON CONFLICT` / upsert, or `ROLLBACK TO SAVEPOINT` recovery) so a post-reload client replay racing the original push cannot 500.
 - **Product impact:** none directly - removes intermittent `tx.*.create` P2002 (`Unique constraint failed on the fields: (id)`) 500s under concurrent same-id pushes; not tied to any UI phase.
 - **Runtime integration target:** the Replicache push apply path (`lib/sync/server-apply.ts`) inside the existing Prisma transaction.
 - **Deferral boundary:** no change to the Replicache wire contract, projection, ordering, or any UI; absorbs the former view-create idempotency Potential Next Direction.
-- **Validation target:** a real-Postgres integration harness proving concurrent same-id create returns `already-applied` (not P2002); targeted unit coverage; previously surfaced only in the authenticated Playwright suite under reload-replay.
+- **Validation target:** deterministic P2002-injection unit coverage in `tests/unit/server-apply.test.ts` proving each create case (list, listItem, tag, view) recovers a unique-constraint abort via SAVEPOINT/ROLLBACK and returns `already-applied` (not P2002); the true concurrent race stays exercised by the authenticated Playwright suite under reload-replay. A dedicated real-Postgres integration harness is deferred - no DB-backed test infra exists yet.
 - **Files:** lib/sync/server-apply.ts, prisma/schema.prisma (only if a constraint/index change is needed), tests
 
 ### 3.3.0 - Item Detail Panel & Notes

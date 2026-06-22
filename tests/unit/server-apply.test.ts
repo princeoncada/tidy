@@ -13,6 +13,15 @@ vi.mock("@/lib/sync/permissions", () => ({
 import type { LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
 import type { SyncBatchOperationDecision } from "@/lib/sync/sync-batch-contract";
 import { applySyncOperations } from "@/lib/sync/server-apply";
+import { Prisma } from "@/app/generated/prisma/client";
+
+function uniqueViolation(target: string[] = ["id"]) {
+  return new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+    code: "P2002",
+    clientVersion: "test",
+    meta: { target },
+  });
+}
 
 type AcceptedDecision = Extract<SyncBatchOperationDecision, { accepted: true }>;
 type ApplyDatabase = NonNullable<
@@ -109,6 +118,7 @@ function createTx() {
       deleteMany: vi.fn(async () => ({ count: 1 })),
     },
     $executeRaw: vi.fn(async () => 1),
+    $executeRawUnsafe: vi.fn(async () => 0),
   };
 }
 
@@ -182,6 +192,137 @@ describe("server sync apply", () => {
         "View id belongs to another user.",
       );
       expect(tx.view.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("create savepoint recovery", () => {
+    it("recovers a concurrent list id conflict as already applied", async () => {
+      const tx = createTx();
+      tx.list.findUnique.mockResolvedValue(null);
+      tx.view.findFirst.mockResolvedValue({
+        id: "all-view",
+        isDefault: true,
+      });
+      tx.viewList.findFirst.mockResolvedValue(null);
+      tx.list.create.mockRejectedValue(uniqueViolation(["id"]));
+
+      const results = await applySyncOperations({
+        userId: "user-1",
+        decisions: [accepted({
+          operationType: "create",
+          entityServerId: null,
+          payload: { name: "Inbox" },
+        })],
+        db: createDb(tx),
+      });
+
+      expect(results[0]).toMatchObject({ status: "already-applied" });
+      expect(tx.$executeRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining("ROLLBACK TO SAVEPOINT"),
+      );
+      expect(tx.viewList.createMany).not.toHaveBeenCalled();
+    });
+
+    it("recovers a concurrent list item id conflict as already applied", async () => {
+      const tx = createTx();
+      tx.listItem.findUnique.mockResolvedValue(null);
+      tx.list.findFirst.mockResolvedValue({ id: "list-1" });
+      tx.listItem.findFirst.mockResolvedValue(null);
+      tx.listItem.create.mockRejectedValue(uniqueViolation(["id"]));
+
+      const results = await applySyncOperations({
+        userId: "user-1",
+        decisions: [accepted({
+          entityType: "listItem",
+          entityClientId: "item-1",
+          operationType: "create",
+          payload: { name: "Task", listId: "list-1" },
+        })],
+        db: createDb(tx),
+      });
+
+      expect(results[0]).toMatchObject({ status: "already-applied" });
+      expect(tx.$executeRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining("ROLLBACK TO SAVEPOINT"),
+      );
+    });
+
+    it("recovers a concurrent tag id conflict as already applied", async () => {
+      const tx = createTx();
+      tx.tag.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ userId: "user-1" });
+      tx.tag.findFirst.mockResolvedValue(null);
+      tx.tag.create.mockRejectedValue(uniqueViolation(["id"]));
+
+      const results = await applySyncOperations({
+        userId: "user-1",
+        decisions: [accepted({
+          entityType: "tag",
+          entityClientId: "tag-1",
+          operationType: "create",
+          payload: { name: "Errands", color: "blue" },
+        })],
+        db: createDb(tx),
+      });
+
+      expect(results[0]).toMatchObject({ status: "already-applied" });
+    });
+
+    it("keeps the existing tag name-conflict rejection after a race", async () => {
+      const tx = createTx();
+      tx.tag.findUnique.mockResolvedValue(null);
+      tx.tag.findFirst.mockResolvedValue(null);
+      tx.tag.create.mockRejectedValue(uniqueViolation(["userId", "name"]));
+
+      const results = await applySyncOperations({
+        userId: "user-1",
+        decisions: [accepted({
+          entityType: "tag",
+          entityClientId: "tag-1",
+          operationType: "create",
+          payload: { name: "Errands" },
+        })],
+        db: createDb(tx),
+      });
+
+      expect(results[0]).toMatchObject({
+        status: "rejected",
+        errorMessage: "A tag with this name already exists.",
+      });
+    });
+
+    it("recovers a concurrent view id conflict without sweeping the default", async () => {
+      const tx = createTx();
+      tx.view.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ userId: "user-1" });
+      tx.view.findFirst
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: "all-view",
+          type: "ALL_LISTS",
+          isDefault: true,
+        })
+        .mockResolvedValueOnce({ id: "all-view" })
+        .mockResolvedValueOnce({ order: 0 })
+        .mockResolvedValueOnce(null);
+      tx.tag.findMany.mockResolvedValue([{ id: "tag-1" }]);
+      tx.view.create.mockRejectedValue(uniqueViolation(["id"]));
+
+      const results = await applySyncOperations({
+        userId: "user-1",
+        decisions: [accepted({
+          entityType: "view",
+          entityClientId: "view-1",
+          operationType: "create",
+          payload: { name: "Errands", tagIds: ["tag-1"] },
+        })],
+        db: createDb(tx),
+      });
+
+      expect(results[0]).toMatchObject({ status: "already-applied" });
+      expect(tx.view.updateMany).not.toHaveBeenCalled();
     });
   });
 
