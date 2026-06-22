@@ -3075,6 +3075,17 @@
       ]
     },
     {
+      "path": "tests/unit/pull-cvr.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sync/replicache/pull-cvr",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
       "path": "tests/unit/realtime-poke.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -6035,6 +6046,18 @@
       "to": "lib/realtime/poke-client.ts",
       "type": "imports",
       "import": "@/lib/realtime/poke-client"
+    },
+    {
+      "from": "tests/unit/pull-cvr.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "tests/unit/pull-cvr.test.ts",
+      "to": "lib/sync/replicache/pull-cvr.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/pull-cvr"
     },
     {
       "from": "tests/unit/realtime-poke.test.ts",
