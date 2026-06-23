@@ -94,6 +94,8 @@ describe("buildReplicacheClientView", () => {
         id: "item-1",
         name: "Item",
         completed: false,
+        status: "TODO",
+        assigneeId: "user-2",
         orderKey: "a0",
         notes: null,
         listId: "list-1",
@@ -104,7 +106,11 @@ describe("buildReplicacheClientView", () => {
     const result = buildView({ lists: [list] });
 
     expect(result[replicacheKeys.list(list.id)]).toBeDefined();
-    expect(result[replicacheKeys.listItem(list.listItems[0].id)]).toBeDefined();
+    expect(result[replicacheKeys.listItem(list.listItems[0].id)]?.value)
+      .toMatchObject({
+        status: "TODO",
+        assigneeId: "user-2",
+      });
     expect(Object.keys(result)).toEqual([
       replicacheKeys.list(list.id),
       replicacheKeys.listItem(list.listItems[0].id),
