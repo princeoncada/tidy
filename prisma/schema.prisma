@@ -23,6 +23,12 @@ enum ViewMatchMode {
   ANY
 }
 
+enum ItemStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
 model View {
   id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
@@ -80,15 +86,17 @@ model List {
 }
 
 model ListItem {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  completed Boolean  @default(false)
-  order     Int
-  orderKey  String?
-  notes     String?
-  listId    String   @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  completed  Boolean    @default(false)
+  status     ItemStatus @default(TODO)
+  assigneeId String?    @db.Uuid
+  order      Int
+  orderKey   String?
+  notes      String?
+  listId     String     @db.Uuid
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   parentList List @relation(fields: [listId], references: [id], onDelete: Cascade)
   noteDoc    ItemNoteDoc?
@@ -96,6 +104,7 @@ model ListItem {
   @@index([listId])
   @@index([listId, order])
   @@index([listId, orderKey])
+  @@index([assigneeId])
 }
 
 model ItemNoteDoc {
