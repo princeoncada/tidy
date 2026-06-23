@@ -1,3 +1,5 @@
+import type { ItemStatus } from "@/lib/sync/replicache/keys";
+
 export type LocalSyncStatus = "local" | "pending" | "syncing" | "synced" | "failed";
 
 export type LocalViewType = "ALL_LISTS" | "UNTAGGED" | "CUSTOM";
@@ -42,6 +44,8 @@ export type LocalListItem = LocalEntityBase & {
   completed: boolean;
   order: number;
   notes: string | null;
+  status: ItemStatus;
+  assigneeId: string | null;
   listClientId: string;
   listServerId: string | null;
 };
