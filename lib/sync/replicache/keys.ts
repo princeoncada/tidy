@@ -34,10 +34,14 @@ export type ReplicacheListValue = {
   updatedAt: string;
 };
 
+export type ItemStatus = "TODO" | "IN_PROGRESS" | "DONE";
+
 export type ReplicacheListItemValue = {
   id: string;
   name: string;
   completed: boolean;
+  status: ItemStatus;
+  assigneeId: string | null;
   order: string;
   notes: string | null;
   listId: string;
