@@ -1,11 +1,11 @@
-<!-- Current Version: 3.3.1 -->
+<!-- Current Version: 3.4.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.3.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.3.1 - Item Properties (Status & Assignee)
-**Next**: 3.4.0 - Presence Transport Spike
+**Current Version**: 3.4.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.4.0 - Presence Transport Spike
+**Next**: 3.4.1 - Multiplayer Board
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -156,6 +156,15 @@ The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration A
 - Configured `smoke-004` measured 22,078 ms end-to-end through periodic pull, with an 18,168 ms wait after push before the peer pull began and no peer `poke_received` event.
 - 3.1.1 fixed the private-channel REST mismatch: `pokeUser()` now sends `private: true` on the broadcast message (matching the private client subscription) and returns a structured delivery result plus a `console.warn` instead of masking non-success HTTP responses. A post-fix representative trial verified poke delivery is restored (end-to-end 22,078 ms -> ~4,094 ms). The gated instrumentation is RETAINED (not removed at 3.1.1 close) as the 3.1.2 harness data source. See the spike report for the protocol and deferred removal steps.
 - 3.1.2 adds `tests/e2e/sync-latency.spec.ts`, a Supabase-admin/Prisma shared-workspace seed helper, pure metric utilities, and the opt-in `npm run test:e2e:latency` script. It drives the retained instrumentation in owner/editor contexts for Baseline, Moderate Load, and Burst, writes per-scenario raw local artifacts under `.tidy-ai/sync-latency/`, and fills each selected Results table with `SYNC_LATENCY_WRITE_REPORT=1`.
+
+## Active 3.4.0 Presence Transport Spike
+
+- `lib/realtime/presence-spike.ts` and `lib/realtime/presence-topic.ts` contain temporary, development-only instrumentation gated by browser local storage key `tidy:presence-spike=1`; it is disabled by default and always disabled in production.
+- The gated path opens a private `tidy:presence:<roomId>` Supabase Realtime channel, uses Presence for the who-is-here roster, uses Broadcast for cursor/typing signals, and keeps all spike data in bounded browser memory.
+- Separation invariant: presence does not touch Replicache push/pull, `server-apply`, `/api/replicache/*`, CVR state, tRPC dashboard mutations, persisted data, or replicated entity fields.
+- `docs/spikes/3.4.0-presence-transport-spike.md` owns the two-profile feasibility proof protocol, limitations, open questions, and removal steps. `docs/DECISIONS.md` records the durable transport decision.
+- Removal of the spike instrumentation is deferred to 3.4.3 when production live presence lands.
+- KNOWN GAP: the empirical two-user feasibility proof for this transport is deferred and not yet run; the transport decision is recorded but unproven. The proof (roster join/leave + cursor/typing echo across two profiles, per the spike doc protocol) must be run and recorded before 3.4.3 relies on this transport.
 
 ## Removed Legacy Paths
 

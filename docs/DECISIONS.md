@@ -502,3 +502,14 @@ rejected for permanently abandoning a drift guardrail.
 **Impact:** No product or runtime change. `STATE.json.seriesComplete` stays `true`.
 Behavior is validated by `validate.ps1` running green; there is no PowerShell test
 harness, so no app unit/e2e tests change.
+
+---
+
+## 2026-06-23: Ephemeral presence rides a separate Supabase Realtime channel (Presence + Broadcast), not Replicache (3.4.0)
+
+Ephemeral presence uses a separate private Supabase Realtime channel namespace,
+`tidy:presence:<roomId>`, with Presence for the who-is-here roster and Broadcast
+for cursor/typing signals. Presence must not touch Replicache push/pull,
+`server-apply`, CVR state, or persisted replicated entities; structural sync
+remains on Replicache. See `docs/spikes/3.4.0-presence-transport-spike.md` for
+the gated feasibility proof protocol and spike removal steps.
