@@ -164,6 +164,7 @@ The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration A
 - Separation invariant: presence does not touch Replicache push/pull, `server-apply`, `/api/replicache/*`, CVR state, tRPC dashboard mutations, persisted data, or replicated entity fields.
 - `docs/spikes/3.4.0-presence-transport-spike.md` owns the two-profile feasibility proof protocol, limitations, open questions, and removal steps. `docs/DECISIONS.md` records the durable transport decision.
 - Removal of the spike instrumentation is deferred to 3.4.3 when production live presence lands.
+- KNOWN GAP: the empirical two-user feasibility proof for this transport is deferred and not yet run; the transport decision is recorded but unproven. The proof (roster join/leave + cursor/typing echo across two profiles, per the spike doc protocol) must be run and recorded before 3.4.3 relies on this transport.
 
 ## Removed Legacy Paths
 
