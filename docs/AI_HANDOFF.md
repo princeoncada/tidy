@@ -1,9 +1,9 @@
-<!-- Current Version: 3.3.1-alpha -->
+<!-- Current Version: 3.3.1 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.3.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.3.1 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.3.1 - Item Properties (Status & Assignee)
 **Next**: 3.4.0 - Presence Transport Spike
 
