@@ -129,6 +129,13 @@
       "imports": []
     },
     {
+      "path": ".tidy-ai/verification-debt.md",
+      "kind": "file",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
       "path": ".vscode/settings.json",
       "kind": "file",
       "extension": ".json",
