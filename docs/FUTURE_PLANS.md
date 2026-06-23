@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.4.0 - Presence Transport Spike (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.4.0 - Presence Transport Spike
-- **Status:** In progress
-- **Type:** decision (spike)
-- **Implementation goal:** Spike the ephemeral-presence transport (cursors/typing/who-is-here) SEPARATE from Replicache; choose the mechanism and prove feasibility.
-- **Product impact:** none - spike.
-- **Runtime integration target:** none - chosen transport feeds 3.4.3.
-- **Deferral boundary:** No production presence UI here; board is 3.4.1.
-- **Validation target:** spike decision record (transport choice + proof).
-- **Files:** lib/realtime/* (spike), docs/ (decision)
 
 ### 3.4.1 - Multiplayer Board
 - **Status:** Open
