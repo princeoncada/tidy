@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.3.1 - Item Properties (Status & Assignee) (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.3.1 - Item Properties (Status & Assignee)
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Add structured item properties (status, assignee) synced via Replicache.
-- **Product impact:** user-visible item properties.
-- **Runtime integration target:** properties sync through the Replicache spine.
-- **Deferral boundary:** Board grouping on status is 3.4.1; presence is 3.4.x.
-- **Validation target:** targeted + manual product proof; schema/migration if needed.
-- **Files:** prisma/schema.prisma (+migration), lib/sync/*, components/item/*
 
 ### 3.4.0 - Presence Transport Spike
 - **Status:** Open
