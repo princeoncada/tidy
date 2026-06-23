@@ -1,9 +1,9 @@
 {
-    "version":  "3.4.0",
-    "state":  "stable",
-    "phase":  "3.4.0",
-    "phaseTitle":  "Presence Transport Spike",
-    "nextPhase":  "3.4.1 - Multiplayer Board",
+    "version":  "3.4.1-alpha",
+    "state":  "alpha",
+    "phase":  "3.4.1",
+    "phaseTitle":  "Multiplayer Board",
+    "nextPhase":  "3.4.2 - Collaboration \u0026 Sharing UX",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-23"
 }
