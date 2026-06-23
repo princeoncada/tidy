@@ -157,6 +157,7 @@ const ListItemComponent = ({
               onOpenChange={setPanelOpen}
               listItem={listItem}
               canEdit={canEdit}
+              currentUserId={userId}
             />
           </>
         )}
