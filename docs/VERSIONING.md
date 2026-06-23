@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.0-alpha
+- **Current version:** 3.4.0
 - **Current phase:** 3.4.0 - Presence Transport Spike
 - **Next phase:** 3.4.1 - Multiplayer Board
 
@@ -330,6 +330,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.2.9 | 2026-06-22 | Create-Path Idempotency Hardening (TOCTOU) | infrastructure | none directly - removes intermittent `tx.*.create` P2002 (`Unique constraint failed on the fields: (id)`) 500s under concurrent same-id pushes; not tied to any UI phase. | the Replicache push apply path (`lib/sync/server-apply.ts`) inside the existing Prisma transaction. | deterministic P2002-injection unit coverage in `tests/unit/server-apply.test.ts` proving each create case (list, listItem, tag, view) recovers a unique-constraint abort via SAVEPOINT/ROLLBACK and returns `already-applied` (not P2002); the true concurrent race stays exercised by the authenticated Playwright suite under reload-replay. A dedicated real-Postgres integration harness is deferred - no DB-backed test infra exists yet. | lib/sync/server-apply.ts, prisma/schema.prisma (only if a constraint/index change is needed), tests | Close the `findUnique` -> `create` TOCTOU shared by every create case in `lib/sync/server-apply.ts` (view, list, item, tag) with a transaction-abort-aware fix (atomic `INSERT ... ON CONFLICT` / upsert, or `ROLLBACK TO SAVEPOINT` recovery) so a post-reload client replay racing the original push cannot 500. |
 | 3.3.0 | 2026-06-22 | Item Detail Panel & Notes | product behavior | user-visible item panel. | panel opens from list/board items; notes use the existing Yjs path. | targeted + manual product proof (open panel, edit notes); preserve Yjs invariants. | components/item/* (new panel), existing notes integration | Notion-style item detail panel hosting the existing Yjs notes + item metadata. |
 | 3.3.1 | 2026-06-23 | Item Properties (Status & Assignee) | product behavior | user-visible item properties. | properties sync through the Replicache spine. | targeted + manual product proof; schema/migration if needed. | prisma/schema.prisma (+migration), lib/sync/*, components/item/* | Add structured item properties (status, assignee) synced via Replicache. |
+| 3.4.0 | 2026-06-23 | Presence Transport Spike | decision (spike) | none - spike. | none - chosen transport feeds 3.4.3. | spike decision record (transport choice + proof). | lib/realtime/* (spike), docs/ (decision) | Spike the ephemeral-presence transport (cursors/typing/who-is-here) SEPARATE from Replicache; choose the mechanism and prove feasibility. |
 
 ---
 
