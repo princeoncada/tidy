@@ -88,6 +88,8 @@ export function buildReplicacheClientView({
         id: item.id,
         name: item.name,
         completed: item.completed,
+        status: item.status,
+        assigneeId: item.assigneeId,
         order: item.orderKey ?? itemFallbackKeys[index],
         notes: item.notes,
         listId: item.listId,
