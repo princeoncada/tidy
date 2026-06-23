@@ -70,6 +70,65 @@ describe("Replicache dashboard mutators", () => {
     expect(store.has(replicacheKeys.listTag("list-1", "tag-1"))).toBe(true);
   });
 
+  it("creates items with default item properties", async () => {
+    const { tx, store } = createTransaction();
+    const [orderKey] = initialKeys(1);
+    const now = "2026-06-23T12:00:00.000Z";
+
+    await replicacheMutators.createItem(tx, {
+      id: "item-1",
+      listId: "list-1",
+      name: "Task",
+      order: orderKey,
+      now,
+    });
+
+    expect(store.get(replicacheKeys.listItem("item-1"))).toMatchObject({
+      id: "item-1",
+      status: "TODO",
+      assigneeId: null,
+      completed: false,
+      order: orderKey,
+      createdAt: now,
+      updatedAt: now,
+    });
+  });
+
+  it("updates item status and assignee through partial fields", async () => {
+    const now = "2026-06-23T12:00:00.000Z";
+    const [orderKey] = initialKeys(1);
+    const { tx, store } = createTransaction({
+      [replicacheKeys.listItem("item-1")]: {
+        id: "item-1",
+        listId: "list-1",
+        name: "Task",
+        order: orderKey,
+        completed: false,
+        status: "TODO",
+        assigneeId: "user-1",
+        notes: null,
+        createdAt: now,
+        updatedAt: now,
+      },
+    });
+
+    await replicacheMutators.updateItem(tx, {
+      id: "item-1",
+      status: "IN_PROGRESS",
+      assigneeId: null,
+      now: "2026-06-23T12:01:00.000Z",
+    });
+
+    expect(store.get(replicacheKeys.listItem("item-1"))).toMatchObject({
+      name: "Task",
+      completed: false,
+      status: "IN_PROGRESS",
+      assigneeId: null,
+      notes: null,
+      updatedAt: "2026-06-23T12:01:00.000Z",
+    });
+  });
+
   it("uses one move mutator to update only the moved item", async () => {
     const now = "2026-06-14T12:00:00.000Z";
     const [firstKey, secondKey] = initialKeys(2);
@@ -81,6 +140,8 @@ describe("Replicache dashboard mutators", () => {
         name: "Move me",
         order: firstKey,
         completed: false,
+        status: "TODO",
+        assigneeId: null,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -91,6 +152,8 @@ describe("Replicache dashboard mutators", () => {
         name: "Existing",
         order: secondKey,
         completed: false,
+        status: "TODO",
+        assigneeId: null,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -160,6 +223,8 @@ describe("Replicache dashboard mutators", () => {
         name: "A",
         order: firstKey,
         completed: false,
+        status: "TODO",
+        assigneeId: null,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -170,6 +235,8 @@ describe("Replicache dashboard mutators", () => {
         name: "B",
         order: secondKey,
         completed: false,
+        status: "TODO",
+        assigneeId: null,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -310,5 +377,56 @@ describe("Replicache server translation", () => {
         { toListClientId: "list-b", orderKey },
       ],
     ]);
+  });
+
+  it("translates item property updates only when provided", () => {
+    const propertyDecisions = translateReplicacheMutation({
+      userId: "user-1",
+      clientID: "client-1",
+      mutationID: 4,
+      name: "updateItem",
+      args: {
+        id: "item-1",
+        status: "DONE",
+        assigneeId: null,
+        now: "2026-06-23T12:00:00.000Z",
+      },
+      timestamp: Date.parse("2026-06-23T12:00:00.000Z"),
+    });
+    const nameOnlyDecisions = translateReplicacheMutation({
+      userId: "user-1",
+      clientID: "client-1",
+      mutationID: 5,
+      name: "updateItem",
+      args: {
+        id: "item-1",
+        name: "Renamed",
+        now: "2026-06-23T12:00:00.000Z",
+      },
+      timestamp: Date.parse("2026-06-23T12:00:00.000Z"),
+    });
+
+    expect(
+      propertyDecisions.map((decision) =>
+        decision.accepted
+          ? [
+              decision.operation.entityType,
+              decision.operation.operationType,
+              decision.operation.payload,
+            ]
+          : decision.errors
+      ),
+    ).toEqual([
+      [
+        "listItem",
+        "update",
+        { status: "DONE", assigneeId: null },
+      ],
+    ]);
+    expect(
+      nameOnlyDecisions.map((decision) =>
+        decision.accepted ? decision.operation.payload : decision.errors
+      ),
+    ).toEqual([{ name: "Renamed" }]);
   });
 });
