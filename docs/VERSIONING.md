@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.0
-- **Current phase:** 3.4.0 - Presence Transport Spike
-- **Next phase:** 3.4.1 - Multiplayer Board
+- **Current version:** 3.4.1-alpha
+- **Current phase:** 3.4.1 - Multiplayer Board
+- **Next phase:** 3.4.2 - Collaboration & Sharing UX
 
 ---
 
