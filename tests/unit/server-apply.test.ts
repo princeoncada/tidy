@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const permissionMocks = vi.hoisted(() => ({
   getEffectiveListRole: vi.fn(),
+  getUsersWithListAccess: vi.fn(),
 }));
 
 vi.mock("@/lib/sync/permissions", () => ({
   canEditContent: (role: string | null) =>
     role === "OWNER" || role === "EDITOR",
   getEffectiveListRole: permissionMocks.getEffectiveListRole,
+  getUsersWithListAccess: permissionMocks.getUsersWithListAccess,
 }));
 
 import type { LocalOutboxOperation } from "@/lib/local-db/outbox-schema";
@@ -133,7 +135,11 @@ function createDb(tx: ReturnType<typeof createTx>): ApplyDatabase {
 describe("server sync apply", () => {
   beforeEach(() => {
     permissionMocks.getEffectiveListRole.mockReset();
+    permissionMocks.getUsersWithListAccess.mockReset();
     permissionMocks.getEffectiveListRole.mockResolvedValue("OWNER");
+    permissionMocks.getUsersWithListAccess.mockResolvedValue(
+      new Set(["user-1", "user-2"]),
+    );
   });
 
   describe("view create idempotency", () => {
@@ -588,6 +594,177 @@ describe("server sync apply", () => {
       status: "rejected",
       errorMessage: "List delete target belongs to another user.",
     });
+  });
+
+  it("applies valid item status updates", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Task",
+      completed: false,
+      notes: null,
+      status: "TODO",
+      assigneeId: null,
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { status: "IN_PROGRESS" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toMatchObject({ status: "applied" });
+    expect(tx.listItem.updateMany).toHaveBeenCalledWith({
+      where: { id: "item-1" },
+      data: { status: "IN_PROGRESS" },
+    });
+  });
+
+  it("rejects invalid item status updates", async () => {
+    const tx = createTx();
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { status: "BLOCKED" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toEqual({
+      operationId: "op-1",
+      status: "rejected",
+      errorMessage: "List item update requires a valid status.",
+    });
+    expect(tx.listItem.findUnique).not.toHaveBeenCalled();
+    expect(tx.listItem.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("assigns an item to a user with list access", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Task",
+      completed: false,
+      notes: null,
+      status: "TODO",
+      assigneeId: null,
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { assigneeId: "user-2" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(permissionMocks.getUsersWithListAccess).toHaveBeenCalledWith(
+      tx,
+      ["list-1"],
+    );
+    expect(results[0]).toMatchObject({ status: "applied" });
+    expect(tx.listItem.updateMany).toHaveBeenCalledWith({
+      where: { id: "item-1" },
+      data: { assigneeId: "user-2" },
+    });
+  });
+
+  it("rejects an item assignee outside the list access set", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Task",
+      completed: false,
+      notes: null,
+      status: "TODO",
+      assigneeId: null,
+    });
+    permissionMocks.getUsersWithListAccess.mockResolvedValueOnce(
+      new Set(["user-1"]),
+    );
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { assigneeId: "user-2" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toEqual({
+      operationId: "op-1",
+      status: "rejected",
+      errorMessage: "List item assignee must have access to the list.",
+    });
+    expect(tx.listItem.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("clears an item assignee with null without requiring an access lookup", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Task",
+      completed: false,
+      notes: null,
+      status: "TODO",
+      assigneeId: "user-2",
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { assigneeId: null },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(permissionMocks.getUsersWithListAccess).not.toHaveBeenCalled();
+    expect(results[0]).toMatchObject({ status: "applied" });
+    expect(tx.listItem.updateMany).toHaveBeenCalledWith({
+      where: { id: "item-1" },
+      data: { assigneeId: null },
+    });
+  });
+
+  it("treats unchanged item status and assignee updates as already applied", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Task",
+      completed: false,
+      notes: null,
+      status: "DONE",
+      assigneeId: "user-2",
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: {
+          status: "DONE",
+          assigneeId: "user-2",
+        },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toMatchObject({ status: "already-applied" });
+    expect(tx.listItem.updateMany).not.toHaveBeenCalled();
   });
 
   it("creates an item only after checking the owned parent list", async () => {
