@@ -15,6 +15,7 @@ import { validateSyncEndpointRequest } from "@/lib/sync/sync-endpoint-contract";
 import {
   REPLICACHE_KEY_PREFIXES,
   replicacheKeys,
+  type ItemStatus,
   type ReplicacheListItemValue,
   type ReplicacheListValue,
   type ReplicacheTagValue,
@@ -50,6 +51,8 @@ export type ReplicacheMutationArgs = {
     name?: string;
     completed?: boolean;
     notes?: string | null;
+    status?: ItemStatus;
+    assigneeId?: string | null;
     now: string;
   };
   deleteItem: { id: string };
@@ -227,6 +230,8 @@ export const replicacheMutators = {
       name: args.name,
       order: args.order,
       completed: false,
+      status: "TODO",
+      assigneeId: null,
       notes: null,
       createdAt: args.now,
       updatedAt: args.now,
@@ -247,6 +252,8 @@ export const replicacheMutators = {
         ...(args.name !== undefined ? { name: args.name } : {}),
         ...(args.completed !== undefined ? { completed: args.completed } : {}),
         ...(args.notes !== undefined ? { notes: args.notes } : {}),
+        ...(args.status !== undefined ? { status: args.status } : {}),
+        ...(args.assigneeId !== undefined ? { assigneeId: args.assigneeId } : {}),
         updatedAt: args.now,
       });
     }
@@ -615,6 +622,10 @@ function describeMutation<Name extends ReplicacheMutationName>(
             ? { completed: value.completed }
             : {}),
           ...(value.notes !== undefined ? { notes: value.notes } : {}),
+          ...(value.status !== undefined ? { status: value.status } : {}),
+          ...(value.assigneeId !== undefined
+            ? { assigneeId: value.assigneeId }
+            : {}),
         },
       }];
     }
