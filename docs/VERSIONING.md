@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.3.0
-- **Current phase:** 3.3.0 - Item Detail Panel & Notes
-- **Next phase:** 3.3.1 - Item Properties (Status & Assignee)
+- **Current version:** 3.3.1-alpha
+- **Current phase:** 3.3.1 - Item Properties (Status & Assignee)
+- **Next phase:** 3.4.0 - Presence Transport Spike
 
 ---
 
