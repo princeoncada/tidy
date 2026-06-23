@@ -138,8 +138,8 @@ describe("Replicache CVR pull diff", () => {
           updatedAt: now,
           listTags: [],
           listItems: [
-            { id: "item-a", listId: "list-a", name: "A", order: 0, orderKey: null, completed: false, notes: null, createdAt: now, updatedAt: now },
-            { id: "item-b", listId: "list-a", name: "B", order: 1, orderKey: null, completed: false, notes: null, createdAt: now, updatedAt: now },
+            { id: "item-a", listId: "list-a", name: "A", order: 0, orderKey: null, completed: false, status: "TODO", assigneeId: null, notes: null, createdAt: now, updatedAt: now },
+            { id: "item-b", listId: "list-a", name: "B", order: 1, orderKey: null, completed: false, status: "IN_PROGRESS", assigneeId: "user-2", notes: null, createdAt: now, updatedAt: now },
           ],
         }],
       } as never,
@@ -159,6 +159,14 @@ describe("Replicache CVR pull diff", () => {
 
     expect(firstMembership.order < secondMembership.order).toBe(true);
     expect(firstItem.order < secondItem.order).toBe(true);
+    expect(view[replicacheKeys.listItem("item-a")].value).toMatchObject({
+      status: "TODO",
+      assigneeId: null,
+    });
+    expect(view[replicacheKeys.listItem("item-b")].value).toMatchObject({
+      status: "IN_PROGRESS",
+      assigneeId: "user-2",
+    });
     expect(() =>
       keyBetween(firstMembership.order, secondMembership.order)
     ).not.toThrow();

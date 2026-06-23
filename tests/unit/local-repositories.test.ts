@@ -70,6 +70,8 @@ function localListItem(overrides: Partial<LocalListItem> = {}): LocalListItem {
     completed: false,
     order: 0,
     notes: null,
+    status: "TODO",
+    assigneeId: null,
     listClientId: "local-list-1",
     listServerId: null,
     ...overrides,

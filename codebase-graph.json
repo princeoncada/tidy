@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.3.0",
-  "generatedAt": "2026-06-22",
+  "version": "3.3.1-alpha",
+  "generatedAt": "2026-06-23",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -529,11 +529,15 @@
         "ItemDetailPanel"
       ],
       "imports": [
+        "@tanstack/react-query",
         "@/components/item/ItemNotesField",
         "@/components/list/types",
         "@/components/ui/dialog",
+        "@/hooks/useDashboardMutations",
         "@/lib/collab/yjs-notes-gate",
-        "@/lib/item-panel/item-panel-gate"
+        "@/lib/item-panel/item-panel-gate",
+        "@/lib/sync/replicache/keys",
+        "@/trpc/client"
       ]
     },
     {
@@ -1855,7 +1859,9 @@
         "LocalViewTag",
         "LocalViewType"
       ],
-      "imports": []
+      "imports": [
+        "@/lib/sync/replicache/keys"
+      ]
     },
     {
       "path": "lib/local-db/metadata-repository.ts",
@@ -2125,6 +2131,7 @@
       "kind": "library",
       "extension": ".ts",
       "symbols": [
+        "ItemStatus",
         "REPLICACHE_KEY_PREFIXES",
         "REPLICACHE_SELECTED_VIEW_KEY",
         "ReplicacheListItemValue",
@@ -2217,6 +2224,7 @@
         "@/lib/db",
         "@/lib/local-db/outbox-schema",
         "@/lib/sync/permissions",
+        "@/lib/sync/replicache/keys",
         "@/lib/sync/sync-batch-contract",
         "@/trpc/routers/viewHelpers"
       ]
@@ -2948,7 +2956,8 @@
         "@testing-library/react",
         "vitest",
         "@/components/item/ItemDetailPanel",
-        "@/components/list/types"
+        "@/components/list/types",
+        "@tanstack/react-query"
       ]
     },
     {
@@ -2981,6 +2990,18 @@
         "node:fs",
         "node:path",
         "vitest"
+      ]
+    },
+    {
+      "path": "tests/unit/list-item-router.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "@trpc/server",
+        "vitest",
+        "@/trpc/init",
+        "@/trpc/routers/listItemRouter"
       ]
     },
     {
@@ -3487,7 +3508,8 @@
         "../init",
         "@trpc/server",
         "@/lib/db",
-        "@/app/generated/prisma/client"
+        "@/app/generated/prisma/client",
+        "@/lib/sync/permissions"
       ]
     },
     {
@@ -4093,6 +4115,12 @@
     },
     {
       "from": "components/item/ItemDetailPanel.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
       "to": "lib/collab/yjs-notes-gate.ts",
       "type": "imports",
       "import": "@/lib/collab/yjs-notes-gate"
@@ -4102,6 +4130,18 @@
       "to": "lib/item-panel/item-panel-gate.ts",
       "type": "imports",
       "import": "@/lib/item-panel/item-panel-gate"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "trpc/client.tsx",
+      "type": "imports",
+      "import": "@/trpc/client"
     },
     {
       "from": "components/item/ItemNotesField.tsx",
@@ -5340,6 +5380,12 @@
       "import": "../local-first-reconcile"
     },
     {
+      "from": "lib/local-db/local-schema.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
       "from": "lib/local-db/metadata-repository.ts",
       "to": "lib/local-db/local-repositories.ts",
       "type": "imports",
@@ -5536,6 +5582,12 @@
       "to": "lib/sync/permissions.ts",
       "type": "imports",
       "import": "@/lib/sync/permissions"
+    },
+    {
+      "from": "lib/sync/server-apply.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
     },
     {
       "from": "lib/sync/server-apply.ts",
@@ -6004,6 +6056,18 @@
       "to": "lib/item-panel/item-panel-gate.ts",
       "type": "imports",
       "import": "@/lib/item-panel/item-panel-gate"
+    },
+    {
+      "from": "tests/unit/list-item-router.test.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "@/trpc/init"
+    },
+    {
+      "from": "tests/unit/list-item-router.test.ts",
+      "to": "trpc/routers/listItemRouter.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/listItemRouter"
     },
     {
       "from": "tests/unit/list-items-reorder-relinquish.test.ts",
@@ -6496,6 +6560,12 @@
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
+    },
+    {
+      "from": "trpc/routers/listItemRouter.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
     },
     {
       "from": "trpc/routers/listItemRouter.ts",

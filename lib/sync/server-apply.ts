@@ -9,7 +9,9 @@ import type { LocalJsonValue, LocalOutboxOperation } from "@/lib/local-db/outbox
 import {
   canEditContent,
   getEffectiveListRole,
+  getUsersWithListAccess,
 } from "@/lib/sync/permissions";
+import type { ItemStatus } from "@/lib/sync/replicache/keys";
 import type { SyncBatchOperationDecision } from "@/lib/sync/sync-batch-contract";
 import {
   ensureAllListsView,
@@ -51,6 +53,7 @@ const TAG_COLORS = new Set([
 ]);
 
 const VIEW_MATCH_MODES = new Set(["ALL", "ANY"]);
+const ITEM_STATUSES = new Set(["TODO", "IN_PROGRESS", "DONE"]);
 
 function isRecord(value: LocalJsonValue): value is Record<string, LocalJsonValue> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -152,6 +155,13 @@ function getViewMatchMode(
   const matchMode = getString(operation, "matchMode");
   return matchMode && VIEW_MATCH_MODES.has(matchMode)
     ? (matchMode as ViewMatchMode)
+    : undefined;
+}
+
+function getItemStatus(operation: LocalOutboxOperation): ItemStatus | undefined {
+  const status = getString(operation, "status");
+  return status && ITEM_STATUSES.has(status)
+    ? (status as ItemStatus)
     : undefined;
 }
 
@@ -514,10 +524,31 @@ async function applyListItemOperation(
       const name = getString(operation, "name");
       const completed = getBoolean(operation, "completed");
       const notes = getOptionalString(operation, "notes");
-      if (name === null && completed === undefined && notes === undefined) {
+      const statusProvided = hasPayloadKey(operation, "status");
+      const status = getItemStatus(operation);
+      const assigneeProvided = hasPayloadKey(operation, "assigneeId");
+      const assigneeId = assigneeProvided
+        ? getOptionalString(operation, "assigneeId")
+        : undefined;
+      if (statusProvided && !status) {
+        return rejected(decision, "List item update requires a valid status.");
+      }
+      if (assigneeProvided && assigneeId === undefined) {
         return rejected(
           decision,
-          "List item update requires name, completed, or notes.",
+          "List item update requires assigneeId to be a user id or null.",
+        );
+      }
+      if (
+        name === null &&
+        completed === undefined &&
+        notes === undefined &&
+        !statusProvided &&
+        !assigneeProvided
+      ) {
+        return rejected(
+          decision,
+          "List item update requires name, completed, notes, status, or assigneeId.",
         );
       }
 
@@ -527,6 +558,8 @@ async function applyListItemOperation(
           name: true,
           completed: true,
           notes: true,
+          status: true,
+          assigneeId: true,
           listId: true,
         },
       });
@@ -538,10 +571,22 @@ async function applyListItemOperation(
         return rejected(decision, "List item update requires edit access.");
       }
 
+      if (assigneeProvided && typeof assigneeId === "string") {
+        const accessibleUsers = await getUsersWithListAccess(tx, [existing.listId]);
+        if (!accessibleUsers.has(assigneeId)) {
+          return rejected(
+            decision,
+            "List item assignee must have access to the list.",
+          );
+        }
+      }
+
       const unchanged =
         (name === null || existing.name === name) &&
         (completed === undefined || existing.completed === completed) &&
-        (notes === undefined || existing.notes === notes);
+        (notes === undefined || existing.notes === notes) &&
+        (!statusProvided || existing.status === status) &&
+        (!assigneeProvided || existing.assigneeId === assigneeId);
       if (unchanged) {
         return result(decision.operationId, "already-applied");
       }
@@ -552,6 +597,8 @@ async function applyListItemOperation(
           ...(name !== null ? { name } : {}),
           ...(completed !== undefined ? { completed } : {}),
           ...(notes !== undefined ? { notes } : {}),
+          ...(statusProvided && status ? { status } : {}),
+          ...(assigneeProvided ? { assigneeId } : {}),
         },
       });
 

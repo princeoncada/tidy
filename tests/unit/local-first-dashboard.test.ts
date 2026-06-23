@@ -81,6 +81,8 @@ function localItem(overrides: Partial<LocalListItem> = {}): LocalListItem {
     completed: false,
     order: 0,
     notes: null,
+    status: "TODO",
+    assigneeId: null,
     listClientId: "local-list-1",
     listServerId: null,
     ...overrides,
@@ -210,10 +212,12 @@ function dashboardSnapshot(view: ViewCacheItem, listName = "Inbox"): DashboardSn
             completed: false,
             order: 0,
             notes: null,
+            status: "IN_PROGRESS" as const,
+            assigneeId: "user-2",
             listId: "list-1",
             createdAt: new Date(createdAt),
             updatedAt: new Date(updatedAt),
-          },
+          } as DashboardSnapshot["lists"][number]["listItems"][number],
         ],
       },
     ],
@@ -270,8 +274,20 @@ describe("local-first dashboard mappers", () => {
       order: 3,
       listTags: [{ listId: "server-list-1", tagId: "server-tag-1" }],
       listItems: [
-        { id: "item-a", listId: "server-list-1", order: 0 },
-        { id: "item-b", listId: "server-list-1", order: 1 },
+        {
+          id: "item-a",
+          listId: "server-list-1",
+          order: 0,
+          status: "TODO",
+          assigneeId: null,
+        },
+        {
+          id: "item-b",
+          listId: "server-list-1",
+          order: 1,
+          status: "TODO",
+          assigneeId: null,
+        },
       ],
     });
   });
@@ -371,6 +387,8 @@ describe("local-first dashboard mappers", () => {
         clientId: "item-1",
         listClientId: "list-1",
         order: 0,
+        status: "IN_PROGRESS",
+        assigneeId: "user-2",
       }),
     ]);
     expect(mapServerGraphToLocalTags([allListsView], snapshot, "user-1")).toEqual([

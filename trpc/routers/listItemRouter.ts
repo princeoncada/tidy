@@ -3,6 +3,11 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/lib/db";
 import { Prisma } from "@/app/generated/prisma/client";
+import {
+  canRead,
+  getEffectiveListRole,
+  getUsersWithListAccess,
+} from "@/lib/sync/permissions";
 
 /**
  * listItemRouter
@@ -46,6 +51,20 @@ export const listItemRouter = createTRPCRouter({
     })
 
     return listItems
+  }),
+
+  getAssignableMembers: protectedProcedure.input(z.object({
+    listId: z.uuid(),
+  })).query(async ({ ctx: { userId }, input: { listId } }) => {
+    const role = await getEffectiveListRole(db, userId, listId);
+    if (!canRead(role)) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    const members = await getUsersWithListAccess(db, [listId]);
+    return {
+      currentUserId: userId,
+      members: [...members].sort(),
+    };
   }),
 
   /**

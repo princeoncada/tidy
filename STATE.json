@@ -1,9 +1,9 @@
 {
-    "version":  "3.3.0",
-    "state":  "stable",
-    "phase":  "3.3.0",
-    "phaseTitle":  "Item Detail Panel \u0026 Notes",
-    "nextPhase":  "3.3.1 - Item Properties (Status \u0026 Assignee)",
+    "version":  "3.3.1-alpha",
+    "state":  "alpha",
+    "phase":  "3.3.1",
+    "phaseTitle":  "Item Properties (Status \u0026 Assignee)",
+    "nextPhase":  "3.4.0 - Presence Transport Spike",
     "seriesComplete":  true,
-    "lastUpdated":  "2026-06-22"
+    "lastUpdated":  "2026-06-23"
 }
