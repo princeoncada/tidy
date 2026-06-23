@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.3.1 - Item Properties (Status & Assignee) (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.3.1 - Item Properties (Status & Assignee)
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Add structured item properties (status, assignee) synced via Replicache.
 - **Product impact:** user-visible item properties.
