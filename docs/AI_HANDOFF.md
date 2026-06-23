@@ -1,11 +1,11 @@
-<!-- Current Version: 3.3.1 -->
+<!-- Current Version: 3.4.0-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.3.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.3.1 - Item Properties (Status & Assignee)
-**Next**: 3.4.0 - Presence Transport Spike
+**Current Version**: 3.4.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.4.0 - Presence Transport Spike
+**Next**: 3.4.1 - Multiplayer Board
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
