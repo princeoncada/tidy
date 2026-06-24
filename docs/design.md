@@ -306,9 +306,10 @@ one must not automatically toggle the other.
 List items also expose a nullable assignee. Assignees are restricted to users
 with access to the parent list, and the value is edited in the item detail
 panel alongside status. Status must use text labels and must not be
-communicated by color alone. Assignee display-name resolution is deferred to
-the 3.4.x sharing UX work, so the runtime may show user ids and mark the
-current user with text.
+communicated by color alone. Assignee display-name resolution is Current as
+of 3.4.2: members are labelled by a server-only identity lookup (display
+name or email) with a raw user-id fallback when the lookup is unavailable,
+and the current user is marked with text.
 
 ## Multiplayer Board
 
@@ -374,6 +375,7 @@ Design and runtime implementation must remain consistent in both directions:
 | 3.3.0 | Item detail panel (centered dialog) hosting item name, completion status, and the existing collaborative notes; per-item open trigger replacing the inline notes expander; gated by NEXT_PUBLIC_ITEM_PANEL_ENABLED (default off) with notes still gated by the Yjs notes flag | Manual product proof (open the panel from a list item, edit notes, reopen and confirm persistence) plus unit tests and design parity |
 | 3.3.1 | Item status and assignee properties in the item detail panel; status remains independent of completed and assignee display names remain deferred | Manual product proof (open panel, set status, assign/unassign a member, reopen and confirm persistence) plus unit tests and design parity |
 | 3.4.1 | Multiplayer Board: flag-gated List/Board mode, three text-labelled status columns, card drag across columns for status, and within-column board ordering via `boardOrderKey` | Manual product proof (two-user board drag/status/order) plus unit tests and design parity |
+| 3.4.2 | Collaboration & Sharing UX: human-readable identity labels (display name or email) for shared members and item assignees, resolved server-side with a raw user-id fallback; live presence and rollups remain deferred | Manual product proof (member list and assignee picker show human labels, self marked, fallback when the service role is unset) plus unit tests and design parity |
 
 Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.
