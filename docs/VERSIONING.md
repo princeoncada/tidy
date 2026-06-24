@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.2
-- **Current phase:** 3.4.2 - Collaboration & Sharing UX
-- **Next phase:** 3.4.3 - Presence Transport Hardening
+- **Current version:** 3.4.3-alpha
+- **Current phase:** 3.4.3 - Presence Transport Hardening
+- **Next phase:** 3.4.4 - Live Presence
 
 ---
 

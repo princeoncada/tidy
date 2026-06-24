@@ -527,3 +527,22 @@ Legacy rows may have null `boardOrderKey`. The board sorts stored board keys
 first and falls back to list `orderKey` plus id for null rows, with a deferred
 one-time deterministic backfill to remove that rollout window. Presence,
 sharing UX polish, and board rollups remain out of 3.4.1.
+
+## 2026-06-24: Presence transport hardened - list-scoped RLS + production client (3.4.3)
+
+The 3.4.0 presence transport is now production-grade. Room key: `roomId = listId`
+(the board is a per-list view; sharing is per-list via listShare + workspace).
+Access control: a SECURITY DEFINER function
+`public.tidy_can_access_presence_topic(topic, uid)` checks the requesting user's
+membership in the room's list (owner / direct list share / workspace owner /
+workspace member), mirroring `getEffectiveListRole` in `lib/sync/permissions.ts`;
+realtime.messages RLS cannot read Prisma tables directly, so the check runs in the
+SECURITY DEFINER helper (same pattern as 2.0.6 note collab RLS). The scoped
+select/insert policies on `realtime.messages` cover the `presence` and `broadcast`
+extensions for `tidy:presence:<listId>` and replace the permissive dev policy from
+the 3.4.0 proof (`prisma/sql/3_4_3_realtime_presence_rls.sql`, controller-run).
+Client: `lib/realtime/presence-client.ts` (`PresenceRoom`) replaces the throwaway
+spike; `leave()` untracks before removing the channel so peers drop promptly; a
+dev-gated harness (`lib/realtime/presence-dev-harness.ts`) keeps the two-user
+proof runnable. Presence remains on its own transport, never coupled into
+Replicache push/pull.

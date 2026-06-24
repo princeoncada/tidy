@@ -1,9 +1,9 @@
 {
-    "version":  "3.4.2",
-    "state":  "stable",
-    "phase":  "3.4.2",
-    "phaseTitle":  "Collaboration \u0026 Sharing UX",
-    "nextPhase":  "3.4.3 - Presence Transport Hardening",
+    "version":  "3.4.3-alpha",
+    "state":  "alpha",
+    "phase":  "3.4.3",
+    "phaseTitle":  "Presence Transport Hardening",
+    "nextPhase":  "3.4.4 - Live Presence",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-24"
 }

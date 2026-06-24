@@ -1,11 +1,7 @@
 import { presenceTopicForRoom } from "@/lib/realtime/presence-topic";
 import { createClient } from "@/lib/supabase/client";
 
-export const PRESENCE_SPIKE_STORAGE_KEY = "tidy:presence-spike";
-
 export const DEFAULT_MAX_PRESENCE_EVENTS = 1_000;
-
-type PresenceSpikeStorage = Pick<Storage, "getItem">;
 
 export type PresenceMember = {
   userId: string;
@@ -31,6 +27,7 @@ type RealtimeChannel = {
   ) => RealtimeChannel;
   subscribe: (callback?: (status: string) => void) => RealtimeChannel;
   track: (payload: PresenceMember) => Promise<unknown> | unknown;
+  untrack: () => Promise<unknown> | unknown;
   send: (payload: {
     type: "broadcast";
     event: "cursor";
@@ -56,7 +53,7 @@ type RealtimeClient = {
   removeChannel: (channel: RealtimeChannel) => Promise<unknown> | unknown;
 };
 
-type PresenceSpikeRoomOptions = {
+type PresenceRoomOptions = {
   roomId: string;
   userId: string;
   accessToken: string;
@@ -64,22 +61,9 @@ type PresenceSpikeRoomOptions = {
   clientFactory?: () => RealtimeClient;
   maxEvents?: number;
   now?: () => number;
+  onRosterChange?: (roster: PresenceMember[]) => void;
+  onCursorEvent?: (event: PresenceBroadcastEvent) => void;
 };
-
-export type PresenceSpikeWindowApi = {
-  join: (roomId: string) => Promise<void>;
-  updateCursor: (x: number, y: number) => void;
-  setTyping: (typing: boolean) => void;
-  roster: () => PresenceMember[];
-  events: () => PresenceBroadcastEvent[];
-  leave: () => void;
-};
-
-declare global {
-  interface Window {
-    __tidyPresenceSpike?: PresenceSpikeWindowApi;
-  }
-}
 
 function createClientKey() {
   const randomId = globalThis.crypto?.randomUUID?.();
@@ -116,28 +100,6 @@ function presenceStateFromChannel(channel: RealtimeChannel | null) {
     return channel?.presenceState?.() ?? {};
   } catch {
     return {};
-  }
-}
-
-export function isPresenceSpikeEnabled({
-  nodeEnv = process.env.NODE_ENV,
-  storage,
-}: {
-  nodeEnv?: string;
-  storage?: PresenceSpikeStorage | null;
-} = {}) {
-  if (nodeEnv === "production") return false;
-
-  try {
-    const resolvedStorage =
-      storage === undefined
-        ? typeof window === "undefined"
-          ? null
-          : window.localStorage
-        : storage;
-    return resolvedStorage?.getItem(PRESENCE_SPIKE_STORAGE_KEY) === "1";
-  } catch {
-    return false;
   }
 }
 
@@ -202,7 +164,7 @@ export class PresenceEventBuffer {
   }
 }
 
-export class PresenceSpikeRoom {
+export class PresenceRoom {
   readonly roomId: string;
   readonly userId: string;
   readonly clientKey: string;
@@ -211,6 +173,12 @@ export class PresenceSpikeRoom {
   private readonly clientFactory: () => RealtimeClient;
   private readonly now: () => number;
   private readonly eventBuffer: PresenceEventBuffer;
+  private readonly onRosterChange:
+    | ((roster: PresenceMember[]) => void)
+    | undefined;
+  private readonly onCursorEvent:
+    | ((event: PresenceBroadcastEvent) => void)
+    | undefined;
   private client: RealtimeClient | null = null;
   private channel: RealtimeChannel | null = null;
   private currentRoster: PresenceMember[] = [];
@@ -226,7 +194,9 @@ export class PresenceSpikeRoom {
     clientFactory = () => createClient() as unknown as RealtimeClient,
     maxEvents,
     now = Date.now,
-  }: PresenceSpikeRoomOptions) {
+    onRosterChange,
+    onCursorEvent,
+  }: PresenceRoomOptions) {
     this.roomId = roomId;
     this.userId = userId;
     this.accessToken = accessToken;
@@ -234,6 +204,8 @@ export class PresenceSpikeRoom {
     this.clientFactory = clientFactory;
     this.eventBuffer = new PresenceEventBuffer(maxEvents);
     this.now = now;
+    this.onRosterChange = onRosterChange;
+    this.onCursorEvent = onCursorEvent;
   }
 
   async join() {
@@ -253,7 +225,10 @@ export class PresenceSpikeRoom {
       .on("presence", { event: "leave" }, () => this.refreshRoster())
       .on("broadcast", { event: "cursor" }, (payload) => {
         const event = parseBroadcastEvent(payload);
-        if (event) this.eventBuffer.record(event);
+        if (event) {
+          this.eventBuffer.record(event);
+          this.onCursorEvent?.(event);
+        }
       });
 
     this.client = client;
@@ -292,8 +267,14 @@ export class PresenceSpikeRoom {
     this.client = null;
     this.currentRoster = [];
     this.eventBuffer.clear();
-    if (client && channel) {
-      void client.removeChannel(channel);
+    if (channel) {
+      void (async () => {
+        try {
+          await channel.untrack();
+        } finally {
+          if (client) await client.removeChannel(channel);
+        }
+      })();
     }
   }
 
@@ -314,6 +295,7 @@ export class PresenceSpikeRoom {
     );
     diffRosters(this.currentRoster, nextRoster);
     this.currentRoster = nextRoster;
+    this.onRosterChange?.(this.roster());
   }
 
   private trackSelf() {
@@ -357,49 +339,4 @@ function parseBroadcastEvent(value: unknown): PresenceBroadcastEvent | null {
 
   const member = normalizeMember(record);
   return member ? { type: "cursor", ...member } : null;
-}
-
-export function installPresenceSpikeWindowApi({ userId }: { userId: string }) {
-  if (!isPresenceSpikeEnabled() || typeof window === "undefined") {
-    return () => {};
-  }
-
-  let room: PresenceSpikeRoom | null = null;
-
-  const leave = () => {
-    room?.leave();
-    room = null;
-  };
-
-  const api: PresenceSpikeWindowApi = {
-    join: async (roomId) => {
-      leave();
-      const {
-        data: { session },
-      } = await createClient().auth.getSession();
-      const accessToken = session?.access_token;
-      if (!accessToken) return;
-
-      const nextRoom = new PresenceSpikeRoom({
-        roomId,
-        userId,
-        accessToken,
-      });
-      await nextRoom.join();
-      room = nextRoom;
-    },
-    updateCursor: (x, y) => room?.updateCursor(x, y),
-    setTyping: (typing) => room?.setTyping(typing),
-    roster: () => room?.roster() ?? [],
-    events: () => room?.events() ?? [],
-    leave,
-  };
-
-  window.__tidyPresenceSpike = api;
-  return () => {
-    leave();
-    if (window.__tidyPresenceSpike === api) {
-      delete window.__tidyPresenceSpike;
-    }
-  };
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   setAuth: vi.fn(async () => undefined),
@@ -21,61 +21,13 @@ vi.mock("@/lib/supabase/client", () => ({
 
 import {
   diffRosters,
-  isPresenceSpikeEnabled,
   PresenceEventBuffer,
-  PresenceSpikeRoom,
+  PresenceRoom,
   rosterFromPresenceState,
-} from "@/lib/realtime/presence-spike";
+} from "@/lib/realtime/presence-client";
 
-describe("presence spike gate", () => {
-  it("enables only when the development storage flag is set", () => {
-    expect(
-      isPresenceSpikeEnabled({
-        nodeEnv: "development",
-        storage: { getItem: () => "1" },
-      }),
-    ).toBe(true);
-    expect(
-      isPresenceSpikeEnabled({
-        nodeEnv: "development",
-        storage: { getItem: () => null },
-      }),
-    ).toBe(false);
-    expect(
-      isPresenceSpikeEnabled({
-        nodeEnv: "development",
-        storage: { getItem: () => "true" },
-      }),
-    ).toBe(false);
-  });
-
-  it("is disabled in production and when storage is unavailable", () => {
-    const enabledStorage = { getItem: vi.fn(() => "1") };
-
-    expect(
-      isPresenceSpikeEnabled({
-        nodeEnv: "production",
-        storage: enabledStorage,
-      }),
-    ).toBe(false);
-    expect(
-      isPresenceSpikeEnabled({ nodeEnv: "development", storage: null }),
-    ).toBe(false);
-    expect(enabledStorage.getItem).not.toHaveBeenCalled();
-  });
-
-  it("fails closed when storage access throws", () => {
-    expect(
-      isPresenceSpikeEnabled({
-        nodeEnv: "development",
-        storage: {
-          getItem: () => {
-            throw new Error("storage blocked");
-          },
-        },
-      }),
-    ).toBe(false);
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
 });
 
 describe("presence roster transforms", () => {
@@ -192,12 +144,13 @@ describe("presence event buffer", () => {
   });
 });
 
-describe("PresenceSpikeRoom", () => {
+describe("PresenceRoom", () => {
   it("authenticates before subscribing to a private presence room", async () => {
     const channel = {
       on: vi.fn(),
       subscribe: vi.fn(),
       track: vi.fn(async () => undefined),
+      untrack: vi.fn(async () => undefined),
       send: vi.fn(async () => undefined),
       presenceState: vi.fn(() => ({})),
     };
@@ -208,7 +161,7 @@ describe("PresenceSpikeRoom", () => {
     });
     mocks.channel.mockReturnValue(channel);
 
-    const room = new PresenceSpikeRoom({
+    const room = new PresenceRoom({
       roomId: "board-1",
       userId: "user-1",
       accessToken: "access-token",
@@ -258,6 +211,40 @@ describe("PresenceSpikeRoom", () => {
     });
 
     room.leave();
-    expect(mocks.removeChannel).toHaveBeenCalledWith(channel);
+    await vi.waitFor(() => {
+      expect(mocks.removeChannel).toHaveBeenCalledWith(channel);
+    });
+  });
+
+  it("untracks before removing the channel on leave", async () => {
+    const channel = {
+      on: vi.fn(),
+      subscribe: vi.fn(),
+      track: vi.fn(async () => undefined),
+      untrack: vi.fn(async () => undefined),
+      send: vi.fn(async () => undefined),
+      presenceState: vi.fn(() => ({})),
+    };
+    channel.on.mockReturnValue(channel);
+    channel.subscribe.mockReturnValue(channel);
+    mocks.channel.mockReturnValue(channel);
+
+    const room = new PresenceRoom({
+      roomId: "board-1",
+      userId: "user-1",
+      accessToken: "access-token",
+      clientKey: "client-1",
+    });
+
+    await room.join();
+    room.leave();
+
+    await vi.waitFor(() => {
+      expect(mocks.removeChannel).toHaveBeenCalledWith(channel);
+    });
+    expect(channel.untrack).toHaveBeenCalledOnce();
+    expect(channel.untrack.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.removeChannel.mock.invocationCallOrder[0],
+    );
   });
 });
