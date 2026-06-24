@@ -260,6 +260,7 @@ export function useReplicacheDashboard() {
   return {
     enabled: true,
     ready: Boolean(rep && dashboard.currentView),
+    listItemValues: graph.listItems,
     ...dashboard,
   };
 }
