@@ -530,6 +530,8 @@ async function applyListItemOperation(
       const assigneeId = assigneeProvided
         ? getOptionalString(operation, "assigneeId")
         : undefined;
+      const boardOrderProvided = hasPayloadKey(operation, "boardOrderKey");
+      const boardOrderKey = getString(operation, "boardOrderKey");
       if (statusProvided && !status) {
         return rejected(decision, "List item update requires a valid status.");
       }
@@ -539,16 +541,23 @@ async function applyListItemOperation(
           "List item update requires assigneeId to be a user id or null.",
         );
       }
+      if (boardOrderProvided && !boardOrderKey) {
+        return rejected(
+          decision,
+          "List item update requires boardOrderKey to be a non-empty string.",
+        );
+      }
       if (
         name === null &&
         completed === undefined &&
         notes === undefined &&
         !statusProvided &&
-        !assigneeProvided
+        !assigneeProvided &&
+        !boardOrderProvided
       ) {
         return rejected(
           decision,
-          "List item update requires name, completed, notes, status, or assigneeId.",
+          "List item update requires name, completed, notes, status, assigneeId, or boardOrderKey.",
         );
       }
 
@@ -560,6 +569,7 @@ async function applyListItemOperation(
           notes: true,
           status: true,
           assigneeId: true,
+          boardOrderKey: true,
           listId: true,
         },
       });
@@ -586,7 +596,8 @@ async function applyListItemOperation(
         (completed === undefined || existing.completed === completed) &&
         (notes === undefined || existing.notes === notes) &&
         (!statusProvided || existing.status === status) &&
-        (!assigneeProvided || existing.assigneeId === assigneeId);
+        (!assigneeProvided || existing.assigneeId === assigneeId) &&
+        (!boardOrderProvided || existing.boardOrderKey === boardOrderKey);
       if (unchanged) {
         return result(decision.operationId, "already-applied");
       }
@@ -599,6 +610,7 @@ async function applyListItemOperation(
           ...(notes !== undefined ? { notes } : {}),
           ...(statusProvided && status ? { status } : {}),
           ...(assigneeProvided ? { assigneeId } : {}),
+          ...(boardOrderProvided && boardOrderKey ? { boardOrderKey } : {}),
         },
       });
 

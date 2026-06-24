@@ -50,6 +50,10 @@ vi.mock("@/components/list/ListsContainer", () => ({
   default: () => <div>Lists</div>,
 }));
 
+vi.mock("@/components/board/BoardContainer", () => ({
+  default: () => <div>Board</div>,
+}));
+
 vi.mock("@/components/layout/SidebarNav", () => ({
   SidebarNav: () => <div>Sidebar</div>,
 }));

@@ -27,7 +27,8 @@ and design-parity review succeed.
 | Sidebar navigation redesign (inline accordion nav, footer account, fixed collapse, full-width canvas) | Current |
 | Item detail panel and existing notes integration | Current |
 | Item status and assignee properties | Current |
-| Board, sharing polish, presence, and rollups | Deferred: 3.4.x |
+| Multiplayer Board | Current |
+| Sharing polish, presence, and rollups | Deferred: 3.4.x |
 
 ## Design Principles
 
@@ -292,8 +293,7 @@ replaces the former inline notes expander.
 The panel is gated by `NEXT_PUBLIC_ITEM_PANEL_ENABLED` and is off by default.
 Its notes section additionally respects the existing Yjs notes flag. The panel
 must manage focus, dismissal, labelling, and stacking according to the
-surface/elevation and accessibility contracts. The board remains deferred to
-3.4.x.
+surface/elevation and accessibility contracts.
 
 ## Item Properties (Status & Assignee)
 
@@ -301,8 +301,7 @@ surface/elevation and accessibility contracts. The board remains deferred to
 
 List items expose a structured status with the values `TODO`, `IN_PROGRESS`,
 and `DONE`. Status is independent of the existing completed checkbox; changing
-one must not automatically toggle the other. Board grouping by status is
-deferred to 3.4.1.
+one must not automatically toggle the other.
 
 List items also expose a nullable assignee. Assignees are restricted to users
 with access to the parent list, and the value is edited in the item detail
@@ -310,6 +309,25 @@ panel alongside status. Status must use text labels and must not be
 communicated by color alone. Assignee display-name resolution is deferred to
 the 3.4.x sharing UX work, so the runtime may show user ids and mark the
 current user with text.
+
+## Multiplayer Board
+
+**Maturity: Current**
+
+The board is a flag-gated dashboard mode controlled by
+`NEXT_PUBLIC_BOARD_ENABLED`. When enabled, the dashboard still defaults to List
+mode and exposes a keyboard-operable List/Board segmented control.
+
+The board presents three status columns: TODO, IN_PROGRESS, and DONE, labelled
+as text. Item cards include the item name, parent-list label, and a text status
+label; status must not be communicated by color alone. Cards must be keyboard
+reachable and expose visible focus on their drag handles.
+
+Dragging a card across columns changes the item's `status`. Dragging within a
+column reorders that status bucket through `ListItem.boardOrderKey`. These
+writes must use the Replicache dashboard mutator path and must not toggle the
+completed checkbox. Sharing polish, live presence overlays, and progress
+rollups remain deferred to their 3.4.x phases.
 
 ## Responsive, Accessibility, and Motion Rules
 
@@ -355,6 +373,7 @@ Design and runtime implementation must remain consistent in both directions:
 | 3.2.7 | Workspace section parity, trailing ellipsis rename/delete, border-only sidebar selection styling, redundant-label removal, and Add-label cleanup | Manual product proof (rename/delete a workspace; default, workspace, and custom-view selection uses border plus check without fill; uniform trigger spacing and Add labels) plus shell parity |
 | 3.3.0 | Item detail panel (centered dialog) hosting item name, completion status, and the existing collaborative notes; per-item open trigger replacing the inline notes expander; gated by NEXT_PUBLIC_ITEM_PANEL_ENABLED (default off) with notes still gated by the Yjs notes flag | Manual product proof (open the panel from a list item, edit notes, reopen and confirm persistence) plus unit tests and design parity |
 | 3.3.1 | Item status and assignee properties in the item detail panel; status remains independent of completed and assignee display names remain deferred | Manual product proof (open panel, set status, assign/unassign a member, reopen and confirm persistence) plus unit tests and design parity |
+| 3.4.1 | Multiplayer Board: flag-gated List/Board mode, three text-labelled status columns, card drag across columns for status, and within-column board ordering via `boardOrderKey` | Manual product proof (two-user board drag/status/order) plus unit tests and design parity |
 
 Later phases must extend this table or document their specialized contracts
 without pulling their product behavior into an earlier phase.

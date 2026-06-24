@@ -89,6 +89,7 @@ describe("Replicache dashboard mutators", () => {
       assigneeId: null,
       completed: false,
       order: orderKey,
+      boardOrderKey: orderKey,
       createdAt: now,
       updatedAt: now,
     });
@@ -106,6 +107,7 @@ describe("Replicache dashboard mutators", () => {
         completed: false,
         status: "TODO",
         assigneeId: "user-1",
+        boardOrderKey: orderKey,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -124,6 +126,7 @@ describe("Replicache dashboard mutators", () => {
       completed: false,
       status: "IN_PROGRESS",
       assigneeId: null,
+      boardOrderKey: orderKey,
       notes: null,
       updatedAt: "2026-06-23T12:01:00.000Z",
     });
@@ -142,6 +145,7 @@ describe("Replicache dashboard mutators", () => {
         completed: false,
         status: "TODO",
         assigneeId: null,
+        boardOrderKey: firstKey,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -154,6 +158,7 @@ describe("Replicache dashboard mutators", () => {
         completed: false,
         status: "TODO",
         assigneeId: null,
+        boardOrderKey: secondKey,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -225,6 +230,7 @@ describe("Replicache dashboard mutators", () => {
         completed: false,
         status: "TODO",
         assigneeId: null,
+        boardOrderKey: firstKey,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -237,6 +243,7 @@ describe("Replicache dashboard mutators", () => {
         completed: false,
         status: "TODO",
         assigneeId: null,
+        boardOrderKey: secondKey,
         notes: null,
         createdAt: now,
         updatedAt: now,
@@ -380,6 +387,7 @@ describe("Replicache server translation", () => {
   });
 
   it("translates item property updates only when provided", () => {
+    const [boardOrderKey] = initialKeys(1);
     const propertyDecisions = translateReplicacheMutation({
       userId: "user-1",
       clientID: "client-1",
@@ -389,6 +397,7 @@ describe("Replicache server translation", () => {
         id: "item-1",
         status: "DONE",
         assigneeId: null,
+        boardOrderKey,
         now: "2026-06-23T12:00:00.000Z",
       },
       timestamp: Date.parse("2026-06-23T12:00:00.000Z"),
@@ -420,7 +429,7 @@ describe("Replicache server translation", () => {
       [
         "listItem",
         "update",
-        { status: "DONE", assigneeId: null },
+        { status: "DONE", assigneeId: null, boardOrderKey },
       ],
     ]);
     expect(

@@ -183,6 +183,7 @@ export function mapLocalListToDashboardList(
         completed: item.completed,
         status: item.status,
         assigneeId: item.assigneeId,
+        boardOrderKey: null,
         order: item.order,
         notes: item.notes,
         listId,

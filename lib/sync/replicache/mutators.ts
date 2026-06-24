@@ -53,6 +53,7 @@ export type ReplicacheMutationArgs = {
     notes?: string | null;
     status?: ItemStatus;
     assigneeId?: string | null;
+    boardOrderKey?: string;
     now: string;
   };
   deleteItem: { id: string };
@@ -232,6 +233,7 @@ export const replicacheMutators = {
       completed: false,
       status: "TODO",
       assigneeId: null,
+      boardOrderKey: args.order,
       notes: null,
       createdAt: args.now,
       updatedAt: args.now,
@@ -253,7 +255,12 @@ export const replicacheMutators = {
         ...(args.completed !== undefined ? { completed: args.completed } : {}),
         ...(args.notes !== undefined ? { notes: args.notes } : {}),
         ...(args.status !== undefined ? { status: args.status } : {}),
-        ...(args.assigneeId !== undefined ? { assigneeId: args.assigneeId } : {}),
+        ...(args.assigneeId !== undefined
+          ? { assigneeId: args.assigneeId }
+          : {}),
+        ...(args.boardOrderKey !== undefined
+          ? { boardOrderKey: args.boardOrderKey }
+          : {}),
         updatedAt: args.now,
       });
     }
@@ -625,6 +632,9 @@ function describeMutation<Name extends ReplicacheMutationName>(
           ...(value.status !== undefined ? { status: value.status } : {}),
           ...(value.assigneeId !== undefined
             ? { assigneeId: value.assigneeId }
+            : {}),
+          ...(value.boardOrderKey !== undefined
+            ? { boardOrderKey: value.boardOrderKey }
             : {}),
         },
       }];

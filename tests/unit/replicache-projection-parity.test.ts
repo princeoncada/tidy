@@ -22,8 +22,8 @@ function graph(matchMode: "ALL" | "ANY"): ReplicacheDashboardGraph {
       { id: "untagged", userId: "user-1", name: "U", workspaceId: null, createdAt: now, updatedAt: now },
     ],
     listItems: [
-      { id: "item-b", listId: "list-a", name: "B", order: itemKeys[1], completed: false, status: "IN_PROGRESS", assigneeId: "user-2", notes: null, createdAt: now, updatedAt: now },
-      { id: "item-a", listId: "list-a", name: "A", order: itemKeys[0], completed: false, status: "TODO", assigneeId: null, notes: null, createdAt: now, updatedAt: now },
+      { id: "item-b", listId: "list-a", name: "B", order: itemKeys[1], boardOrderKey: itemKeys[1], completed: false, status: "IN_PROGRESS", assigneeId: "user-2", notes: null, createdAt: now, updatedAt: now },
+      { id: "item-a", listId: "list-a", name: "A", order: itemKeys[0], boardOrderKey: itemKeys[0], completed: false, status: "TODO", assigneeId: null, notes: null, createdAt: now, updatedAt: now },
     ],
     tags: [
       { id: "tag-a", userId: "user-1", name: "A", color: "gray", createdAt: now, updatedAt: now },
@@ -91,6 +91,7 @@ describe("Replicache dashboard projection parity", () => {
         completed: false,
         status: "DONE",
         assigneeId: "user-1",
+        boardOrderKey: keyBetween(null, firstItemKey),
         notes: null,
         createdAt: now,
         updatedAt: now,

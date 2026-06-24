@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.4.1 - Multiplayer Board (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.4.1 - Multiplayer Board
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** The flagship multiplayer board view (grouped items, drag across columns) on the Replicache spine.
 - **Product impact:** major user-visible board.
@@ -156,6 +157,7 @@ Execution discipline (anti-loop rails):
 
 Assigned a version only when scoped.
 - Investigate why open-phase.ps1/promote.ps1's committed codebase-graph.json (fallback generator) reads as stale against validate.ps1's freshness regeneration, so the Section 2 graph refresh is not needed on every phase (scripts/generate-codebase-graph.ps1, scripts/generate_codebase_graph.py, scripts/validate.ps1)
+- One-time deterministic `ListItem.boardOrderKey` backfill to remove the multiplayer board legacy-null rollout window.
 - Rate limiting and abuse controls
 - Persistent sync idempotency ledger for duplicate-request auditability beyond semantic idempotency (distinct from the 3.5.0 mutation ledger, which serves history/time-travel)
 - Observability
