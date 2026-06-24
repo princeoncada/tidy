@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const dbMock = vi.hoisted(() => ({
   workspace: {
@@ -37,6 +37,7 @@ const permissionMocks = vi.hoisted(() => ({
   getEffectiveWorkspaceRole: vi.fn(),
 }));
 
+vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ db: dbMock }));
 vi.mock("@/lib/sync/permissions", () => ({
   canManage: (role: string | null) => role === "OWNER",
@@ -71,8 +72,14 @@ function expectCode(error: unknown, code: string) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", undefined);
+  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", undefined);
   permissionMocks.getEffectiveListRole.mockResolvedValue("OWNER");
   permissionMocks.getEffectiveWorkspaceRole.mockResolvedValue("OWNER");
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe("share router", () => {
@@ -177,5 +184,22 @@ describe("share router", () => {
     expect(dbMock.listShare.deleteMany).toHaveBeenCalledWith({
       where: { listId: LIST, userId: OTHER },
     });
+  });
+
+  it("returns list members with fallback labels", async () => {
+    dbMock.list.findUnique.mockResolvedValue({
+      userId: USER,
+      listShares: [{ userId: OTHER, role: "EDITOR" }],
+    });
+
+    await expect(
+      caller().listMembers({
+        resourceType: "LIST",
+        resourceId: LIST,
+      }),
+    ).resolves.toEqual([
+      { userId: USER, role: "OWNER", label: "User 11111111" },
+      { userId: OTHER, role: "EDITOR", label: "User 22222222" },
+    ]);
   });
 });

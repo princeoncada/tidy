@@ -1,9 +1,9 @@
 {
-    "version":  "3.4.1",
-    "state":  "stable",
-    "phase":  "3.4.1",
-    "phaseTitle":  "Multiplayer Board",
-    "nextPhase":  "3.4.2 - Collaboration \u0026 Sharing UX",
+    "version":  "3.4.2-alpha",
+    "state":  "alpha",
+    "phase":  "3.4.2",
+    "phaseTitle":  "Collaboration \u0026 Sharing UX",
+    "nextPhase":  "3.4.3 - Live Presence",
     "seriesComplete":  true,
     "lastUpdated":  "2026-06-24"
 }

@@ -72,8 +72,10 @@ function EnabledItemDetailPanel({
     }),
     enabled: open && canEdit,
   });
-  const memberIds = membersQuery.data?.members ??
-    (item.assigneeId ? [item.assigneeId] : []);
+  const members = membersQuery.data?.members ??
+    (item.assigneeId
+      ? [{ userId: item.assigneeId, label: item.assigneeId }]
+      : []);
   const selfUserId = membersQuery.data?.currentUserId ?? currentUserId;
 
   function handleStatusChange(status: ItemStatus) {
@@ -147,10 +149,10 @@ function EnabledItemDetailPanel({
               className="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Unassigned</option>
-              {memberIds.map((memberId) => (
-                <option key={memberId} value={memberId}>
-                  {memberId}
-                  {memberId === selfUserId ? " (you)" : ""}
+              {members.map((member) => (
+                <option key={member.userId} value={member.userId}>
+                  {member.label}
+                  {member.userId === selfUserId ? " (you)" : ""}
                 </option>
               ))}
             </select>

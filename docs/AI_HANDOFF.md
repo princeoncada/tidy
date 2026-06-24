@@ -1,11 +1,11 @@
-<!-- Current Version: 3.4.1 -->
+<!-- Current Version: 3.4.2-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.4.1 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.4.1 - Multiplayer Board
-**Next**: 3.4.2 - Collaboration & Sharing UX
+**Current Version**: 3.4.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.4.2 - Collaboration & Sharing UX
+**Next**: 3.4.3 - Live Presence
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -52,7 +52,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - `lib/collab/*`, `components/item/ItemNotesField.tsx`, `app/api/collab/notes/[itemId]/route.ts` - gated per-item Yjs note documents (the notes field is hosted by the item detail panel).
 - `components/item/ItemDetailPanel.tsx`, `lib/item-panel/item-panel-gate.ts` - centered item detail panel hosting item metadata and the collaborative notes field, gated by `NEXT_PUBLIC_ITEM_PANEL_ENABLED` (default off); opened per item from `components/list/ListItemComponent.tsx`.
 - `trpc/routers/*` - retained protected API for auth-adjacent and non-dashboard management flows such as sharing.
-- `components/sharing/*`, `lib/sync/permissions.ts`, `app/share/[token]/page.tsx` - sharing role authority, management API, owner controls, and invite redemption.
+- `components/sharing/*`, `lib/sync/permissions.ts`, `lib/sharing/user-directory.ts`, `app/share/[token]/page.tsx` - sharing role authority, management API, server-only identity-label directory, owner controls, and invite redemption.
 - `app/manifest.ts`, `public/sw.js`, `components/AppShellServiceWorker.tsx`, `hooks/use-app-shell-service-worker.ts`, `lib/sw/*` - app-shell service worker.
 - `app/globals.css`, `lib/theme/tokens.ts`, and `components/theme/*` - additive
   semantic color tokens and root-mounted theme controls.
@@ -158,6 +158,10 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Server-side ownership/effective-role checks are mandatory even when UI only exposes allowed controls.
 - `lib/sync/permissions.ts` is the shared server authority for list/item access.
 - Sharing management remains protected tRPC traffic; dashboard list/item mutations remain Replicache traffic.
+- Member and assignee identity labels are resolved server-side only, inside
+  the already-authorized `share.listMembers` and
+  `listItem.getAssignableMembers` queries; the client never receives a bulk
+  user directory and no new permission surface is added.
 - Collaborative note GET allows any effective list role. Note persistence and Broadcast send require EDITOR or OWNER.
 
 ## Forward Arc Invariants (3.0+)
@@ -210,9 +214,12 @@ Keep these because Replicache still uses them:
 ## Known Risks
 
 - The item detail panel and its notes field are flag-gated (`NEXT_PUBLIC_ITEM_PANEL_ENABLED` default off; notes also gated by the Yjs notes flag). The inline notes expander was removed in 3.3.0; the Yjs note path and `ItemNoteDoc` projection are unchanged.
-- Item assignees are restricted to current list-access members and have no
-  display-name resolution yet; that polish is deferred to the 3.4.x sharing UX
-  work. Board grouping on item status is implemented behind
+- Item assignees are restricted to current list-access members. As of 3.4.2,
+  assignee and shared-member identities are labelled by a server-only
+  identity-directory lookup (`lib/sharing/user-directory.ts`) over the
+  Supabase service-role GoTrue admin REST endpoint, with a raw user-id
+  fallback when the service role is unset; no display-name data is persisted.
+  Board grouping on item status is implemented behind
   `NEXT_PUBLIC_BOARD_ENABLED`, with legacy-null `boardOrderKey` fallback until
   the deferred deterministic backfill runs.
 - Create-path idempotency (3.2.9): every create in `lib/sync/server-apply.ts` (list, listItem, tag, view) wraps `tx.<entity>.create` in a Postgres SAVEPOINT via `createWithinSavepoint`; a unique-constraint (P2002) abort rolls back only the nested savepoint and maps to `already-applied`, so a post-reload replay racing the original push no longer 500s the push route. Tag/view conflicts re-query by id to keep the existing "belongs to another user" / name-conflict rejects. Do not revert creates to bare `findUnique -> create`, and keep the view `isDefault` sweep AFTER a confirmed insert (excluding the new id) so an id-race cannot blank the default flag.

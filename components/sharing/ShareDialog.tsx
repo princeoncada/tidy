@@ -193,8 +193,11 @@ export function ShareDialog({
                 key={member.userId}
                 className="flex items-center gap-2 rounded-lg border p-2"
               >
-                <span className="min-w-0 flex-1 truncate text-xs">
-                  {member.userId}
+                <span
+                  className="min-w-0 flex-1 truncate text-xs"
+                  title={member.userId}
+                >
+                  {member.label ?? member.userId}
                 </span>
                 {member.role === "OWNER" ? (
                   <span className="text-xs font-medium">Owner</span>

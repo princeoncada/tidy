@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const dbMock = vi.hoisted(() => ({}));
 
@@ -8,6 +8,7 @@ const permissionMocks = vi.hoisted(() => ({
   getUsersWithListAccess: vi.fn(),
 }));
 
+vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ db: dbMock }));
 vi.mock("@/lib/sync/permissions", () => ({
   canRead: (role: string | null) => role !== null,
@@ -39,10 +40,16 @@ function expectCode(error: unknown, code: string) {
 describe("list item router", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", undefined);
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", undefined);
     permissionMocks.getEffectiveListRole.mockResolvedValue("VIEWER");
     permissionMocks.getUsersWithListAccess.mockResolvedValue(
       new Set(["33333333-3333-4333-8333-333333333333", USER]),
     );
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("returns assignable members for a reader", async () => {
@@ -51,8 +58,14 @@ describe("list item router", () => {
     ).resolves.toEqual({
       currentUserId: USER,
       members: [
-        USER,
-        "33333333-3333-4333-8333-333333333333",
+        {
+          userId: USER,
+          label: "User 11111111",
+        },
+        {
+          userId: "33333333-3333-4333-8333-333333333333",
+          label: "User 33333333",
+        },
       ],
     });
 

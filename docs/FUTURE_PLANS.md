@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.4.2 - Collaboration & Sharing UX (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.4.2 - Collaboration & Sharing UX
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Polished sharing/collaboration UX over the existing permissions model (invite/redeem/roles surfaced in the new shell).
 - **Product impact:** user-visible sharing flows.
