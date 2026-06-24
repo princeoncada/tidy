@@ -12,7 +12,10 @@ const trpcMocks = vi.hoisted(() => ({
   useQuery: vi.fn(() => ({
     data: {
       currentUserId: "user-1",
-      members: ["user-1", "user-2"],
+      members: [
+        { userId: "user-1", label: "Avery Admin" },
+        { userId: "user-2", label: "editor@example.com" },
+      ],
     },
   })),
 }));
@@ -105,7 +108,9 @@ describe("ItemDetailPanel", () => {
     expect(screen.getByText("Buy milk")).toBeInTheDocument();
     expect(screen.getByLabelText("Status")).toHaveValue("TODO");
     expect(screen.getByLabelText("Assignee")).toHaveValue("");
-    expect(screen.getByRole("option", { name: "user-1 (you)" }))
+    expect(screen.getByRole("option", { name: "Avery Admin (you)" }))
+      .toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "editor@example.com" }))
       .toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Item notes" })).toHaveValue(
       "stored note",
