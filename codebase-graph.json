@@ -546,13 +546,31 @@
         "@dnd-kit/react",
         "react",
         "@/components/board/BoardColumn",
+        "@/components/board/BoardPresence",
         "@/hooks/useDashboardMutations",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/hooks/useReplicacheDashboard",
         "@/lib/board/board-order",
         "@/components/list/types",
         "@/lib/dashboard/workspace-filter",
+        "@/lib/realtime/presence-gate",
+        "@/lib/realtime/use-presence-rooms",
         "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "components/board/BoardPresence.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "BoardPresenceBar",
+        "BoardPresenceCursors"
+      ],
+      "imports": [
+        "lucide-react",
+        "@/lib/realtime/use-presence-rooms",
+        "@/lib/realtime/presence-client",
+        "@/lib/utils"
       ]
     },
     {
@@ -588,12 +606,16 @@
       ],
       "imports": [
         "@tanstack/react-query",
+        "react",
+        "@/components/item/ItemPresence",
         "@/components/item/ItemNotesField",
         "@/components/list/types",
         "@/components/ui/dialog",
         "@/hooks/useDashboardMutations",
         "@/lib/collab/yjs-notes-gate",
         "@/lib/item-panel/item-panel-gate",
+        "@/lib/realtime/presence-gate",
+        "@/lib/realtime/use-presence-rooms",
         "@/lib/sync/replicache/keys",
         "@/trpc/client"
       ]
@@ -611,6 +633,18 @@
         "@/lib/collab/note-provider",
         "@/lib/collab/yjs-note-doc",
         "@/lib/supabase/client"
+      ]
+    },
+    {
+      "path": "components/item/ItemPresence.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "ItemPresence"
+      ],
+      "imports": [
+        "lucide-react",
+        "@/lib/realtime/presence-client"
       ]
     },
     {
@@ -2140,6 +2174,15 @@
       ]
     },
     {
+      "path": "lib/realtime/presence-gate.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "isPresenceEnabled"
+      ],
+      "imports": []
+    },
+    {
       "path": "lib/realtime/presence-topic.ts",
       "kind": "library",
       "extension": ".ts",
@@ -2147,6 +2190,21 @@
         "presenceTopicForRoom"
       ],
       "imports": []
+    },
+    {
+      "path": "lib/realtime/use-presence-rooms.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "PresenceCursor",
+        "mergePresenceRosters",
+        "usePresenceRooms"
+      ],
+      "imports": [
+        "react",
+        "@/lib/realtime/presence-client",
+        "@/lib/supabase/client"
+      ]
     },
     {
       "path": "lib/sharing/user-directory.ts",
@@ -3043,6 +3101,17 @@
       ]
     },
     {
+      "path": "tests/unit/board-presence.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/board/BoardPresence"
+      ]
+    },
+    {
       "path": "tests/unit/collab-note-route.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3132,6 +3201,17 @@
       "imports": [
         "vitest",
         "@/lib/item-panel/item-panel-gate"
+      ]
+    },
+    {
+      "path": "tests/unit/item-presence.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/item/ItemPresence"
       ]
     },
     {
@@ -3309,6 +3389,27 @@
       "imports": [
         "vitest",
         "@/lib/realtime/presence-dev-harness"
+      ]
+    },
+    {
+      "path": "tests/unit/presence-gate.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/realtime/presence-gate"
+      ]
+    },
+    {
+      "path": "tests/unit/presence-rooms.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/realtime/use-presence-rooms",
+        "@/lib/realtime/presence-client"
       ]
     },
     {
@@ -4276,6 +4377,12 @@
     },
     {
       "from": "components/board/BoardContainer.tsx",
+      "to": "components/board/BoardPresence.tsx",
+      "type": "imports",
+      "import": "@/components/board/BoardPresence"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
       "to": "components/list/types.ts",
       "type": "imports",
       "import": "@/components/list/types"
@@ -4312,9 +4419,39 @@
     },
     {
       "from": "components/board/BoardContainer.tsx",
+      "to": "lib/realtime/presence-gate.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-gate"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "lib/realtime/use-presence-rooms.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/use-presence-rooms"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
       "to": "lib/sync/replicache/keys.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "components/board/BoardPresence.tsx",
+      "to": "lib/realtime/presence-client.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-client"
+    },
+    {
+      "from": "components/board/BoardPresence.tsx",
+      "to": "lib/realtime/use-presence-rooms.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/use-presence-rooms"
+    },
+    {
+      "from": "components/board/BoardPresence.tsx",
+      "to": "lib/utils.ts",
+      "type": "imports",
+      "import": "@/lib/utils"
     },
     {
       "from": "components/Dashboard.tsx",
@@ -4396,6 +4533,12 @@
     },
     {
       "from": "components/item/ItemDetailPanel.tsx",
+      "to": "components/item/ItemPresence.tsx",
+      "type": "imports",
+      "import": "@/components/item/ItemPresence"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
       "to": "components/list/types.ts",
       "type": "imports",
       "import": "@/components/list/types"
@@ -4423,6 +4566,18 @@
       "to": "lib/item-panel/item-panel-gate.ts",
       "type": "imports",
       "import": "@/lib/item-panel/item-panel-gate"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "lib/realtime/presence-gate.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-gate"
+    },
+    {
+      "from": "components/item/ItemDetailPanel.tsx",
+      "to": "lib/realtime/use-presence-rooms.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/use-presence-rooms"
     },
     {
       "from": "components/item/ItemDetailPanel.tsx",
@@ -4459,6 +4614,12 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "components/item/ItemPresence.tsx",
+      "to": "lib/realtime/presence-client.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-client"
     },
     {
       "from": "components/layout/AppShell.tsx",
@@ -5811,6 +5972,18 @@
       "import": "@/lib/supabase/client"
     },
     {
+      "from": "lib/realtime/use-presence-rooms.ts",
+      "to": "lib/realtime/presence-client.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-client"
+    },
+    {
+      "from": "lib/realtime/use-presence-rooms.ts",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
       "from": "lib/supabase/auth-confirm.ts",
       "to": "lib/supabase/server.ts",
       "type": "imports",
@@ -6333,6 +6506,12 @@
       "import": "@/components/layout/AppShell"
     },
     {
+      "from": "tests/unit/board-presence.test.tsx",
+      "to": "components/board/BoardPresence.tsx",
+      "type": "imports",
+      "import": "@/components/board/BoardPresence"
+    },
+    {
       "from": "tests/unit/collab-note-route.test.ts",
       "to": "app/api/collab/notes/[itemId]/route.ts",
       "type": "imports",
@@ -6403,6 +6582,12 @@
       "to": "lib/item-panel/item-panel-gate.ts",
       "type": "imports",
       "import": "@/lib/item-panel/item-panel-gate"
+    },
+    {
+      "from": "tests/unit/item-presence.test.tsx",
+      "to": "components/item/ItemPresence.tsx",
+      "type": "imports",
+      "import": "@/components/item/ItemPresence"
     },
     {
       "from": "tests/unit/list-item-router.test.ts",
@@ -6559,6 +6744,24 @@
       "to": "lib/realtime/presence-dev-harness.ts",
       "type": "imports",
       "import": "@/lib/realtime/presence-dev-harness"
+    },
+    {
+      "from": "tests/unit/presence-gate.test.ts",
+      "to": "lib/realtime/presence-gate.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-gate"
+    },
+    {
+      "from": "tests/unit/presence-rooms.test.ts",
+      "to": "lib/realtime/presence-client.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-client"
+    },
+    {
+      "from": "tests/unit/presence-rooms.test.ts",
+      "to": "lib/realtime/use-presence-rooms.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/use-presence-rooms"
     },
     {
       "from": "tests/unit/pull-cvr.test.ts",
