@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo } from "react";
 
+import { ItemPresence } from "@/components/item/ItemPresence";
 import { ItemNotesField } from "@/components/item/ItemNotesField";
 import type { ListItem } from "@/components/list/types";
 import {
@@ -14,6 +16,8 @@ import {
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import { isYjsNotesEnabled } from "@/lib/collab/yjs-notes-gate";
 import { isItemPanelEnabled } from "@/lib/item-panel/item-panel-gate";
+import { isPresenceEnabled } from "@/lib/realtime/presence-gate";
+import { usePresenceRooms } from "@/lib/realtime/use-presence-rooms";
 import type { ItemStatus } from "@/lib/sync/replicache/keys";
 import { useTRPC } from "@/trpc/client";
 
@@ -72,11 +76,48 @@ function EnabledItemDetailPanel({
     }),
     enabled: open && canEdit,
   });
-  const members = membersQuery.data?.members ??
-    (item.assigneeId
-      ? [{ userId: item.assigneeId, label: item.assigneeId }]
-      : []);
+  const fallbackMembers = useMemo(
+    () =>
+      item.assigneeId
+        ? [{ userId: item.assigneeId, label: item.assigneeId }]
+        : [],
+    [item.assigneeId],
+  );
+  const members = useMemo(
+    () => membersQuery.data?.members ?? fallbackMembers,
+    [fallbackMembers, membersQuery.data?.members],
+  );
   const selfUserId = membersQuery.data?.currentUserId ?? currentUserId;
+  const presenceEnabled = isPresenceEnabled();
+  const presence = usePresenceRooms({
+    enabled: presenceEnabled && open,
+    roomIds: [listItem.listId],
+    userId: selfUserId,
+  });
+  const setPresenceTyping = presence.setTyping;
+  const memberLabels = useMemo(
+    () => new Map(members.map((member) => [member.userId, member.label])),
+    [members],
+  );
+  const labelForUser = useCallback(
+    (userId: string) => memberLabels.get(userId),
+    [memberLabels],
+  );
+  const handleTypingChange = useCallback(
+    (typing: boolean) => {
+      if (!presenceEnabled || !open) return;
+      setPresenceTyping(typing);
+    },
+    [open, presenceEnabled, setPresenceTyping],
+  );
+
+  useEffect(() => {
+    if (!open) setPresenceTyping(false);
+
+    return () => {
+      setPresenceTyping(false);
+    };
+  }, [open, setPresenceTyping]);
 
   function handleStatusChange(status: ItemStatus) {
     if (!canEdit || !dashboardMutations.mutate) return;
@@ -108,6 +149,14 @@ function EnabledItemDetailPanel({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
+          {presenceEnabled && (
+            <ItemPresence
+              currentUserId={selfUserId}
+              roster={presence.roster}
+              labelForUser={labelForUser}
+            />
+          )}
+
           <div className="grid gap-2">
             <label
               htmlFor={`item-status-${listItem.id}`}
@@ -165,6 +214,7 @@ function EnabledItemDetailPanel({
                 itemId={listItem.id}
                 canEdit={canEdit}
                 initialNotes={listItem.notes ?? ""}
+                onTypingChange={handleTypingChange}
               />
             ) : (
               <p className="text-sm text-muted-foreground">
