@@ -181,13 +181,13 @@ The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration A
 - 3.1.1 fixed the private-channel REST mismatch: `pokeUser()` now sends `private: true` on the broadcast message (matching the private client subscription) and returns a structured delivery result plus a `console.warn` instead of masking non-success HTTP responses. A post-fix representative trial verified poke delivery is restored (end-to-end 22,078 ms -> ~4,094 ms). The gated instrumentation is RETAINED (not removed at 3.1.1 close) as the 3.1.2 harness data source. See the spike report for the protocol and deferred removal steps.
 - 3.1.2 adds `tests/e2e/sync-latency.spec.ts`, a Supabase-admin/Prisma shared-workspace seed helper, pure metric utilities, and the opt-in `npm run test:e2e:latency` script. It drives the retained instrumentation in owner/editor contexts for Baseline, Moderate Load, and Burst, writes per-scenario raw local artifacts under `.tidy-ai/sync-latency/`, and fills each selected Results table with `SYNC_LATENCY_WRITE_REPORT=1`.
 
-## Active 3.4.0 Presence Transport Spike
+## Active 3.4.3 Presence Transport Hardening
 
-- `lib/realtime/presence-spike.ts` and `lib/realtime/presence-topic.ts` contain temporary, development-only instrumentation gated by browser local storage key `tidy:presence-spike=1`; it is disabled by default and always disabled in production.
+- `lib/realtime/presence-client.ts` (`PresenceRoom`) is the minimal production presence transport; `lib/realtime/presence-topic.ts` builds the `tidy:presence:<listId>` topic. `lib/realtime/presence-dev-harness.ts` is a development-only window proof harness gated by browser local storage key `tidy:presence-spike=1`, disabled by default and always disabled in production.
 - The gated path opens a private `tidy:presence:<roomId>` Supabase Realtime channel, uses Presence for the who-is-here roster, uses Broadcast for cursor/typing signals, and keeps all spike data in bounded browser memory.
 - Separation invariant: presence does not touch Replicache push/pull, `server-apply`, `/api/replicache/*`, CVR state, tRPC dashboard mutations, persisted data, or replicated entity fields.
 - `docs/spikes/3.4.0-presence-transport-spike.md` owns the two-profile feasibility proof protocol, limitations, open questions, and removal steps. `docs/DECISIONS.md` records the durable transport decision.
-- Removal of the spike instrumentation is deferred to 3.4.3 (Presence Transport Hardening), which replaces it with a minimal production presence client.
+- Presence access is permission-scoped: `prisma/sql/3_4_3_realtime_presence_rls.sql` (controller-run) authorizes `tidy:presence:<listId>` via a SECURITY DEFINER list-membership check (roomId = listId), replacing the 3.4.0 permissive dev policy. The presence UI is 3.4.4.
 - PROOF DONE (2026-06-24): the two-user feasibility proof ran + is recorded in the spike doc Results. Transport PROVEN (roster join + cursor/typing broadcast across two profiles). Two findings are now 3.4.3 scope: (1) the private presence channel needs PERMISSION-SCOPED RLS on `realtime.messages` (a SECURITY DEFINER room-membership check; a permissive dev policy is currently LIVE in Supabase and must be replaced + dropped), and (2) `leave()` must `untrack()` before `removeChannel()` or peers keep a sticky roster entry.
 
 ## Removed Legacy Paths
