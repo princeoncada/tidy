@@ -1,9 +1,9 @@
-<!-- Current Version: 3.4.1-alpha -->
+<!-- Current Version: 3.4.1 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.4.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.4.1 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.4.1 - Multiplayer Board
 **Next**: 3.4.2 - Collaboration & Sharing UX
 
