@@ -43,6 +43,7 @@ export type ReplicacheListItemValue = {
   status: ItemStatus;
   assigneeId: string | null;
   order: string;
+  boardOrderKey: string | null;
   notes: string | null;
   listId: string;
   createdAt: string;
