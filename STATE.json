@@ -1,6 +1,6 @@
 {
-    "version":  "3.4.3-alpha",
-    "state":  "alpha",
+    "version":  "3.4.3",
+    "state":  "stable",
     "phase":  "3.4.3",
     "phaseTitle":  "Presence Transport Hardening",
     "nextPhase":  "3.4.4 - Live Presence",
