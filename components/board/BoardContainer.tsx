@@ -1,9 +1,14 @@
 "use client";
 
 import { DragDropProvider } from "@dnd-kit/react";
+import type { PointerEvent } from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { BoardColumn } from "@/components/board/BoardColumn";
+import {
+  BoardPresenceBar,
+  BoardPresenceCursors,
+} from "@/components/board/BoardPresence";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import type { LocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
@@ -15,6 +20,8 @@ import {
 } from "@/lib/board/board-order";
 import type { List } from "@/components/list/types";
 import { filterListsByWorkspace } from "@/lib/dashboard/workspace-filter";
+import { isPresenceEnabled } from "@/lib/realtime/presence-gate";
+import { usePresenceRooms } from "@/lib/realtime/use-presence-rooms";
 import type { ItemStatus } from "@/lib/sync/replicache/keys";
 
 type BoardContainerProps = {
@@ -120,6 +127,7 @@ export default function BoardContainer({
   const [dragPreviewGroups, setDragPreviewGroups] =
     useState<BoardGroups | null>(null);
   const dragPreviewGroupsRef = useRef<BoardGroups | null>(null);
+  const boardSurfaceRef = useRef<HTMLDivElement | null>(null);
 
   const boardData = useMemo(() => {
     const lists = filterListsByWorkspace(
@@ -156,6 +164,16 @@ export default function BoardContainer({
   ]);
 
   const visibleGroups = dragPreviewGroups ?? boardData.groups;
+  const presenceRoomIds = useMemo(
+    () => boardData.lists.map((list) => list.id),
+    [boardData.lists],
+  );
+  const presenceEnabled = isPresenceEnabled();
+  const presence = usePresenceRooms({
+    enabled: presenceEnabled,
+    roomIds: presenceRoomIds,
+    userId: boot.userId,
+  });
   const setLocalDragPreview = useCallback((nextGroups: BoardGroups | null) => {
     dragPreviewGroupsRef.current = nextGroups;
     setDragPreviewGroups(nextGroups);
@@ -163,6 +181,21 @@ export default function BoardContainer({
   const canEditItem = useCallback(
     (item: BoardCardItem) => boardData.editableLists.has(item.listId),
     [boardData.editableLists],
+  );
+  const updatePresenceCursor = presence.updateCursor;
+  const handleBoardPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (!presenceEnabled || event.pointerType === "touch") return;
+
+      const rect = boardSurfaceRef.current?.getBoundingClientRect();
+      if (!rect || rect.width === 0 || rect.height === 0) return;
+
+      updatePresenceCursor(
+        (event.clientX - rect.left) / rect.width,
+        (event.clientY - rect.top) / rect.height,
+      );
+    },
+    [presenceEnabled, updatePresenceCursor],
   );
 
   if (!dashboard.ready) {
@@ -193,8 +226,16 @@ export default function BoardContainer({
 
   if (itemCount === 0) {
     return (
-      <div className="flex min-h-80 w-full items-center justify-center rounded-lg border border-dashed border-border text-sm text-text-muted">
-        No items in this view
+      <div className="grid gap-3">
+        {presenceEnabled && (
+          <BoardPresenceBar
+            currentUserId={boot.userId}
+            roster={presence.roster}
+          />
+        )}
+        <div className="flex min-h-80 w-full items-center justify-center rounded-lg border border-dashed border-border text-sm text-text-muted">
+          No items in this view
+        </div>
       </div>
     );
   }
@@ -306,17 +347,32 @@ export default function BoardContainer({
         setLocalDragPreview(null);
       }}
     >
-      <div className="grid grow grid-cols-1 gap-3 lg:grid-cols-3">
-        {BOARD_COLUMNS.map((column) => (
-          <BoardColumn
-            key={column.status}
-            column={column}
-            items={visibleGroups[column.status]}
-            listNames={boardData.listNames}
-            canEditItem={canEditItem}
-            activeDropTarget={activeDropTarget}
-          />
-        ))}
+      <div
+        ref={boardSurfaceRef}
+        className="relative grid gap-3"
+        onPointerMove={handleBoardPointerMove}
+      >
+        {presenceEnabled && (
+          <>
+            <BoardPresenceBar
+              currentUserId={boot.userId}
+              roster={presence.roster}
+            />
+            <BoardPresenceCursors cursors={presence.cursors} />
+          </>
+        )}
+        <div className="grid grow grid-cols-1 gap-3 lg:grid-cols-3">
+          {BOARD_COLUMNS.map((column) => (
+            <BoardColumn
+              key={column.status}
+              column={column}
+              items={visibleGroups[column.status]}
+              listNames={boardData.listNames}
+              canEditItem={canEditItem}
+              activeDropTarget={activeDropTarget}
+            />
+          ))}
+        </div>
       </div>
     </DragDropProvider>
   );
