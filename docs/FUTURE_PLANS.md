@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.4.1 - Multiplayer Board (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.4.1 - Multiplayer Board
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** The flagship multiplayer board view (grouped items, drag across columns) on the Replicache spine.
-- **Product impact:** major user-visible board.
-- **Runtime integration target:** board renders + writes through Replicache; flag-gated rollout.
-- **Deferral boundary:** Live presence overlays are 3.4.3; sharing UX is 3.4.2; progress rollups are 3.4.4.
-- **Validation target:** targeted + manual product proof (two-user board); preserve DnD/order invariants.
-- **Files:** components/board/* (new), lib/sync/*
 
 ### 3.4.2 - Collaboration & Sharing UX
 - **Status:** Open
