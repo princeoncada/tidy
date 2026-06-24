@@ -882,7 +882,7 @@
         "react",
         "@/lib/sync/replicache/client",
         "@/lib/realtime/poke-client",
-        "@/lib/realtime/presence-spike",
+        "@/lib/realtime/presence-dev-harness",
         "@/lib/supabase/client",
         "@/lib/sync/sync-latency-spike"
       ]
@@ -2107,24 +2107,35 @@
       "imports": []
     },
     {
-      "path": "lib/realtime/presence-spike.ts",
+      "path": "lib/realtime/presence-client.ts",
       "kind": "library",
       "extension": ".ts",
       "symbols": [
         "DEFAULT_MAX_PRESENCE_EVENTS",
-        "PRESENCE_SPIKE_STORAGE_KEY",
         "PresenceBroadcastEvent",
         "PresenceEventBuffer",
         "PresenceMember",
-        "PresenceSpikeRoom",
-        "PresenceSpikeWindowApi",
+        "PresenceRoom",
         "diffRosters",
-        "installPresenceSpikeWindowApi",
-        "isPresenceSpikeEnabled",
         "rosterFromPresenceState"
       ],
       "imports": [
         "@/lib/realtime/presence-topic",
+        "@/lib/supabase/client"
+      ]
+    },
+    {
+      "path": "lib/realtime/presence-dev-harness.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "PRESENCE_SPIKE_STORAGE_KEY",
+        "PresenceSpikeWindowApi",
+        "installPresenceSpikeWindowApi",
+        "isPresenceSpikeEnabled"
+      ],
+      "imports": [
+        "@/lib/realtime/presence-client",
         "@/lib/supabase/client"
       ]
     },
@@ -3281,13 +3292,23 @@
       ]
     },
     {
-      "path": "tests/unit/presence-spike.test.ts",
+      "path": "tests/unit/presence-client.test.ts",
       "kind": "test",
       "extension": ".ts",
       "symbols": [],
       "imports": [
         "vitest",
-        "@/lib/realtime/presence-spike"
+        "@/lib/realtime/presence-client"
+      ]
+    },
+    {
+      "path": "tests/unit/presence-dev-harness.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/realtime/presence-dev-harness"
       ]
     },
     {
@@ -4999,9 +5020,9 @@
     },
     {
       "from": "components/ReplicacheProvider.tsx",
-      "to": "lib/realtime/presence-spike.ts",
+      "to": "lib/realtime/presence-dev-harness.ts",
       "type": "imports",
-      "import": "@/lib/realtime/presence-spike"
+      "import": "@/lib/realtime/presence-dev-harness"
     },
     {
       "from": "components/ReplicacheProvider.tsx",
@@ -5766,13 +5787,25 @@
       "import": "@/lib/realtime/poke-topic"
     },
     {
-      "from": "lib/realtime/presence-spike.ts",
+      "from": "lib/realtime/presence-client.ts",
       "to": "lib/realtime/presence-topic.ts",
       "type": "imports",
       "import": "@/lib/realtime/presence-topic"
     },
     {
-      "from": "lib/realtime/presence-spike.ts",
+      "from": "lib/realtime/presence-client.ts",
+      "to": "lib/supabase/client.ts",
+      "type": "imports",
+      "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "lib/realtime/presence-dev-harness.ts",
+      "to": "lib/realtime/presence-client.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-client"
+    },
+    {
+      "from": "lib/realtime/presence-dev-harness.ts",
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
@@ -6516,10 +6549,16 @@
       "import": "@/lib/realtime/poke-client"
     },
     {
-      "from": "tests/unit/presence-spike.test.ts",
-      "to": "lib/realtime/presence-spike.ts",
+      "from": "tests/unit/presence-client.test.ts",
+      "to": "lib/realtime/presence-client.ts",
       "type": "imports",
-      "import": "@/lib/realtime/presence-spike"
+      "import": "@/lib/realtime/presence-client"
+    },
+    {
+      "from": "tests/unit/presence-dev-harness.test.ts",
+      "to": "lib/realtime/presence-dev-harness.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/presence-dev-harness"
     },
     {
       "from": "tests/unit/pull-cvr.test.ts",
