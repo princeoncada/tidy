@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.3-alpha
+- **Current version:** 3.4.3
 - **Current phase:** 3.4.3 - Presence Transport Hardening
 - **Next phase:** 3.4.4 - Live Presence
 
@@ -333,6 +333,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.4.0 | 2026-06-23 | Presence Transport Spike | decision (spike) | none - spike. | none - chosen transport feeds 3.4.3. | spike decision record (transport choice + proof). | lib/realtime/* (spike), docs/ (decision) | Spike the ephemeral-presence transport (cursors/typing/who-is-here) SEPARATE from Replicache; choose the mechanism and prove feasibility. |
 | 3.4.1 | 2026-06-24 | Multiplayer Board | product behavior | major user-visible board. | board renders + writes through Replicache; flag-gated rollout. | targeted + manual product proof (two-user board); preserve DnD/order invariants. | components/board/* (new), lib/sync/* | The flagship multiplayer board view (grouped items, drag across columns) on the Replicache spine. |
 | 3.4.2 | 2026-06-24 | Collaboration & Sharing UX | product behavior | user-visible sharing flows. | uses lib/sync/permissions.ts + share redeem. | targeted + manual product proof (share + redeem). | components/share/*, lib/sync/permissions.ts | Polished sharing/collaboration UX over the existing permissions model (invite/redeem/roles surfaced in the new shell). |
+| 3.4.3 | 2026-06-24 | Presence Transport Hardening | infrastructure | none directly - enables 3.4.4 Live Presence UI. | authenticated members can join/track/broadcast on a permission-scoped private `tidy:presence:<roomId>` channel, separate from Replicache push/pull. | targeted + manual product proof = re-run the two-user proof GREEN 4/4 (roster join AND clean leave + cursor/typing echo) against the SCOPED policy, plus a negative proof (a non-member is denied the room). Drop the permissive dev policy. | lib/realtime/*, Supabase RLS (controller-run SQL, not in repo - same as 2.0.6/2.0.7) | Make the proven presence transport production-ready: (a) replace the permissive dev RLS with a PERMISSION-SCOPED policy on `realtime.messages` - a SECURITY DEFINER function checking the requesting user's membership in the room's underlying list/board (`realtime.messages` RLS cannot read Prisma tables directly; 2.0.6 pattern) plus a decided `roomId` -> list/board mapping; (b) fix presence leave so peers drop promptly (`untrack()` before `removeChannel()`); (c) a minimal production presence client in `lib/realtime/*` for the 3.4.4 UI to consume, replacing the throwaway spike API. |
 
 ---
 
