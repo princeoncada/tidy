@@ -11,6 +11,7 @@ import {
   getEffectiveWorkspaceRole,
   rank,
 } from "@/lib/sync/permissions";
+import { resolveUserLabels } from "@/lib/sharing/user-directory";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 
@@ -78,6 +79,16 @@ async function upsertStrongestWorkspaceRole(
     update: { role: nextRole },
     create: { workspaceId, userId, role: nextRole },
   });
+}
+
+async function withMemberLabels<T extends { userId: string }>(
+  entries: T[],
+): Promise<Array<T & { label: string }>> {
+  const labels = await resolveUserLabels(entries.map((entry) => entry.userId));
+  return entries.map((entry) => ({
+    ...entry,
+    label: labels.get(entry.userId) ?? entry.userId,
+  }));
 }
 
 export const shareRouter = createTRPCRouter({
@@ -394,10 +405,10 @@ export const shareRouter = createTRPCRouter({
         },
       });
       if (!list) throw new TRPCError({ code: "NOT_FOUND" });
-      return [
+      return withMemberLabels([
         { userId: list.userId, role: "OWNER" as const },
         ...list.listShares,
-      ];
+      ]);
     }
 
     const workspace = await db.workspace.findUnique({
@@ -411,10 +422,10 @@ export const shareRouter = createTRPCRouter({
       },
     });
     if (!workspace) throw new TRPCError({ code: "NOT_FOUND" });
-    return [
+    return withMemberLabels([
       { userId: workspace.ownerId, role: "OWNER" as const },
       ...workspace.members,
-    ];
+    ]);
   }),
 
   updateMemberRole: protectedProcedure.input(
