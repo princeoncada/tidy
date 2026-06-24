@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.3
-- **Current phase:** 3.4.3 - Presence Transport Hardening
-- **Next phase:** 3.4.4 - Live Presence
+- **Current version:** 3.4.4-alpha
+- **Current phase:** 3.4.4 - Live Presence
+- **Next phase:** 3.4.5 - Board Progress & Rollups
 
 ---
 
