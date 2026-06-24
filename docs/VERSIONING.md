@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.1-alpha
+- **Current version:** 3.4.1
 - **Current phase:** 3.4.1 - Multiplayer Board
 - **Next phase:** 3.4.2 - Collaboration & Sharing UX
 
@@ -331,6 +331,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.3.0 | 2026-06-22 | Item Detail Panel & Notes | product behavior | user-visible item panel. | panel opens from list/board items; notes use the existing Yjs path. | targeted + manual product proof (open panel, edit notes); preserve Yjs invariants. | components/item/* (new panel), existing notes integration | Notion-style item detail panel hosting the existing Yjs notes + item metadata. |
 | 3.3.1 | 2026-06-23 | Item Properties (Status & Assignee) | product behavior | user-visible item properties. | properties sync through the Replicache spine. | targeted + manual product proof; schema/migration if needed. | prisma/schema.prisma (+migration), lib/sync/*, components/item/* | Add structured item properties (status, assignee) synced via Replicache. |
 | 3.4.0 | 2026-06-23 | Presence Transport Spike | decision (spike) | none - spike. | none - chosen transport feeds 3.4.3. | spike decision record (transport choice + proof). | lib/realtime/* (spike), docs/ (decision) | Spike the ephemeral-presence transport (cursors/typing/who-is-here) SEPARATE from Replicache; choose the mechanism and prove feasibility. |
+| 3.4.1 | 2026-06-24 | Multiplayer Board | product behavior | major user-visible board. | board renders + writes through Replicache; flag-gated rollout. | targeted + manual product proof (two-user board); preserve DnD/order invariants. | components/board/* (new), lib/sync/* | The flagship multiplayer board view (grouped items, drag across columns) on the Replicache spine. |
 
 ---
 
