@@ -2138,6 +2138,17 @@
       "imports": []
     },
     {
+      "path": "lib/sharing/user-directory.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "resolveUserLabels"
+      ],
+      "imports": [
+        "server-only"
+      ]
+    },
+    {
       "path": "lib/supabase/auth-confirm.ts",
       "kind": "library",
       "extension": ".ts",
@@ -3440,6 +3451,18 @@
       ]
     },
     {
+      "path": "tests/unit/share-dialog-members.test.tsx",
+      "kind": "test",
+      "extension": ".tsx",
+      "symbols": [],
+      "imports": [
+        "@testing-library/react",
+        "vitest",
+        "@/components/sharing/ShareDialog",
+        "@tanstack/react-query"
+      ]
+    },
+    {
       "path": "tests/unit/share-redeemer.test.tsx",
       "kind": "test",
       "extension": ".tsx",
@@ -3527,6 +3550,16 @@
         "node:path",
         "vitest",
         "@/lib/theme/tokens"
+      ]
+    },
+    {
+      "path": "tests/unit/user-directory.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/sharing/user-directory"
       ]
     },
     {
@@ -3652,7 +3685,8 @@
         "@trpc/server",
         "@/lib/db",
         "@/app/generated/prisma/client",
-        "@/lib/sync/permissions"
+        "@/lib/sync/permissions",
+        "@/lib/sharing/user-directory"
       ]
     },
     {
@@ -3683,6 +3717,7 @@
         "@/app/generated/prisma/client",
         "@/lib/db",
         "@/lib/sync/permissions",
+        "@/lib/sharing/user-directory",
         "@trpc/server",
         "zod",
         "../init"
@@ -6651,6 +6686,12 @@
       "import": "@/lib/sync/sync-batch-contract"
     },
     {
+      "from": "tests/unit/share-dialog-members.test.tsx",
+      "to": "components/sharing/ShareDialog.tsx",
+      "type": "imports",
+      "import": "@/components/sharing/ShareDialog"
+    },
+    {
       "from": "tests/unit/share-redeemer.test.tsx",
       "to": "components/sharing/ShareRedeemer.tsx",
       "type": "imports",
@@ -6727,6 +6768,12 @@
       "to": "lib/theme/tokens.ts",
       "type": "imports",
       "import": "@/lib/theme/tokens"
+    },
+    {
+      "from": "tests/unit/user-directory.test.ts",
+      "to": "lib/sharing/user-directory.ts",
+      "type": "imports",
+      "import": "@/lib/sharing/user-directory"
     },
     {
       "from": "tests/unit/view-helpers.test.ts",
@@ -6850,6 +6897,12 @@
     },
     {
       "from": "trpc/routers/listItemRouter.ts",
+      "to": "lib/sharing/user-directory.ts",
+      "type": "imports",
+      "import": "@/lib/sharing/user-directory"
+    },
+    {
+      "from": "trpc/routers/listItemRouter.ts",
       "to": "lib/sync/permissions.ts",
       "type": "imports",
       "import": "@/lib/sync/permissions"
@@ -6883,6 +6936,12 @@
       "to": "lib/db.ts",
       "type": "imports",
       "import": "@/lib/db"
+    },
+    {
+      "from": "trpc/routers/shareRouter.ts",
+      "to": "lib/sharing/user-directory.ts",
+      "type": "imports",
+      "import": "@/lib/sharing/user-directory"
     },
     {
       "from": "trpc/routers/shareRouter.ts",
