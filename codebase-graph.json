@@ -508,6 +508,53 @@
       ]
     },
     {
+      "path": "components/board/BoardCard.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "BoardCard"
+      ],
+      "imports": [
+        "@dnd-kit/react/sortable",
+        "lucide-react",
+        "@/lib/utils",
+        "@/lib/board/board-order"
+      ]
+    },
+    {
+      "path": "components/board/BoardColumn.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "BoardColumn"
+      ],
+      "imports": [
+        "@dnd-kit/react",
+        "@/components/board/BoardCard",
+        "@/lib/board/board-order",
+        "@/lib/utils"
+      ]
+    },
+    {
+      "path": "components/board/BoardContainer.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "BoardContainer"
+      ],
+      "imports": [
+        "@dnd-kit/react",
+        "react",
+        "@/components/board/BoardColumn",
+        "@/hooks/useDashboardMutations",
+        "@/hooks/useLocalFirstDashboardBoot",
+        "@/hooks/useReplicacheDashboard",
+        "@/lib/board/board-order",
+        "@/lib/dashboard/workspace-filter",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
       "path": "components/Dashboard.tsx",
       "kind": "component",
       "extension": ".tsx",
@@ -518,14 +565,17 @@
         "lucide-react",
         "next/navigation",
         "react",
+        "./board/BoardContainer",
         "./list/ListsContainer",
+        "./ui/button",
         "./ui/separator",
         "./UserAccountNav",
         "@tanstack/react-query",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/components/ReplicacheProvider",
         "@/components/layout/AppShell",
-        "@/components/layout/SidebarNav"
+        "@/components/layout/SidebarNav",
+        "@/lib/board/board-gate"
       ]
     },
     {
@@ -1584,6 +1634,42 @@
       "imports": [
         "@/lib/supabase/client",
         "@tanstack/react-query"
+      ]
+    },
+    {
+      "path": "lib/board/board-gate.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "isBoardEnabled"
+      ],
+      "imports": []
+    },
+    {
+      "path": "lib/board/board-order.test.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/board/board-order",
+        "@/lib/sync/fractional-index"
+      ]
+    },
+    {
+      "path": "lib/board/board-order.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "BoardCardItem",
+        "BoardColumnDefinition",
+        "boardKeyForDrop",
+        "compareBoardItems",
+        "groupItemsByStatus"
+      ],
+      "imports": [
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys"
       ]
     },
     {
@@ -4098,6 +4184,84 @@
       "import": "@/lib/supabase/client"
     },
     {
+      "from": "components/board/BoardCard.tsx",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "components/board/BoardCard.tsx",
+      "to": "lib/utils.ts",
+      "type": "imports",
+      "import": "@/lib/utils"
+    },
+    {
+      "from": "components/board/BoardColumn.tsx",
+      "to": "components/board/BoardCard.tsx",
+      "type": "imports",
+      "import": "@/components/board/BoardCard"
+    },
+    {
+      "from": "components/board/BoardColumn.tsx",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "components/board/BoardColumn.tsx",
+      "to": "lib/utils.ts",
+      "type": "imports",
+      "import": "@/lib/utils"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "components/board/BoardColumn.tsx",
+      "type": "imports",
+      "import": "@/components/board/BoardColumn"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "hooks/useDashboardMutations.ts",
+      "type": "imports",
+      "import": "@/hooks/useDashboardMutations"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "hooks/useLocalFirstDashboardBoot.ts",
+      "type": "imports",
+      "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "hooks/useReplicacheDashboard.ts",
+      "type": "imports",
+      "import": "@/hooks/useReplicacheDashboard"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "lib/dashboard/workspace-filter.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/workspace-filter"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "components/Dashboard.tsx",
+      "to": "components/board/BoardContainer.tsx",
+      "type": "imports",
+      "import": "./board/BoardContainer"
+    },
+    {
       "from": "components/Dashboard.tsx",
       "to": "components/layout/AppShell.tsx",
       "type": "imports",
@@ -4129,6 +4293,12 @@
     },
     {
       "from": "components/Dashboard.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "./ui/button"
+    },
+    {
+      "from": "components/Dashboard.tsx",
       "to": "components/ui/separator.tsx",
       "type": "imports",
       "import": "./ui/separator"
@@ -4144,6 +4314,12 @@
       "to": "hooks/useLocalFirstDashboardBoot.ts",
       "type": "imports",
       "import": "@/hooks/useLocalFirstDashboardBoot"
+    },
+    {
+      "from": "components/Dashboard.tsx",
+      "to": "lib/board/board-gate.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-gate"
     },
     {
       "from": "components/Dashboard.tsx",
@@ -5296,6 +5472,30 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "lib/board/board-order.test.ts",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "lib/board/board-order.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "lib/board/board-order.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "lib/board/board-order.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
     },
     {
       "from": "lib/collab/note-provider.ts",
