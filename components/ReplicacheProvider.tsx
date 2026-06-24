@@ -14,7 +14,7 @@ import {
   type TidyReplicache,
 } from "@/lib/sync/replicache/client";
 import { subscribeToPokes } from "@/lib/realtime/poke-client";
-import { installPresenceSpikeWindowApi } from "@/lib/realtime/presence-spike";
+import { installPresenceSpikeWindowApi } from "@/lib/realtime/presence-dev-harness";
 import { createClient } from "@/lib/supabase/client";
 import {
   installSyncLatencySpikeWindowApi,
