@@ -1,5 +1,8 @@
-import "server-only";
-
+// Server-only by convention: this module reads SUPABASE_SERVICE_ROLE_KEY (a
+// non-public env var that Next.js never bundles to the client) and is imported
+// only by server-side tRPC routers. The `server-only` package guard is
+// intentionally NOT used here: it throws when the router-ownership unit sweep
+// imports the router graph in Node. This mirrors lib/realtime/poke-server.ts.
 type GoTrueAdminUser = {
   email?: string | null;
   user_metadata?: Record<string, unknown> | null;
