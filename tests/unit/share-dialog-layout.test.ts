@@ -15,4 +15,14 @@ describe("share dialog layout", () => {
     );
     expect(source).not.toContain("w-[min(32rem,calc(100%-2rem))]");
   });
+
+  it("renders member labels while preserving raw ids as title text", () => {
+    const source = readFileSync(
+      path.resolve(process.cwd(), "components/sharing/ShareDialog.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("title={member.userId}");
+    expect(source).toContain("{member.label ?? member.userId}");
+  });
 });
