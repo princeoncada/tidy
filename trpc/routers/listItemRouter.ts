@@ -8,6 +8,7 @@ import {
   getEffectiveListRole,
   getUsersWithListAccess,
 } from "@/lib/sync/permissions";
+import { resolveUserLabels } from "@/lib/sharing/user-directory";
 
 /**
  * listItemRouter
@@ -61,9 +62,14 @@ export const listItemRouter = createTRPCRouter({
       throw new TRPCError({ code: "FORBIDDEN" });
     }
     const members = await getUsersWithListAccess(db, [listId]);
+    const sorted = [...members].sort();
+    const labels = await resolveUserLabels(sorted);
     return {
       currentUserId: userId,
-      members: [...members].sort(),
+      members: sorted.map((memberId) => ({
+        userId: memberId,
+        label: labels.get(memberId) ?? memberId,
+      })),
     };
   }),
 
