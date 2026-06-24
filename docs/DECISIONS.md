@@ -513,3 +513,17 @@ for cursor/typing signals. Presence must not touch Replicache push/pull,
 `server-apply`, CVR state, or persisted replicated entities; structural sync
 remains on Replicache. See `docs/spikes/3.4.0-presence-transport-spike.md` for
 the gated feasibility proof protocol and spike removal steps.
+
+---
+
+## 2026-06-23: Board order uses ListItem.boardOrderKey through updateItem (3.4.1)
+
+The multiplayer board uses nullable `ListItem.boardOrderKey` as the per-status
+board ordering authority. It is threaded through the existing Replicache
+`updateItem` mutator and list-item update server-apply path; no new mutator,
+operation type, tRPC write, or sync-contract operation is introduced.
+
+Legacy rows may have null `boardOrderKey`. The board sorts stored board keys
+first and falls back to list `orderKey` plus id for null rows, with a deferred
+one-time deterministic backfill to remove that rollout window. Presence,
+sharing UX polish, and board rollups remain out of 3.4.1.
