@@ -13,6 +13,7 @@ import {
   groupItemsByStatus,
   type BoardCardItem,
 } from "@/lib/board/board-order";
+import type { List } from "@/components/list/types";
 import { filterListsByWorkspace } from "@/lib/dashboard/workspace-filter";
 import type { ItemStatus } from "@/lib/sync/replicache/keys";
 
@@ -131,7 +132,7 @@ export default function BoardContainer({
       lists
         .filter((list) => {
           const role =
-            list.accessRole ??
+            (list as List).accessRole ??
             (list.userId === boot.userId ? "OWNER" : "VIEWER");
           return role === "OWNER" || role === "EDITOR";
         })
