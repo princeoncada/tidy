@@ -56,22 +56,32 @@ Architecture spine (invariant across the arc):
 
 Execution discipline (anti-loop rails):
 - Spike before commit: 3.1.0 and 3.4.0 are throwaway measurement/feasibility spikes that produce the scope for the phase after them.
-- Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
+- Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
 
-### 3.4.3 - Live Presence
+### 3.4.3 - Presence Transport Hardening
 - **Status:** Open
-- **Entry gate (blocking, from 3.4.0):** Run and record the 3.4.0 presence-transport two-user feasibility proof (`docs/spikes/3.4.0-presence-transport-spike.md` Results table - roster join/leave + cursor/typing echo across two profiles, gate `tidy:presence-spike=1`) BEFORE any presence implementation. The chosen transport (private `tidy:presence:<roomId>` Supabase Realtime channel; Presence for roster, Broadcast for cursor/typing) stands by construction only until this proof is recorded. Carried debt from 3.4.0 (deferred 2026-06-23, sequenced here 2026-06-24).
-- **Type:** product behavior
-- **Implementation goal:** Implement live presence (cursors/typing/who-is-here) using 3.4.0's chosen transport, on the board + panel.
-- **Product impact:** user-visible presence.
-- **Runtime integration target:** presence transport runs alongside Replicache, not through it.
-- **Deferral boundary:** Progress rollups are 3.4.4; transport scope is fixed by 3.4.0.
-- **Validation target:** targeted + manual product proof (two-user presence).
-- **Files:** lib/realtime/*, components/board/*, components/item/*
+- **Entry gate (from 3.4.0): SATISFIED 2026-06-24.** The two-user feasibility proof ran + is recorded (`docs/spikes/3.4.0-presence-transport-spike.md` Results). Transport PROVEN (roster join + cursor/typing broadcast across two profiles); the proof surfaced the two findings this phase pays down.
+- **Type:** infrastructure
+- **Implementation goal:** Make the proven presence transport production-ready: (a) replace the permissive dev RLS with a PERMISSION-SCOPED policy on `realtime.messages` - a SECURITY DEFINER function checking the requesting user's membership in the room's underlying list/board (`realtime.messages` RLS cannot read Prisma tables directly; 2.0.6 pattern) plus a decided `roomId` -> list/board mapping; (b) fix presence leave so peers drop promptly (`untrack()` before `removeChannel()`); (c) a minimal production presence client in `lib/realtime/*` for the 3.4.4 UI to consume, replacing the throwaway spike API.
+- **Product impact:** none directly - enables 3.4.4 Live Presence UI.
+- **Runtime integration target:** authenticated members can join/track/broadcast on a permission-scoped private `tidy:presence:<roomId>` channel, separate from Replicache push/pull.
+- **Deferral boundary:** No presence UI rendering (cursors/typing/who-is-here) - that is 3.4.4. No rollups (3.4.5).
+- **Validation target:** targeted + manual product proof = re-run the two-user proof GREEN 4/4 (roster join AND clean leave + cursor/typing echo) against the SCOPED policy, plus a negative proof (a non-member is denied the room). Drop the permissive dev policy.
+- **Files:** lib/realtime/*, Supabase RLS (controller-run SQL, not in repo - same as 2.0.6/2.0.7)
 
-### 3.4.4 - Board Progress & Rollups
+### 3.4.4 - Live Presence
+- **Status:** Open
+- **Type:** product behavior
+- **Implementation goal:** Render live presence (cursors / typing indicators / who-is-here roster) on the board + item panel, consuming the 3.4.3 production presence client. Flag-gated.
+- **Product impact:** user-visible presence.
+- **Runtime integration target:** presence UI reads the 3.4.3 transport (private channel), never through Replicache.
+- **Deferral boundary:** Transport/RLS/leave are 3.4.3; progress rollups are 3.4.5. High-frequency cursor coalescing cadence tuning folds in here if cursors ship.
+- **Validation target:** targeted + manual product proof (two-user presence: peer cursor move, typing indicator, who-is-here join AND leave).
+- **Files:** components/board/*, components/item/*, lib/realtime/*
+
+### 3.4.5 - Board Progress & Rollups
 - **Status:** Open
 - **Type:** product behavior
 - **Implementation goal:** Progress/rollup surfaces for the board (completion %, per-column counts) computed from real synced data.
@@ -152,7 +162,7 @@ Assigned a version only when scoped.
 Superseded by pinned arc phases (pointers, not separate backlog):
 - Finer-grained shared-list collaboration - sharing owner tags/custom views with recipients, and letting recipients reorder shared lists within their own organization - is owned by 3.4.2 (Collaboration & Sharing UX).
 - Replicache pull resiliency under concurrent pulls (`buildReplicacheClientView` `list.listItems` crash) and `selectedView` convergence for `tests/e2e/views.spec.ts` "latest selected view wins after fast switching" - now owned by 3.2.8 (Concurrent-Pull Resilience & Fast-Switch View Convergence). Pre-existing; surfaced during 3.2.4, reconfirmed at `--workers=2` during 3.2.5.
-- Rich-text/structured item notes and remote-cursor presence are owned by 3.3.0 (item panel/notes) and 3.4.0/3.4.3 (presence transport + live presence); plain-text Yjs notes already shipped in 2.0.6.
+- Rich-text/structured item notes and remote-cursor presence are owned by 3.3.0 (item panel/notes) and 3.4.0/3.4.3/3.4.4 (presence transport spike + transport hardening + live presence UI); plain-text Yjs notes already shipped in 2.0.6.
 
 ---
 
