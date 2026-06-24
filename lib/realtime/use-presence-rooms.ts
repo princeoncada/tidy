@@ -114,6 +114,7 @@ export function usePresenceRooms({
     });
 
     const activeRoomIds = roomKey.split("\n");
+    const activeUserId = userId;
 
     void createClient()
       .auth.getSession()
@@ -128,7 +129,7 @@ export function usePresenceRooms({
 
           const room = new PresenceRoom({
             roomId,
-            userId,
+            userId: activeUserId,
             accessToken,
             onRosterChange: (roster) => {
               setRostersByRoom((current) => {
@@ -138,7 +139,7 @@ export function usePresenceRooms({
               });
             },
             onCursorEvent: (event) => {
-              if (event.userId === userId) return;
+              if (event.userId === activeUserId) return;
 
               setCursorsByUser((current) => {
                 const next = new Map(current);
