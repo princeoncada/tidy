@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
   "version": "3.4.1-alpha",
-  "generatedAt": "2026-06-23",
+  "generatedAt": "2026-06-24",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -550,6 +550,7 @@
         "@/hooks/useLocalFirstDashboardBoot",
         "@/hooks/useReplicacheDashboard",
         "@/lib/board/board-order",
+        "@/components/list/types",
         "@/lib/dashboard/workspace-filter",
         "@/lib/sync/replicache/keys"
       ]
@@ -4218,6 +4219,12 @@
       "to": "components/board/BoardColumn.tsx",
       "type": "imports",
       "import": "@/components/board/BoardColumn"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "components/list/types.ts",
+      "type": "imports",
+      "import": "@/components/list/types"
     },
     {
       "from": "components/board/BoardContainer.tsx",
