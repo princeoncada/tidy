@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.4.4 - Live Presence (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.4.4 - Live Presence
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Render live presence (cursors / typing indicators / who-is-here roster) on the board + item panel, consuming the 3.4.3 production presence client. Flag-gated.
-- **Product impact:** user-visible presence.
-- **Runtime integration target:** presence UI reads the 3.4.3 transport (private channel), never through Replicache.
-- **Deferral boundary:** Transport/RLS/leave are 3.4.3; progress rollups are 3.4.5. High-frequency cursor coalescing cadence tuning folds in here if cursors ship.
-- **Validation target:** targeted + manual product proof (two-user presence: peer cursor move, typing indicator, who-is-here join AND leave).
-- **Files:** components/board/*, components/item/*, lib/realtime/*
 
 ### 3.4.5 - Board Progress & Rollups
 - **Status:** Open
