@@ -748,6 +748,7 @@ describe("server sync apply", () => {
       notes: null,
       status: "DONE",
       assigneeId: "user-2",
+      boardOrderKey: "a0",
     });
 
     const results = await applySyncOperations({
@@ -764,6 +765,84 @@ describe("server sync apply", () => {
     });
 
     expect(results[0]).toMatchObject({ status: "already-applied" });
+    expect(tx.listItem.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("applies board order key-only item updates", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Task",
+      completed: false,
+      notes: null,
+      status: "TODO",
+      assigneeId: null,
+      boardOrderKey: "a0",
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { boardOrderKey: "a1" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toMatchObject({ status: "applied" });
+    expect(tx.listItem.updateMany).toHaveBeenCalledWith({
+      where: { id: "item-1" },
+      data: { boardOrderKey: "a1" },
+    });
+  });
+
+  it("treats unchanged board order key updates as already applied", async () => {
+    const tx = createTx();
+    tx.listItem.findUnique.mockResolvedValue({
+      listId: "list-1",
+      name: "Task",
+      completed: false,
+      notes: null,
+      status: "TODO",
+      assigneeId: null,
+      boardOrderKey: "a0",
+    });
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { boardOrderKey: "a0" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toMatchObject({ status: "already-applied" });
+    expect(tx.listItem.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("rejects empty board order key item updates", async () => {
+    const tx = createTx();
+
+    const results = await applySyncOperations({
+      userId: "user-1",
+      decisions: [accepted({
+        entityType: "listItem",
+        entityClientId: "item-1",
+        payload: { boardOrderKey: "" },
+      })],
+      db: createDb(tx),
+    });
+
+    expect(results[0]).toEqual({
+      operationId: "op-1",
+      status: "rejected",
+      errorMessage:
+        "List item update requires boardOrderKey to be a non-empty string.",
+    });
+    expect(tx.listItem.findUnique).not.toHaveBeenCalled();
     expect(tx.listItem.updateMany).not.toHaveBeenCalled();
   });
 
