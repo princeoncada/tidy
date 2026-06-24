@@ -1,6 +1,6 @@
 {
-    "version":  "3.4.2-alpha",
-    "state":  "alpha",
+    "version":  "3.4.2",
+    "state":  "stable",
     "phase":  "3.4.2",
     "phaseTitle":  "Collaboration \u0026 Sharing UX",
     "nextPhase":  "3.4.3 - Live Presence",
