@@ -2144,9 +2144,7 @@
       "symbols": [
         "resolveUserLabels"
       ],
-      "imports": [
-        "server-only"
-      ]
+      "imports": []
     },
     {
       "path": "lib/supabase/auth-confirm.ts",
