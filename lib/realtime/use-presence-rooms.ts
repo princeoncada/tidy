@@ -99,11 +99,10 @@ export function usePresenceRooms({
 
   useEffect(() => {
     let disposed = false;
-    const shouldConnect = enabled && Boolean(userId) && roomKey.length > 0;
 
     leaveRooms();
 
-    if (!shouldConnect) {
+    if (!enabled || !userId || roomKey.length === 0) {
       return () => {
         disposed = true;
       };
