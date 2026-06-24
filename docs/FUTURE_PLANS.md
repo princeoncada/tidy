@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.4.2 - Collaboration & Sharing UX (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.4 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.4.2 - Collaboration & Sharing UX
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Polished sharing/collaboration UX over the existing permissions model (invite/redeem/roles surfaced in the new shell).
-- **Product impact:** user-visible sharing flows.
-- **Runtime integration target:** uses lib/sync/permissions.ts + share redeem.
-- **Deferral boundary:** Live presence is 3.4.3; no new permission model.
-- **Validation target:** targeted + manual product proof (share + redeem).
-- **Files:** components/share/*, lib/sync/permissions.ts
 
 ### 3.4.3 - Live Presence
 - **Status:** Open
