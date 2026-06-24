@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.4.4 - Live Presence (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.4.4 - Live Presence
-- **Status:** Open
+- **Status:** In progress
 - **Type:** product behavior
 - **Implementation goal:** Render live presence (cursors / typing indicators / who-is-here roster) on the board + item panel, consuming the 3.4.3 production presence client. Flag-gated.
 - **Product impact:** user-visible presence.
