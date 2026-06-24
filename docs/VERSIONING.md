@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.2-alpha
+- **Current version:** 3.4.2
 - **Current phase:** 3.4.2 - Collaboration & Sharing UX
 - **Next phase:** 3.4.3 - Live Presence
 
@@ -332,6 +332,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.3.1 | 2026-06-23 | Item Properties (Status & Assignee) | product behavior | user-visible item properties. | properties sync through the Replicache spine. | targeted + manual product proof; schema/migration if needed. | prisma/schema.prisma (+migration), lib/sync/*, components/item/* | Add structured item properties (status, assignee) synced via Replicache. |
 | 3.4.0 | 2026-06-23 | Presence Transport Spike | decision (spike) | none - spike. | none - chosen transport feeds 3.4.3. | spike decision record (transport choice + proof). | lib/realtime/* (spike), docs/ (decision) | Spike the ephemeral-presence transport (cursors/typing/who-is-here) SEPARATE from Replicache; choose the mechanism and prove feasibility. |
 | 3.4.1 | 2026-06-24 | Multiplayer Board | product behavior | major user-visible board. | board renders + writes through Replicache; flag-gated rollout. | targeted + manual product proof (two-user board); preserve DnD/order invariants. | components/board/* (new), lib/sync/* | The flagship multiplayer board view (grouped items, drag across columns) on the Replicache spine. |
+| 3.4.2 | 2026-06-24 | Collaboration & Sharing UX | product behavior | user-visible sharing flows. | uses lib/sync/permissions.ts + share redeem. | targeted + manual product proof (share + redeem). | components/share/*, lib/sync/permissions.ts | Polished sharing/collaboration UX over the existing permissions model (invite/redeem/roles surfaced in the new shell). |
 
 ---
 
