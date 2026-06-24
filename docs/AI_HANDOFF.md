@@ -22,6 +22,8 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Create, rename, delete, reorder, and share lists.
 - Create, rename, delete, complete, uncomplete, set status, assign/unassign,
   reorder, move, and edit notes on items.
+- View the flag-gated multiplayer board grouped by item status and drag cards
+  across status columns.
 - Create, update, delete, attach, and detach tags.
 - Create, edit, delete, select, and reorder custom tag-based views.
 - Redeem share links and manage workspaces/list shares.
@@ -40,6 +42,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - `hooks/useReplicacheDashboard.ts` - subscribes to the per-user Replicache store and projects the dashboard graph.
 - `hooks/useDashboardMutations.ts` - exposes Replicache mutators to dashboard components.
 - `components/list/ListsContainer.tsx`, `ListAdder.tsx`, `ListComponent.tsx`, `ListItemComponent.tsx`, `ListTagPicker.tsx` - dashboard list/item/tag UI.
+- `components/board/*`, `lib/board/*` - flag-gated board UI and per-status board ordering helpers.
 - `components/views/ViewsSidebarPreview.tsx` - custom view UI and view selection/reorder behavior.
 - `components/layout/*` - authenticated dashboard sidebar and canvas shell.
 - `lib/sync/replicache/*` - keys, mutators, push/pull, CVR diff, and client construction.
@@ -95,8 +98,12 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Sharing models: `Workspace`, `WorkspaceMember`, `ListShare`, and `ShareLink`.
 - `ItemNoteDoc` is a one-to-one binary Yjs document keyed by `ListItem.id`. It is not a Replicache entity; `ListItem.notes` remains the plain-text read projection.
 - `ListItem` has `status` (`ItemStatus`: `TODO`, `IN_PROGRESS`, `DONE`, default
-  `TODO`) and nullable `assigneeId`; assignee ids are Supabase user ids and are
-  validated against `getUsersWithListAccess` on the server apply path.
+  `TODO`), nullable `assigneeId`, and nullable `boardOrderKey`.
+  `boardOrderKey` is the per-status board ordering authority across the current
+  view; legacy nulls sort after stored board keys with list-order/id fallback
+  until a deterministic backfill removes the rollout window. Assignee ids are
+  Supabase user ids and are validated against `getUsersWithListAccess` on the
+  server apply path.
 - Live dashboard ordering is owned by fractional order keys: `View.orderKey`, `ViewList.orderKey`, and `ListItem.orderKey`.
 - Owned workspace navigation order uses nullable `Workspace.orderKey` and a
   protected, single-row `reorderWorkspace` tRPC mutation. Workspaces remain
@@ -109,15 +116,15 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Integer `order` fields are retained for schema/backfill compatibility and historical helper types, but they are not the live dashboard ordering authority.
 - Replicache keys are `list/{id}`, `listItem/{id}`, `tag/{id}`, `view/{id}`, `viewList/{viewId}/{listId}`, `viewTag/{viewId}/{tagId}`, `listTag/{listId}/{tagId}`, and `metadata/selectedView`.
 - The `listItem/{id}` Replicache value shape is
-  `id/name/completed/status/assigneeId/order/notes/listId/createdAt/updatedAt`.
+  `id/name/completed/status/assigneeId/order/boardOrderKey/notes/listId/createdAt/updatedAt`.
 
 **Sync and projection:**
 - Replicache pull converts the server graph into key/value patches and uses CVR hashes to emit `put`/`del` changes.
 - Replicache push translates named mutators into the existing operation decision shape and applies them through `server-apply.ts` inside a Prisma transaction with `lastMutationID` advancement.
-- Item `status` and `assigneeId` sync through the existing partial-field
-  `updateItem` mutator and CVR list-item projection; status is validated
-  against the enum and non-null assignees must be users with access to the
-  parent list.
+- Item `status`, `assigneeId`, and `boardOrderKey` sync through the existing
+  partial-field `updateItem` mutator and CVR list-item projection; status is
+  validated against the enum, `boardOrderKey` must be non-empty when provided,
+  and non-null assignees must be users with access to the parent list.
 - View-create is idempotent for sequential/duplicate pushes via two layers: the push handler's `lastMutationID` dedup and server-apply's `findUnique(id)` guard (`already-applied` for the same user, rejected for another user's id) before `tx.view.create`. A concurrent same-id push could in principle race to a P2002 -> 500, but this is unreproducible in the mock-only server test layer and is prevented by the Replicache client's per-client push serialization; addressing it would require a transaction-abort/savepoint-aware change. This residual is accepted and deferred in `docs/FUTURE_PLANS.md` Potential Next Directions.
 - Rejected Replicache mutations advance as no-op background corrections; the next pull rebases local optimistic state.
 - Supabase Broadcast pokes are doorbells only. Missed pokes self-heal on the periodic Replicache pull.
@@ -132,6 +139,19 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - After a committing list/item drop, the optimistic drag preview is held until the projected dashboard `lists` converges to the committed placement (confirm-before-relinquish), with a 1500ms fallback relinquish, so cross-list item moves do not snap back to the source.
 - Committed custom-view reorders write one `View.orderKey`.
 - Drag ids are `list-${id}`, `list-item-${id}`, and `list-drop-${id}`.
+
+**Multiplayer board:**
+- The board is gated by `NEXT_PUBLIC_BOARD_ENABLED` and defaults off; the
+  dashboard defaults to list mode even when the flag is enabled.
+- The board renders the current view's workspace-filtered items from
+  `useReplicacheDashboard`, grouped into TODO, IN_PROGRESS, and DONE columns.
+- Board writes use only `useDashboardMutations().mutate.updateItem` with the
+  existing Replicache `updateItem` mutator; dragging a card to another column
+  changes `status` and dragging within a column updates `boardOrderKey`.
+- Board status labels are text, not color-only. The board does not toggle
+  `completed` when status changes.
+- Legacy rows with null `boardOrderKey` are client-sorted after stored board
+  keys by list order and id. A one-time deterministic backfill is deferred.
 
 **Auth and permissions:**
 - All dashboard data is scoped by Supabase user id.
@@ -192,7 +212,9 @@ Keep these because Replicache still uses them:
 - The item detail panel and its notes field are flag-gated (`NEXT_PUBLIC_ITEM_PANEL_ENABLED` default off; notes also gated by the Yjs notes flag). The inline notes expander was removed in 3.3.0; the Yjs note path and `ItemNoteDoc` projection are unchanged.
 - Item assignees are restricted to current list-access members and have no
   display-name resolution yet; that polish is deferred to the 3.4.x sharing UX
-  work. Board grouping on item status is deferred to 3.4.1.
+  work. Board grouping on item status is implemented behind
+  `NEXT_PUBLIC_BOARD_ENABLED`, with legacy-null `boardOrderKey` fallback until
+  the deferred deterministic backfill runs.
 - Create-path idempotency (3.2.9): every create in `lib/sync/server-apply.ts` (list, listItem, tag, view) wraps `tx.<entity>.create` in a Postgres SAVEPOINT via `createWithinSavepoint`; a unique-constraint (P2002) abort rolls back only the nested savepoint and maps to `already-applied`, so a post-reload replay racing the original push no longer 500s the push route. Tag/view conflicts re-query by id to keep the existing "belongs to another user" / name-conflict rejects. Do not revert creates to bare `findUnique -> create`, and keep the view `isDefault` sweep AFTER a confirmed insert (excluding the new id) so an id-race cannot blank the default flag.
 - Fractional key backfill must complete before assuming every persisted row has a stored key; pull fallbacks prevent null keys from entering Replicache state during rollout.
 - Replicache correction surfacing is currently limited to push correction accounting and pull rebasing. Do not reintroduce the retired local-outbox status UI for this.
