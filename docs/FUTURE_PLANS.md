@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.4.3 - Presence Transport Hardening (active) - see Planned
 ---
 
 ## Planned
@@ -61,7 +62,7 @@ Execution discipline (anti-loop rails):
 - Done = a named proof (test or manual product proof), never "looks done".
 
 ### 3.4.3 - Presence Transport Hardening
-- **Status:** Open
+- **Status:** In progress
 - **Entry gate (from 3.4.0): SATISFIED 2026-06-24.** The two-user feasibility proof ran + is recorded (`docs/spikes/3.4.0-presence-transport-spike.md` Results). Transport PROVEN (roster join + cursor/typing broadcast across two profiles); the proof surfaced the two findings this phase pays down.
 - **Type:** infrastructure
 - **Implementation goal:** Make the proven presence transport production-ready: (a) replace the permissive dev RLS with a PERMISSION-SCOPED policy on `realtime.messages` - a SECURITY DEFINER function checking the requesting user's membership in the room's underlying list/board (`realtime.messages` RLS cannot read Prisma tables directly; 2.0.6 pattern) plus a decided `roomId` -> list/board mapping; (b) fix presence leave so peers drop promptly (`untrack()` before `removeChannel()`); (c) a minimal production presence client in `lib/realtime/*` for the 3.4.4 UI to consume, replacing the throwaway spike API.
