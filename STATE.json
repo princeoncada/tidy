@@ -3,7 +3,7 @@
     "state":  "stable",
     "phase":  "3.4.2",
     "phaseTitle":  "Collaboration \u0026 Sharing UX",
-    "nextPhase":  "3.4.3 - Live Presence",
+    "nextPhase":  "3.4.3 - Presence Transport Hardening",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-24"
 }
