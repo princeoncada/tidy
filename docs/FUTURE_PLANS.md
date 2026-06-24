@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.4.3 - Presence Transport Hardening (active) - see Planned
 ---
 
 ## Planned
@@ -60,17 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.4.3 - Presence Transport Hardening
-- **Status:** In progress
-- **Entry gate (from 3.4.0): SATISFIED 2026-06-24.** The two-user feasibility proof ran + is recorded (`docs/spikes/3.4.0-presence-transport-spike.md` Results). Transport PROVEN (roster join + cursor/typing broadcast across two profiles); the proof surfaced the two findings this phase pays down.
-- **Type:** infrastructure
-- **Implementation goal:** Make the proven presence transport production-ready: (a) replace the permissive dev RLS with a PERMISSION-SCOPED policy on `realtime.messages` - a SECURITY DEFINER function checking the requesting user's membership in the room's underlying list/board (`realtime.messages` RLS cannot read Prisma tables directly; 2.0.6 pattern) plus a decided `roomId` -> list/board mapping; (b) fix presence leave so peers drop promptly (`untrack()` before `removeChannel()`); (c) a minimal production presence client in `lib/realtime/*` for the 3.4.4 UI to consume, replacing the throwaway spike API.
-- **Product impact:** none directly - enables 3.4.4 Live Presence UI.
-- **Runtime integration target:** authenticated members can join/track/broadcast on a permission-scoped private `tidy:presence:<roomId>` channel, separate from Replicache push/pull.
-- **Deferral boundary:** No presence UI rendering (cursors/typing/who-is-here) - that is 3.4.4. No rollups (3.4.5).
-- **Validation target:** targeted + manual product proof = re-run the two-user proof GREEN 4/4 (roster join AND clean leave + cursor/typing echo) against the SCOPED policy, plus a negative proof (a non-member is denied the room). Drop the permissive dev policy.
-- **Files:** lib/realtime/*, Supabase RLS (controller-run SQL, not in repo - same as 2.0.6/2.0.7)
 
 ### 3.4.4 - Live Presence
 - **Status:** Open
