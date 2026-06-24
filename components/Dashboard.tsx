@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import BoardContainer from "./board/BoardContainer";
 import ListsContainer from "./list/ListsContainer";
+import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import UserAccountNav from "./UserAccountNav";
 import { useQueryClient } from "@tanstack/react-query";
@@ -13,6 +15,7 @@ import { useLocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { ReplicacheProvider } from "@/components/ReplicacheProvider";
 import { AppShell } from "@/components/layout/AppShell";
 import { SidebarNav } from "@/components/layout/SidebarNav";
+import { isBoardEnabled } from "@/lib/board/board-gate";
 
 const supabase = createClient();
 
@@ -21,6 +24,8 @@ const Dashboard = () => {
   const [loggingOut, setLoggingOut] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
+  const [boardMode, setBoardMode] = useState(false);
+  const boardEnabled = isBoardEnabled();
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -74,20 +79,54 @@ const Dashboard = () => {
           <div className="flex min-w-0 flex-col gap-3 py-12 lg:py-10">
             <div className="flex flex-col gap-2.5 w-full items-center">
               <div className="w-full flex flex-col">
-                <div className="flex h-12 w-full items-end">
+                <div className="flex h-12 w-full items-end justify-between gap-3">
                   <h1 className="text-xl md:text-2xl font-bold text-text">
                     Your Todo Lists
                   </h1>
+                  {boardEnabled && (
+                    <div
+                      className="flex rounded-lg border border-border bg-surface-muted p-0.5"
+                      aria-label="Dashboard view"
+                    >
+                      <Button
+                        type="button"
+                        variant={boardMode ? "ghost" : "secondary"}
+                        size="sm"
+                        aria-pressed={!boardMode}
+                        aria-label="Show list view"
+                        onClick={() => setBoardMode(false)}
+                      >
+                        List
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={boardMode ? "secondary" : "ghost"}
+                        size="sm"
+                        aria-pressed={boardMode}
+                        aria-label="Show board view"
+                        onClick={() => setBoardMode(true)}
+                      >
+                        Board
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <Separator className="bg-border md:bg-border/30" />
             </div>
 
-            <ListsContainer
-              boot={localFirstBoot}
-              activeWorkspaceId={activeWorkspaceId}
-            />
+            {boardEnabled && boardMode ? (
+              <BoardContainer
+                boot={localFirstBoot}
+                activeWorkspaceId={activeWorkspaceId}
+              />
+            ) : (
+              <ListsContainer
+                boot={localFirstBoot}
+                activeWorkspaceId={activeWorkspaceId}
+              />
+            )}
           </div>
         </MaxWidthWrapper>
       </main>
