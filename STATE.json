@@ -1,9 +1,9 @@
 {
-    "version":  "3.4.3",
-    "state":  "stable",
-    "phase":  "3.4.3",
-    "phaseTitle":  "Presence Transport Hardening",
-    "nextPhase":  "3.4.4 - Live Presence",
+    "version":  "3.4.4-alpha",
+    "state":  "alpha",
+    "phase":  "3.4.4",
+    "phaseTitle":  "Live Presence",
+    "nextPhase":  "3.4.5 - Board Progress \u0026 Rollups",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-24"
 }
