@@ -62,6 +62,7 @@ Execution discipline (anti-loop rails):
 
 ### 3.4.3 - Live Presence
 - **Status:** Open
+- **Entry gate (blocking, from 3.4.0):** Run and record the 3.4.0 presence-transport two-user feasibility proof (`docs/spikes/3.4.0-presence-transport-spike.md` Results table - roster join/leave + cursor/typing echo across two profiles, gate `tidy:presence-spike=1`) BEFORE any presence implementation. The chosen transport (private `tidy:presence:<roomId>` Supabase Realtime channel; Presence for roster, Broadcast for cursor/typing) stands by construction only until this proof is recorded. Carried debt from 3.4.0 (deferred 2026-06-23, sequenced here 2026-06-24).
 - **Type:** product behavior
 - **Implementation goal:** Implement live presence (cursors/typing/who-is-here) using 3.4.0's chosen transport, on the board + panel.
 - **Product impact:** user-visible presence.
