@@ -107,7 +107,7 @@ Rules:
 
 - **Current version:** 3.4.2
 - **Current phase:** 3.4.2 - Collaboration & Sharing UX
-- **Next phase:** 3.4.3 - Live Presence
+- **Next phase:** 3.4.3 - Presence Transport Hardening
 
 ---
 
