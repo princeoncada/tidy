@@ -1,9 +1,9 @@
-<!-- Current Version: 3.4.3-alpha -->
+<!-- Current Version: 3.4.3 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.4.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.4.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.4.3 - Presence Transport Hardening
 **Next**: 3.4.4 - Live Presence
 
