@@ -547,10 +547,12 @@
         "react",
         "@/components/board/BoardColumn",
         "@/components/board/BoardPresence",
+        "@/components/board/BoardSummary",
         "@/hooks/useDashboardMutations",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/hooks/useReplicacheDashboard",
         "@/lib/board/board-order",
+        "@/lib/board/board-rollup",
         "@/components/list/types",
         "@/lib/dashboard/workspace-filter",
         "@/lib/realtime/presence-gate",
@@ -571,6 +573,18 @@
         "@/lib/realtime/use-presence-rooms",
         "@/lib/realtime/presence-client",
         "@/lib/utils"
+      ]
+    },
+    {
+      "path": "components/board/BoardSummary.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "BoardSummary"
+      ],
+      "imports": [
+        "@/lib/board/board-order",
+        "@/lib/board/board-rollup"
       ]
     },
     {
@@ -1704,6 +1718,31 @@
       ],
       "imports": [
         "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "lib/board/board-rollup.test.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/board/board-rollup",
+        "@/lib/board/board-order",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "lib/board/board-rollup.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "BoardRollup",
+        "computeBoardRollup"
+      ],
+      "imports": [
+        "@/lib/board/board-order",
         "@/lib/sync/replicache/keys"
       ]
     },
@@ -4383,6 +4422,12 @@
     },
     {
       "from": "components/board/BoardContainer.tsx",
+      "to": "components/board/BoardSummary.tsx",
+      "type": "imports",
+      "import": "@/components/board/BoardSummary"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
       "to": "components/list/types.ts",
       "type": "imports",
       "import": "@/components/list/types"
@@ -4410,6 +4455,12 @@
       "to": "lib/board/board-order.ts",
       "type": "imports",
       "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "lib/board/board-rollup.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-rollup"
     },
     {
       "from": "components/board/BoardContainer.tsx",
@@ -4452,6 +4503,18 @@
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
+    },
+    {
+      "from": "components/board/BoardSummary.tsx",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "components/board/BoardSummary.tsx",
+      "to": "lib/board/board-rollup.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-rollup"
     },
     {
       "from": "components/Dashboard.tsx",
@@ -5715,6 +5778,36 @@
     },
     {
       "from": "lib/board/board-order.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "lib/board/board-rollup.test.ts",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "lib/board/board-rollup.test.ts",
+      "to": "lib/board/board-rollup.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-rollup"
+    },
+    {
+      "from": "lib/board/board-rollup.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "lib/board/board-rollup.ts",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "lib/board/board-rollup.ts",
       "to": "lib/sync/replicache/keys.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/keys"
