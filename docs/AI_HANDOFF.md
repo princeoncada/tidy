@@ -152,6 +152,11 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
   `completed` when status changes.
 - Legacy rows with null `boardOrderKey` are client-sorted after stored board
   keys by list order and id. A one-time deterministic backfill is deferred.
+- The board renders a progress summary (`components/board/BoardSummary.tsx`)
+  above the columns: completion percentage (DONE over total) plus per-column
+  counts and a total, computed by `lib/board/board-rollup.ts` from the
+  committed, workspace-filtered synced groups (`boardData.groups`), not the
+  in-flight drag preview.
 
 **Auth and permissions:**
 - All dashboard data is scoped by Supabase user id.
