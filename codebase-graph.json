@@ -1695,17 +1695,6 @@
       "imports": []
     },
     {
-      "path": "lib/board/board-order.test.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/board/board-order",
-        "@/lib/sync/fractional-index"
-      ]
-    },
-    {
       "path": "lib/board/board-order.ts",
       "kind": "library",
       "extension": ".ts",
@@ -3125,6 +3114,17 @@
         "react",
         "vitest",
         "@/components/layout/AppShell"
+      ]
+    },
+    {
+      "path": "tests/unit/board-order.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/board/board-order",
+        "@/lib/sync/fractional-index"
       ]
     },
     {
@@ -5759,18 +5759,6 @@
       "import": "@/lib/supabase/client"
     },
     {
-      "from": "lib/board/board-order.test.ts",
-      "to": "lib/board/board-order.ts",
-      "type": "imports",
-      "import": "@/lib/board/board-order"
-    },
-    {
-      "from": "lib/board/board-order.test.ts",
-      "to": "lib/sync/fractional-index.ts",
-      "type": "imports",
-      "import": "@/lib/sync/fractional-index"
-    },
-    {
       "from": "lib/board/board-order.ts",
       "to": "lib/sync/fractional-index.ts",
       "type": "imports",
@@ -6579,6 +6567,18 @@
       "to": "components/layout/AppShell.tsx",
       "type": "imports",
       "import": "@/components/layout/AppShell"
+    },
+    {
+      "from": "tests/unit/board-order.test.ts",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "tests/unit/board-order.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
     },
     {
       "from": "tests/unit/board-presence.test.tsx",
