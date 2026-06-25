@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.4
-- **Current phase:** 3.4.4 - Live Presence
-- **Next phase:** 3.4.5 - Board Progress & Rollups
+- **Current version:** 3.4.5-alpha
+- **Current phase:** 3.4.5 - Board Progress & Rollups
+- **Next phase:** 3.5.0 - Mutation Ledger
 
 ---
 
