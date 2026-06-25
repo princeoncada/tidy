@@ -1722,18 +1722,6 @@
       ]
     },
     {
-      "path": "lib/board/board-rollup.test.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/board/board-rollup",
-        "@/lib/board/board-order",
-        "@/lib/sync/replicache/keys"
-      ]
-    },
-    {
       "path": "lib/board/board-rollup.ts",
       "kind": "library",
       "extension": ".ts",
@@ -3148,6 +3136,18 @@
         "@testing-library/react",
         "vitest",
         "@/components/board/BoardPresence"
+      ]
+    },
+    {
+      "path": "tests/unit/board-rollup.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/board/board-rollup",
+        "@/lib/board/board-order",
+        "@/lib/sync/replicache/keys"
       ]
     },
     {
@@ -5783,24 +5783,6 @@
       "import": "@/lib/sync/replicache/keys"
     },
     {
-      "from": "lib/board/board-rollup.test.ts",
-      "to": "lib/board/board-order.ts",
-      "type": "imports",
-      "import": "@/lib/board/board-order"
-    },
-    {
-      "from": "lib/board/board-rollup.test.ts",
-      "to": "lib/board/board-rollup.ts",
-      "type": "imports",
-      "import": "@/lib/board/board-rollup"
-    },
-    {
-      "from": "lib/board/board-rollup.test.ts",
-      "to": "lib/sync/replicache/keys.ts",
-      "type": "imports",
-      "import": "@/lib/sync/replicache/keys"
-    },
-    {
       "from": "lib/board/board-rollup.ts",
       "to": "lib/board/board-order.ts",
       "type": "imports",
@@ -6603,6 +6585,24 @@
       "to": "components/board/BoardPresence.tsx",
       "type": "imports",
       "import": "@/components/board/BoardPresence"
+    },
+    {
+      "from": "tests/unit/board-rollup.test.ts",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "tests/unit/board-rollup.test.ts",
+      "to": "lib/board/board-rollup.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-rollup"
+    },
+    {
+      "from": "tests/unit/board-rollup.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
     },
     {
       "from": "tests/unit/collab-note-route.test.ts",
