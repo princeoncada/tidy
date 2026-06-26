@@ -7,6 +7,7 @@ import { tagRouter } from './tagRouter';
 import { viewRouter } from './viewRouter';
 import { shareRouter } from './shareRouter';
 import { historyRouter } from './historyRouter';
+import { revertRouter } from './revertRouter';
 
 export const appRouter = createTRPCRouter({
   test: testRouter,
@@ -17,6 +18,7 @@ export const appRouter = createTRPCRouter({
   view: viewRouter,
   share: shareRouter,
   history: historyRouter,
+  revert: revertRouter,
 });
 
 // export type definition of API
