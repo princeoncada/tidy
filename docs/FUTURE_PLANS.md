@@ -103,6 +103,7 @@ Assigned a version only when scoped.
 - Observability
 - Scale/performance profiling
 - Order compaction
+- Notion-style visual historical-snapshot view: render a read-only reconstruction of past dashboard state (lists/items/views) at a chosen ledger entry by replaying the MutationLedgerEntry ledger, distinct from 3.5.2 revert which writes the reconstructed state back through the spine (lib/history/replay.ts, components/history/*).
 - Installable-PWA polish: manifest metadata + icon set (the app-shell service worker and app/manifest.ts already ship)
 - Mobile/touch drag-drop + responsive QA (components/list/*)
 - Accessibility + UI polish pass (folds into 3.2.x design-token + shell work when scoped)
