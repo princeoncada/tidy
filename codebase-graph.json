@@ -1945,6 +1945,34 @@
       "imports": []
     },
     {
+      "path": "lib/history/replay.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "ReplayLedgerEntry",
+        "replayMutationLedgerEntries"
+      ],
+      "imports": [
+        "replicache",
+        "@/lib/sync/replicache/mutators"
+      ]
+    },
+    {
+      "path": "lib/history/revert-plan.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "buildRevertPlan"
+      ],
+      "imports": [
+        "replicache",
+        "@/lib/local-db/outbox-schema",
+        "@/lib/sync/replicache/keys",
+        "@/lib/sync/replicache/pull-cvr",
+        "@/lib/sync/server-apply"
+      ]
+    },
+    {
       "path": "lib/item-panel/item-panel-gate.ts",
       "kind": "library",
       "extension": ".ts",
@@ -3269,6 +3297,30 @@
       ]
     },
     {
+      "path": "tests/unit/history-replay.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/history/replay",
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "tests/unit/history-revert-plan.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/history/revert-plan",
+        "@/lib/sync/replicache/keys",
+        "@/lib/sync/replicache/pull-cvr"
+      ]
+    },
+    {
       "path": "tests/unit/history-router.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3632,6 +3684,17 @@
       ]
     },
     {
+      "path": "tests/unit/revert-router.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/trpc/init",
+        "@/trpc/routers/revertRouter"
+      ]
+    },
+    {
       "path": "tests/unit/router-ownership-baseline.test.ts",
       "kind": "test",
       "extension": ".ts",
@@ -3900,7 +3963,8 @@
         "./tagRouter",
         "./viewRouter",
         "./shareRouter",
-        "./historyRouter"
+        "./historyRouter",
+        "./revertRouter"
       ]
     },
     {
@@ -3947,6 +4011,29 @@
         "@trpc/server",
         "@/app/generated/prisma/client",
         "./viewHelpers"
+      ]
+    },
+    {
+      "path": "trpc/routers/revertRouter.ts",
+      "kind": "trpc_router",
+      "extension": ".ts",
+      "symbols": [
+        "revertRouter"
+      ],
+      "imports": [
+        "@trpc/server",
+        "zod",
+        "@/lib/dashboard/server-read",
+        "@/lib/db",
+        "@/lib/history/replay",
+        "@/lib/history/revert-plan",
+        "@/lib/realtime/poke-server",
+        "@/lib/sync/permissions",
+        "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys",
+        "@/lib/sync/replicache/pull-cvr",
+        "@/lib/sync/server-apply",
+        "../init"
       ]
     },
     {
@@ -5982,6 +6069,36 @@
       "import": "@/lib/sync/fractional-index"
     },
     {
+      "from": "lib/history/replay.ts",
+      "to": "lib/sync/replicache/mutators.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/mutators"
+    },
+    {
+      "from": "lib/history/revert-plan.ts",
+      "to": "lib/local-db/outbox-schema.ts",
+      "type": "imports",
+      "import": "@/lib/local-db/outbox-schema"
+    },
+    {
+      "from": "lib/history/revert-plan.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "lib/history/revert-plan.ts",
+      "to": "lib/sync/replicache/pull-cvr.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/pull-cvr"
+    },
+    {
+      "from": "lib/history/revert-plan.ts",
+      "to": "lib/sync/server-apply.ts",
+      "type": "imports",
+      "import": "@/lib/sync/server-apply"
+    },
+    {
       "from": "lib/local-db/local-db-diagnostics.ts",
       "to": "lib/local-db/metadata-repository.ts",
       "type": "imports",
@@ -6786,6 +6903,42 @@
       "import": "@/lib/history/history-gate"
     },
     {
+      "from": "tests/unit/history-replay.test.ts",
+      "to": "lib/history/replay.ts",
+      "type": "imports",
+      "import": "@/lib/history/replay"
+    },
+    {
+      "from": "tests/unit/history-replay.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "tests/unit/history-replay.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "tests/unit/history-revert-plan.test.ts",
+      "to": "lib/history/revert-plan.ts",
+      "type": "imports",
+      "import": "@/lib/history/revert-plan"
+    },
+    {
+      "from": "tests/unit/history-revert-plan.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "tests/unit/history-revert-plan.test.ts",
+      "to": "lib/sync/replicache/pull-cvr.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/pull-cvr"
+    },
+    {
       "from": "tests/unit/history-router.test.ts",
       "to": "trpc/init.ts",
       "type": "imports",
@@ -7116,6 +7269,18 @@
       "import": "@/lib/sync/replicache/push"
     },
     {
+      "from": "tests/unit/revert-router.test.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "@/trpc/init"
+    },
+    {
+      "from": "tests/unit/revert-router.test.ts",
+      "to": "trpc/routers/revertRouter.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/revertRouter"
+    },
+    {
       "from": "tests/unit/router-ownership-baseline.test.ts",
       "to": "trpc/init.ts",
       "type": "imports",
@@ -7345,6 +7510,12 @@
     },
     {
       "from": "trpc/routers/_app.ts",
+      "to": "trpc/routers/revertRouter.ts",
+      "type": "imports",
+      "import": "./revertRouter"
+    },
+    {
+      "from": "trpc/routers/_app.ts",
       "to": "trpc/routers/shareRouter.ts",
       "type": "imports",
       "import": "./shareRouter"
@@ -7426,6 +7597,72 @@
       "to": "trpc/routers/viewHelpers.ts",
       "type": "imports",
       "import": "./viewHelpers"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/dashboard/server-read.ts",
+      "type": "imports",
+      "import": "@/lib/dashboard/server-read"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/history/replay.ts",
+      "type": "imports",
+      "import": "@/lib/history/replay"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/history/revert-plan.ts",
+      "type": "imports",
+      "import": "@/lib/history/revert-plan"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/realtime/poke-server.ts",
+      "type": "imports",
+      "import": "@/lib/realtime/poke-server"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/sync/permissions.ts",
+      "type": "imports",
+      "import": "@/lib/sync/permissions"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/sync/replicache/pull-cvr.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/pull-cvr"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "lib/sync/server-apply.ts",
+      "type": "imports",
+      "import": "@/lib/sync/server-apply"
+    },
+    {
+      "from": "trpc/routers/revertRouter.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "../init"
     },
     {
       "from": "trpc/routers/shareRouter.ts",
