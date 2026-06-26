@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.4.5 - Board Progress & Rollups (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.4.5 - Board Progress & Rollups
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Progress/rollup surfaces for the board (completion %, per-column counts) computed from real synced data.
-- **Product impact:** user-visible progress.
-- **Runtime integration target:** rollups read live Replicache state (data-before-visualization).
-- **Deferral boundary:** No version history (3.5.x).
-- **Validation target:** targeted + manual product proof.
-- **Files:** components/board/*, lib/*
 
 ### 3.5.0 - Mutation Ledger
 - **Status:** Open
