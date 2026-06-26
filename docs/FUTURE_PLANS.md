@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.5.0 - Mutation Ledger (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.5.0 - Mutation Ledger
-- **Status:** In progress
-- **Type:** infrastructure
-- **Implementation goal:** Persist an append-only mutation ledger (who/what/when) as the substrate for history.
-- **Product impact:** none directly - enables 3.5.1/3.5.2.
-- **Runtime integration target:** ledger records mutations from the sync push path.
-- **Deferral boundary:** Read/time-travel UI is 3.5.1; revert is 3.5.2.
-- **Validation target:** targeted; ledger write proof.
-- **Files:** prisma/schema.prisma (+migration), lib/sync/*
 
 ### 3.5.1 - Time-Travel Read
 - **Status:** Open
