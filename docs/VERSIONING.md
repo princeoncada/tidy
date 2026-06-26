@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.5-alpha
+- **Current version:** 3.4.5
 - **Current phase:** 3.4.5 - Board Progress & Rollups
 - **Next phase:** 3.5.0 - Mutation Ledger
 
@@ -335,6 +335,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.4.2 | 2026-06-24 | Collaboration & Sharing UX | product behavior | user-visible sharing flows. | uses lib/sync/permissions.ts + share redeem. | targeted + manual product proof (share + redeem). | components/share/*, lib/sync/permissions.ts | Polished sharing/collaboration UX over the existing permissions model (invite/redeem/roles surfaced in the new shell). |
 | 3.4.3 | 2026-06-24 | Presence Transport Hardening | infrastructure | none directly - enables 3.4.4 Live Presence UI. | authenticated members can join/track/broadcast on a permission-scoped private `tidy:presence:<roomId>` channel, separate from Replicache push/pull. | targeted + manual product proof = re-run the two-user proof GREEN 4/4 (roster join AND clean leave + cursor/typing echo) against the SCOPED policy, plus a negative proof (a non-member is denied the room). Drop the permissive dev policy. | lib/realtime/*, Supabase RLS (controller-run SQL, not in repo - same as 2.0.6/2.0.7) | Make the proven presence transport production-ready: (a) replace the permissive dev RLS with a PERMISSION-SCOPED policy on `realtime.messages` - a SECURITY DEFINER function checking the requesting user's membership in the room's underlying list/board (`realtime.messages` RLS cannot read Prisma tables directly; 2.0.6 pattern) plus a decided `roomId` -> list/board mapping; (b) fix presence leave so peers drop promptly (`untrack()` before `removeChannel()`); (c) a minimal production presence client in `lib/realtime/*` for the 3.4.4 UI to consume, replacing the throwaway spike API. |
 | 3.4.4 | 2026-06-24 | Live Presence | product behavior | user-visible presence. | presence UI reads the 3.4.3 transport (private channel), never through Replicache. | targeted + manual product proof (two-user presence: peer cursor move, typing indicator, who-is-here join AND leave). | components/board/*, components/item/*, lib/realtime/* | Render live presence (cursors / typing indicators / who-is-here roster) on the board + item panel, consuming the 3.4.3 production presence client. Flag-gated. |
+| 3.4.5 | 2026-06-26 | Board Progress & Rollups | product behavior | user-visible progress. | rollups read live Replicache state (data-before-visualization). | targeted + manual product proof. | components/board/*, lib/* | Progress/rollup surfaces for the board (completion %, per-column counts) computed from real synced data. |
 
 ---
 
