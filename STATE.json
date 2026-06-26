@@ -1,6 +1,6 @@
 {
-    "version":  "3.5.1-alpha",
-    "state":  "alpha",
+    "version":  "3.5.1",
+    "state":  "stable",
     "phase":  "3.5.1",
     "phaseTitle":  "Time-Travel Read",
     "nextPhase":  "3.5.2 - Revert",
