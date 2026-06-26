@@ -96,6 +96,9 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 **Data model and ordering:**
 - Core models: `List`, `ListItem`, `Tag`, `View`, `ViewList`, `ViewTag`, `ListTag`.
 - Sharing models: `Workspace`, `WorkspaceMember`, `ListShare`, and `ShareLink`.
+- `MutationLedgerEntry` is the append-only history ledger keyed by `id`, guarded
+  by unique `(clientId, mutationId)`, and intentionally has no foreign key to
+  `ReplicacheClientGroup` so history can survive client-group pruning.
 - `ItemNoteDoc` is a one-to-one binary Yjs document keyed by `ListItem.id`. It is not a Replicache entity; `ListItem.notes` remains the plain-text read projection.
 - `ListItem` has `status` (`ItemStatus`: `TODO`, `IN_PROGRESS`, `DONE`, default
   `TODO`), nullable `assigneeId`, and nullable `boardOrderKey`.
@@ -121,6 +124,11 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 **Sync and projection:**
 - Replicache pull converts the server graph into key/value patches and uses CVR hashes to emit `put`/`del` changes.
 - Replicache push translates named mutators into the existing operation decision shape and applies them through `server-apply.ts` inside a Prisma transaction with `lastMutationID` advancement.
+- Replicache push appends one `MutationLedgerEntry` per mutation that actually
+  applied a state change, not for no-op already-applied mutations or
+  rejected/rolled-back mutations, inside the same per-mutation transaction as
+  the `lastMutationID` advance. The ledger is write-only in 3.5.0; read-only
+  time travel is 3.5.1 and revert/write-back is 3.5.2.
 - Item `status`, `assigneeId`, and `boardOrderKey` sync through the existing
   partial-field `updateItem` mutator and CVR list-item projection; status is
   validated against the enum, `boardOrderKey` must be non-empty when provided,
