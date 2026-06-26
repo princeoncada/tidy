@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.5.1 - Time-Travel Read (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.5.1 - Time-Travel Read
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Read-only time-travel/history view over the 3.5.0 ledger.
-- **Product impact:** user-visible history view (read-only).
-- **Runtime integration target:** history reads the ledger.
-- **Deferral boundary:** Revert/write-back is 3.5.2.
-- **Validation target:** targeted + manual product proof (view past state).
-- **Files:** components/history/*, lib/*
 
 ### 3.5.2 - Revert
 - **Status:** Open
