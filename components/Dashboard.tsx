@@ -16,6 +16,7 @@ import { ReplicacheProvider } from "@/components/ReplicacheProvider";
 import { AppShell } from "@/components/layout/AppShell";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { isBoardEnabled } from "@/lib/board/board-gate";
+import HistoryPanel from "@/components/history/HistoryPanel";
 
 const supabase = createClient();
 
@@ -83,33 +84,36 @@ const Dashboard = () => {
                   <h1 className="text-xl md:text-2xl font-bold text-text">
                     Your Todo Lists
                   </h1>
-                  {boardEnabled && (
-                    <div
-                      className="flex rounded-lg border border-border bg-surface-muted p-0.5"
-                      aria-label="Dashboard view"
-                    >
-                      <Button
-                        type="button"
-                        variant={boardMode ? "ghost" : "secondary"}
-                        size="sm"
-                        aria-pressed={!boardMode}
-                        aria-label="Show list view"
-                        onClick={() => setBoardMode(false)}
+                  <div className="flex items-center gap-2">
+                    <HistoryPanel />
+                    {boardEnabled && (
+                      <div
+                        className="flex rounded-lg border border-border bg-surface-muted p-0.5"
+                        aria-label="Dashboard view"
                       >
-                        List
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={boardMode ? "secondary" : "ghost"}
-                        size="sm"
-                        aria-pressed={boardMode}
-                        aria-label="Show board view"
-                        onClick={() => setBoardMode(true)}
-                      >
-                        Board
-                      </Button>
-                    </div>
-                  )}
+                        <Button
+                          type="button"
+                          variant={boardMode ? "ghost" : "secondary"}
+                          size="sm"
+                          aria-pressed={!boardMode}
+                          aria-label="Show list view"
+                          onClick={() => setBoardMode(false)}
+                        >
+                          List
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={boardMode ? "secondary" : "ghost"}
+                          size="sm"
+                          aria-pressed={boardMode}
+                          aria-label="Show board view"
+                          onClick={() => setBoardMode(true)}
+                        >
+                          Board
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 

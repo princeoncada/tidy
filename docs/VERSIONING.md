@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.5.0
-- **Current phase:** 3.5.0 - Mutation Ledger
-- **Next phase:** 3.5.1 - Time-Travel Read
+- **Current version:** 3.5.1-alpha
+- **Current phase:** 3.5.1 - Time-Travel Read
+- **Next phase:** 3.5.2 - Revert
 
 ---
 

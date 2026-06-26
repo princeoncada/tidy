@@ -1,11 +1,11 @@
-<!-- Current Version: 3.5.0 -->
+<!-- Current Version: 3.5.1-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.5.0 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.5.0 - Mutation Ledger
-**Next**: 3.5.1 - Time-Travel Read
+**Current Version**: 3.5.1-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.5.1 - Time-Travel Read
+**Next**: 3.5.2 - Revert
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
@@ -27,6 +27,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Create, update, delete, attach, and detach tags.
 - Create, edit, delete, select, and reorder custom tag-based views.
 - Redeem share links and manage workspaces/list shares.
+- View a read-only history of recent changes (flag-gated).
 - Switch the app theme among light, dark, and system from the account menu.
 
 **Routes**:
@@ -51,6 +52,7 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - `lib/dashboard/projection.ts` and `lib/dashboard-cache.ts` - shared projection helpers and retained tRPC cache helper types/tests.
 - `lib/collab/*`, `components/item/ItemNotesField.tsx`, `app/api/collab/notes/[itemId]/route.ts` - gated per-item Yjs note documents (the notes field is hosted by the item detail panel).
 - `components/item/ItemDetailPanel.tsx`, `lib/item-panel/item-panel-gate.ts` - centered item detail panel hosting item metadata and the collaborative notes field, gated by `NEXT_PUBLIC_ITEM_PANEL_ENABLED` (default off); opened per item from `components/list/ListItemComponent.tsx`.
+- `lib/history/*`, `components/history/HistoryPanel.tsx`, `trpc/routers/historyRouter.ts` - gated read-only mutation history (`NEXT_PUBLIC_HISTORY_ENABLED`, default off) over `MutationLedgerEntry`.
 - `trpc/routers/*` - retained protected API for auth-adjacent and non-dashboard management flows such as sharing.
 - `components/sharing/*`, `lib/sync/permissions.ts`, `lib/sharing/user-directory.ts`, `app/share/[token]/page.tsx` - sharing role authority, management API, server-only identity-label directory, owner controls, and invite redemption.
 - `app/manifest.ts`, `public/sw.js`, `components/AppShellServiceWorker.tsx`, `hooks/use-app-shell-service-worker.ts`, `lib/sw/*` - app-shell service worker.
@@ -98,7 +100,9 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Sharing models: `Workspace`, `WorkspaceMember`, `ListShare`, and `ShareLink`.
 - `MutationLedgerEntry` is the append-only history ledger keyed by `id`, guarded
   by unique `(clientId, mutationId)`, and intentionally has no foreign key to
-  `ReplicacheClientGroup` so history can survive client-group pruning.
+  `ReplicacheClientGroup` so history can survive client-group pruning. Read-only
+  history is exposed via the history tRPC router and gated HistoryPanel in
+  3.5.1; revert/write-back remains 3.5.2.
 - `ItemNoteDoc` is a one-to-one binary Yjs document keyed by `ListItem.id`. It is not a Replicache entity; `ListItem.notes` remains the plain-text read projection.
 - `ListItem` has `status` (`ItemStatus`: `TODO`, `IN_PROGRESS`, `DONE`, default
   `TODO`), nullable `assigneeId`, and nullable `boardOrderKey`.
@@ -127,8 +131,9 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 - Replicache push appends one `MutationLedgerEntry` per mutation that actually
   applied a state change, not for no-op already-applied mutations or
   rejected/rolled-back mutations, inside the same per-mutation transaction as
-  the `lastMutationID` advance. The ledger is write-only in 3.5.0; read-only
-  time travel is 3.5.1 and revert/write-back is 3.5.2.
+  the `lastMutationID` advance. 3.5.1 adds the read-only history path through
+  the history tRPC router and gated HistoryPanel; revert/write-back remains
+  3.5.2.
 - Item `status`, `assigneeId`, and `boardOrderKey` sync through the existing
   partial-field `updateItem` mutator and CVR list-item projection; status is
   validated against the enum, `boardOrderKey` must be non-empty when provided,
