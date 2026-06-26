@@ -47,6 +47,9 @@ type ReplicacheTrackingTransaction = {
   listItem: {
     findUnique(args: unknown): Promise<{ listId: string } | null>;
   };
+  mutationLedgerEntry: {
+    create(args: unknown): Promise<unknown>;
+  };
 };
 
 export type ReplicachePushDatabase = {
@@ -205,6 +208,7 @@ export async function processReplicachePush({
         let effects = createSyncPostCommitEffects();
         let mutationCorrections: ReplicachePushCorrection[] = [];
         let mutationAffectedListIds: string[] = [];
+        let didApplyChange = false;
 
         if (!isReplicacheMutationName(mutation.name)) {
           mutationCorrections = [{
@@ -259,6 +263,10 @@ export async function processReplicachePush({
               );
               effects = createSyncPostCommitEffects();
               mutationAffectedListIds = [];
+            } else {
+              didApplyChange = results.some(
+                (result) => result.status === "applied",
+              );
             }
             await prismaTx.$executeRawUnsafe(
               `RELEASE SAVEPOINT ${REPLICACHE_MUTATION_SAVEPOINT}`,
@@ -273,6 +281,20 @@ export async function processReplicachePush({
               messages,
             }];
           }
+        }
+
+        if (didApplyChange) {
+          await tx.mutationLedgerEntry.create({
+            data: {
+              userId,
+              clientGroupId: clientGroupID,
+              clientId: mutation.clientID,
+              mutationId: mutation.id,
+              name: mutation.name,
+              args: (mutation.args ?? {}) as Prisma.InputJsonValue,
+              affectedListIds: mutationAffectedListIds,
+            },
+          });
         }
 
         await tx.replicacheClient.update({
