@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.5.2 - Revert (active) - see Planned
 ---
 
 ## Planned
@@ -60,16 +59,6 @@ Execution discipline (anti-loop rails):
 - Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
 - Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
 - Done = a named proof (test or manual product proof), never "looks done".
-
-### 3.5.2 - Revert
-- **Status:** In progress
-- **Type:** product behavior
-- **Implementation goal:** Revert-to-a-prior-state action built on the ledger + time-travel read.
-- **Product impact:** user-visible revert.
-- **Runtime integration target:** revert writes through the Replicache spine.
-- **Deferral boundary:** Closes the 3.5 history sub-arc.
-- **Validation target:** targeted + manual product proof (revert + sync).
-- **Files:** lib/sync/*, components/history/*
 
 ### 4.0 - Expo / React Native Mobile
 - **Status:** Open
