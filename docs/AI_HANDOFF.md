@@ -1,9 +1,9 @@
-<!-- Current Version: 3.5.2-alpha -->
+<!-- Current Version: 3.5.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.5.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.5.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.5.2 - Revert
 **Next**: 4.0 - Expo / React Native Mobile
 
