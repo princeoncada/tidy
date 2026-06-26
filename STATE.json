@@ -1,9 +1,9 @@
 {
-    "version":  "3.5.1",
-    "state":  "stable",
-    "phase":  "3.5.1",
-    "phaseTitle":  "Time-Travel Read",
-    "nextPhase":  "3.5.2 - Revert",
+    "version":  "3.5.2-alpha",
+    "state":  "alpha",
+    "phase":  "3.5.2",
+    "phaseTitle":  "Revert",
+    "nextPhase":  "4.0 - Expo / React Native Mobile",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-26"
 }
