@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock } from "lucide-react";
 import { useState } from "react";
 
@@ -25,12 +25,33 @@ export default function HistoryPanel() {
 
 function EnabledHistoryPanel() {
   const [open, setOpen] = useState(false);
+  const [revertError, setRevertError] = useState<string | null>(null);
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const historyInput = {};
   const query = useQuery({
-    ...trpc.history.listMutationHistory.queryOptions({}),
+    ...trpc.history.listMutationHistory.queryOptions(historyInput),
     enabled: open,
   });
+  const revert = useMutation(
+    trpc.revert.revertToLedgerEntry.mutationOptions({
+      onMutate: () => setRevertError(null),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.history.listMutationHistory.queryKey(historyInput),
+        });
+      },
+      onError: (error) => setRevertError(error.message),
+    }),
+  );
   const entries = query.data?.map(formatMutationLedgerEntry) ?? [];
+
+  function handleRevert(entryId: string) {
+    if (!window.confirm("Revert your dashboard to this history entry?")) {
+      return;
+    }
+    revert.mutate({ entryId });
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -49,6 +70,9 @@ function EnabledHistoryPanel() {
         </DialogHeader>
 
         <div className="space-y-2">
+          {revertError && (
+            <p className="text-sm text-destructive">{revertError}</p>
+          )}
           {query.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading history...</p>
           ) : entries.length > 0 ? (
@@ -66,12 +90,22 @@ function EnabledHistoryPanel() {
                       {entry.detail}
                     </p>
                   </div>
-                  <time
-                    dateTime={entry.at}
-                    className="shrink-0 text-right text-xs text-muted-foreground"
-                  >
-                    {new Date(entry.at).toLocaleString()}
-                  </time>
+                  <div className="flex shrink-0 flex-col items-end gap-2">
+                    <time
+                      dateTime={entry.at}
+                      className="text-right text-xs text-muted-foreground"
+                    >
+                      {new Date(entry.at).toLocaleString()}
+                    </time>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      disabled={revert.isPending}
+                      onClick={() => handleRevert(entry.id)}
+                    >
+                      Revert to here
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))
