@@ -1,6 +1,6 @@
 {
-    "version":  "3.5.0-alpha",
-    "state":  "alpha",
+    "version":  "3.5.0",
+    "state":  "stable",
     "phase":  "3.5.0",
     "phaseTitle":  "Mutation Ledger",
     "nextPhase":  "3.5.1 - Time-Travel Read",
