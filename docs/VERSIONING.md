@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.5.1-alpha
+- **Current version:** 3.5.1
 - **Current phase:** 3.5.1 - Time-Travel Read
 - **Next phase:** 3.5.2 - Revert
 
@@ -337,6 +337,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.4.4 | 2026-06-24 | Live Presence | product behavior | user-visible presence. | presence UI reads the 3.4.3 transport (private channel), never through Replicache. | targeted + manual product proof (two-user presence: peer cursor move, typing indicator, who-is-here join AND leave). | components/board/*, components/item/*, lib/realtime/* | Render live presence (cursors / typing indicators / who-is-here roster) on the board + item panel, consuming the 3.4.3 production presence client. Flag-gated. |
 | 3.4.5 | 2026-06-26 | Board Progress & Rollups | product behavior | user-visible progress. | rollups read live Replicache state (data-before-visualization). | targeted + manual product proof. | components/board/*, lib/* | Progress/rollup surfaces for the board (completion %, per-column counts) computed from real synced data. |
 | 3.5.0 | 2026-06-26 | Mutation Ledger | infrastructure | none directly - enables 3.5.1/3.5.2. | ledger records mutations from the sync push path. | targeted; ledger write proof. | prisma/schema.prisma (+migration), lib/sync/* | Persist an append-only mutation ledger (who/what/when) as the substrate for history. |
+| 3.5.1 | 2026-06-26 | Time-Travel Read | product behavior | user-visible history view (read-only). | history reads the ledger. | targeted + manual product proof (view past state). | components/history/*, lib/* | Read-only time-travel/history view over the 3.5.0 ledger. |
 
 ---
 
