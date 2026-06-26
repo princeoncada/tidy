@@ -516,7 +516,7 @@ function planLink(
   const parts = partsFromKey(key, prefix);
   if (!parts) return [];
   const [leftId, rightId] = parts;
-  const payload = entityType === "viewTag"
+  const payload: Record<string, LocalJsonValue> = entityType === "viewTag"
     ? { viewId: leftId, tagId: rightId }
     : { listId: leftId, tagId: rightId };
   return targetValue && !currentValue
