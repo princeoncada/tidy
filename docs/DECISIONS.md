@@ -6,6 +6,21 @@ If a decision invalidates another doc, update both. Decisions that affect produc
 
 ---
 
+## 2026-06-26: Mutation ledger is the history/time-travel substrate (3.5.0)
+
+The 3.5.0 mutation ledger is the append-only history substrate for read-only
+time travel in 3.5.1 and revert in 3.5.2. It is distinct from the separately
+deferred sync idempotency ledger for duplicate-request auditability.
+
+The ledger is a standalone `MutationLedgerEntry` table with no foreign key to
+`ReplicacheClientGroup`, so history can outlive client-group pruning. Rows are
+written from the Replicache push path only when a mutation applies a real state
+change, and the write happens in the same per-mutation transaction as the
+`lastMutationID` advance. Read APIs and revert behavior are explicitly deferred
+to 3.5.1 and 3.5.2.
+
+---
+
 ## 2026-05-28: Adopted HFK-style AI workflow
 
 Migrated tidy's docs to an HFK-style workflow: STATE.json oracle, five-location versioning, ChromaDB doc query, CODEX_RULES.md, AI_HANDOFF.md, PHASE_LOG.md, FUTURE_PLANS.md, DECISIONS.md, validate/promote scripts.
