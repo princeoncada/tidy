@@ -608,7 +608,26 @@
         "@/components/ReplicacheProvider",
         "@/components/layout/AppShell",
         "@/components/layout/SidebarNav",
-        "@/lib/board/board-gate"
+        "@/lib/board/board-gate",
+        "@/components/history/HistoryPanel"
+      ]
+    },
+    {
+      "path": "components/history/HistoryPanel.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "HistoryPanel"
+      ],
+      "imports": [
+        "@tanstack/react-query",
+        "lucide-react",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/dialog",
+        "@/lib/history/history-format",
+        "@/lib/history/history-gate",
+        "@/trpc/client"
       ]
     },
     {
@@ -1903,6 +1922,27 @@
       "imports": [
         "react"
       ]
+    },
+    {
+      "path": "lib/history/history-format.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "FormattedMutationLedgerEntry",
+        "MutationLedgerEntryInput",
+        "formatMutationLedgerEntry",
+        "humanizeMutationName"
+      ],
+      "imports": []
+    },
+    {
+      "path": "lib/history/history-gate.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "isHistoryEnabled"
+      ],
+      "imports": []
     },
     {
       "path": "lib/item-panel/item-panel-gate.ts",
@@ -3209,6 +3249,37 @@
       ]
     },
     {
+      "path": "tests/unit/history-format.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/history/history-format"
+      ]
+    },
+    {
+      "path": "tests/unit/history-gate.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/history/history-gate"
+      ]
+    },
+    {
+      "path": "tests/unit/history-router.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/trpc/init",
+        "@/trpc/routers/historyRouter"
+      ]
+    },
+    {
       "path": "tests/unit/item-detail-panel.test.tsx",
       "kind": "test",
       "extension": ".tsx",
@@ -3828,7 +3899,21 @@
         "./testRouter",
         "./tagRouter",
         "./viewRouter",
-        "./shareRouter"
+        "./shareRouter",
+        "./historyRouter"
+      ]
+    },
+    {
+      "path": "trpc/routers/historyRouter.ts",
+      "kind": "trpc_router",
+      "extension": ".ts",
+      "symbols": [
+        "historyRouter"
+      ],
+      "imports": [
+        "zod",
+        "@/lib/db",
+        "../init"
       ]
     },
     {
@@ -4524,6 +4609,12 @@
     },
     {
       "from": "components/Dashboard.tsx",
+      "to": "components/history/HistoryPanel.tsx",
+      "type": "imports",
+      "import": "@/components/history/HistoryPanel"
+    },
+    {
+      "from": "components/Dashboard.tsx",
       "to": "components/layout/AppShell.tsx",
       "type": "imports",
       "import": "@/components/layout/AppShell"
@@ -4587,6 +4678,36 @@
       "to": "lib/supabase/client.ts",
       "type": "imports",
       "import": "@/lib/supabase/client"
+    },
+    {
+      "from": "components/history/HistoryPanel.tsx",
+      "to": "components/ui/button.tsx",
+      "type": "imports",
+      "import": "@/components/ui/button"
+    },
+    {
+      "from": "components/history/HistoryPanel.tsx",
+      "to": "components/ui/dialog.tsx",
+      "type": "imports",
+      "import": "@/components/ui/dialog"
+    },
+    {
+      "from": "components/history/HistoryPanel.tsx",
+      "to": "lib/history/history-format.ts",
+      "type": "imports",
+      "import": "@/lib/history/history-format"
+    },
+    {
+      "from": "components/history/HistoryPanel.tsx",
+      "to": "lib/history/history-gate.ts",
+      "type": "imports",
+      "import": "@/lib/history/history-gate"
+    },
+    {
+      "from": "components/history/HistoryPanel.tsx",
+      "to": "trpc/client.tsx",
+      "type": "imports",
+      "import": "@/trpc/client"
     },
     {
       "from": "components/item/ItemDetailPanel.tsx",
@@ -6653,6 +6774,30 @@
       "import": "@/lib/sync/fractional-index"
     },
     {
+      "from": "tests/unit/history-format.test.ts",
+      "to": "lib/history/history-format.ts",
+      "type": "imports",
+      "import": "@/lib/history/history-format"
+    },
+    {
+      "from": "tests/unit/history-gate.test.ts",
+      "to": "lib/history/history-gate.ts",
+      "type": "imports",
+      "import": "@/lib/history/history-gate"
+    },
+    {
+      "from": "tests/unit/history-router.test.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "@/trpc/init"
+    },
+    {
+      "from": "tests/unit/history-router.test.ts",
+      "to": "trpc/routers/historyRouter.ts",
+      "type": "imports",
+      "import": "@/trpc/routers/historyRouter"
+    },
+    {
       "from": "tests/unit/item-detail-panel.test.tsx",
       "to": "components/item/ItemDetailPanel.tsx",
       "type": "imports",
@@ -7182,6 +7327,12 @@
     },
     {
       "from": "trpc/routers/_app.ts",
+      "to": "trpc/routers/historyRouter.ts",
+      "type": "imports",
+      "import": "./historyRouter"
+    },
+    {
+      "from": "trpc/routers/_app.ts",
       "to": "trpc/routers/listItemRouter.ts",
       "type": "imports",
       "import": "./listItemRouter"
@@ -7221,6 +7372,18 @@
       "to": "trpc/routers/viewRouter.ts",
       "type": "imports",
       "import": "./viewRouter"
+    },
+    {
+      "from": "trpc/routers/historyRouter.ts",
+      "to": "lib/db.ts",
+      "type": "imports",
+      "import": "@/lib/db"
+    },
+    {
+      "from": "trpc/routers/historyRouter.ts",
+      "to": "trpc/init.ts",
+      "type": "imports",
+      "import": "../init"
     },
     {
       "from": "trpc/routers/listItemRouter.ts",
