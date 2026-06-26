@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.4.5
-- **Current phase:** 3.4.5 - Board Progress & Rollups
-- **Next phase:** 3.5.0 - Mutation Ledger
+- **Current version:** 3.5.0-alpha
+- **Current phase:** 3.5.0 - Mutation Ledger
+- **Next phase:** 3.5.1 - Time-Travel Read
 
 ---
 

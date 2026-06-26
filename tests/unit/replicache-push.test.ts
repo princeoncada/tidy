@@ -52,6 +52,9 @@ function createPushDatabase(lastMutationID = 0, listOwner = "user-2") {
     listItem: {
       findUnique: vi.fn(async () => null),
     },
+    mutationLedgerEntry: {
+      create: vi.fn(async () => ({})),
+    },
   };
   const database = {
     $transaction: vi.fn(async (callback: (value: typeof tx) => unknown) =>
@@ -183,6 +186,7 @@ describe("Replicache push ordering", () => {
     });
 
     expect(tx.list.updateMany).not.toHaveBeenCalled();
+    expect(tx.mutationLedgerEntry.create).not.toHaveBeenCalled();
     expect(tx.$executeRawUnsafe).toHaveBeenCalledWith(
       "ROLLBACK TO SAVEPOINT replicache_mutation",
     );
@@ -218,6 +222,17 @@ describe("Replicache push ordering", () => {
     expect(tx.list.updateMany).toHaveBeenCalledWith({
       where: { id: "list-1" },
       data: { name: "Renamed" },
+    });
+    expect(tx.mutationLedgerEntry.create).toHaveBeenCalledTimes(1);
+    expect(tx.mutationLedgerEntry.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId: "user-1",
+        clientGroupId: "group-1",
+        clientId: "client-1",
+        mutationId: 1,
+        name: "renameList",
+        affectedListIds: ["list-1"],
+      }),
     });
     expect(result.affectedListIds).toEqual(["list-1"]);
     expect(client.lastMutationID).toBe(1);

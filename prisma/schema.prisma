@@ -187,6 +187,21 @@ model ReplicacheClientViewRecord {
   @@index([clientGroupId, createdAt])
 }
 
+model MutationLedgerEntry {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String   @db.Uuid
+  clientGroupId   String
+  clientId        String
+  mutationId      Int
+  name            String
+  args            Json
+  affectedListIds String[]
+  createdAt       DateTime @default(now())
+
+  @@unique([clientId, mutationId])
+  @@index([userId, createdAt])
+}
+
 enum ViewType {
   ALL_LISTS
   UNTAGGED
