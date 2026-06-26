@@ -28,7 +28,7 @@ and design-parity review succeed.
 | Item detail panel and existing notes integration | Current |
 | Item status and assignee properties | Current |
 | Multiplayer Board | Current |
-| Sharing polish, presence, and rollups | Deferred: 3.4.x |
+| Sharing polish | Deferred: 3.4.x |
 
 ## Design Principles
 
@@ -327,8 +327,14 @@ reachable and expose visible focus on their drag handles.
 Dragging a card across columns changes the item's `status`. Dragging within a
 column reorders that status bucket through `ListItem.boardOrderKey`. These
 writes must use the Replicache dashboard mutator path and must not toggle the
-completed checkbox. Sharing polish, live presence overlays, and progress
-rollups remain deferred to their 3.4.x phases.
+completed checkbox.
+
+The board shows a progress summary above the columns: a completion percentage
+(DONE over total) with an accessible progress indicator, plus per-column counts
+and a total. The summary is computed from the current view's live, synced board
+items (workspace-filtered) and reflects committed state rather than an in-flight
+drag preview. Progress must be conveyed as text, not by color alone. Sharing
+polish remains deferred to its 3.4.x phase.
 
 ## Responsive, Accessibility, and Motion Rules
 

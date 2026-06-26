@@ -9,6 +9,7 @@ import {
   BoardPresenceBar,
   BoardPresenceCursors,
 } from "@/components/board/BoardPresence";
+import { BoardSummary } from "@/components/board/BoardSummary";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import type { LocalFirstDashboardBoot } from "@/hooks/useLocalFirstDashboardBoot";
 import { useReplicacheDashboard } from "@/hooks/useReplicacheDashboard";
@@ -18,6 +19,7 @@ import {
   groupItemsByStatus,
   type BoardCardItem,
 } from "@/lib/board/board-order";
+import { computeBoardRollup } from "@/lib/board/board-rollup";
 import type { List } from "@/components/list/types";
 import { filterListsByWorkspace } from "@/lib/dashboard/workspace-filter";
 import { isPresenceEnabled } from "@/lib/realtime/presence-gate";
@@ -164,6 +166,10 @@ export default function BoardContainer({
   ]);
 
   const visibleGroups = dragPreviewGroups ?? boardData.groups;
+  const rollup = useMemo(
+    () => computeBoardRollup(boardData.groups),
+    [boardData.groups],
+  );
   const presenceRoomIds = useMemo(
     () => boardData.lists.map((list) => list.id),
     [boardData.lists],
@@ -361,6 +367,7 @@ export default function BoardContainer({
             <BoardPresenceCursors cursors={presence.cursors} />
           </>
         )}
+        <BoardSummary rollup={rollup} />
         <div className="grid grow grid-cols-1 gap-3 lg:grid-cols-3">
           {BOARD_COLUMNS.map((column) => (
             <BoardColumn

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.4.4",
-  "generatedAt": "2026-06-24",
+  "version": "3.4.5-alpha",
+  "generatedAt": "2026-06-25",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -547,10 +547,12 @@
         "react",
         "@/components/board/BoardColumn",
         "@/components/board/BoardPresence",
+        "@/components/board/BoardSummary",
         "@/hooks/useDashboardMutations",
         "@/hooks/useLocalFirstDashboardBoot",
         "@/hooks/useReplicacheDashboard",
         "@/lib/board/board-order",
+        "@/lib/board/board-rollup",
         "@/components/list/types",
         "@/lib/dashboard/workspace-filter",
         "@/lib/realtime/presence-gate",
@@ -571,6 +573,18 @@
         "@/lib/realtime/use-presence-rooms",
         "@/lib/realtime/presence-client",
         "@/lib/utils"
+      ]
+    },
+    {
+      "path": "components/board/BoardSummary.tsx",
+      "kind": "component",
+      "extension": ".tsx",
+      "symbols": [
+        "BoardSummary"
+      ],
+      "imports": [
+        "@/lib/board/board-order",
+        "@/lib/board/board-rollup"
       ]
     },
     {
@@ -1681,17 +1695,6 @@
       "imports": []
     },
     {
-      "path": "lib/board/board-order.test.ts",
-      "kind": "library",
-      "extension": ".ts",
-      "symbols": [],
-      "imports": [
-        "vitest",
-        "@/lib/board/board-order",
-        "@/lib/sync/fractional-index"
-      ]
-    },
-    {
       "path": "lib/board/board-order.ts",
       "kind": "library",
       "extension": ".ts",
@@ -1704,6 +1707,19 @@
       ],
       "imports": [
         "@/lib/sync/fractional-index",
+        "@/lib/sync/replicache/keys"
+      ]
+    },
+    {
+      "path": "lib/board/board-rollup.ts",
+      "kind": "library",
+      "extension": ".ts",
+      "symbols": [
+        "BoardRollup",
+        "computeBoardRollup"
+      ],
+      "imports": [
+        "@/lib/board/board-order",
         "@/lib/sync/replicache/keys"
       ]
     },
@@ -3101,6 +3117,17 @@
       ]
     },
     {
+      "path": "tests/unit/board-order.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/board/board-order",
+        "@/lib/sync/fractional-index"
+      ]
+    },
+    {
       "path": "tests/unit/board-presence.test.tsx",
       "kind": "test",
       "extension": ".tsx",
@@ -3109,6 +3136,18 @@
         "@testing-library/react",
         "vitest",
         "@/components/board/BoardPresence"
+      ]
+    },
+    {
+      "path": "tests/unit/board-rollup.test.ts",
+      "kind": "test",
+      "extension": ".ts",
+      "symbols": [],
+      "imports": [
+        "vitest",
+        "@/lib/board/board-rollup",
+        "@/lib/board/board-order",
+        "@/lib/sync/replicache/keys"
       ]
     },
     {
@@ -4383,6 +4422,12 @@
     },
     {
       "from": "components/board/BoardContainer.tsx",
+      "to": "components/board/BoardSummary.tsx",
+      "type": "imports",
+      "import": "@/components/board/BoardSummary"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
       "to": "components/list/types.ts",
       "type": "imports",
       "import": "@/components/list/types"
@@ -4410,6 +4455,12 @@
       "to": "lib/board/board-order.ts",
       "type": "imports",
       "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "components/board/BoardContainer.tsx",
+      "to": "lib/board/board-rollup.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-rollup"
     },
     {
       "from": "components/board/BoardContainer.tsx",
@@ -4452,6 +4503,18 @@
       "to": "lib/utils.ts",
       "type": "imports",
       "import": "@/lib/utils"
+    },
+    {
+      "from": "components/board/BoardSummary.tsx",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "components/board/BoardSummary.tsx",
+      "to": "lib/board/board-rollup.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-rollup"
     },
     {
       "from": "components/Dashboard.tsx",
@@ -5696,25 +5759,25 @@
       "import": "@/lib/supabase/client"
     },
     {
-      "from": "lib/board/board-order.test.ts",
+      "from": "lib/board/board-order.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
+      "from": "lib/board/board-order.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
+    },
+    {
+      "from": "lib/board/board-rollup.ts",
       "to": "lib/board/board-order.ts",
       "type": "imports",
       "import": "@/lib/board/board-order"
     },
     {
-      "from": "lib/board/board-order.test.ts",
-      "to": "lib/sync/fractional-index.ts",
-      "type": "imports",
-      "import": "@/lib/sync/fractional-index"
-    },
-    {
-      "from": "lib/board/board-order.ts",
-      "to": "lib/sync/fractional-index.ts",
-      "type": "imports",
-      "import": "@/lib/sync/fractional-index"
-    },
-    {
-      "from": "lib/board/board-order.ts",
+      "from": "lib/board/board-rollup.ts",
       "to": "lib/sync/replicache/keys.ts",
       "type": "imports",
       "import": "@/lib/sync/replicache/keys"
@@ -6506,10 +6569,40 @@
       "import": "@/components/layout/AppShell"
     },
     {
+      "from": "tests/unit/board-order.test.ts",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "tests/unit/board-order.test.ts",
+      "to": "lib/sync/fractional-index.ts",
+      "type": "imports",
+      "import": "@/lib/sync/fractional-index"
+    },
+    {
       "from": "tests/unit/board-presence.test.tsx",
       "to": "components/board/BoardPresence.tsx",
       "type": "imports",
       "import": "@/components/board/BoardPresence"
+    },
+    {
+      "from": "tests/unit/board-rollup.test.ts",
+      "to": "lib/board/board-order.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-order"
+    },
+    {
+      "from": "tests/unit/board-rollup.test.ts",
+      "to": "lib/board/board-rollup.ts",
+      "type": "imports",
+      "import": "@/lib/board/board-rollup"
+    },
+    {
+      "from": "tests/unit/board-rollup.test.ts",
+      "to": "lib/sync/replicache/keys.ts",
+      "type": "imports",
+      "import": "@/lib/sync/replicache/keys"
     },
     {
       "from": "tests/unit/collab-note-route.test.ts",

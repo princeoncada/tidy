@@ -1,9 +1,9 @@
 {
-    "version":  "3.4.4",
-    "state":  "stable",
-    "phase":  "3.4.4",
-    "phaseTitle":  "Live Presence",
-    "nextPhase":  "3.4.5 - Board Progress \u0026 Rollups",
+    "version":  "3.4.5-alpha",
+    "state":  "alpha",
+    "phase":  "3.4.5",
+    "phaseTitle":  "Board Progress \u0026 Rollups",
+    "nextPhase":  "3.5.0 - Mutation Ledger",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-24"
+    "lastUpdated":  "2026-06-25"
 }
