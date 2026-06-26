@@ -1,9 +1,9 @@
-<!-- Current Version: 3.4.5-alpha -->
+<!-- Current Version: 3.4.5 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.4.5-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.4.5 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.4.5 - Board Progress & Rollups
 **Next**: 3.5.0 - Mutation Ledger
 
