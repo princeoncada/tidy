@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.6.0 - Tidy Stewardship Foundation (active) - see Planned
 ---
 
 ## Planned
@@ -78,7 +79,7 @@ Execution discipline:
 - Do not let stewardship docs become duplicate source-of-truth docs.
 
 ### 3.6.0 - Tidy Stewardship Foundation
-- **Status:** Open
+- **Status:** In progress
 - **Type:** docs/workflow
 - **Implementation goal:** Add a dedicated Tidy repo-stewardship support folder and initial structure for source-of-truth mapping, staleness tracking, cleanup backlog, continuity checks, and Claude/Codex/ChatGPT support. This creates the support surface used to prepare for the Workspace OS rebase.
 - **Product impact:** none directly - users see no runtime behavior change. The phase improves repository continuity and prepares the product direction shift.
