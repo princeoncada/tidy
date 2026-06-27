@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.5.2
-- **Current phase:** 3.5.2 - Revert
-- **Next phase:** 4.0 - Expo / React Native Mobile
+- **Current version:** 3.6.0-alpha
+- **Current phase:** 3.6.0 - Tidy Stewardship Foundation
+- **Next phase:** 3.6.1 - Repo Staleness Audit
 
 ---
 

@@ -2,40 +2,27 @@
 
 Support checklist for ChatGPT work in Tidy.
 
-This file is support-only. The authoritative ChatGPT role and evidence boundary remain in `AGENTS.md` and `docs/WORKFLOW.md`.
+This file is support-only. Authoritative role and evidence boundaries remain in `AGENTS.md` ("ChatGPT Reviewer Mode"), `docs/WORKFLOW.md` ("Local Evidence Packet"), `docs/CODEX_RULES.md` ("ChatGPT Reviewer Evidence Boundary"), and `docs/AI_HANDOFF.md`.
 
 ## Intended role
 
-ChatGPT is Tidy's second-opinion provider, docs/workflow auditor, docs/skills workflow fixer based on audit findings, future-planning assistant, and architecture/drift reviewer.
-
-ChatGPT should primarily review existing code and docs for:
-
-- inconsistencies
-- stale assumptions
-- stale ends
-- disconnected files
-- wrong paths
-- duplicate truth surfaces
-- outdated role definitions
-- stale `.claude/skills/*` instructions
-- roadmap mismatch
-- handoff mismatch
-- design/runtime drift
-- validation-boundary drift
-
-ChatGPT is not the default product-code implementer.
+ChatGPT is the second-opinion reviewer and docs/workflow auditor. It reviews pushed GitHub state plus evidence pasted into the chat. The expanded second-opinion, audit, and future-planning responsibilities are being formalized in phase 3.6.3 - Agent Workflow Realignment; until that phase lands, follow the role text in the owner docs above rather than this file.
 
 ## Evidence boundary
 
-- State whether review is pushed-remote-only or includes pasted local evidence.
-- Do not imply connector reads include uncommitted local work.
-- For source-heavy review, require a Local Evidence Packet or clearly label the review remote-only.
+- ChatGPT sees pushed GitHub state plus pasted evidence only.
+- It cannot see local uncommitted work, branch-only files, local diffs or status, validation output, or generated graph changes.
+- Source-heavy, branch-local, or graph-sensitive review requires a Local Evidence Packet (see `docs/WORKFLOW.md`).
+- If evidence is absent, state that the review is pushed-remote-only. Never imply connector reads include local state.
 
-## Scoped editing
+## Checks before review
 
-When explicitly assigned docs, workflow, or support-file edits:
+- Decide whether the question is answerable from pushed state alone or needs a Local Evidence Packet.
+- Read the owner docs named in `docs/tidy/SOURCE_OF_TRUTH_MAP.md` before judging drift.
+- Do not restate roadmap, version, phase, or architecture state from memory; cite the owner doc.
 
-- keep the diff small and reviewable;
-- update owner docs when owner truth changes;
-- keep `docs/tidy/*` support-only;
-- do not create a second roadmap, handoff, design system, version oracle, validation contract, or implementation prompt.
+## Drift checks
+
+- Do not treat `docs/tidy/*` as a source-of-truth owner.
+- When a finding changes product, roadmap, version, workflow, or design truth, route it to the owner doc, not only this support file.
+- Do not claim local validation results; validation evidence is user/controller-supplied.
