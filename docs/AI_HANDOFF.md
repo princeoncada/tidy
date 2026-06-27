@@ -5,7 +5,7 @@
 
 **Current Version**: 3.5.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.5.2 - Revert
-**Next**: 4.0 - Expo / React Native Mobile
+**Next**: 3.6.0 - Tidy Stewardship Foundation
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
