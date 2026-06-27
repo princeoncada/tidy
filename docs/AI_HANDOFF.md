@@ -1,9 +1,9 @@
-<!-- Current Version: 3.6.0-alpha -->
+<!-- Current Version: 3.6.0 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.6.0-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.6.0 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.6.0 - Tidy Stewardship Foundation
 **Next**: 3.6.1 - Repo Staleness Audit
 
