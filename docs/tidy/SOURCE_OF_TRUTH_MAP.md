@@ -1,4 +1,4 @@
-# Tidy Source-of-Truth Map
+﻿# Tidy Source-of-Truth Map
 
 Support surface for repo stewardship. This file maps where truths live so ChatGPT, Claude Code, Codex, and the user/controller can audit drift without creating duplicate owners.
 
@@ -24,7 +24,7 @@ This file is not a roadmap, handoff, design system, version oracle, implementati
 
 | Role truth | Primary owner to update | Support files that may reference it |
 | --- | --- | --- |
-| ChatGPT role and evidence boundary | `docs/WORKFLOW.md` and `AGENTS.md` | `docs/tidy/chatgpt_support_checklist.md`, `docs/tidy/STALENESS_AUDIT.md` |
+| ChatGPT role and evidence boundary | `docs/WORKFLOW.md` and `AGENTS.md` | `docs/tidy/CHATGPT_SUPPORT_CHECKLIST.md`, `docs/tidy/STALENESS_AUDIT.md` |
 | Claude Code planning/prompt-builder role | `docs/WORKFLOW.md`, `AGENTS.md`, `.claude/skills/tidy-codex-prompt-builder/SKILL.md` | `docs/tidy/CLAUDE_CODE_SUPPORT_CHECKLIST.md` |
 | Codex implementation and validation-evidence role | `docs/WORKFLOW.md`, `docs/CODEX_RULES.md`, `AGENTS.md` | `docs/tidy/CODEX_SUPPORT_CHECKLIST.md` |
 | User/controller manual-validation and closeout authority | `docs/WORKFLOW.md`, `AGENTS.md` | all support checklists |
@@ -32,3 +32,4 @@ This file is not a roadmap, handoff, design system, version oracle, implementati
 ## Stewardship rule
 
 When a support-file finding changes product truth, roadmap truth, version truth, workflow truth, or design truth, update the owner. Do not let `docs/tidy/*` become the only place that says the truth.
+
