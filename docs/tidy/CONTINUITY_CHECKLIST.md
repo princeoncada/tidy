@@ -38,7 +38,7 @@ This file is not a session log, roadmap, handoff, or implementation prompt. Norm
 - User/controller has approved required manual validation.
 - Codex validation evidence is present or the workflow explicitly says which validation remains user/controller-run.
 - `git status --short` is clean before irreversible closeout commands.
-- Any stale support findings have either been fixed in the owner doc or moved to `docs/tidy/CLEANUP_BACKLOG.md`.
+- Any stale support findings have either been fixed in the owner doc or recorded in `docs/tidy/STALENESS_AUDIT.md`.
 
 ## Workspace OS preparation gate
 
