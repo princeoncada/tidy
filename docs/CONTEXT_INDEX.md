@@ -41,6 +41,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/evals/` = committed eval definition templates (capability/regression proof); raw run logs stay local in `.tidy-ai/eval-runs/`; not source of truth
 - `ai-harness/README.md` = optional opt-in hook reference (inactive hook templates); not a startup read, not source of truth
 - `.tidy-ai/` = local-only, gitignored agent scratch and learning queue written by opt-in hooks; never committed, not a read target, not source of truth
+- `docs/tidy/*` = repo-stewardship support surface (source-of-truth map, staleness audit, cleanup backlog, continuity + per-agent support checklists); audit/support only, not a source-of-truth owner
 
 ---
 
