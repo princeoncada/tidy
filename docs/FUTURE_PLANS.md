@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.6.0 - Tidy Stewardship Foundation (active) - see Planned
 ---
 
 ## Planned
@@ -77,16 +76,6 @@ Execution discipline:
 - Keep runtime behavior unchanged unless a later phase explicitly scopes runtime cleanup.
 - Preserve clear validation evidence before closeout.
 - Do not let stewardship docs become duplicate source-of-truth docs.
-
-### 3.6.0 - Tidy Stewardship Foundation
-- **Status:** In progress
-- **Type:** docs/workflow
-- **Implementation goal:** Add a dedicated Tidy repo-stewardship support folder and initial structure for source-of-truth mapping, staleness tracking, cleanup backlog, continuity checks, and Claude/Codex/ChatGPT support. This creates the support surface used to prepare for the Workspace OS rebase.
-- **Product impact:** none directly - users see no runtime behavior change. The phase improves repository continuity and prepares the product direction shift.
-- **Runtime integration target:** none - documentation/workflow support only.
-- **Deferral boundary:** Does not implement Workspace OS behavior, change product nouns, alter runtime models, remove major deprecated docs, or change agent authority boundaries beyond introducing the support structure. Any deletion, role-boundary rewrite, or runtime-impacting cleanup discovered here must become a follow-up phase.
-- **Validation target:** Docs/workflow validation plus manual review that the new Tidy stewardship folder does not duplicate or override existing source-of-truth files. Confirm every new support document points back to canonical owner docs.
-- **Files:** `docs/tidy/*`, `docs/CONTEXT_INDEX.md`, `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md` if continuation guidance changes.
 
 ### 3.6.1 - Repo Staleness Audit
 - **Status:** Open
