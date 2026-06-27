@@ -1,4 +1,4 @@
-# Tidy Continuity Checklist
+﻿# Tidy Continuity Checklist
 
 Support surface for keeping Tidy sessions recoverable across ChatGPT, Claude Code, Codex, and the user/controller.
 
@@ -38,7 +38,7 @@ This file is not a session log, roadmap, handoff, or implementation prompt. Norm
 - User/controller has approved required manual validation.
 - Codex validation evidence is present or the workflow explicitly says which validation remains user/controller-run.
 - `git status --short` is clean before irreversible closeout commands.
-- Any stale support findings have either been fixed in the owner doc or recorded in `docs/tidy/STALENESS_AUDIT.md`.
+- Any stale support findings have either been fixed in the owner doc or moved to `docs/tidy/CLEANUP_BACKLOG.md`.
 
 ## Workspace OS preparation gate
 
@@ -47,3 +47,4 @@ Before any Workspace OS rebase phase begins:
 - ChatGPT, Claude Code, Codex, and user/controller role boundaries are reconciled in the authoritative workflow docs.
 - `docs/tidy/STALENESS_AUDIT.md` has no unresolved high-priority workflow-boundary findings.
 - The Workspace OS RFC has a single owner and does not duplicate `docs/AI_HANDOFF.md`, `docs/design.md`, or `docs/FUTURE_PLANS.md`.
+
