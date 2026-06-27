@@ -21,6 +21,13 @@ Support surface for tracking stale assumptions and drift candidates. This file r
 | Medium | `docs/AI_HANDOFF.md` | Current product snapshot still frames Tidy as an authenticated personal todo workspace. That is accurate for runtime state, but 3.6/Workspace OS planning must avoid prematurely changing runtime truth before the RFC lands. | `docs/AI_HANDOFF.md`, future RFC owner | 3.6.4 |
 | Low | `docs/tidy/*` | Support folder is new and must stay support-only. Any support finding that becomes durable truth must be moved to the owner doc. | `docs/tidy/SOURCE_OF_TRUTH_MAP.md` | ongoing |
 
+## Cleanup backlog
+
+- Capture `3.6.0 - Tidy Stewardship Foundation` through `3.6.4 - Workspace OS Rebase RFC` in `docs/FUTURE_PLANS.md` through the normal phase workflow.
+- Realign role boundaries in `AGENTS.md`, `docs/WORKFLOW.md`, and `docs/CODEX_RULES.md`.
+- Update relevant `.claude/skills/*` after owner docs are corrected.
+- Keep `docs/tidy/*` support-only.
+
 ## Audit process
 
 1. Identify the stale or duplicate truth.
