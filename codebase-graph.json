@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.5.2",
-  "generatedAt": "2026-06-27",
+  "version": "3.6.0-alpha",
+  "generatedAt": "2026-06-28",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
     "preferredCli": "graphify",
@@ -1592,6 +1592,48 @@
     },
     {
       "path": "docs/spikes/3.4.0-presence-transport-spike.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/tidy/CLAUDE_CODE_SUPPORT_CHECKLIST.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/tidy/CLEANUP_BACKLOG.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/tidy/CODEX_SUPPORT_CHECKLIST.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/tidy/CONTINUITY_CHECKLIST.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/tidy/SOURCE_OF_TRUTH_MAP.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/tidy/STALENESS_AUDIT.md",
       "kind": "documentation",
       "extension": ".md",
       "symbols": [],
