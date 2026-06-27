@@ -1,6 +1,6 @@
 {
-    "version":  "3.6.0-alpha",
-    "state":  "alpha",
+    "version":  "3.6.0",
+    "state":  "stable",
     "phase":  "3.6.0",
     "phaseTitle":  "Tidy Stewardship Foundation",
     "nextPhase":  "3.6.1 - Repo Staleness Audit",
