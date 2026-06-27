@@ -1,9 +1,9 @@
 {
-    "version":  "3.5.2",
-    "state":  "stable",
-    "phase":  "3.5.2",
-    "phaseTitle":  "Revert",
-    "nextPhase":  "3.6.0 - Tidy Stewardship Foundation",
+    "version":  "3.6.0-alpha",
+    "state":  "alpha",
+    "phase":  "3.6.0",
+    "phaseTitle":  "Tidy Stewardship Foundation",
+    "nextPhase":  "3.6.1 - Repo Staleness Audit",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-26"
+    "lastUpdated":  "2026-06-27"
 }
