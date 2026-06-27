@@ -44,41 +44,127 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 
 ## Planned
 
-**3.0 Collaboration Arc - Context (orientation, not a phase)**
+**3.6 Tidy Stewardship Arc - Context (orientation, not a phase)**
 
-Arc goal: evolve Tidy from a personal list app into a small-team PM collaboration tool, kept portfolio-grade.
+Arc goal: prepare the repository, documentation, source-of-truth map, and AI-agent workflow before the 4.0 Workspace OS product-model rebase.
 
-Architecture spine (invariant across the arc):
-- One Replicache sync spine serves both web and the future Expo/React Native client (4.0).
-- Structural sync (lists/items/board via Replicache) and ephemeral presence (cursors/typing/who-is-here) ride SEPARATE transports; presence must not be coupled into the Replicache push/pull path.
-- The existing workspace model is KEPT, not replaced.
-- UI/design is governed by docs/design.md (created in 3.0.4) as the single source of truth.
+Problem:
+- Tidy is about to shift from a todo-list productivity app into a lightweight workspace OS.
+- The repo must not carry stale todo-era assumptions, duplicate truths, unclear docs ownership, disconnected files, wrong pathing, or overloaded workflow surfaces into that pivot.
+- Claude Code, Codex, and ChatGPT support should remain grounded in current source-of-truth files and small phase discipline.
+- The agent workflow needs to be updated so ChatGPT, Claude Code, and Codex have distinct responsibilities that match the actual intended development flow.
 
-Execution discipline (anti-loop rails):
-- Spike before commit: 3.1.0 and 3.4.0 are throwaway measurement/feasibility spikes that produce the scope for the phase after them.
-- Measure before fix (3.1.1 scopes from 3.1.0); data before visualization (3.4.5 reads real synced data first).
-- Flag-gate risky product surfaces; every flag declares default, dev path, activation, and removal.
-- Done = a named proof (test or manual product proof), never "looks done".
+Source-of-truth spine:
+- `STATE.json` remains the machine-readable version/state/phase oracle.
+- `docs/FUTURE_PLANS.md` remains the roadmap owner.
+- `docs/AI_HANDOFF.md` remains the current architecture, invariant, risk, and handoff owner.
+- `docs/design.md` remains the UI/design contract owner.
+- `docs/VERSIONING.md` remains version rules and released history.
+- `docs/WORKFLOW.md` and `docs/CODEX_RULES.md` remain agent workflow and implementation boundary owners.
+- The Tidy stewardship folder maps, audits, and supports these owner docs. It must not become a competing roadmap, architecture spec, or design system.
 
-### 4.0 - Expo / React Native Mobile
+Agent responsibility target:
+- ChatGPT becomes the second-opinion provider, docs/workflow auditor, docs/skills workflow fixer based on audit findings, and future-planning assistant. ChatGPT may read code and write repo changes when explicitly working inside a scoped docs/workflow/support phase, but its primary role is still review, audit, inconsistency detection, stale-end detection, disconnected-file detection, wrong-path detection, and roadmap-support review.
+- Claude Code becomes the future-plan architect and phase-scope explainer. Claude Code should explain which files are touched, what has to happen, and the concise step-by-step pseudo-code / implementation plan Codex needs. Claude Code no longer owns final validation. Claude Code provides manual validation instructions the user must approve.
+- Codex becomes the implementation and validation agent. Codex implements from Claude Code's master prompt, runs or provides the required validation path according to the updated repo rules, reports validation evidence, and identifies any required follow-up fixes before closeout.
+- The user/controller remains the approval authority for manual product validation and closeout decisions.
+
+Execution discipline:
+- Read broadly, write surgically, delete only with evidence.
+- Classify stale materials before deleting or redirecting them.
+- Prefer small cleanup phases over one large docs purge.
+- Keep runtime behavior unchanged unless a later phase explicitly scopes runtime cleanup.
+- Preserve clear validation evidence before closeout.
+- Do not let stewardship docs become duplicate source-of-truth docs.
+
+### 3.6.0 - Tidy Stewardship Foundation
+- **Status:** Open
+- **Type:** docs/workflow
+- **Implementation goal:** Add a dedicated Tidy repo-stewardship support folder and initial structure for source-of-truth mapping, staleness tracking, cleanup backlog, continuity checks, and Claude/Codex/ChatGPT support. This creates the support surface used to prepare for the Workspace OS rebase.
+- **Product impact:** none directly - users see no runtime behavior change. The phase improves repository continuity and prepares the product direction shift.
+- **Runtime integration target:** none - documentation/workflow support only.
+- **Deferral boundary:** Does not implement Workspace OS behavior, change product nouns, alter runtime models, remove major deprecated docs, or change agent authority boundaries beyond introducing the support structure. Any deletion, role-boundary rewrite, or runtime-impacting cleanup discovered here must become a follow-up phase.
+- **Validation target:** Docs/workflow validation plus manual review that the new Tidy stewardship folder does not duplicate or override existing source-of-truth files. Confirm every new support document points back to canonical owner docs.
+- **Files:** `docs/tidy/*`, `docs/CONTEXT_INDEX.md`, `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md` if continuation guidance changes.
+
+### 3.6.1 - Repo Staleness Audit
+- **Status:** Open
+- **Type:** cleanup
+- **Implementation goal:** Audit repository documentation, scripts, workflow surfaces, deprecated materials, generated artifacts, docs/skills surfaces, source-path references, and duplicate truth surfaces. Classify each finding into clear buckets before any destructive cleanup occurs.
+- **Product impact:** none directly - users see no runtime behavior change. The phase reduces risk before the Workspace OS rebase by making stale or duplicate repository knowledge visible.
+- **Runtime integration target:** none - audit and classification only.
+- **Deferral boundary:** Does not delete or rewrite stale materials unless they are trivial, unreferenced, and clearly safe. Does not change runtime code, product behavior, or roadmap direction. Cleanup actions are deferred to 3.6.2 or later scoped phases.
+- **Validation target:** Docs/workflow validation plus manual review of the staleness audit. Confirm every finding identifies owner, current status, risk level, proposed action, affected paths, and whether a follow-up phase is required.
+- **Files:** `docs/tidy/STALENESS_AUDIT.md`, `docs/tidy/CLEANUP_BACKLOG.md`, `docs/tidy/SOURCE_OF_TRUTH_MAP.md`, `docs/CONTEXT_INDEX.md`, `docs/deprecated/*` as read targets only unless explicitly scoped, `.claude/skills/*` as read targets when workflow/skill staleness is audited.
+
+### 3.6.2 - Docs Consolidation Cleanup
+- **Status:** Open
+- **Type:** cleanup
+- **Implementation goal:** Remove, redirect, or consolidate documentation that 3.6.1 proved stale, duplicated, disconnected, incorrectly pathed, or dangerous. Update routing and handoff surfaces so future agents read current owner docs instead of stale archives.
+- **Product impact:** none directly - users see no runtime behavior change. The phase improves repo clarity and reduces stale-context risk for future implementation work.
+- **Runtime integration target:** none unless a specific stale workflow artifact requires a scoped non-runtime script/docs update.
+- **Deferral boundary:** Does not delete historical material that still explains current architecture unless a replacement pointer preserves the useful context. Does not alter product behavior, source code, schema, or tests except for explicitly scoped docs/workflow references. Any uncertain deletion must remain in the cleanup backlog.
+- **Validation target:** Docs/workflow validation plus manual link/reference review. Confirm `docs/CONTEXT_INDEX.md`, `docs/AI_HANDOFF.md`, and Tidy stewardship docs route to current owners and do not reference removed files.
+- **Files:** `docs/CONTEXT_INDEX.md`, `docs/AI_HANDOFF.md`, `docs/tidy/*`, proven-stale docs identified by 3.6.1, docs reference updates.
+
+### 3.6.3 - Agent Workflow Realignment
+- **Status:** Open
+- **Type:** docs/workflow
+- **Implementation goal:** Rewrite the Claude Code, Codex, and ChatGPT workflow model to match the intended development system: ChatGPT as second-opinion/docs-workflow auditor and future-planning assistant with scoped repo read/write support; Claude Code as future-plan architect and Codex-ready implementation explainer; Codex as implementer and validation runner/evidence reporter.
+- **Product impact:** none directly - users see no runtime behavior change. The phase improves AI-assisted development reliability before larger architecture work begins.
+- **Runtime integration target:** none - workflow documentation and skill/prompt support only.
+- **Deferral boundary:** Does not change product runtime behavior. Does not make ChatGPT the primary implementer. Does not make Claude Code the final validator. Does not allow Codex to commit, push, or close phases unless separately authorized by workflow rules. Does not weaken the requirement for user-approved manual validation before closeout.
+- **Validation target:** Docs/workflow validation plus manual review that role boundaries are consistent across workflow docs, Codex rules, source-of-truth map, handoff guidance, and skill/prompt surfaces. Confirm the new workflow clearly states who scopes, who implements, who validates automated checks, who approves manual checks, and when closeout can proceed.
+- **Files:** `docs/WORKFLOW.md`, `docs/CODEX_RULES.md`, `docs/AI_HANDOFF.md`, `docs/CONTEXT_INDEX.md`, `docs/tidy/CODEX_SUPPORT_CHECKLIST.md`, `docs/tidy/CLAUDE_CODE_SUPPORT_CHECKLIST.md`, `docs/tidy/CHATGPT_SUPPORT_CHECKLIST.md`, `docs/tidy/CONTINUITY_CHECKLIST.md`, `.claude/skills/*` if workflow skill instructions require alignment.
+
+### 3.6.4 - Workspace OS Rebase RFC
+- **Status:** Open
+- **Type:** decision
+- **Implementation goal:** Write the architecture/product RFC for moving Tidy from a todo-list productivity app into a lightweight workspace OS. Define the target product grammar, preserved technical spine, migration sequence, non-goals, and first 4.0 implementation slice.
+- **Product impact:** none directly - users see no runtime behavior change in this phase. The phase decides and documents the product identity pivot that later phases implement.
+- **Runtime integration target:** none - decision/RFC only.
+- **Deferral boundary:** Does not implement pages, projects, work-item renames, universal views, command palette, backlinks, schema changes, or UI rebase. Does not rewrite current runtime concepts before the RFC is accepted. Implementation starts in 4.0.0 or later.
+- **Validation target:** Docs/workflow validation plus manual architecture review. Confirm the RFC identifies product nouns, current-to-target mapping, preserved invariants, migration risks, data-model implications, design-system implications, agent-workflow implications, and explicit non-goals.
+- **Files:** `docs/rfcs/workspace-os-rebase.md`, `docs/tidy/WORKSPACE_OS_REBASE_NOTES.md` if retained as support notes, `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md`, `docs/design.md` if target design contracts are introduced as future targets, `docs/CONTEXT_INDEX.md`.
+
+---
+
+**4.0 Workspace OS Rebase Arc - Context (orientation, not a phase)**
+
+Arc goal: evolve Tidy from a todo-list productivity app into a lightweight workspace OS.
+
+Target direction:
+- Notion-like page/canvas experience.
+- Plane-like project/work-item grammar.
+- Tidy's existing restrained UI taste.
+- shadcn/Radix as the main component foundation.
+- Replicache as the local-first structural sync spine.
+- Yjs for collaborative document bodies.
+- Presence separate from Replicache structural sync.
+- Lightweight runtime, small vertical slices, and no bloated Notion-clone surface.
+
+Architecture spine:
+- The rebase should evolve the existing app shell, not replace it wholesale.
+- Current lists/items/views/workspaces should be mapped deliberately into future projects/pages/work-items/views rather than renamed blindly.
+- The first implementation slice should prove the new product grammar with minimal runtime disruption.
+- Source-of-truth docs must move with the runtime model: roadmap, handoff, design contracts, and context routing must stay in sync.
+
+Execution discipline:
+- Do not perform a large schema rewrite as the first move.
+- Do not rename every concept before the product model is proven.
+- Introduce the Workspace OS model through thin vertical slices.
+- Preserve current sync, auth, permissions, and local-first behavior unless a phase explicitly changes them.
+- Keep 4.0.0 focused on the product-model foundation, not every future feature.
+
+### 4.0.0 - Workspace OS Product Model Rebase
 - **Status:** Open
 - **Type:** product behavior
-- **Implementation goal:** Native mobile client on the SAME Replicache spine. Decompose into sub-phases at 4.0 scope time.
-- **Product impact:** mobile app.
-- **Runtime integration target:** Expo/React Native client shares the web sync spine.
-- **Deferral boundary:** MCP is 4.1; sub-phase breakdown deferred to 4.0 scope time.
-- **Validation target:** defined at 4.0 decomposition.
-- **Files:** TBD - new Expo/React Native surface
-
-### 4.1 - MCP Integration
-- **Status:** Open
-- **Type:** product behavior
-- **Implementation goal:** Expose Tidy via MCP. Decompose when reached.
-- **Product impact:** programmatic/agent access.
-- **Runtime integration target:** MCP server over Tidy data.
-- **Deferral boundary:** Full decomposition deferred to 4.1 scope time.
-- **Validation target:** defined at 4.1 decomposition.
-- **Files:** TBD - decompose at 4.1
+- **Implementation goal:** Start the product identity shift from todo-list productivity app to lightweight workspace OS by introducing the first runtime-supported product model changes from the Workspace OS Rebase RFC. Establish the initial current-to-target mapping for core nouns such as workspace, project/space, page, work item, and view.
+- **Product impact:** Users begin seeing Tidy as a workspace rather than only a todo/list app, through the first concrete product-model and UI changes.
+- **Runtime integration target:** The first Workspace OS slice runs on the existing authenticated dashboard shell, Replicache structural sync spine, Yjs document-body path where applicable, shadcn component foundation, and existing permission model.
+- **Deferral boundary:** Does not clone Notion or Plane wholesale. Does not ship the full page editor, universal object graph, command center, backlinks, analytics, mobile app, MCP integration, or complete schema migration unless separately scoped. Does not replace Replicache, Yjs, shadcn, or the existing auth/permission spine.
+- **Validation target:** Targeted tests for the first rebase slice plus manual product proof that the new model appears in the UI, preserves existing list/item/board behavior where still supported, and does not break sync, permissions, or local-first rendering. Design parity review against `docs/design.md` updates if visual/product contracts change.
+- **Files:** `docs/rfcs/workspace-os-rebase.md`, `docs/AI_HANDOFF.md`, `docs/design.md`, `docs/CONTEXT_INDEX.md`, relevant dashboard/product-model source files selected during phase scoping, related tests.
 
 ---
 
@@ -115,6 +201,7 @@ Superseded by pinned arc phases (pointers, not separate backlog):
 - **Roadmap renumber (2026-06-14, post-2.0.4 R9):** inserted 2.0.5 - Share Redeem Error UX Hardening ahead of the collaboration work after R9 surfaced a revoked-link redemption UX failure (unhandled rejection on the /share redeem page). Yjs Collaborative Item Notes 2.0.5 -> 2.0.6; Retire Legacy paths 2.0.6 -> 2.0.7 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
 - **Roadmap renumber (2026-06-16):** inserted 2.0.7 - Realtime Poke Send Authorization ahead of the cleanup work to fix shared-rename propagation latency (the server poke could not send because realtime.messages RLS, enabled in 2.0.6, blocks the anon key on INSERT). Retire Legacy paths 2.0.7 -> 2.0.8 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
 - **Roadmap renumber (2026-06-16, dead-config carve-out):** carved the dead `licenseKey` / `NEXT_PUBLIC_REPLICACHE_LICENSE_KEY` removal out of the retirement phase into a new small 2.0.8 - Remove Dead Replicache License Config. Retire Legacy paths 2.0.8 -> 2.0.9 (seriesComplete still flips at the renumbered Retire phase). No work item dropped; only resequenced.
+- **Roadmap redirect (2026-06-28, 3.6 Stewardship + 4.0 Workspace OS):** the old **4.0 - Expo / React Native Mobile** and **4.1 - MCP Integration** Planned phases are superseded by the new 3.6 Tidy Stewardship Arc (3.6.0-3.6.4) and the reframed 4.0 Workspace OS Rebase Arc (4.0.0). Native mobile and MCP are NOT dropped - they fold into 4.0.0's deferral boundary ("mobile app, MCP integration ... unless separately scoped") and will be rebroken into Planned phases when scoped. STATE.json nextPhase moved 4.0 -> 3.6.0 in lockstep with VERSIONING (Next phase) and AI_HANDOFF (Next). The completed 3.0-3.5 "Collaboration Arc - Context" orientation block was also dropped from Planned (its live invariants remain in docs/AI_HANDOFF.md). No work item dropped; only resequenced and reframed.
 
 ---
 
