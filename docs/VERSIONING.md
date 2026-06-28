@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.6.3
-- **Current phase:** 3.6.3 - Agent Workflow Realignment
-- **Next phase:** 3.6.4 - Workspace OS Rebase RFC
+- **Current version:** 3.6.4-alpha
+- **Current phase:** 3.6.4 - Workspace OS Rebase RFC
+- **Next phase:** 4.0.0 - Workspace OS Product Model Rebase
 
 ---
 
