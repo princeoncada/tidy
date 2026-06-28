@@ -192,8 +192,8 @@ Tidy is an authenticated personal todo workspace with Replicache-backed optimist
 
 ## Forward Arc Invariants (3.0+)
 
-The 3.0 collaboration arc context in `docs/FUTURE_PLANS.md` (3.0 Collaboration Arc) is the owner; this is the implementer-facing pointer:
-- One Replicache sync spine serves both web and the future Expo/React Native client (4.0); do not fork a second structural-sync path.
+These are the durable runtime invariants carried forward from the completed 3.0-3.5 collaboration arc (version history in `docs/VERSIONING.md`); forward product direction is owned by the 4.0 Workspace OS Rebase Arc in `docs/FUTURE_PLANS.md`. This is the implementer-facing pointer:
+- One Replicache sync spine is the sole structural-sync path; do not fork a second structural-sync path. A future native/mobile client is deferred 4.0 Workspace OS work (see the 4.0 Workspace OS Rebase Arc deferral boundary in `docs/FUTURE_PLANS.md`) and must reuse this spine rather than introduce a parallel one.
 - Structural sync (lists/items/board via Replicache) and ephemeral presence (cursors/typing/who-is-here) ride SEPARATE transports. Presence must not be coupled into the Replicache push/pull path.
 - The existing workspace model is KEPT, not replaced.
 - From 3.0.4, UI/design is governed by `docs/design.md` as the single source of truth.
