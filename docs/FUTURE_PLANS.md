@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.6.2 - Docs Consolidation Cleanup (active) - see Planned
 ---
 
 ## Planned
@@ -77,16 +76,6 @@ Execution discipline:
 - Keep runtime behavior unchanged unless a later phase explicitly scopes runtime cleanup.
 - Preserve clear validation evidence before closeout.
 - Do not let stewardship docs become duplicate source-of-truth docs.
-
-### 3.6.2 - Docs Consolidation Cleanup
-- **Status:** In progress
-- **Type:** cleanup
-- **Implementation goal:** Remove, redirect, or consolidate documentation that 3.6.1 proved stale, duplicated, disconnected, incorrectly pathed, or dangerous. Update routing and handoff surfaces so future agents read current owner docs instead of stale archives.
-- **Product impact:** none directly - users see no runtime behavior change. The phase improves repo clarity and reduces stale-context risk for future implementation work.
-- **Runtime integration target:** none unless a specific stale workflow artifact requires a scoped non-runtime script/docs update.
-- **Deferral boundary:** Does not delete historical material that still explains current architecture unless a replacement pointer preserves the useful context. Does not alter product behavior, source code, schema, or tests except for explicitly scoped docs/workflow references. Any uncertain deletion must remain in the cleanup backlog.
-- **Validation target:** Docs/workflow validation plus manual link/reference review. Confirm `docs/CONTEXT_INDEX.md`, `docs/AI_HANDOFF.md`, and Tidy stewardship docs route to current owners and do not reference removed files.
-- **Files:** `docs/CONTEXT_INDEX.md`, `docs/AI_HANDOFF.md`, `docs/tidy/*`, proven-stale docs identified by 3.6.1, docs reference updates.
 
 ### 3.6.3 - Agent Workflow Realignment
 - **Status:** Open
