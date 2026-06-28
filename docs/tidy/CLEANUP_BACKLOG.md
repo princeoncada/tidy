@@ -14,6 +14,8 @@ This file is not the roadmap. Accepted phase sequencing belongs in `docs/FUTURE_
 
 ## Immediate backlog
 
+- Done (3.6.2): retired the `docs/deprecated/*` legacy archive (25 files) after per-file supersession verification, reconciled the `docs/AI_HANDOFF.md` forward-arc wording, and updated routing/roadmap references.
+
 1. Done (3.6.0): captured the 3.6 stewardship arc in `docs/FUTURE_PLANS.md` through the normal versioning workflow.
 2. Realign role boundaries in `AGENTS.md`, `docs/WORKFLOW.md`, and `docs/CODEX_RULES.md`.
 3. Update `.claude/skills/tidy-codex-prompt-builder/SKILL.md` after the owner docs change.
