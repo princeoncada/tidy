@@ -8,27 +8,29 @@ This file governs how Claude Code and Codex operate together in Tidy. Session st
 
 ## Roles
 
-Three roles operate together: Claude Code architects, scopes, plans, validates, and writes Codex prompts; Codex is the boosted implementer; ChatGPT reviews. This section is the authoritative role-boundary definition; the ChatGPT Reviewer Mode subsection below adds only the evidence/review mechanics.
+Four roles operate together: Claude Code is the future-plan architect and Codex-ready implementation explainer; Codex implements and runs the automated validation, reporting the evidence; ChatGPT is the second-opinion provider and docs/workflow auditor; the user/controller owns manual product validation and closeout. This section is the authoritative role-boundary definition; the ChatGPT Reviewer Mode subsection below adds only the evidence/review mechanics.
 
-### Claude Code (Architecture, Scoping, Planning, Validation, Prompt Building)
+### Claude Code (Future-Plan Architecture, Scoping, Implementation Explanation, Prompt Building)
 
-Claude Code is the **architecture, scoping, planning, validation, and prompt-building layer**. It designs the approach, decides phase scope, plans the work, reads project state, writes Codex prompts, validates output, and provides commit blocks for the user to run. It has direct local access and self-gathers local evidence.
+Claude Code is the **future-plan architect and Codex-ready implementation-explanation layer**. It designs the approach, decides phase scope, plans the work, reads project state, and writes Codex prompts that explain which files are touched, what has to happen, and the concise step-by-step implementation plan Codex needs. It provides the manual validation instructions the user/controller must approve, and provides commit blocks for the user to run. It has direct local access and self-gathers local evidence.
 
-Claude Code does **not**: implement code, commit, push, run `npm run test:ci`, create branches, or run validation scripts.
+Claude Code **no longer owns final validation**: it does not judge automated pass/fail as the deciding authority. Codex runs and reports the automated validation evidence; the user/controller approves the manual product proof and owns closeout.
+
+Claude Code does **not**: implement code, commit, push, run `npm run test:ci`, create branches, run validation scripts, or close/promote phases.
 
 **Exception**: Claude Code may implement directly only when explicitly unlocked with the [Implementation Gate](#implementation-gate) phrase.
 
-### Codex (Boosted Implementation)
+### Codex (Implementation and Validation Evidence)
 
-Codex is the **boosted implementation layer**. It reads docs, reads the directly relevant source files, edits source files from Claude Code's prompt, and summarizes what changed.
+Codex is the **implementation and validation-evidence layer**. It reads docs, reads the directly relevant source files, edits source files from Claude Code's prompt, runs the required automated validation (unit/typecheck/lint, `.\scripts\validate.ps1`, and the graph refresh/audit the change requires), reports the raw validation evidence, and names any required follow-up fixes before closeout.
 
-Codex does **not**: commit, push, run `npm run test:ci`, create branches, run validation scripts, run npm scripts, run graph audit commands, or claim validation results unless the user/controller provided the output.
+Codex does **not**: commit, push, create branches, run git commands, run the version or closeout scripts (`.\scripts\open-phase.ps1`, `.\scripts\promote.ps1`), modify any versioning location, close/promote phases, or claim manual-proof or closeout results. It reports only the automated validation it actually ran, with real output, and never fabricates results.
 
-### ChatGPT (Review)
+### ChatGPT (Second Opinion and Docs/Workflow Audit)
 
-ChatGPT is the **review layer**: reviewer, weak-point finder, and handoff reviewer. It reviews the approach, plan, and Codex prompts, surfaces risks, gaps, and weak points, and reviews handoffs, working from pushed GitHub state plus pasted local evidence; it has no direct local access. It does not decide phase scope or write Codex prompts - Claude Code owns that. See ChatGPT Reviewer Mode below for the evidence-packet mechanics.
+ChatGPT is the **second-opinion and docs/workflow-audit layer**: reviewer, weak-point finder, inconsistency/stale-end/disconnected-file/wrong-path detector, handoff reviewer, and future-planning assistant. It reviews the approach, plan, and Codex prompts, surfaces risks, gaps, and weak points, and reviews handoffs, working from pushed GitHub state plus pasted local evidence; it has no direct local access. It may read code and write repo changes only when explicitly working inside a scoped docs/workflow/support phase; its primary role stays review and audit. It does not decide phase scope or write Codex prompts - Claude Code owns that. See ChatGPT Reviewer Mode below for the evidence-packet mechanics.
 
-ChatGPT does **not**: read the local working tree directly, run commands, edit files, scope phases, write Codex prompts, or claim local/validation results that were not pasted to it.
+ChatGPT does **not**: read the local working tree directly, run commands outside a scoped support phase, scope phases, write Codex prompts, or claim local/validation results that were not pasted to it.
 
 ---
 
@@ -345,8 +347,8 @@ Every requirement is mandatory. Do not skip, defer, or partially implement.
 
 SAFETY CONSTRAINTS:
 
-- Do not commit, push, or create branches
-- Do not run npm scripts, git commands, or validation scripts
+- Do not commit, push, create branches, or run git commands
+- Run the required automated validation (unit/typecheck/lint, validate.ps1, and the graph refresh/audit the change requires) and report the raw output; do not run the version or closeout scripts (open-phase.ps1, promote.ps1) and do not modify any versioning location
 - Do not modify app/generated/prisma
 - Do not touch unrelated files
 - [phase-specific constraints]
@@ -359,8 +361,8 @@ After completing all changes, stop and provide:
 1. Files created (path + one-sentence purpose)
 2. Files modified (path + what changed)
 3. Whether app behavior changed
-4. Validation not run by Codex
-5. Commands for the user/controller to run next
+4. Automated validation evidence: the validation commands Codex ran and their raw output (or, for any required check Codex could not run, which one and why), plus any follow-up fixes
+5. The manual validation and closeout actions that remain for the user/controller (manual product proof, commit, merge, promote, push)
 ```
 
 ### Section 2 - Validation
