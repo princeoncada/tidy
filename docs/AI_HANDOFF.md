@@ -1,9 +1,9 @@
-<!-- Current Version: 3.6.2-alpha -->
+<!-- Current Version: 3.6.2 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.6.2-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.6.2 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.6.2 - Docs Consolidation Cleanup
 **Next**: 3.6.3 - Agent Workflow Realignment
 
