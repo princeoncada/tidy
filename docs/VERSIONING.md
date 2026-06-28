@@ -105,7 +105,7 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.6.1-alpha
+- **Current version:** 3.6.1
 - **Current phase:** 3.6.1 - Repo Staleness Audit
 - **Next phase:** 3.6.2 - Docs Consolidation Cleanup
 
@@ -340,6 +340,7 @@ Phase log: `docs/PHASE_LOG.md` (Phase 3 section)
 | 3.5.1 | 2026-06-26 | Time-Travel Read | product behavior | user-visible history view (read-only). | history reads the ledger. | targeted + manual product proof (view past state). | components/history/*, lib/* | Read-only time-travel/history view over the 3.5.0 ledger. |
 | 3.5.2 | 2026-06-26 | Revert | product behavior | user-visible revert. | revert writes through the Replicache spine. | targeted + manual product proof (revert + sync). | lib/sync/*, components/history/* | Revert-to-a-prior-state action built on the ledger + time-travel read. |
 | 3.6.0 | 2026-06-27 | Tidy Stewardship Foundation | docs/workflow | none directly - users see no runtime behavior change. The phase improves repository continuity and prepares the product direction shift. | none - documentation/workflow support only. | Docs/workflow validation plus manual review that the new Tidy stewardship folder does not duplicate or override existing source-of-truth files. Confirm every new support document points back to canonical owner docs. | `docs/tidy/*`, `docs/CONTEXT_INDEX.md`, `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md` if continuation guidance changes. | Add a dedicated Tidy repo-stewardship support folder and initial structure for source-of-truth mapping, staleness tracking, cleanup backlog, continuity checks, and Claude/Codex/ChatGPT support. This creates the support surface used to prepare for the Workspace OS rebase. |
+| 3.6.1 | 2026-06-28 | Repo Staleness Audit | cleanup | none directly - users see no runtime behavior change. The phase reduces risk before the Workspace OS rebase by making stale or duplicate repository knowledge visible. | none - audit and classification only. | Docs/workflow validation plus manual review of the staleness audit. Confirm every finding identifies owner, current status, risk level, proposed action, affected paths, and whether a follow-up phase is required. | `docs/tidy/STALENESS_AUDIT.md`, `docs/tidy/CLEANUP_BACKLOG.md`, `docs/tidy/SOURCE_OF_TRUTH_MAP.md`, `docs/CONTEXT_INDEX.md`, `docs/deprecated/*` as read targets only unless explicitly scoped, `.claude/skills/*` as read targets when workflow/skill staleness is audited. | Audit repository documentation, scripts, workflow surfaces, deprecated materials, generated artifacts, docs/skills surfaces, source-path references, and duplicate truth surfaces. Classify each finding into clear buckets before any destructive cleanup occurs. |
 
 ---
 
