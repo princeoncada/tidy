@@ -1,11 +1,11 @@
-<!-- Current Version: 3.6.3 -->
+<!-- Current Version: 3.6.4-alpha -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.6.3 - read `STATE.json` for the machine-readable oracle.
-**Current Phase**: 3.6.3 - Agent Workflow Realignment
-**Next**: 3.6.4 - Workspace OS Rebase RFC
+**Current Version**: 3.6.4-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Phase**: 3.6.4 - Workspace OS Rebase RFC
+**Next**: 4.0.0 - Workspace OS Product Model Rebase
 
 Use these source-of-truth pointers instead of treating this file as a full history dump:
 - `STATE.json` - version, state, phase, phase title, next phase.
