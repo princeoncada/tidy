@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.6.2 - Docs Consolidation Cleanup (active) - see Planned
 ---
 
 ## Planned
@@ -78,7 +79,7 @@ Execution discipline:
 - Do not let stewardship docs become duplicate source-of-truth docs.
 
 ### 3.6.2 - Docs Consolidation Cleanup
-- **Status:** Open
+- **Status:** In progress
 - **Type:** cleanup
 - **Implementation goal:** Remove, redirect, or consolidate documentation that 3.6.1 proved stale, duplicated, disconnected, incorrectly pathed, or dangerous. Update routing and handoff surfaces so future agents read current owner docs instead of stale archives.
 - **Product impact:** none directly - users see no runtime behavior change. The phase improves repo clarity and reduces stale-context risk for future implementation work.
