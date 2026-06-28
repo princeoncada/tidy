@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.6.1 - Repo Staleness Audit (active) - see Planned
 ---
 
 ## Planned
@@ -78,7 +79,7 @@ Execution discipline:
 - Do not let stewardship docs become duplicate source-of-truth docs.
 
 ### 3.6.1 - Repo Staleness Audit
-- **Status:** Open
+- **Status:** In progress
 - **Type:** cleanup
 - **Implementation goal:** Audit repository documentation, scripts, workflow surfaces, deprecated materials, generated artifacts, docs/skills surfaces, source-path references, and duplicate truth surfaces. Classify each finding into clear buckets before any destructive cleanup occurs.
 - **Product impact:** none directly - users see no runtime behavior change. The phase reduces risk before the Workspace OS rebase by making stale or duplicate repository knowledge visible.

@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.6.0
-- **Current phase:** 3.6.0 - Tidy Stewardship Foundation
-- **Next phase:** 3.6.1 - Repo Staleness Audit
+- **Current version:** 3.6.1-alpha
+- **Current phase:** 3.6.1 - Repo Staleness Audit
+- **Next phase:** 3.6.2 - Docs Consolidation Cleanup
 
 ---
 

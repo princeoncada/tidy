@@ -10,23 +10,26 @@ Support surface for tracking stale assumptions and drift candidates. This file r
 
 ## Current audit findings
 
-| Priority | Surface | Finding | Owner to fix | Suggested phase |
-| --- | --- | --- | --- | --- |
-| High | `docs/WORKFLOW.md` Roles | Current text says Claude Code architects/scopes/plans/validates and writes prompts. The new model says Claude Code is the future-plan architect and Codex-ready implementation explainer, not the final validator. | `docs/WORKFLOW.md`, `AGENTS.md` | 3.6.3 |
-| High | `AGENTS.md` Roles and Implementation Gate | Current text says Claude Code scopes/plans/validates and writes Codex prompts; it also says Codex does not run validation. The new model needs Codex as implementation + validation-evidence agent and user/controller as manual-validation/closeout authority. | `AGENTS.md`, `docs/WORKFLOW.md`, `docs/CODEX_RULES.md` | 3.6.3 |
-| High | `docs/CODEX_RULES.md` Validation Boundary | Current boundary states validation is user/controller-run and Codex must not execute validation. The new role model needs a deliberate rewrite that says which validations Codex may run or provide, which remain controller-run, and how evidence is reported. | `docs/CODEX_RULES.md`, `docs/WORKFLOW.md` | 3.6.3 |
-| Medium | `.claude/skills/tidy-codex-prompt-builder/SKILL.md` | Skill still prohibits telling Codex to run validation and bakes in current branch/open/validation sequencing. It should be realigned only after authoritative workflow docs are updated. | `.claude/skills/tidy-codex-prompt-builder/SKILL.md` | 3.6.3 |
-| Medium | `.claude/skills/tidy-validation-judge/SKILL.md` | Skill assumes user-pasted validation/status evidence and says it never runs validation. Reconcile after the Codex validation-evidence boundary is rewritten. | `.claude/skills/tidy-validation-judge/SKILL.md` | 3.6.3 |
-| Medium | `docs/FUTURE_PLANS.md` | Current first Planned item is `4.0 - Expo / React Native Mobile`. The requested near-term stewardship arc inserts `3.6.0` through `3.6.4` before the Workspace OS rebase. Roadmap capture must update FUTURE_PLANS and matching next-phase pointers through the normal versioning rules. | `docs/FUTURE_PLANS.md`, `STATE.json`, `docs/AI_HANDOFF.md`, `docs/VERSIONING.md` as applicable | 3.6.0 |
-| Medium | `docs/AI_HANDOFF.md` | Current product snapshot still frames Tidy as an authenticated personal todo workspace. That is accurate for runtime state, but 3.6/Workspace OS planning must avoid prematurely changing runtime truth before the RFC lands. | `docs/AI_HANDOFF.md`, future RFC owner | 3.6.4 |
-| Low | `docs/tidy/*` | Support folder is new and must stay support-only. Any support finding that becomes durable truth must be moved to the owner doc. | `docs/tidy/SOURCE_OF_TRUTH_MAP.md` | ongoing |
+| Priority | Surface | Finding | Owner | Proposed action | Status | Follow-up phase |
+| --- | --- | --- | --- | --- | --- | --- |
+| High | `docs/WORKFLOW.md` Roles | Current text says Claude Code architects/scopes/plans/validates and writes prompts. The new model says Claude Code is the future-plan architect and Codex-ready implementation explainer, not the final validator. | `docs/WORKFLOW.md`, `AGENTS.md` | Rewrite the Claude Code role to future-plan architect / implementation explainer that no longer owns final validation. Record only; do not edit the owner doc in this phase. | Open - deferred | 3.6.3 |
+| High | `AGENTS.md` Roles and Implementation Gate | Current text says Claude Code scopes/plans/validates and writes Codex prompts; it also says Codex does not run validation. The new model needs Codex as implementation + validation-evidence agent and user/controller as manual-validation/closeout authority. | `AGENTS.md`, `docs/WORKFLOW.md`, `docs/CODEX_RULES.md` | Rewrite the role split so Codex owns implementation + validation evidence and the user/controller owns manual validation and closeout. Record only; do not edit yet. | Open - deferred | 3.6.3 |
+| High | `docs/CODEX_RULES.md` Validation Boundary | Current boundary states validation is user/controller-run and Codex must not execute validation. The new role model needs a deliberate rewrite that says which validations Codex may run or provide, which remain controller-run, and how evidence is reported. | `docs/CODEX_RULES.md`, `docs/WORKFLOW.md` | Rewrite the validation boundary to define which validations Codex may run/provide, which stay controller-run, and how evidence is reported. Record only; do not edit yet. | Open - deferred | 3.6.3 |
+| Medium | `.claude/skills/tidy-codex-prompt-builder/SKILL.md` | Skill still prohibits telling Codex to run validation and bakes in current branch/open/validation sequencing. It should be realigned only after authoritative workflow docs are updated. | `.claude/skills/tidy-codex-prompt-builder/SKILL.md` | Realign the skill only after the owner workflow docs are rewritten. Record only; do not edit yet. | Open - deferred | 3.6.3 |
+| Medium | `.claude/skills/tidy-validation-judge/SKILL.md` | Skill assumes user-pasted validation/status evidence and says it never runs validation. Reconcile after the Codex validation-evidence boundary is rewritten. | `.claude/skills/tidy-validation-judge/SKILL.md` | Reconcile the skill after the Codex validation-evidence boundary is rewritten. Record only; do not edit yet. | Open - deferred | 3.6.3 |
+| Medium | `docs/FUTURE_PLANS.md` | Current first Planned item is `4.0 - Expo / React Native Mobile`. The requested near-term stewardship arc inserts `3.6.0` through `3.6.4` before the Workspace OS rebase. Roadmap capture must update FUTURE_PLANS and matching next-phase pointers through the normal versioning rules. | `docs/FUTURE_PLANS.md`, `STATE.json`, `docs/AI_HANDOFF.md`, `docs/VERSIONING.md` | 3.6 stewardship arc (3.6.0-3.6.4) captured in FUTURE_PLANS with matching STATE/handoff/versioning pointers; the old 4.0 Expo/RN and 4.1 MCP items were superseded into the 4.0 Workspace OS deferral boundary. No further action. | Resolved in 3.6.0 | none |
+| Medium | `docs/AI_HANDOFF.md` | Current product snapshot still frames Tidy as an authenticated personal todo workspace. That is accurate for runtime state, but 3.6/Workspace OS planning must avoid prematurely changing runtime truth before the RFC lands. | `docs/AI_HANDOFF.md`, future RFC owner | Keep the current todo-runtime snapshot truthful; do not pre-change runtime framing before the Workspace OS RFC lands. Record only. | Open - deferred | 3.6.4 |
+| Medium | `docs/deprecated/*` legacy archive | The legacy archive still contains old reverse-engineering, prompt-template, optimistic-sync, task-routing, testing, and validation docs. `docs/FUTURE_PLANS.md` already identifies this archive as a retirement candidate after per-file supersession checks. | `docs/deprecated/*`, `docs/CONTEXT_INDEX.md`, `docs/FUTURE_PLANS.md` | Verify each deprecated file against live owner docs, then retire, redirect, or retain with an explicit pointer during docs consolidation. Record only; do not delete in this phase. | Open - deferred | 3.6.2 |
+| Medium | `scripts/export-chatgpt-review-context.ps1` | The ChatGPT evidence-packet script still prints stale role/phase copy, including "ChatGPT Architect Mode" and an old `1.4.0` scoping instruction, while the current model is ChatGPT reviewer/stewardship support. | `scripts/export-chatgpt-review-context.ps1`, `docs/WORKFLOW.md` | Realign the support packet copy with the 3.6.3 role model after authoritative workflow docs are updated. Record only; do not edit scripts in this phase. | Open - deferred | 3.6.3 |
+| Medium | `docs/AI_HANDOFF.md` Forward Arc Invariants | The forward-arc invariant still names a future Expo/React Native client as `4.0`, but `docs/FUTURE_PLANS.md` now redirects old mobile/MCP phases into the Workspace OS deferral boundary. | `docs/AI_HANDOFF.md`, `docs/FUTURE_PLANS.md` | Reconcile the forward-arc wording so current runtime invariants remain truthful while mobile/MCP are framed as deferred Workspace OS work. Record only; do not edit owner docs in this phase. | Open - deferred | 3.6.2 |
+| Low | `docs/tidy/*` | Support folder is new and must stay support-only. Any support finding that becomes durable truth must be moved to the owner doc. | `docs/tidy/SOURCE_OF_TRUTH_MAP.md` | Keep docs/tidy/* support-only; move any durable truth to its owner doc as it arises. | Open - ongoing | ongoing |
 
 ## Cleanup backlog
 
-- Capture `3.6.0 - Tidy Stewardship Foundation` through `3.6.4 - Workspace OS Rebase RFC` in `docs/FUTURE_PLANS.md` through the normal phase workflow.
-- Realign role boundaries in `AGENTS.md`, `docs/WORKFLOW.md`, and `docs/CODEX_RULES.md`.
-- Update relevant `.claude/skills/*` after owner docs are corrected.
-- Keep `docs/tidy/*` support-only.
+- Done (3.6.0): captured `3.6.0 - Tidy Stewardship Foundation` through `3.6.4 - Workspace OS Rebase RFC` in `docs/FUTURE_PLANS.md` through the normal phase workflow.
+- Realign role boundaries in `AGENTS.md`, `docs/WORKFLOW.md`, and `docs/CODEX_RULES.md` (deferred to 3.6.3).
+- Update relevant `.claude/skills/*` after owner docs are corrected (deferred to 3.6.3).
+- Keep `docs/tidy/*` support-only (ongoing).
 
 ## Audit process
 
@@ -36,8 +39,14 @@ Support surface for tracking stale assumptions and drift candidates. This file r
 4. Patch the owner, not only this support file.
 5. Leave this file with either `Resolved in <version>` or a remaining backlog pointer.
 
-## Not yet audited
+## Audited in 3.6.1
 
-- `docs/deprecated/*` legacy archive.
-- Older session logs and phase logs; these are historical audit only and should not be treated as active guidance.
-- All `.claude/skills/*` beyond prompt-builder, validation-judge, and minimal-handoff.
+- `docs/deprecated/*` legacy archive: new findings-table row added for per-file consolidation or retirement in 3.6.2.
+- `scripts/` (commit/open-phase/promote/validate + generators): core phase/version/validation/generator scripts audited clean; new findings-table row added for stale ChatGPT support-packet copy in `scripts/export-chatgpt-review-context.ps1`.
+- `app/generated/prisma`: generated output, excluded from stewardship edits; audited clean - generated banner confirms "Do not edit directly."
+- Source-path references in `docs/tidy/*` and the docs root: new findings-table row added for stale `docs/AI_HANDOFF.md` forward-arc mobile `4.0` wording; no stewardship edit to owner docs in this phase.
+- Remaining `.claude/skills/*` beyond prompt-builder, validation-judge, and minimal-handoff: audited clean - no additional stale role, validation, or prompt-boundary finding beyond existing rows.
+
+## Deferred (historical, out of scope)
+
+- Older session logs and phase logs are historical audit only and are not active guidance; no stewardship edit in this arc.
