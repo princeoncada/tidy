@@ -36,6 +36,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/SESSION_LOG.md` = session log index/pointer only, not active guidance
 - `docs/NEW_CHATHEAD_OPENER.md` = standard next-chat opener reference only, not active guidance
 - `docs/DECISIONS.md` = durable architecture decisions
+- `docs/rfcs/` = accepted architecture/product RFCs scoping future arcs (e.g. the Workspace OS rebase); decision records, not runtime source of truth
 - `codebase-graph.json` = routing/orientation only, not source of truth
 - `.claude/skills/` = operational Claude Code procedures (real skills); execution layer, not source of truth; loaded by Claude Code only, not by ChatGPT/Codex
 - `docs/evals/` = committed eval definition templates (capability/regression proof); raw run logs stay local in `.tidy-ai/eval-runs/`; not source of truth
@@ -94,6 +95,7 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 ### Architecture Decision
 
 - `docs/DECISIONS.md`
+- `docs/rfcs/` for an accepted RFC scoping a future arc
 - `docs/AI_HANDOFF.md` if current architecture invariants are affected
 - `docs/FUTURE_PLANS.md` if follow-up roadmap work is needed
 
