@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.6.4 - Workspace OS Rebase RFC (active) - see Planned
 ---
 
 ## Planned
@@ -77,45 +76,6 @@ Execution discipline:
 - Keep runtime behavior unchanged unless a later phase explicitly scopes runtime cleanup.
 - Preserve clear validation evidence before closeout.
 - Do not let stewardship docs become duplicate source-of-truth docs.
-
-### 3.6.4 - Workspace OS Rebase RFC
-- **Status:** In progress
-- **Type:** decision
-- **Implementation goal:** Write the architecture/product RFC for moving Tidy from a todo-list productivity app into a lightweight workspace OS. Define the target product grammar, preserved technical spine, migration sequence, non-goals, and first 4.0 implementation slice.
-- **Product impact:** none directly - users see no runtime behavior change in this phase. The phase decides and documents the product identity pivot that later phases implement.
-- **Runtime integration target:** none - decision/RFC only.
-- **Deferral boundary:** Does not implement pages, projects, work-item renames, universal views, command palette, backlinks, schema changes, or UI rebase. Does not rewrite current runtime concepts before the RFC is accepted. Implementation starts in 4.0.0 or later.
-- **Validation target:** Docs/workflow validation plus manual architecture review. Confirm the RFC identifies product nouns, current-to-target mapping, preserved invariants, migration risks, data-model implications, design-system implications, agent-workflow implications, and explicit non-goals.
-- **Files:** `docs/rfcs/workspace-os-rebase.md`, `docs/tidy/WORKSPACE_OS_REBASE_NOTES.md` if retained as support notes, `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md`, `docs/design.md` if target design contracts are introduced as future targets, `docs/CONTEXT_INDEX.md`.
-
-**4.0 Workspace OS Rebase Arc - Context (orientation, not a phase)**
-
-Arc goal: evolve Tidy from a todo-list productivity app into a lightweight workspace OS.
-
-RFC: the architecture/product decision for this arc is owned by `docs/rfcs/workspace-os-rebase.md` (authored in 3.6.4). It is the single source for target product grammar, current-to-target noun mapping, preserved spine, migration sequence, and the first 4.0.0 slice; this arc context stays orientation-only and does not duplicate it.
-
-Target direction:
-- Notion-like page/canvas experience.
-- Plane-like project/work-item grammar.
-- Tidy's existing restrained UI taste.
-- shadcn/Radix as the main component foundation.
-- Replicache as the local-first structural sync spine.
-- Yjs for collaborative document bodies.
-- Presence separate from Replicache structural sync.
-- Lightweight runtime, small vertical slices, and no bloated Notion-clone surface.
-
-Architecture spine:
-- The rebase should evolve the existing app shell, not replace it wholesale.
-- Current lists/items/views/workspaces should be mapped deliberately into future projects/pages/work-items/views rather than renamed blindly.
-- The first implementation slice should prove the new product grammar with minimal runtime disruption.
-- Source-of-truth docs must move with the runtime model: roadmap, handoff, design contracts, and context routing must stay in sync.
-
-Execution discipline:
-- Do not perform a large schema rewrite as the first move.
-- Do not rename every concept before the product model is proven.
-- Introduce the Workspace OS model through thin vertical slices.
-- Preserve current sync, auth, permissions, and local-first behavior unless a phase explicitly changes them.
-- Keep 4.0.0 focused on the product-model foundation, not every future feature.
 
 ### 4.0.0 - Workspace OS Product Model Rebase
 - **Status:** Open
