@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.6.2 - Docs Consolidation Cleanup (active) - see Planned
 ---
 
 ## Planned
@@ -78,7 +79,7 @@ Execution discipline:
 - Do not let stewardship docs become duplicate source-of-truth docs.
 
 ### 3.6.2 - Docs Consolidation Cleanup
-- **Status:** Open
+- **Status:** In progress
 - **Type:** cleanup
 - **Implementation goal:** Remove, redirect, or consolidate documentation that 3.6.1 proved stale, duplicated, disconnected, incorrectly pathed, or dangerous. Update routing and handoff surfaces so future agents read current owner docs instead of stale archives.
 - **Product impact:** none directly - users see no runtime behavior change. The phase improves repo clarity and reduces stale-context risk for future implementation work.
@@ -163,7 +164,6 @@ Assigned a version only when scoped.
 - Mobile/touch drag-drop + responsive QA (components/list/*)
 - Accessibility + UI polish pass (folds into 3.2.x design-token + shell work when scoped)
 - Migration/backfill playbook (prisma/schema.prisma, prisma/migrations/*)
-- Retire the remaining docs/deprecated/* legacy archive (~25 files: the 00-16 reverse-engineering set plus app-reverse-engineering, codex-prompt-template, optimistic-updates, task-routing-guide, testing, and testing-validation docs) after per-file verification that each is superseded by a live owner; backlog.md and phase-1-dexie-foundation.md were already removed in 3.0.2. Resolve README.md in the same pass (sync or retire).
 
 Superseded by pinned arc phases (pointers, not separate backlog):
 - Finer-grained shared-list collaboration - sharing owner tags/custom views with recipients, and letting recipients reorder shared lists within their own organization - is owned by 3.4.2 (Collaboration & Sharing UX).

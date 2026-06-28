@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.6.1
-- **Current phase:** 3.6.1 - Repo Staleness Audit
-- **Next phase:** 3.6.2 - Docs Consolidation Cleanup
+- **Current version:** 3.6.2-alpha
+- **Current phase:** 3.6.2 - Docs Consolidation Cleanup
+- **Next phase:** 3.6.3 - Agent Workflow Realignment
 
 ---
 

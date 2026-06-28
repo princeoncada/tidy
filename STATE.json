@@ -1,9 +1,9 @@
 {
-    "version":  "3.6.1",
-    "state":  "stable",
-    "phase":  "3.6.1",
-    "phaseTitle":  "Repo Staleness Audit",
-    "nextPhase":  "3.6.2 - Docs Consolidation Cleanup",
+    "version":  "3.6.2-alpha",
+    "state":  "alpha",
+    "phase":  "3.6.2",
+    "phaseTitle":  "Docs Consolidation Cleanup",
+    "nextPhase":  "3.6.3 - Agent Workflow Realignment",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-28"
 }
