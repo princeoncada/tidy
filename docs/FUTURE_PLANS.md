@@ -88,11 +88,11 @@ Execution discipline:
 - **Validation target:** Docs/workflow validation plus manual architecture review. Confirm the RFC identifies product nouns, current-to-target mapping, preserved invariants, migration risks, data-model implications, design-system implications, agent-workflow implications, and explicit non-goals.
 - **Files:** `docs/rfcs/workspace-os-rebase.md`, `docs/tidy/WORKSPACE_OS_REBASE_NOTES.md` if retained as support notes, `docs/FUTURE_PLANS.md`, `docs/AI_HANDOFF.md`, `docs/design.md` if target design contracts are introduced as future targets, `docs/CONTEXT_INDEX.md`.
 
----
-
 **4.0 Workspace OS Rebase Arc - Context (orientation, not a phase)**
 
 Arc goal: evolve Tidy from a todo-list productivity app into a lightweight workspace OS.
+
+RFC: the architecture/product decision for this arc is owned by `docs/rfcs/workspace-os-rebase.md` (authored in 3.6.4). It is the single source for target product grammar, current-to-target noun mapping, preserved spine, migration sequence, and the first 4.0.0 slice; this arc context stays orientation-only and does not duplicate it.
 
 Target direction:
 - Notion-like page/canvas experience.
