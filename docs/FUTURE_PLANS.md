@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.6.1 - Repo Staleness Audit (active) - see Planned
 ---
 
 ## Planned
@@ -77,16 +76,6 @@ Execution discipline:
 - Keep runtime behavior unchanged unless a later phase explicitly scopes runtime cleanup.
 - Preserve clear validation evidence before closeout.
 - Do not let stewardship docs become duplicate source-of-truth docs.
-
-### 3.6.1 - Repo Staleness Audit
-- **Status:** In progress
-- **Type:** cleanup
-- **Implementation goal:** Audit repository documentation, scripts, workflow surfaces, deprecated materials, generated artifacts, docs/skills surfaces, source-path references, and duplicate truth surfaces. Classify each finding into clear buckets before any destructive cleanup occurs.
-- **Product impact:** none directly - users see no runtime behavior change. The phase reduces risk before the Workspace OS rebase by making stale or duplicate repository knowledge visible.
-- **Runtime integration target:** none - audit and classification only.
-- **Deferral boundary:** Does not delete or rewrite stale materials unless they are trivial, unreferenced, and clearly safe. Does not change runtime code, product behavior, or roadmap direction. Cleanup actions are deferred to 3.6.2 or later scoped phases.
-- **Validation target:** Docs/workflow validation plus manual review of the staleness audit. Confirm every finding identifies owner, current status, risk level, proposed action, affected paths, and whether a follow-up phase is required.
-- **Files:** `docs/tidy/STALENESS_AUDIT.md`, `docs/tidy/CLEANUP_BACKLOG.md`, `docs/tidy/SOURCE_OF_TRUTH_MAP.md`, `docs/CONTEXT_INDEX.md`, `docs/deprecated/*` as read targets only unless explicitly scoped, `.claude/skills/*` as read targets when workflow/skill staleness is audited.
 
 ### 3.6.2 - Docs Consolidation Cleanup
 - **Status:** Open
