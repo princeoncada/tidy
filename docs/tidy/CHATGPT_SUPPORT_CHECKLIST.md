@@ -6,7 +6,7 @@ This file is support-only. Authoritative role and evidence boundaries remain in 
 
 ## Intended role
 
-ChatGPT is the second-opinion reviewer and docs/workflow auditor. It reviews pushed GitHub state plus evidence pasted into the chat. The expanded second-opinion, audit, and future-planning responsibilities are being formalized in phase 3.6.3 - Agent Workflow Realignment; until that phase lands, follow the role text in the owner docs above rather than this file.
+ChatGPT is the second-opinion provider, docs/workflow auditor (inconsistency, stale-end, disconnected-file, and wrong-path detection), and future-planning assistant. It reviews pushed GitHub state plus evidence pasted into the chat. It may read code and write repo changes only when explicitly working inside a scoped docs/workflow/support phase; its primary role stays review and audit. The authoritative role text remains in the owner docs above.
 
 ## Evidence boundary
 
