@@ -40,7 +40,6 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
-- 3.6.3 - Agent Workflow Realignment (active) - see Planned
 ---
 
 ## Planned
@@ -77,16 +76,6 @@ Execution discipline:
 - Keep runtime behavior unchanged unless a later phase explicitly scopes runtime cleanup.
 - Preserve clear validation evidence before closeout.
 - Do not let stewardship docs become duplicate source-of-truth docs.
-
-### 3.6.3 - Agent Workflow Realignment
-- **Status:** In progress
-- **Type:** docs/workflow
-- **Implementation goal:** Rewrite the Claude Code, Codex, and ChatGPT workflow model to match the intended development system: ChatGPT as second-opinion/docs-workflow auditor and future-planning assistant with scoped repo read/write support; Claude Code as future-plan architect and Codex-ready implementation explainer; Codex as implementer and validation runner/evidence reporter.
-- **Product impact:** none directly - users see no runtime behavior change. The phase improves AI-assisted development reliability before larger architecture work begins.
-- **Runtime integration target:** none - workflow documentation and skill/prompt support only.
-- **Deferral boundary:** Does not change product runtime behavior. Does not make ChatGPT the primary implementer. Does not make Claude Code the final validator. Does not allow Codex to commit, push, or close phases unless separately authorized by workflow rules. Does not weaken the requirement for user-approved manual validation before closeout.
-- **Validation target:** Docs/workflow validation plus manual review that role boundaries are consistent across workflow docs, Codex rules, source-of-truth map, handoff guidance, and skill/prompt surfaces. Confirm the new workflow clearly states who scopes, who implements, who validates automated checks, who approves manual checks, and when closeout can proceed.
-- **Files:** `docs/WORKFLOW.md`, `docs/CODEX_RULES.md`, `docs/AI_HANDOFF.md`, `docs/CONTEXT_INDEX.md`, `docs/tidy/CODEX_SUPPORT_CHECKLIST.md`, `docs/tidy/CLAUDE_CODE_SUPPORT_CHECKLIST.md`, `docs/tidy/CHATGPT_SUPPORT_CHECKLIST.md`, `docs/tidy/CONTINUITY_CHECKLIST.md`, `.claude/skills/*` if workflow skill instructions require alignment.
 
 ### 3.6.4 - Workspace OS Rebase RFC
 - **Status:** Open
