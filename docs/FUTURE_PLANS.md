@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.6.4 - Workspace OS Rebase RFC (active) - see Planned
 ---
 
 ## Planned
@@ -78,7 +79,7 @@ Execution discipline:
 - Do not let stewardship docs become duplicate source-of-truth docs.
 
 ### 3.6.4 - Workspace OS Rebase RFC
-- **Status:** Open
+- **Status:** In progress
 - **Type:** decision
 - **Implementation goal:** Write the architecture/product RFC for moving Tidy from a todo-list productivity app into a lightweight workspace OS. Define the target product grammar, preserved technical spine, migration sequence, non-goals, and first 4.0 implementation slice.
 - **Product impact:** none directly - users see no runtime behavior change in this phase. The phase decides and documents the product identity pivot that later phases implement.
