@@ -1,9 +1,9 @@
-<!-- Current Version: 3.6.3-alpha -->
+<!-- Current Version: 3.6.3 -->
 # AI Handoff
 
 ## Current Version / Phase
 
-**Current Version**: 3.6.3-alpha - read `STATE.json` for the machine-readable oracle.
+**Current Version**: 3.6.3 - read `STATE.json` for the machine-readable oracle.
 **Current Phase**: 3.6.3 - Agent Workflow Realignment
 **Next**: 3.6.4 - Workspace OS Rebase RFC
 
