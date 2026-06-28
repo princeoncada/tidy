@@ -1,9 +1,9 @@
 {
-    "version":  "3.6.1-alpha",
-    "state":  "alpha",
+    "version":  "3.6.1",
+    "state":  "stable",
     "phase":  "3.6.1",
     "phaseTitle":  "Repo Staleness Audit",
     "nextPhase":  "3.6.2 - Docs Consolidation Cleanup",
     "seriesComplete":  false,
-    "lastUpdated":  "2026-06-27"
+    "lastUpdated":  "2026-06-28"
 }
