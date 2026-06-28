@@ -107,5 +107,4 @@ unless the startup protocol is changed later by a dedicated workflow phase.
 - `docs/NEW_CHATHEAD_OPENER.md` as a substitute for reading source-of-truth docs
 - full repository tree
 - product source files unrelated to the graph-selected task
-- old deprecated docs unless explicitly scoped
 - generated Prisma output
