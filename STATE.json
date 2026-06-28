@@ -1,9 +1,9 @@
 {
-    "version":  "3.6.3",
-    "state":  "stable",
-    "phase":  "3.6.3",
-    "phaseTitle":  "Agent Workflow Realignment",
-    "nextPhase":  "3.6.4 - Workspace OS Rebase RFC",
+    "version":  "3.6.4-alpha",
+    "state":  "alpha",
+    "phase":  "3.6.4",
+    "phaseTitle":  "Workspace OS Rebase RFC",
+    "nextPhase":  "4.0.0 - Workspace OS Product Model Rebase",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-28"
 }
