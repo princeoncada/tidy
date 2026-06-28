@@ -1,6 +1,6 @@
 {
   "schemaVersion": "tidy-codebase-graph/v1",
-  "version": "3.6.3",
+  "version": "3.6.4-alpha",
   "generatedAt": "2026-06-28",
   "generator": "scripts/generate_codebase_graph.py fallback scanner",
   "graphify": {
@@ -1396,6 +1396,13 @@
     },
     {
       "path": "docs/PHASE_LOG.md",
+      "kind": "documentation",
+      "extension": ".md",
+      "symbols": [],
+      "imports": []
+    },
+    {
+      "path": "docs/rfcs/workspace-os-rebase.md",
       "kind": "documentation",
       "extension": ".md",
       "symbols": [],
