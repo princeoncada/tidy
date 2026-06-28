@@ -18,7 +18,7 @@ Do not read: unrelated product source, docs/PHASE_LOG.md, docs/SESSION_LOG/, the
 
 Allowed actions: scope the phase; emit Graph Routing Summary + Section 1 + Section 2.
 
-Prohibited actions: giving Codex git/commit/push/branch commands; telling Codex to run validation; emitting nested triple-backtick fences inside the master prompt; broad-scan instructions; scoping source edits outside the phase; instructing the user to hand-edit docs/FUTURE_PLANS.md or any roadmap doc - roadmap-capture and reconciliation edits go into the Codex master prompt as ordinary MODIFY items; re-emitting a full master prompt to change part of an already-delivered prompt - emit only the changed items as a labeled delta or route the fix through the in-alpha correction path, and re-emit a full prompt only if the phase identity itself changed; chaining into a second phase in the same session.
+Prohibited actions: giving Codex git/commit/push/branch or version/closeout-script commands (Codex runs the required automated validation and reports evidence, but never runs git, version, or closeout scripts); emitting nested triple-backtick fences inside the master prompt; broad-scan instructions; scoping source edits outside the phase; instructing the user to hand-edit docs/FUTURE_PLANS.md or any roadmap doc - roadmap-capture and reconciliation edits go into the Codex master prompt as ordinary MODIFY items; re-emitting a full master prompt to change part of an already-delivered prompt - emit only the changed items as a labeled delta or route the fix through the in-alpha correction path, and re-emit a full prompt only if the phase identity itself changed; chaining into a second phase in the same session.
 
 Output contract - in this order:
 0. Local Evidence gate (outside code blocks): if the phase is source-heavy or local-sensitive, the Local Evidence Packet's evidence must exist before scoping. A LOCAL Claude Code session self-gathers it with its own tools (run git status --short, git log --oneline -5, read STATE.json, run npm run graph:codebase, run git diff --stat) and then scopes - it does not emit the packet for the user to paste back. Reserve the emit-one-powershell-block-and-wait form for providing ChatGPT reviewer context or a session without local access. This is pre-scope evidence, distinct from the Section 2 graph refresh; skip only for docs-only phases scoped purely from remote state. Source of truth: AGENTS.md ChatGPT Reviewer Mode + docs/WORKFLOW.md.
@@ -61,7 +61,7 @@ If any doubt remains, open the script and read its "Next steps" Write-Host block
 Reconcile before scoping: if the user references a phase, version, or work item that is not a heading in docs/FUTURE_PLANS.md, STOP and reconcile intent vs docs with the user before scoping anything; do not silently default to STATE.json.nextPhase, and do not fabricate a lost-state narrative. One phase per session: scope a single phase, then stop; never chain into the next phase. Prefer targeted reads (Grep / offset+limit on the needed block) over full-file reads of large docs, and never re-read a file already read in-session.
 
 Self-check before emitting (all must pass):
-- Section 1 and Section 2 are separate top-level code blocks; no triple-backtick fence appears inside the master prompt (use labels/indentation); Codex is told "Validation not run by Codex"; no git/commit/push/branch/validation commands inside the Codex prompt; surgical OLD/NEW pairs used where edit points are known; an alpha-opening prompt carries a PRECONDITION block; the opening sequence (branch -> open-phase -> opener commits -> STATE confirm) is emitted before Section 1; roadmap edits are placed in the master prompt, not handed to the user; no full master-prompt re-emit when only part changed.
+- Section 1 and Section 2 are separate top-level code blocks; no triple-backtick fence appears inside the master prompt (use labels/indentation); the Codex prompt tells Codex to run the required automated validation and report evidence; no git/commit/push/branch or version/closeout-script commands inside the Codex prompt; surgical OLD/NEW pairs used where edit points are known; an alpha-opening prompt carries a PRECONDITION block; the opening sequence (branch -> open-phase -> opener commits -> STATE confirm) is emitted before Section 1; roadmap edits are placed in the master prompt, not handed to the user; no full master-prompt re-emit when only part changed.
 - every in-alpha fix response leads with a granular one-file-per-commit commit-before-fix block placed ahead of the fix master prompt.
 
 Assistant Output Formatting Contract (canonical owner; docs/WORKFLOW.md points here): this skill is the single source of truth for how assistant Codex-prompt responses are shaped. Apply every rule:
@@ -81,10 +81,10 @@ Assistant Output Formatting Contract (canonical owner; docs/WORKFLOW.md points h
 - Do not place explanatory prose, bullets, markdown headings, wrappers, or comments inside copyable command blocks unless they are commands the user should actually run.
 - Use text for Codex prompt blocks.
 - Use powershell for validation and command blocks.
-- Codex implementation summaries must not include "Verified directly" or equivalent self-validation sections.
-- Validation sections in Codex output must only contain commands for the user/controller to run.
-- If Codex did not run validation, it must say "Validation not run by Codex."
-- Codex must not claim validation/test/audit results unless the user provided them.
+- Codex implementation summaries report the automated validation Codex actually ran with raw output; they must not fabricate results or claim manual-proof/closeout outcomes.
+- Codex output reports the automated validation Codex ran (with raw output), then lists the manual product proof and closeout commands that remain for the user/controller to run.
+- Codex reports the automated validation it ran with raw evidence; for any required check it could not run, it states which one and why and names it as remaining for user/controller approval.
+- Codex must report only the automated validation it actually ran; it must not fabricate results or claim manual-proof/closeout outcomes.
 
 Refusal rules: if the change points cannot be pinned down, use the exploratory format (Goal/Constraints/Expected outcome/Codex instructions) rather than inventing OLD/NEW text.
 

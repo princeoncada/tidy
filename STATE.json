@@ -1,9 +1,9 @@
 {
-    "version":  "3.6.2",
-    "state":  "stable",
-    "phase":  "3.6.2",
-    "phaseTitle":  "Docs Consolidation Cleanup",
-    "nextPhase":  "3.6.3 - Agent Workflow Realignment",
+    "version":  "3.6.3-alpha",
+    "state":  "alpha",
+    "phase":  "3.6.3",
+    "phaseTitle":  "Agent Workflow Realignment",
+    "nextPhase":  "3.6.4 - Workspace OS Rebase RFC",
     "seriesComplete":  false,
     "lastUpdated":  "2026-06-28"
 }

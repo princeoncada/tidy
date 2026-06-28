@@ -7,7 +7,7 @@ Standing ruleset for every Codex implementation session. Read this before writin
 ## Never Do (Absolute)
 
 - Do not commit, push, or create branches
-- Do not run `npm run test:ci`, `npm run build`, validation scripts, graph audit commands, git commands, or commit commands
+- Do not commit, push, create branches, run git commands, or run the version/closeout scripts (`.\scripts\open-phase.ps1`, `.\scripts\promote.ps1`). Codex runs the required automated validation and reports the evidence (see Validation Boundary).
 - Do not modify `app/generated/prisma` (generated Prisma output)
 - Do not modify lockfiles unless the package manager automatically requires it for an explicitly requested dependency change
 - Do not manually update any versioning location (STATE.json, package.json, docs/AI_HANDOFF.md, docs/WORKFLOW.md, docs/VERSIONING.md). Version changes happen only through .\scripts\open-phase.ps1 (alpha) and .\scripts\promote.ps1 (stable).
@@ -79,7 +79,7 @@ Unless the task specifically changes these areas, never touch:
 2. Identify required test coverage before coding (see Required Tests below)
 3. Read 2 - 3 source files directly relevant to the change
 4. Make the code change and matching test change in the same branch
-5. Identify the validation commands required after implementation and provide them for the user/controller to run
+5. Run the required automated validation and report the evidence; identify the manual product proof and closeout commands that remain for the user/controller to run
 6. Update `docs/AI_HANDOFF.md` if invariants or risks changed; update `docs/FUTURE_PLANS.md` for new gaps
 
 ## Debugging Attempt Discipline
@@ -169,15 +169,14 @@ AGENTS.md owns the graph routing and audit rules. For Codex implementation:
 
 ## Validation Boundary
 
-Validation is user/controller-run, not Codex-run.
+Automated validation is Codex-run; manual product validation and closeout are user/controller-run.
 
-- Provide validation commands only; do not execute them.
-- Codex must not claim validation passed unless the user provided the output.
-- Do not include a "Verified directly" section in Codex output.
-- Do not write "validated directly", "tests passed", "audit passed", or similar language unless those results were provided by the user in the same conversation.
-- Codex implementation summaries must include `Validation not run by Codex` and `Commands for user/controller to run`.
-- Codex may state that validation was not run because Codex is prohibited from running validation.
-- Codex must provide graph audit, build, test, and validation commands as user/controller instructions only.
+- Codex runs the required automated validation (unit/typecheck/lint, `.\scripts\validate.ps1`, and the graph refresh/audit the change requires) and reports the raw command output.
+- Codex implementation summaries must include an `Automated validation evidence` section (commands run + raw output) and a `Remaining for user/controller` section (manual product proof plus commit/merge/promote/push closeout).
+- For any required check Codex could not run, state which check and why, and name it under `Remaining for user/controller`.
+- Codex must report only the automated validation it actually ran. Do not fabricate results, and do not write "validated directly", "tests passed", or "audit passed" for a run that did not happen.
+- Codex must not claim the manual product proof or any closeout (merge/promote/push) outcome - those remain user/controller-owned.
+- The user/controller still runs the authoritative pre-closeout `.\scripts\validate.ps1` gate and approves the manual product proof before closeout.
 
 ---
 
@@ -256,8 +255,8 @@ Every implementation PR must:
 - Update or add tests in the same branch
 - New product phases must update tests in the same phase unless the phase is explicitly test-only or docs-only.
 - Before coding: identify happy path, common cases, edge cases, unit coverage, and E2E coverage
-- After coding: identify the required validation commands and provide them for the user/controller to run
-- Not claim validation, test, build, or audit commands passed unless the user/controller provided the output in the same conversation
+- After coding: run the required automated validation and report the evidence; identify the manual product proof and closeout that remain for the user/controller
+- Report only the automated validation Codex actually ran, with real output; do not fabricate results and do not claim manual-proof or closeout outcomes
 - Not mark complete if tests were not added or updated unless clearly justified with a documented reason
 
 Validation policy (product phases):

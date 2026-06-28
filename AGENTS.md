@@ -43,7 +43,7 @@ Never answer version, phase, or "what's next" from memory. Completed-version his
 
 ## ChatGPT Reviewer Mode
 
-Claude Code owns local architecture, scoping, planning, validation, and Codex prompts. ChatGPT reviews pushed GitHub state plus pasted evidence; it cannot see local uncommitted work, branch-only files, local diffs/status, validation output, or generated graph changes.
+Claude Code owns local architecture, scoping, planning, and Codex prompts; Codex runs the automated validation and reports evidence, and the user/controller owns manual validation and closeout. ChatGPT reviews pushed GitHub state plus pasted evidence; it cannot see local uncommitted work, branch-only files, local diffs/status, validation output, or generated graph changes.
 
 Source-heavy, branch-local, or graph-sensitive ChatGPT review requires a Local Evidence Packet:
 
@@ -85,19 +85,19 @@ Continuity must be recoverable from STATE.json + FUTURE_PLANS + AI_HANDOFF + the
 
 ## Roles and Implementation Gate
 
-Claude Code scopes/plans/validates and writes Codex prompts. Codex implements the scoped change. ChatGPT reviews.
+Claude Code is the future-plan architect and Codex-ready implementation explainer: it scopes, plans, and writes Codex prompts, and provides the manual validation instructions the user/controller must approve. It no longer owns final validation. Codex implements the scoped change, runs the automated validation, and reports the evidence. ChatGPT is the second-opinion/docs-workflow auditor and future-planning assistant. The user/controller owns manual product validation and closeout.
 
 Claude Code may implement directly only with this exact user-provided phrase:
 
     I AUTHORIZE CLAUDE CODE TO IMPLEMENT - [reason]
 
-Without it, Claude writes the two-section Codex prompt defined in WORKFLOW. The phrase is a user-initiated fallback when Codex cannot finish; Claude never suggests it. Even when authorized, Claude never commits, pushes, creates branches, or runs `npm run test:ci`.
+Without it, Claude writes the two-section Codex prompt defined in WORKFLOW. The phrase is a user-initiated fallback when Codex cannot finish; Claude never suggests it. Even when authorized, Claude never commits, pushes, creates branches, runs `npm run test:ci`, or closes/promotes phases.
 
 When `STATE.json.state = alpha`, corrections extend the active phase without a version bump or full re-scope. Stable fixes open a new phase.
 
 ## Codex Validation Boundary
 
-Codex edits only the scoped files and does not run validation, npm, build, graph audit, git, commit, push, or branch commands. Validation is user/controller-run. Codex reports results only when the user supplied them and must say "Validation not run by Codex" otherwise.
+Codex edits the scoped files, then runs the required automated validation (unit/typecheck/lint, `validate.ps1`, and the graph refresh/audit the change requires) and reports the raw evidence. Codex does not run git, commit, push, branch, or the version/closeout scripts (`open-phase.ps1`, `promote.ps1`), and does not modify any versioning location. Manual product validation and closeout remain user/controller-run, including the authoritative pre-closeout `validate.ps1` gate. Codex reports only the automated validation it actually ran, names any check that remains for user/controller approval, and never fabricates or claims manual-proof/closeout results.
 
 Behavior changes require matching tests in the same branch. Before implementation, identify happy/common/edge cases and unit/E2E needs. `docs/CODEX_RULES.md` owns commands, manual regressions, scope control, and definition of done.
 

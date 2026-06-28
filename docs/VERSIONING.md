@@ -105,9 +105,9 @@ Rules:
 
 ## Current State
 
-- **Current version:** 3.6.2
-- **Current phase:** 3.6.2 - Docs Consolidation Cleanup
-- **Next phase:** 3.6.3 - Agent Workflow Realignment
+- **Current version:** 3.6.3-alpha
+- **Current phase:** 3.6.3 - Agent Workflow Realignment
+- **Next phase:** 3.6.4 - Workspace OS Rebase RFC
 
 ---
 

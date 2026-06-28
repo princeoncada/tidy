@@ -40,6 +40,7 @@ Completed-version history lives in `docs/VERSIONING.md` under `## Version Histor
 ## In Progress
 
 
+- 3.6.3 - Agent Workflow Realignment (active) - see Planned
 ---
 
 ## Planned
@@ -78,7 +79,7 @@ Execution discipline:
 - Do not let stewardship docs become duplicate source-of-truth docs.
 
 ### 3.6.3 - Agent Workflow Realignment
-- **Status:** Open
+- **Status:** In progress
 - **Type:** docs/workflow
 - **Implementation goal:** Rewrite the Claude Code, Codex, and ChatGPT workflow model to match the intended development system: ChatGPT as second-opinion/docs-workflow auditor and future-planning assistant with scoped repo read/write support; Claude Code as future-plan architect and Codex-ready implementation explainer; Codex as implementer and validation runner/evidence reporter.
 - **Product impact:** none directly - users see no runtime behavior change. The phase improves AI-assisted development reliability before larger architecture work begins.
